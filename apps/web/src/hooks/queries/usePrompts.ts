@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { promptsApi, type Prompt, type PromptCreate, type PromptUpdate } from '@/lib/api';
+import { promptsApi, type PromptCreate, type PromptUpdate } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
 
 export const promptKeys = {

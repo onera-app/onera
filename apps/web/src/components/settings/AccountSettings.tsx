@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
-import { cn } from '@/lib/utils';
 
 export function AccountSettings() {
   const { user } = useAuthStore();

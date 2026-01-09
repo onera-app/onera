@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { foldersApi, type Folder, type FolderCreate, type FolderUpdate } from '@/lib/api';
+import { foldersApi, type FolderCreate, type FolderUpdate } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
 
 export const folderKeys = {

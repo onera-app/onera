@@ -116,12 +116,16 @@ export function E2EEProvider({ children }: { children: ReactNode }) {
     setStatus('locked');
   }, [setStatus]);
 
+  // Derive isUnlocked from reactive status (not the sync function)
+  // This ensures React re-renders when status changes
+  const isUnlockedValue = status === 'unlocked';
+
   const value: E2EEContextValue = {
     status,
     error,
     ready,
     needsSetup,
-    isUnlocked: isUnlocked(),
+    isUnlocked: isUnlockedValue,
 
     getMasterKey,
     getPrivateKey,

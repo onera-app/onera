@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNote, useUpdateNote } from '@/hooks/queries/useNotes';
 import { useFolders } from '@/hooks/queries/useFolders';
 import { RichTextEditor } from './RichTextEditor';

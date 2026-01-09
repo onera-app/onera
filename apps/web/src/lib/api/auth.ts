@@ -1,5 +1,5 @@
 import { api } from './client';
-import type { User, AuthToken, LoginForm, SignupForm } from '@cortex/types';
+import type { User, LoginForm, SignupForm } from '@cortex/types';
 
 interface AuthResponse {
   token: string;

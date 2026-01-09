@@ -5,7 +5,7 @@ import { Modal } from '@/components/common/Modal';
 import { cn } from '@/lib/utils';
 
 export function E2EESettings() {
-  const { isUnlocked, status, lock } = useE2EE();
+  const { isUnlocked, lock } = useE2EE();
   const [showRecoveryModal, setShowRecoveryModal] = useState(false);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
 

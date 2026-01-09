@@ -38,10 +38,10 @@ export function AddConnectionModal({
           organization: decrypted.org_id || '',
         };
       } catch {
-        return {};
+        return {} as Record<string, string>;
       }
     }
-    return {};
+    return {} as Record<string, string>;
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');

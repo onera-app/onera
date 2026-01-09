@@ -40,6 +40,12 @@ export {
   type DirectBrowserTransportOptions,
 } from './transport';
 
+// Tasks (title generation, follow-ups)
+export {
+  generateChatTitle,
+  generateFollowUps,
+} from './tasks';
+
 /**
  * Clear all AI-related caches
  * Call on logout, lock, or when credentials change

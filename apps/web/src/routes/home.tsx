@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, Link } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type { UIMessage } from 'ai';
 import { useAuthStore } from '@/stores/authStore';
@@ -39,6 +39,7 @@ function toChatMessage(msg: UIMessage, model?: string): ChatMessage {
 
 export function HomePage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { token } = useAuthStore();
   const { isUnlocked } = useE2EE();
   const { selectedModelId, setSelectedModel } = useModelStore();
@@ -124,24 +125,18 @@ export function HomePage() {
         return;
       }
 
-      // Get the first user message content for title
-      const firstUserContent = aiMessages.find(m => m.role === 'user');
-      let titleText = '';
-      if (firstUserContent?.parts) {
-        for (const part of firstUserContent.parts) {
-          if (part.type === 'text') {
-            titleText += part.text;
-          }
-        }
-      }
-      const title = titleText.slice(0, 50) + (titleText.length > 50 ? '...' : '');
-
       // Convert all messages to storage format
       const finalMessages = aiMessages.map(msg => toChatMessage(msg, selectedModelId || undefined));
 
+      // Use first user message as initial title (fast)
+      const firstUserMsg = finalMessages.find(m => m.role === 'user');
+      const content = firstUserMsg?.content || 'New Chat';
+      const initialTitle = (typeof content === 'string' ? content : 'New Chat').slice(0, 50) +
+        ((typeof content === 'string' ? content : '').length > 50 ? '...' : '');
+
       try {
         // Encrypt the chat with all messages
-        const { chatId, data: encryptedData } = await createEncryptedChat(title, {
+        const { chatId, data: encryptedData } = await createEncryptedChat(initialTitle, {
           messages: finalMessages,
         });
 
@@ -159,6 +154,9 @@ export function HomePage() {
           chat_nonce: encryptedData.chatNonce,
         });
 
+        // Invalidate chats query to update sidebar
+        queryClient.invalidateQueries({ queryKey: ['chats'] });
+
         // Navigate to the chat
         navigate({ to: '/c/$chatId', params: { chatId } });
       } catch (err) {
@@ -169,7 +167,7 @@ export function HomePage() {
     };
 
     createAndNavigate();
-  }, [aiMessages, isStreaming, isCreating, token, selectedModelId, navigate]);
+  }, [aiMessages, isStreaming, isCreating, token, selectedModelId, navigate, queryClient]);
 
   // Reset state when needed
   useEffect(() => {

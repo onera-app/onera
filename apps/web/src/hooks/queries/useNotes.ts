@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { notesApi, type Note, type NoteCreate, type NoteUpdate } from '@/lib/api';
+import { notesApi, type NoteCreate, type NoteUpdate } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
 
 export const noteKeys = {

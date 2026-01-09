@@ -1,9 +1,7 @@
-import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useCredentials, useDeleteCredential } from '@/hooks/queries/useCredentials';
 import { useE2EE } from '@/providers/E2EEProvider';
 import { LLM_PROVIDERS } from '@/lib/api';
-import { Button } from '@/components/common/Button';
 import dayjs from 'dayjs';
 
 interface ConnectionsListProps {

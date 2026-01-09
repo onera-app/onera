@@ -50,6 +50,42 @@ body {
   background: oklch(0.45 0.01 260);
 }
 
+/* Thin scrollbar variant for sidebar */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: oklch(0.75 0.01 260);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.65 0.01 260);
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: oklch(0.30 0.01 260);
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.40 0.01 260);
+}
+
+/* Hide scrollbar until hover */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.scrollbar-thin:hover {
+  scrollbar-color: oklch(0.75 0.01 260) transparent;
+}
+
+.dark .scrollbar-thin:hover {
+  scrollbar-color: oklch(0.30 0.01 260) transparent;
+}
+
 /* OLED dark mode */
 .oled-dark {
   --color-gray-950: oklch(0 0 0);
@@ -122,4 +158,133 @@ body {
 .prose pre code {
   background: transparent;
   padding: 0;
+}
+
+/* Additional animations */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.slide-up {
+  animation: slide-up 200ms ease-out;
+}
+
+.slide-down {
+  animation: slide-down 200ms ease-out;
+}
+
+.slide-in-right {
+  animation: slide-in-right 200ms ease-out;
+}
+
+.pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+/* Focus styles */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900;
+}
+
+/* Button transitions */
+.btn-transition {
+  @apply transition-all duration-150 ease-out active:scale-[0.98];
+}
+
+/* Message bubble animations */
+.message-enter {
+  animation: slide-up 300ms ease-out;
+}
+
+/* Dropdown animations */
+.dropdown-enter {
+  animation: slide-down 150ms ease-out, fade-in 150ms ease-out;
+}
+
+/* Line clamp utilities */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Glass effect for modals */
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dark .glass {
+  background: rgba(17, 24, 39, 0.8);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, oklch(0.6 0.2 250), oklch(0.6 0.2 300));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Selection color */
+::selection {
+  background: oklch(0.7 0.15 250 / 0.3);
+}
+
+.dark ::selection {
+  background: oklch(0.5 0.15 250 / 0.4);
 }

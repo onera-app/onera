@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUIStore } from '@/stores/uiStore';
-import { Button } from '@/components/common/Button';
 import { cn } from '@/lib/utils';
 import { supportedLanguages } from '@/i18n';
 

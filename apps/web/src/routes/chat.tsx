@@ -1,20 +1,22 @@
-import { useCallback, useEffect, useMemo } from 'react';
-import { useParams } from '@tanstack/react-router';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useParams, useNavigate } from '@tanstack/react-router';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import type { UIMessage } from 'ai';
 import { useAuthStore } from '@/stores/authStore';
 import { useE2EE } from '@/providers/E2EEProvider';
 import { useModelStore } from '@/stores/modelStore';
-import { getChat, updateChat } from '@/lib/api/chats';
-import { getChatKey, decryptChatTitle, decryptChatContent, encryptChatContent } from '@cortex/crypto';
+import { getChat, updateChat, deleteChat } from '@/lib/api/chats';
+import { getChatKey, decryptChatTitle, decryptChatContent, encryptChatContent, encryptChatTitle } from '@cortex/crypto';
 import type { ChatMessage } from '@cortex/types';
 import { Messages } from '@/components/chat/Messages';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { ChatNavbar } from '@/components/chat/ChatNavbar';
 import { ModelSelector } from '@/components/chat/ModelSelector';
+import { FollowUps } from '@/components/chat/FollowUps';
 import { useDirectChat } from '@/hooks/useDirectChat';
+import { generateFollowUps } from '@/lib/ai';
 
 interface DecryptedChat {
   id: string;
@@ -65,10 +67,15 @@ function toChatMessage(msg: UIMessage, model?: string): ChatMessage {
 
 export function ChatPage() {
   const { chatId } = useParams({ strict: false });
+  const navigate = useNavigate();
   const { token } = useAuthStore();
   const { isUnlocked } = useE2EE();
   const queryClient = useQueryClient();
   const { selectedModelId, setSelectedModel } = useModelStore();
+
+  // Follow-up suggestions state
+  const [followUps, setFollowUps] = useState<string[]>([]);
+  const [isGeneratingFollowUps, setIsGeneratingFollowUps] = useState(false);
 
   // Fetch and decrypt chat
   const {
@@ -119,7 +126,7 @@ export function ChatPage() {
 
       return {
         id: encrypted.id,
-        title: '🔒 Encrypted',
+        title: 'Encrypted',
         messages: [],
         created_at: encrypted.created_at,
         updated_at: encrypted.updated_at,
@@ -130,16 +137,70 @@ export function ChatPage() {
     enabled: !!token && !!chatId,
   });
 
-  // Handle message completion - persist to encrypted storage
-  const handleFinish = useCallback(async (message: UIMessage) => {
+  // Delete chat mutation
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteChat(token!, chatId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chats'] });
+      navigate({ to: '/' });
+      toast.success('Chat deleted');
+    },
+    onError: () => {
+      toast.error('Failed to delete chat');
+    },
+  });
+
+  // Handle title change
+  const handleTitleChange = useCallback(async (newTitle: string) => {
     if (!token || !chat || !chatId) return;
 
-    // Get current messages from cache and add the new assistant message
+    try {
+      const encrypted = encryptChatTitle(
+        chatId,
+        chat.encrypted_chat_key,
+        chat.chat_key_nonce,
+        newTitle
+      );
+
+      await updateChat(token, chatId, {
+        encrypted_title: encrypted.encryptedTitle,
+        title_nonce: encrypted.titleNonce,
+      });
+
+      // Update local cache
+      queryClient.setQueryData(['chat', chatId], (old: DecryptedChat | undefined) =>
+        old ? { ...old, title: newTitle } : old
+      );
+      queryClient.invalidateQueries({ queryKey: ['chats'] });
+      toast.success('Title updated');
+    } catch {
+      toast.error('Failed to update title');
+    }
+  }, [chat, chatId, queryClient, token]);
+
+  // Ref to track pending user message for persistence
+  const pendingUserMessageRef = useRef<ChatMessage | null>(null);
+
+  // Handle message completion - persist user + assistant messages
+  const handleFinish = useCallback(async (message: UIMessage) => {
+    if (!token || !chatId) return;
+
+    // Get current chat from cache (need fresh data)
     const currentChat = queryClient.getQueryData<DecryptedChat>(['chat', chatId]);
     if (!currentChat) return;
 
+    // Build final messages: stored + pending user + assistant
+    const pendingUserMessage = pendingUserMessageRef.current;
     const assistantMessage = toChatMessage(message, selectedModelId || undefined);
-    const finalMessages = [...currentChat.messages, assistantMessage];
+
+    let finalMessages: ChatMessage[];
+    if (pendingUserMessage) {
+      finalMessages = [...currentChat.messages, pendingUserMessage, assistantMessage];
+      pendingUserMessageRef.current = null; // Clear pending
+    } else {
+      // No pending user message - this shouldn't happen but handle gracefully
+      finalMessages = [...currentChat.messages, assistantMessage];
+    }
 
     // Update local cache
     queryClient.setQueryData(['chat', chatId], {
@@ -151,8 +212,8 @@ export function ChatPage() {
     try {
       const encrypted = encryptChatContent(
         chatId,
-        chat.encrypted_chat_key,
-        chat.chat_key_nonce,
+        currentChat.encrypted_chat_key,
+        currentChat.chat_key_nonce,
         { messages: finalMessages }
       );
 
@@ -160,11 +221,29 @@ export function ChatPage() {
         encrypted_chat: encrypted.encryptedChat,
         chat_nonce: encrypted.chatNonce,
       });
+
+      // Invalidate chats list to update sidebar
+      queryClient.invalidateQueries({ queryKey: ['chats'] });
+
+      // Generate follow-up suggestions asynchronously
+      if (selectedModelId) {
+        setIsGeneratingFollowUps(true);
+        generateFollowUps(finalMessages, selectedModelId, 3)
+          .then((suggestions) => {
+            setFollowUps(suggestions);
+          })
+          .catch((err) => {
+            console.warn('Failed to generate follow-ups:', err);
+          })
+          .finally(() => {
+            setIsGeneratingFollowUps(false);
+          });
+      }
     } catch (saveError) {
       console.error('Failed to save chat:', saveError);
       toast.error('Message sent but failed to save');
     }
-  }, [chat, chatId, queryClient, selectedModelId, token]);
+  }, [chatId, queryClient, selectedModelId, token]);
 
   // Use the direct chat hook
   const {
@@ -215,24 +294,23 @@ export function ChatPage() {
     return '';
   }, [aiMessages, isStreaming]);
 
-  // Get display messages (exclude streaming assistant message)
+  // Get display messages - combine stored messages with streaming state
   const displayMessages = useMemo(() => {
-    if (!chat?.messages) return [];
+    const storedMessages = chat?.messages || [];
 
-    // If we have a streaming response, show stored messages + user message from AI state
-    if (isStreaming && aiMessages.length > 0) {
-      const lastUserMsg = [...aiMessages].reverse().find(m => m.role === 'user');
-      if (lastUserMsg) {
-        // Check if this user message is already in stored messages
-        const alreadyStored = chat.messages.some(m => m.id === lastUserMsg.id);
-        if (!alreadyStored) {
-          return [...chat.messages, toChatMessage(lastUserMsg)];
-        }
-      }
+    // If we have AI messages that include more than stored (user sent new message)
+    if (aiMessages.length > storedMessages.length) {
+      // Filter out the streaming assistant message (it's shown separately)
+      const messagesToShow = isStreaming
+        ? aiMessages.filter((m, i) => !(m.role === 'assistant' && i === aiMessages.length - 1))
+        : aiMessages;
+
+      return messagesToShow.map(m => toChatMessage(m, m.role === 'assistant' ? selectedModelId || undefined : undefined));
     }
 
-    return chat.messages;
-  }, [chat?.messages, aiMessages, isStreaming]);
+    // Use stored messages
+    return storedMessages;
+  }, [chat?.messages, aiMessages, isStreaming, selectedModelId]);
 
   // Handle sending a message
   const handleSendMessage = useCallback(async (content: string) => {
@@ -252,51 +330,36 @@ export function ChatPage() {
       return;
     }
 
-    // Create user message for storage
+    // Clear follow-ups when sending a new message
+    setFollowUps([]);
+
+    // Create and store pending user message for persistence
     const userMessage: ChatMessage = {
       id: uuidv4(),
       role: 'user',
       content,
       created_at: Date.now(),
     };
-
-    // Add user message to storage immediately
-    const updatedMessages = [...(chat.messages || []), userMessage];
-    queryClient.setQueryData(['chat', chatId], (old: DecryptedChat | undefined) =>
-      old ? { ...old, messages: updatedMessages } : old
-    );
-
-    // Save user message to server
-    try {
-      const encrypted = encryptChatContent(
-        chatId,
-        chat.encrypted_chat_key,
-        chat.chat_key_nonce,
-        { messages: updatedMessages }
-      );
-
-      await updateChat(token, chatId, {
-        encrypted_chat: encrypted.encryptedChat,
-        chat_nonce: encrypted.chatNonce,
-      });
-    } catch (saveError) {
-      console.error('Failed to save user message:', saveError);
-    }
+    pendingUserMessageRef.current = userMessage;
 
     // Send to AI via the hook
     try {
       await sendMessage(content);
     } catch (err) {
+      pendingUserMessageRef.current = null; // Clear on error
       if ((err as Error).name !== 'AbortError') {
         toast.error(err instanceof Error ? err.message : 'Failed to send message');
       }
     }
-  }, [chat, chatId, isLoadingCredentials, isReady, isUnlocked, queryClient, selectedModelId, sendMessage, token]);
+  }, [chat, chatId, isLoadingCredentials, isReady, isUnlocked, selectedModelId, sendMessage, token]);
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100" />
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-gray-600 dark:border-gray-600 dark:border-t-gray-300" />
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading chat...</p>
+        </div>
       </div>
     );
   }
@@ -304,9 +367,14 @@ export function ChatPage() {
   if (error) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <p className="text-red-500 mb-2">Failed to load chat</p>
-          <p className="text-sm text-gray-500">
+        <div className="text-center max-w-md">
+          <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+            <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <p className="text-red-600 dark:text-red-400 font-medium mb-2">Failed to load chat</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {error instanceof Error ? error.message : 'Unknown error'}
           </p>
         </div>
@@ -315,10 +383,15 @@ export function ChatPage() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-950">
       {/* Chat header */}
       <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800">
-        <ChatNavbar title={chat?.title || 'Chat'} chatId={chatId || ''} />
+        <ChatNavbar
+          title={chat?.title || 'Chat'}
+          chatId={chatId || ''}
+          onTitleChange={isUnlocked ? handleTitleChange : undefined}
+          onDelete={() => deleteMutation.mutate()}
+        />
         <div className="pr-4">
           <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />
         </div>
@@ -329,25 +402,35 @@ export function ChatPage() {
         <Messages
           messages={displayMessages}
           streamingMessage={streamingContent}
+          streamingModel={selectedModelId || undefined}
           isStreaming={isStreaming}
         />
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-800">
-        {isStreaming ? (
-          <div className="flex items-center justify-center gap-4">
-            <span className="text-sm text-gray-500">Generating response...</span>
-            <button
-              onClick={stop}
-              className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
-            >
-              Stop
-            </button>
-          </div>
-        ) : (
+      <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
+        <div className="max-w-3xl mx-auto">
+          {/* Follow-up suggestions */}
+          {!isStreaming && followUps.length > 0 && (
+            <FollowUps
+              followUps={followUps}
+              onSelect={handleSendMessage}
+              className="mb-3"
+            />
+          )}
+
+          {/* Loading follow-ups indicator */}
+          {isGeneratingFollowUps && (
+            <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-2">
+              <div className="w-3 h-3 border-2 border-gray-300 border-t-gray-500 dark:border-gray-600 dark:border-t-gray-400 rounded-full animate-spin" />
+              <span>Generating suggestions...</span>
+            </div>
+          )}
+
           <MessageInput
             onSend={handleSendMessage}
+            onStop={stop}
+            isStreaming={isStreaming}
             disabled={!isUnlocked || !selectedModelId}
             placeholder={
               !isUnlocked
@@ -357,7 +440,7 @@ export function ChatPage() {
                 : 'Send a message...'
             }
           />
-        )}
+        </div>
       </div>
     </div>
   );
