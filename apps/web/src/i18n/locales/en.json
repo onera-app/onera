@@ -1,0 +1,166 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "close": "Close",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "search": "Search",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "auth": {
+    "login": "Log In",
+    "logout": "Log Out",
+    "signup": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "name": "Name"
+  },
+  "sidebar": {
+    "newChat": "New Chat",
+    "notes": "Notes",
+    "prompts": "Prompts",
+    "connections": "Connections",
+    "settings": "Settings",
+    "chats": "Chats",
+    "noChats": "No chats yet"
+  },
+  "chat": {
+    "placeholder": "Send a message...",
+    "send": "Send",
+    "regenerate": "Regenerate",
+    "copy": "Copy",
+    "delete": "Delete",
+    "encrypted": "Encrypted"
+  },
+  "notes": {
+    "title": "Notes",
+    "newNote": "New Note",
+    "noNotes": "No notes yet. Create one!",
+    "selectNote": "Select a note to edit",
+    "untitled": "Untitled",
+    "saveChanges": "Save Changes",
+    "unsavedChanges": "Unsaved changes",
+    "archive": "Archive",
+    "unarchive": "Unarchive",
+    "showArchived": "Show archived"
+  },
+  "prompts": {
+    "title": "Prompts",
+    "newPrompt": "New Prompt",
+    "noPrompts": "No prompts yet. Create one!",
+    "selectPrompt": "Select a prompt to edit",
+    "name": "Name",
+    "description": "Description",
+    "content": "Content",
+    "variableHint": "Use {{variable}} syntax for placeholders"
+  },
+  "connections": {
+    "title": "Connections",
+    "subtitle": "Manage your LLM provider connections",
+    "addNew": "Add New Connection",
+    "yourConnections": "Your Connections",
+    "noConnections": "No connections yet. Add one above to get started.",
+    "connectionName": "Connection Name",
+    "testConnection": "Test Connection",
+    "testing": "Testing connection...",
+    "testSuccess": "Connection successful!",
+    "testFailed": "Connection failed",
+    "securityNote": "Your credentials are encrypted with your E2EE key and stored securely."
+  },
+  "settings": {
+    "title": "Settings",
+    "account": {
+      "title": "Account Settings",
+      "subtitle": "Manage your account information",
+      "changeAvatar": "Change Avatar",
+      "changePassword": "Change Password",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmNewPassword": "Confirm New Password"
+    },
+    "interface": {
+      "title": "Interface Settings",
+      "subtitle": "Customize the appearance and behavior",
+      "theme": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System",
+      "chatWidth": "Chat Width",
+      "narrow": "Narrow",
+      "normal": "Normal",
+      "wide": "Wide",
+      "showTimestamps": "Show Timestamps",
+      "timestampsDesc": "Display time for each message",
+      "sendOnEnter": "Send on Enter",
+      "sendOnEnterDesc": "Press Enter to send, Shift+Enter for new line",
+      "language": "Language"
+    },
+    "e2ee": {
+      "title": "End-to-End Encryption",
+      "subtitle": "Manage your encryption keys and security settings",
+      "unlocked": "E2EE is Unlocked",
+      "locked": "E2EE is Locked",
+      "unlockedDesc": "Your chats and notes are accessible",
+      "lockedDesc": "Unlock to access encrypted content",
+      "lockNow": "Lock Now",
+      "howItWorks": "How E2EE Works",
+      "encryptedBeforeLeaving": "Your data is encrypted before leaving your device",
+      "onlyYouHoldKeys": "Only you hold the keys to decrypt your data",
+      "directToProvider": "Chats are sent directly to your LLM provider",
+      "serverNeverSees": "The server never sees your unencrypted content",
+      "keyManagement": "Key Management",
+      "recoveryKey": "Recovery Key",
+      "recoveryKeyDesc": "24-word phrase to recover your keys if you forget your password",
+      "viewRecoveryKey": "View Recovery Key",
+      "changeE2EEPassword": "E2EE Password",
+      "changeE2EEPasswordDesc": "Change the password used to unlock your encrypted data",
+      "warning": "Important Warning",
+      "warningText": "If you lose both your password and recovery key, your encrypted data cannot be recovered. Make sure to save your recovery key in a safe place."
+    }
+  },
+  "e2ee": {
+    "setup": {
+      "title": "Setup End-to-End Encryption",
+      "subtitle": "Protect your data with a secure password",
+      "choosePassword": "Choose a strong password",
+      "confirmPassword": "Confirm your password",
+      "continue": "Continue",
+      "recoveryPhrase": "Your Recovery Phrase",
+      "recoveryPhraseDesc": "Write down these 24 words in order. They can be used to recover your encryption keys if you forget your password.",
+      "confirmSaved": "I have saved my recovery phrase",
+      "complete": "Complete Setup"
+    },
+    "unlock": {
+      "title": "Unlock Your Data",
+      "subtitle": "Enter your E2EE password to access your encrypted data",
+      "password": "E2EE Password",
+      "unlock": "Unlock",
+      "useRecoveryKey": "Use Recovery Key",
+      "recoveryKeyTitle": "Enter Recovery Key",
+      "recoveryKeyDesc": "Enter your 24-word recovery phrase",
+      "recover": "Recover"
+    }
+  },
+  "folders": {
+    "allItems": "All items",
+    "newFolder": "New folder",
+    "rename": "Rename",
+    "addSubfolder": "Add subfolder"
+  },
+  "errors": {
+    "generic": "Something went wrong",
+    "notFound": "Not found",
+    "unauthorized": "Unauthorized",
+    "networkError": "Network error"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "create": "Erstellen",
+    "close": "Schließen",
+    "loading": "Wird geladen...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "confirm": "Bestätigen",
+    "search": "Suchen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "previous": "Zurück"
+  },
+  "auth": {
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "signup": "Registrieren",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "forgotPassword": "Passwort vergessen?",
+    "name": "Name"
+  },
+  "sidebar": {
+    "newChat": "Neuer Chat",
+    "notes": "Notizen",
+    "prompts": "Prompts",
+    "connections": "Verbindungen",
+    "settings": "Einstellungen",
+    "chats": "Chats",
+    "noChats": "Noch keine Chats"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "interface": {
+      "language": "Sprache"
+    }
+  }
+}

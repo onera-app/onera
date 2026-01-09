@@ -1,0 +1,43 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "create": "创建",
+    "close": "关闭",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "confirm": "确认",
+    "search": "搜索",
+    "back": "返回",
+    "next": "下一步",
+    "previous": "上一步"
+  },
+  "auth": {
+    "login": "登录",
+    "logout": "退出登录",
+    "signup": "注册",
+    "email": "邮箱",
+    "password": "密码",
+    "confirmPassword": "确认密码",
+    "forgotPassword": "忘记密码？",
+    "name": "姓名"
+  },
+  "sidebar": {
+    "newChat": "新对话",
+    "notes": "笔记",
+    "prompts": "提示词",
+    "connections": "连接",
+    "settings": "设置",
+    "chats": "对话",
+    "noChats": "暂无对话"
+  },
+  "settings": {
+    "title": "设置",
+    "interface": {
+      "language": "语言"
+    }
+  }
+}

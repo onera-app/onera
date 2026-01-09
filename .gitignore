@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+.svelte-kit/
+.venv/
+__pycache__/
+*.pyc
+
+# Build outputs
+build/
+dist/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Database
+*.db
+*.sqlite
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Bun
+bun.lockb
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+*.pem
+*.key

@@ -1,0 +1,63 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "close": "Cerrar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "confirm": "Confirmar",
+    "search": "Buscar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior"
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión",
+    "signup": "Registrarse",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "name": "Nombre"
+  },
+  "sidebar": {
+    "newChat": "Nuevo chat",
+    "notes": "Notas",
+    "prompts": "Prompts",
+    "connections": "Conexiones",
+    "settings": "Configuración",
+    "chats": "Chats",
+    "noChats": "Aún no hay chats"
+  },
+  "chat": {
+    "placeholder": "Envía un mensaje...",
+    "send": "Enviar",
+    "regenerate": "Regenerar",
+    "copy": "Copiar",
+    "delete": "Eliminar",
+    "encrypted": "Cifrado"
+  },
+  "notes": {
+    "title": "Notas",
+    "newNote": "Nueva nota",
+    "noNotes": "Aún no hay notas. ¡Crea una!",
+    "selectNote": "Selecciona una nota para editar",
+    "untitled": "Sin título",
+    "saveChanges": "Guardar cambios",
+    "unsavedChanges": "Cambios sin guardar",
+    "archive": "Archivar",
+    "unarchive": "Desarchivar",
+    "showArchived": "Mostrar archivadas"
+  },
+  "settings": {
+    "title": "Configuración",
+    "interface": {
+      "language": "Idioma"
+    }
+  }
+}

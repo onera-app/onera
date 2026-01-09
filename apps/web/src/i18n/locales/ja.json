@@ -1,0 +1,43 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "create": "作成",
+    "close": "閉じる",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "confirm": "確認",
+    "search": "検索",
+    "back": "戻る",
+    "next": "次へ",
+    "previous": "前へ"
+  },
+  "auth": {
+    "login": "ログイン",
+    "logout": "ログアウト",
+    "signup": "新規登録",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "confirmPassword": "パスワード確認",
+    "forgotPassword": "パスワードを忘れた方",
+    "name": "名前"
+  },
+  "sidebar": {
+    "newChat": "新しいチャット",
+    "notes": "ノート",
+    "prompts": "プロンプト",
+    "connections": "接続",
+    "settings": "設定",
+    "chats": "チャット",
+    "noChats": "チャットはまだありません"
+  },
+  "settings": {
+    "title": "設定",
+    "interface": {
+      "language": "言語"
+    }
+  }
+}
