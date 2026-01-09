@@ -21,7 +21,6 @@
     "paths": {
       "@/*": ["./src/*"],
       "@cortex/crypto": ["../../packages/crypto/src/sodium"],
-      "@cortex/llm-client": ["../../packages/llm-client/src"],
       "@cortex/types": ["../../packages/types/src"]
     }
   },

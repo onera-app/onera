@@ -21,7 +21,6 @@
         "@ai-sdk/openai": "3.0.7",
         "@ai-sdk/react": "3.0.25",
         "@cortex/crypto": "workspace:*",
-        "@cortex/llm-client": "workspace:*",
         "@cortex/types": "workspace:*",
         "@tanstack/react-query": "^5.64.0",
         "@tanstack/react-router": "^1.95.0",
@@ -72,16 +71,6 @@
       "devDependencies": {
         "@types/libsodium-wrappers-sumo": "^0.7.8",
         "@types/uuid": "^10.0.0",
-        "typescript": "^5.7.0",
-      },
-    },
-    "packages/llm-client": {
-      "name": "@cortex/llm-client",
-      "version": "0.1.0",
-      "dependencies": {
-        "@cortex/crypto": "workspace:*",
-      },
-      "devDependencies": {
         "typescript": "^5.7.0",
       },
     },
@@ -149,8 +138,6 @@
     "@babel/types": ["@babel/types@7.28.5", "", { "dependencies": { "@babel/helper-string-parser": "^7.27.1", "@babel/helper-validator-identifier": "^7.28.5" } }, "sha512-qQ5m48eI/MFLQ5PxQj4PFaprjyCTLI37ElWMmNs0K8Lk3dVeOdNpB3ks8jc7yM5CDmVC73eMVk/trk3fgmrUpA=="],
 
     "@cortex/crypto": ["@cortex/crypto@workspace:packages/crypto"],
-
-    "@cortex/llm-client": ["@cortex/llm-client@workspace:packages/llm-client"],
 
     "@cortex/types": ["@cortex/types@workspace:packages/types"],
 

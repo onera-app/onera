@@ -14,7 +14,6 @@
     "@ai-sdk/openai": "3.0.7",
     "@ai-sdk/react": "3.0.25",
     "@cortex/crypto": "workspace:*",
-    "@cortex/llm-client": "workspace:*",
     "@cortex/types": "workspace:*",
     "@tanstack/react-query": "^5.64.0",
     "@tanstack/react-router": "^1.95.0",

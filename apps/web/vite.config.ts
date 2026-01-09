@@ -18,7 +18,6 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@cortex/crypto': path.resolve(__dirname, '../../packages/crypto/src/sodium'),
-      '@cortex/llm-client': path.resolve(__dirname, '../../packages/llm-client/src'),
       '@cortex/types': path.resolve(__dirname, '../../packages/types/src'),
     },
   },
