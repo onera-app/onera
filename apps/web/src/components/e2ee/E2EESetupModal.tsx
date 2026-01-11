@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useAuthStore } from '@/stores/authStore';
+import { useMutation } from 'convex/react';
+import { api } from 'convex/_generated/api';
 import { useE2EEStore } from '@/stores/e2eeStore';
 import { setupUserKeys, type RecoveryKeyInfo } from '@cortex/crypto';
-import { createUserKeys } from '@/lib/api/userKeys';
 import { Modal } from '@/components/common/Modal';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
@@ -11,8 +11,8 @@ import { Input } from '@/components/common/Input';
 type Step = 'password' | 'recovery' | 'confirm';
 
 export function E2EESetupModal() {
-  const { token } = useAuthStore();
   const { setStatus, setNeedsSetup, setError } = useE2EEStore();
+  const createUserKeys = useMutation(api.userKeys.create);
 
   const [step, setStep] = useState<Step>('password');
   const [password, setPassword] = useState('');
@@ -34,31 +34,26 @@ export function E2EESetupModal() {
       return;
     }
 
-    if (!token) {
-      toast.error('Not authenticated');
-      return;
-    }
-
     setIsLoading(true);
     setStatus('unlocking');
 
     try {
       const { recoveryInfo: info, storableKeys } = await setupUserKeys(password);
 
-      // Save keys to server
-      await createUserKeys(token, {
-        kek_salt: storableKeys.kekSalt,
-        kek_ops_limit: storableKeys.kekOpsLimit,
-        kek_mem_limit: storableKeys.kekMemLimit,
-        encrypted_master_key: storableKeys.encryptedMasterKey,
-        master_key_nonce: storableKeys.masterKeyNonce,
-        public_key: storableKeys.publicKey,
-        encrypted_private_key: storableKeys.encryptedPrivateKey,
-        private_key_nonce: storableKeys.privateKeyNonce,
-        encrypted_recovery_key: storableKeys.encryptedRecoveryKey,
-        recovery_key_nonce: storableKeys.recoveryKeyNonce,
-        master_key_recovery: storableKeys.masterKeyRecovery,
-        master_key_recovery_nonce: storableKeys.masterKeyRecoveryNonce,
+      // Save keys to server via Convex
+      await createUserKeys({
+        kekSalt: storableKeys.kekSalt,
+        kekOpsLimit: storableKeys.kekOpsLimit,
+        kekMemLimit: storableKeys.kekMemLimit,
+        encryptedMasterKey: storableKeys.encryptedMasterKey,
+        masterKeyNonce: storableKeys.masterKeyNonce,
+        publicKey: storableKeys.publicKey,
+        encryptedPrivateKey: storableKeys.encryptedPrivateKey,
+        privateKeyNonce: storableKeys.privateKeyNonce,
+        encryptedRecoveryKey: storableKeys.encryptedRecoveryKey,
+        recoveryKeyNonce: storableKeys.recoveryKeyNonce,
+        masterKeyRecovery: storableKeys.masterKeyRecovery,
+        masterKeyRecoveryNonce: storableKeys.masterKeyRecoveryNonce,
       });
 
       setRecoveryInfo(info);

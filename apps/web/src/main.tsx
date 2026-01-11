@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ConvexReactClient } from 'convex/react';
+import { ConvexAuthProvider } from '@convex-dev/auth/react';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { Toaster } from 'sonner';
 
@@ -12,6 +13,9 @@ import './styles/globals.css';
 // Initialize i18n
 import './i18n';
 
+// Create Convex client
+const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
+
 // Create a new router instance
 const router = createRouter({ routeTree });
 
@@ -22,25 +26,15 @@ declare module '@tanstack/react-router' {
   }
 }
 
-// Create a query client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60, // 1 minute
-      retry: 1,
-    },
-  },
-});
-
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
+    <ConvexAuthProvider client={convex}>
       <ThemeProvider>
         <E2EEProvider>
           <RouterProvider router={router} />
           <Toaster position="top-right" richColors />
         </E2EEProvider>
       </ThemeProvider>
-    </QueryClientProvider>
+    </ConvexAuthProvider>
   </StrictMode>
 );

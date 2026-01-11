@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useCallback, type ReactNode } from 'react';
-import { useAuthStore } from '@/stores/authStore';
+import { useConvexAuth, useQuery } from 'convex/react';
+import { api } from 'convex/_generated/api';
 import { useE2EEStore, type E2EEStatus } from '@/stores/e2eeStore';
 import {
   initializeE2EE,
@@ -12,7 +13,6 @@ import {
   getPublicKey,
   subscribe as subscribeToCrypto,
 } from '@cortex/crypto';
-import { checkUserHasKeys } from '@/lib/api/userKeys';
 import { clearAllAICaches } from '@/lib/ai';
 
 interface E2EEContextValue {
@@ -35,7 +35,7 @@ interface E2EEContextValue {
 const E2EEContext = createContext<E2EEContextValue | null>(null);
 
 export function E2EEProvider({ children }: { children: ReactNode }) {
-  const { token } = useAuthStore();
+  const { isAuthenticated } = useConvexAuth();
   const {
     status,
     error,
@@ -46,6 +46,12 @@ export function E2EEProvider({ children }: { children: ReactNode }) {
     setNeedsSetup,
     setError,
   } = useE2EEStore();
+
+  // Check if user has keys using Convex
+  const userKeysCheck = useQuery(
+    api.userKeys.check,
+    isAuthenticated ? {} : 'skip'
+  );
 
   // Initialize E2EE and subscribe to state changes
   useEffect(() => {
@@ -73,21 +79,14 @@ export function E2EEProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, [setReady, setStatus, setError]);
 
-  // Check if user has keys when authenticated
+  // Update needsSetup based on Convex query result
   useEffect(() => {
-    const checkKeys = async () => {
-      if (!token || !ready) return;
+    if (!isAuthenticated || !ready) return;
 
-      try {
-        const hasKeys = await checkUserHasKeys(token);
-        setNeedsSetup(!hasKeys);
-      } catch (err) {
-        console.error('Failed to check user keys:', err);
-      }
-    };
-
-    checkKeys();
-  }, [token, ready, setNeedsSetup]);
+    if (userKeysCheck !== undefined) {
+      setNeedsSetup(!userKeysCheck.hasKeys);
+    }
+  }, [isAuthenticated, ready, userKeysCheck, setNeedsSetup]);
 
   // Extend session on user activity
   useEffect(() => {

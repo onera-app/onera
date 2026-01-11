@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { useFolders, useCreateFolder, useUpdateFolder, useDeleteFolder } from '@/hooks/queries/useFolders';
-import type { Folder } from '@/lib/api';
+import type { Folder } from '@/lib/types';
 
 interface FolderTreeProps {
   selectedFolderId?: string;
@@ -39,8 +39,8 @@ export function FolderTree({ selectedFolderId, onSelectFolder, showAllOption = t
     // Build tree
     folders.forEach((folder) => {
       const node = nodeMap.get(folder.id)!;
-      if (folder.parent_id && nodeMap.has(folder.parent_id)) {
-        nodeMap.get(folder.parent_id)!.children.push(node);
+      if (folder.parentId && nodeMap.has(folder.parentId)) {
+        nodeMap.get(folder.parentId)!.children.push(node);
       } else {
         rootNodes.push(node);
       }
@@ -99,7 +99,7 @@ export function FolderTree({ selectedFolderId, onSelectFolder, showAllOption = t
     if (newFolderName.trim()) {
       await createFolder.mutateAsync({
         name: newFolderName.trim(),
-        parent_id: newFolderParentId,
+        parentId: newFolderParentId,
       });
       setNewFolderName('');
       setIsCreating(false);

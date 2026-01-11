@@ -1,70 +1,76 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { foldersApi, type FolderCreate, type FolderUpdate } from '@/lib/api';
-import { useAuthStore } from '@/stores/authStore';
-
-export const folderKeys = {
-  all: ['folders'] as const,
-  lists: () => [...folderKeys.all, 'list'] as const,
-  list: () => [...folderKeys.lists()] as const,
-  details: () => [...folderKeys.all, 'detail'] as const,
-  detail: (id: string) => [...folderKeys.details(), id] as const,
-};
+import { useQuery, useMutation } from 'convex/react';
+import { api } from 'convex/_generated/api';
+import type { Id } from 'convex/_generated/dataModel';
 
 export function useFolders() {
-  const token = useAuthStore((s) => s.token);
-
-  return useQuery({
-    queryKey: folderKeys.list(),
-    queryFn: () => foldersApi.getAll(token!),
-    enabled: !!token,
-  });
+  return useQuery(api.folders.list);
 }
 
 export function useFolder(id: string) {
-  const token = useAuthStore((s) => s.token);
-
-  return useQuery({
-    queryKey: folderKeys.detail(id),
-    queryFn: () => foldersApi.get(id, token!),
-    enabled: !!token && !!id,
-  });
+  return useQuery(api.folders.get, { folderId: id as Id<'folders'> });
 }
 
 export function useCreateFolder() {
-  const queryClient = useQueryClient();
-  const token = useAuthStore((s) => s.token);
+  const createFolder = useMutation(api.folders.create);
 
-  return useMutation({
-    mutationFn: (data: FolderCreate) => foldersApi.create(data, token!),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: folderKeys.lists() });
+  return {
+    mutateAsync: async (data: { name: string; parentId?: string }) => {
+      return createFolder({
+        name: data.name,
+        parentId: data.parentId as Id<'folders'> | undefined,
+      });
     },
-  });
+    mutate: (data: { name: string; parentId?: string }) => {
+      createFolder({
+        name: data.name,
+        parentId: data.parentId as Id<'folders'> | undefined,
+      });
+    },
+  };
 }
 
 export function useUpdateFolder() {
-  const queryClient = useQueryClient();
-  const token = useAuthStore((s) => s.token);
+  const updateFolder = useMutation(api.folders.update);
 
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: FolderUpdate }) =>
-      foldersApi.update(id, data, token!),
-    onSuccess: (updatedFolder) => {
-      queryClient.setQueryData(folderKeys.detail(updatedFolder.id), updatedFolder);
-      queryClient.invalidateQueries({ queryKey: folderKeys.lists() });
+  return {
+    mutateAsync: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { name?: string; parentId?: string | null };
+    }) => {
+      return updateFolder({
+        folderId: id as Id<'folders'>,
+        name: data.name,
+        parentId: data.parentId === null ? null : (data.parentId as Id<'folders'> | undefined),
+      });
     },
-  });
+    mutate: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { name?: string; parentId?: string | null };
+    }) => {
+      updateFolder({
+        folderId: id as Id<'folders'>,
+        name: data.name,
+        parentId: data.parentId === null ? null : (data.parentId as Id<'folders'> | undefined),
+      });
+    },
+  };
 }
 
 export function useDeleteFolder() {
-  const queryClient = useQueryClient();
-  const token = useAuthStore((s) => s.token);
+  const deleteFolder = useMutation(api.folders.remove);
 
-  return useMutation({
-    mutationFn: (id: string) => foldersApi.delete(id, token!),
-    onSuccess: (_, deletedId) => {
-      queryClient.removeQueries({ queryKey: folderKeys.detail(deletedId) });
-      queryClient.invalidateQueries({ queryKey: folderKeys.lists() });
+  return {
+    mutateAsync: async (id: string) => {
+      return deleteFolder({ folderId: id as Id<'folders'> });
     },
-  });
+    mutate: (id: string) => {
+      deleteFolder({ folderId: id as Id<'folders'> });
+    },
+  };
 }

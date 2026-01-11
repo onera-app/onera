@@ -3,7 +3,7 @@ import { Modal } from '@/components/common/Modal';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { useCreateCredential, useUpdateCredential } from '@/hooks/queries/useCredentials';
-import { LLM_PROVIDERS, type Credential } from '@/lib/api';
+import { LLM_PROVIDERS, type Credential } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { encryptCredential, decryptCredential, isUnlocked } from '@cortex/crypto';
 
@@ -29,7 +29,7 @@ export function AddConnectionModal({
     if (existingCredential && isUnlocked()) {
       try {
         const decrypted = decryptCredential({
-          encrypted_data: existingCredential.encrypted_data,
+          encrypted_data: existingCredential.encryptedData,
           iv: existingCredential.iv,
         });
         return {
@@ -99,7 +99,7 @@ export function AddConnectionModal({
       const data = {
         provider: providerId,
         name: name.trim(),
-        encrypted_data: encrypted.encrypted_data,
+        encryptedData: encrypted.encrypted_data,
         iv: encrypted.iv,
       };
 

@@ -54,24 +54,28 @@ export function MessageInput({
   const canSend = value.trim().length > 0 && !disabled;
 
   return (
-    <div className="relative">
+    <div className="relative max-w-4xl mx-auto">
       <div
         className={cn(
           'relative flex items-end gap-2 px-4 py-3 rounded-2xl',
-          'bg-gray-100 dark:bg-gray-800',
-          'border border-gray-200 dark:border-gray-700',
-          'focus-within:border-gray-300 dark:focus-within:border-gray-600',
-          'transition-colors'
+          'bg-gray-100 dark:bg-gray-800/80',
+          'border border-gray-200 dark:border-gray-700/50',
+          'focus-within:border-accent/50 dark:focus-within:border-accent/50',
+          'focus-within:ring-1 focus-within:ring-accent/20',
+          'transition-all shadow-sm'
         )}
       >
         {/* Left toolbar */}
-        <div className="flex items-center gap-1 pb-0.5">
+        <div className="flex items-center gap-0.5 pb-0.5">
           {/* Attach file button */}
           <button
             type="button"
-            className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-200 dark:hover:text-gray-300 dark:hover:bg-gray-700 transition-colors"
-            title="Attach file (coming soon)"
-            disabled
+            className={cn(
+              'p-2 rounded-lg transition-colors',
+              'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
+              'hover:bg-gray-200 dark:hover:bg-gray-700'
+            )}
+            title="Attach file"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
@@ -108,8 +112,9 @@ export function MessageInput({
             <button
               onClick={onStop}
               className={cn(
-                'p-2 rounded-xl transition-colors',
-                'bg-red-500 text-white hover:bg-red-600'
+                'p-2 rounded-xl transition-all',
+                'bg-error text-white hover:bg-error/90',
+                'shadow-sm'
               )}
               title="Stop generating"
             >
@@ -124,7 +129,7 @@ export function MessageInput({
               className={cn(
                 'p-2 rounded-xl transition-all',
                 canSend
-                  ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100'
+                  ? 'bg-accent text-white hover:bg-accent-hover shadow-sm'
                   : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
               )}
               title="Send message"
@@ -137,17 +142,17 @@ export function MessageInput({
         </div>
       </div>
 
-      {/* Keyboard hint */}
-      <div className="flex items-center justify-center mt-2 text-xs text-gray-400 dark:text-gray-500">
-        <span>Press</span>
-        <kbd className="mx-1 px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-mono text-[10px]">
+      {/* Keyboard hint - more subtle */}
+      <div className="flex items-center justify-center mt-2 text-[11px] text-gray-400 dark:text-gray-500">
+        <kbd className="px-1.5 py-0.5 rounded bg-gray-200/50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 font-mono">
           Enter
         </kbd>
-        <span>to send,</span>
-        <kbd className="mx-1 px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-mono text-[10px]">
+        <span className="mx-1.5">to send</span>
+        <span className="text-gray-300 dark:text-gray-600 mx-1">|</span>
+        <kbd className="px-1.5 py-0.5 rounded bg-gray-200/50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 font-mono">
           Shift + Enter
         </kbd>
-        <span>for new line</span>
+        <span className="mx-1.5">for new line</span>
       </div>
     </div>
   );

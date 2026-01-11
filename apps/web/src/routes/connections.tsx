@@ -3,7 +3,7 @@ import { ConnectionsList, AddConnectionModal } from '@/components/connections';
 import { useCredentials } from '@/hooks/queries/useCredentials';
 
 export function ConnectionsPage() {
-  const { data: credentials = [] } = useCredentials();
+  const credentials = useCredentials() ?? [];
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedProviderId, setSelectedProviderId] = useState<string>('');
   const [editingCredentialId, setEditingCredentialId] = useState<string | null>(null);

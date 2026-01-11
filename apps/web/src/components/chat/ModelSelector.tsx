@@ -1,9 +1,13 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect, useRef, useMemo, useCallback, type KeyboardEvent } from 'react';
 import { Link } from '@tanstack/react-router';
-import { useAuthStore } from '@/stores/authStore';
 import { useE2EE } from '@/providers/E2EEProvider';
-import { getAvailableModels, hasConnections } from '@/lib/ai';
+import { useCredentials } from '@/hooks/queries/useCredentials';
+import {
+  decryptRawCredentials,
+  getAvailableModelsFromCredentials,
+  type ModelOption,
+  type RawCredential,
+} from '@/lib/ai';
 import { cn } from '@/lib/utils';
 
 interface ModelSelectorProps {
@@ -11,37 +15,68 @@ interface ModelSelectorProps {
   onChange: (model: string) => void;
 }
 
-interface ModelOption {
-  id: string;
-  name: string;
-  provider: string;
-  credentialId: string;
+/**
+ * Simple fuzzy search - matches if all characters appear in order
+ */
+function fuzzyMatch(text: string, query: string): boolean {
+  const textLower = text.toLowerCase();
+  const queryLower = query.toLowerCase();
+
+  let queryIndex = 0;
+  for (let i = 0; i < textLower.length && queryIndex < queryLower.length; i++) {
+    if (textLower[i] === queryLower[queryIndex]) {
+      queryIndex++;
+    }
+  }
+  return queryIndex === queryLower.length;
 }
 
 export function ModelSelector({ value, onChange }: ModelSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const { token } = useAuthStore();
+  const [models, setModels] = useState<ModelOption[]>([]);
+  const [loadingModels, setLoadingModels] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
   const { isUnlocked } = useE2EE();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
-  // Check if user has any connections
-  const { data: hasAnyConnections = false, isLoading: checkingConnections } = useQuery({
-    queryKey: ['hasConnections'],
-    queryFn: () => hasConnections(token!),
-    enabled: !!token,
-    staleTime: 30000,
-  });
+  // Fetch credentials from Convex
+  const rawCredentials = useCredentials();
+  const checkingConnections = rawCredentials === undefined;
+  const hasAnyConnections = rawCredentials && rawCredentials.length > 0;
 
-  // Fetch available models
-  const { data: models = [], isLoading: loadingModels } = useQuery({
-    queryKey: ['availableModels'],
-    queryFn: () => getAvailableModels(token!),
-    enabled: !!token && isUnlocked && hasAnyConnections,
-    staleTime: 60000,
-    refetchOnWindowFocus: false,
-  });
+  // Fetch available models when credentials change
+  useEffect(() => {
+    async function loadModels() {
+      if (!rawCredentials || rawCredentials.length === 0 || !isUnlocked) {
+        setModels([]);
+        return;
+      }
+
+      setLoadingModels(true);
+      try {
+        const raw: RawCredential[] = rawCredentials.map(c => ({
+          id: c.id,
+          provider: c.provider,
+          name: c.name,
+          encryptedData: c.encryptedData,
+          iv: c.iv,
+        }));
+        const decrypted = decryptRawCredentials(raw);
+        const availableModels = await getAvailableModelsFromCredentials(decrypted);
+        setModels(availableModels);
+      } catch (err) {
+        console.error('Failed to load models:', err);
+        setModels([]);
+      } finally {
+        setLoadingModels(false);
+      }
+    }
+
+    loadModels();
+  }, [rawCredentials, isUnlocked]);
 
   // Auto-select first model if none selected
   useEffect(() => {
@@ -54,6 +89,7 @@ export function ModelSelector({ value, onChange }: ModelSelectorProps) {
   useEffect(() => {
     if (isOpen && searchInputRef.current) {
       searchInputRef.current.focus();
+      setHighlightedIndex(0);
     }
   }, [isOpen]);
 
@@ -71,29 +107,70 @@ export function ModelSelector({ value, onChange }: ModelSelectorProps) {
     }
   }, [isOpen]);
 
-  // Filter models by search query
+  // Filter models by search query with fuzzy matching
   const filteredModels = useMemo(() => {
     if (!searchQuery.trim()) return models;
-    const query = searchQuery.toLowerCase();
+    const query = searchQuery.trim();
     return models.filter(
       (m) =>
-        m.name.toLowerCase().includes(query) ||
-        m.provider.toLowerCase().includes(query)
+        fuzzyMatch(m.name, query) ||
+        fuzzyMatch(m.provider, query) ||
+        m.name.toLowerCase().includes(query.toLowerCase())
     );
   }, [models, searchQuery]);
+
+  // Flat list for keyboard navigation
+  const flatModelList = useMemo(() => {
+    return filteredModels;
+  }, [filteredModels]);
+
+  // Keyboard navigation
+  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightedIndex(i => Math.min(i + 1, flatModelList.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedIndex(i => Math.max(i - 1, 0));
+    } else if (e.key === 'Enter' && flatModelList[highlightedIndex]) {
+      e.preventDefault();
+      onChange(flatModelList[highlightedIndex].id);
+      setIsOpen(false);
+      setSearchQuery('');
+    } else if (e.key === 'Escape') {
+      setIsOpen(false);
+      setSearchQuery('');
+    }
+  }, [flatModelList, highlightedIndex, onChange]);
+
+  // Scroll highlighted item into view
+  useEffect(() => {
+    if (isOpen && listRef.current) {
+      const items = listRef.current.querySelectorAll('[data-model-item]');
+      const highlighted = items[highlightedIndex];
+      if (highlighted) {
+        highlighted.scrollIntoView({ block: 'nearest' });
+      }
+    }
+  }, [highlightedIndex, isOpen]);
+
+  // Reset highlight when search changes
+  useEffect(() => {
+    setHighlightedIndex(0);
+  }, [searchQuery]);
 
   const selectedModel = models.find((m) => m.id === value);
   const isLoading = checkingConnections || loadingModels;
 
-  // No connections configured - show setup prompt
+  // No connections configured
   if (!checkingConnections && !hasAnyConnections) {
     return (
       <Link
         to="/workspace/connections"
         className={cn(
           'flex items-center gap-2 px-3 py-2 rounded-xl text-sm',
-          'bg-amber-100 dark:bg-amber-900/30 hover:bg-amber-200 dark:hover:bg-amber-900/50',
-          'text-amber-800 dark:text-amber-200 border border-amber-300 dark:border-amber-700',
+          'bg-warning/10 hover:bg-warning/20',
+          'text-warning border border-warning/30',
           'transition-colors'
         )}
       >
@@ -140,10 +217,11 @@ export function ModelSelector({ value, onChange }: ModelSelectorProps) {
         disabled={isLoading || models.length === 0}
         className={cn(
           'flex items-center gap-2 px-3 py-2 rounded-xl text-sm',
-          'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700',
+          'bg-gray-100 dark:bg-gray-800/80 hover:bg-gray-200 dark:hover:bg-gray-700',
           'text-gray-700 dark:text-gray-300',
           'disabled:opacity-50 disabled:cursor-not-allowed',
-          'transition-colors min-w-[180px]'
+          'transition-colors min-w-[180px]',
+          isOpen && 'ring-1 ring-accent/50'
         )}
       >
         {isLoading ? (
@@ -171,9 +249,9 @@ export function ModelSelector({ value, onChange }: ModelSelectorProps) {
       </button>
 
       {isOpen && models.length > 0 && (
-        <div className="absolute right-0 mt-2 w-80 z-50 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-80 z-50 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700/50 overflow-hidden">
           {/* Search input */}
-          <div className="p-2 border-b border-gray-200 dark:border-gray-700">
+          <div className="p-2 border-b border-gray-200 dark:border-gray-700/50">
             <div className="relative">
               <svg
                 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
@@ -194,13 +272,14 @@ export function ModelSelector({ value, onChange }: ModelSelectorProps) {
                 placeholder="Search models..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onKeyDown={handleKeyDown}
+                className="w-full pl-10 pr-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-accent/50"
               />
             </div>
           </div>
 
           {/* Model list */}
-          <div className="max-h-80 overflow-y-auto py-1">
+          <div ref={listRef} className="max-h-80 overflow-y-auto py-1">
             {filteredModels.length === 0 ? (
               <div className="px-4 py-8 text-center text-sm text-gray-500">
                 No models found
@@ -211,51 +290,63 @@ export function ModelSelector({ value, onChange }: ModelSelectorProps) {
                   <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-800/50 sticky top-0">
                     {provider}
                   </div>
-                  {providerModels.map((model) => (
-                    <button
-                      key={model.id}
-                      onClick={() => {
-                        onChange(model.id);
-                        setIsOpen(false);
-                        setSearchQuery('');
-                      }}
-                      className={cn(
-                        'w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm',
-                        'hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors',
-                        model.id === value && 'bg-blue-50 dark:bg-blue-900/20'
-                      )}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-gray-900 dark:text-white truncate">
-                          {model.name}
+                  {providerModels.map((model) => {
+                    const flatIndex = flatModelList.findIndex(m => m.id === model.id);
+                    const isHighlighted = flatIndex === highlightedIndex;
+                    const isSelected = model.id === value;
+
+                    return (
+                      <button
+                        key={model.id}
+                        data-model-item
+                        onClick={() => {
+                          onChange(model.id);
+                          setIsOpen(false);
+                          setSearchQuery('');
+                        }}
+                        className={cn(
+                          'w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm',
+                          'transition-colors',
+                          isHighlighted && 'bg-gray-100 dark:bg-gray-800',
+                          isSelected && !isHighlighted && 'bg-accent/10',
+                          !isHighlighted && !isSelected && 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                        )}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-gray-900 dark:text-white truncate">
+                            {model.name}
+                          </div>
                         </div>
-                      </div>
-                      {model.id === value && (
-                        <svg className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                    </button>
-                  ))}
+                        {isSelected && (
+                          <svg className="w-4 h-4 text-accent flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               ))
             )}
           </div>
 
-          {/* Add more connections link */}
-          <div className="border-t border-gray-200 dark:border-gray-700 p-2">
+          {/* Footer hint */}
+          <div className="border-t border-gray-200 dark:border-gray-700/50 px-3 py-2 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs text-gray-400">
+              <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-[10px]">↑↓</kbd>
+              <span>navigate</span>
+              <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-[10px]">↵</kbd>
+              <span>select</span>
+            </div>
             <Link
               to="/workspace/connections"
               onClick={() => {
                 setIsOpen(false);
                 setSearchQuery('');
               }}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              className="text-xs text-accent hover:underline"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Manage Connections
+              Manage
             </Link>
           </div>
         </div>

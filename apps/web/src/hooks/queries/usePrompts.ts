@@ -1,70 +1,68 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { promptsApi, type PromptCreate, type PromptUpdate } from '@/lib/api';
-import { useAuthStore } from '@/stores/authStore';
-
-export const promptKeys = {
-  all: ['prompts'] as const,
-  lists: () => [...promptKeys.all, 'list'] as const,
-  list: () => [...promptKeys.lists()] as const,
-  details: () => [...promptKeys.all, 'detail'] as const,
-  detail: (id: string) => [...promptKeys.details(), id] as const,
-};
+import { useQuery, useMutation } from 'convex/react';
+import { api } from 'convex/_generated/api';
+import type { Id } from 'convex/_generated/dataModel';
 
 export function usePrompts() {
-  const token = useAuthStore((s) => s.token);
-
-  return useQuery({
-    queryKey: promptKeys.list(),
-    queryFn: () => promptsApi.getAll(token!),
-    enabled: !!token,
-  });
+  return useQuery(api.prompts.list);
 }
 
 export function usePrompt(id: string) {
-  const token = useAuthStore((s) => s.token);
-
-  return useQuery({
-    queryKey: promptKeys.detail(id),
-    queryFn: () => promptsApi.get(id, token!),
-    enabled: !!token && !!id,
-  });
+  return useQuery(api.prompts.get, { promptId: id as Id<'prompts'> });
 }
 
 export function useCreatePrompt() {
-  const queryClient = useQueryClient();
-  const token = useAuthStore((s) => s.token);
+  const createPrompt = useMutation(api.prompts.create);
 
-  return useMutation({
-    mutationFn: (data: PromptCreate) => promptsApi.create(data, token!),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: promptKeys.lists() });
+  return {
+    mutateAsync: async (data: { name: string; description?: string; content: string }) => {
+      return createPrompt(data);
     },
-  });
+    mutate: (data: { name: string; description?: string; content: string }) => {
+      createPrompt(data);
+    },
+  };
 }
 
 export function useUpdatePrompt() {
-  const queryClient = useQueryClient();
-  const token = useAuthStore((s) => s.token);
+  const updatePrompt = useMutation(api.prompts.update);
 
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: PromptUpdate }) =>
-      promptsApi.update(id, data, token!),
-    onSuccess: (updatedPrompt) => {
-      queryClient.setQueryData(promptKeys.detail(updatedPrompt.id), updatedPrompt);
-      queryClient.invalidateQueries({ queryKey: promptKeys.lists() });
+  return {
+    mutateAsync: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { name?: string; description?: string | null; content?: string };
+    }) => {
+      return updatePrompt({
+        promptId: id as Id<'prompts'>,
+        ...data,
+      });
     },
-  });
+    mutate: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { name?: string; description?: string | null; content?: string };
+    }) => {
+      updatePrompt({
+        promptId: id as Id<'prompts'>,
+        ...data,
+      });
+    },
+  };
 }
 
 export function useDeletePrompt() {
-  const queryClient = useQueryClient();
-  const token = useAuthStore((s) => s.token);
+  const deletePrompt = useMutation(api.prompts.remove);
 
-  return useMutation({
-    mutationFn: (id: string) => promptsApi.delete(id, token!),
-    onSuccess: (_, deletedId) => {
-      queryClient.removeQueries({ queryKey: promptKeys.detail(deletedId) });
-      queryClient.invalidateQueries({ queryKey: promptKeys.lists() });
+  return {
+    mutateAsync: async (id: string) => {
+      return deletePrompt({ promptId: id as Id<'prompts'> });
     },
-  });
+    mutate: (id: string) => {
+      deletePrompt({ promptId: id as Id<'prompts'> });
+    },
+  };
 }

@@ -1,52 +1,31 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { User } from '@cortex/types';
 import { clearAllAICaches } from '@/lib/ai';
 
-interface AuthState {
-  user: User | null;
-  token: string | null;
-  isLoading: boolean;
+// Note: This store is now a compatibility layer for legacy code.
+// New code should use the useAuth hook from @/hooks/useAuth
+// which wraps Convex Auth directly.
 
-  // Actions
-  setUser: (user: User | null) => void;
-  setToken: (token: string | null) => void;
+interface AuthState {
+  // Legacy state - kept for compatibility during migration
+  isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
-  login: (token: string, user: User) => void;
+
+  // Legacy logout action - clears local caches
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      user: null,
-      token: null,
-      isLoading: true,
+export const useAuthStore = create<AuthState>()((set) => ({
+  isLoading: true,
+  setIsLoading: (isLoading) => set({ isLoading }),
 
-      setUser: (user) => set({ user }),
-      setToken: (token) => set({ token }),
-      setIsLoading: (isLoading) => set({ isLoading }),
-
-      login: (token, user) => set({ token, user, isLoading: false }),
-
-      logout: () => {
-        // Clear AI caches (credentials, providers) before clearing auth
-        clearAllAICaches();
-        set({ token: null, user: null });
-        // Clear E2EE session on logout
-        localStorage.removeItem('e2ee_session_master_key');
-        localStorage.removeItem('e2ee_session_private_key');
-        sessionStorage.removeItem('e2ee_session_key');
-      },
-    }),
-    {
-      name: 'cortex-auth',
-      partialize: (state) => ({ token: state.token, user: state.user }),
-      onRehydrateStorage: () => (state) => {
-        if (state) {
-          state.setIsLoading(false);
-        }
-      },
-    }
-  )
-);
+  logout: () => {
+    // Clear AI caches (credentials, providers) before clearing auth
+    clearAllAICaches();
+    // Clear E2EE session on logout
+    localStorage.removeItem('e2ee_session_master_key');
+    localStorage.removeItem('e2ee_session_private_key');
+    sessionStorage.removeItem('e2ee_session_key');
+    // Clear legacy storage
+    localStorage.removeItem('cortex-auth');
+  },
+}));

@@ -8,6 +8,7 @@ interface ModalProps {
   children: ReactNode;
   closable?: boolean;
   className?: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
 export function Modal({
@@ -17,6 +18,7 @@ export function Modal({
   children,
   closable = true,
   className,
+  size = 'md',
 }: ModalProps) {
   // Handle escape key
   useEffect(() => {
@@ -46,26 +48,36 @@ export function Modal({
 
   if (!open) return null;
 
+  const sizeClasses = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl',
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={closable ? onClose : undefined}
       />
 
       {/* Modal */}
       <div
         className={cn(
-          'relative z-10 w-full max-w-md mx-4',
-          'bg-white dark:bg-gray-900 rounded-2xl shadow-xl',
+          'relative z-10 w-full',
+          sizeClasses[size],
+          'bg-white dark:bg-gray-900',
+          'rounded-2xl shadow-2xl',
+          'border border-gray-200 dark:border-gray-700/50',
           'animate-in fade-in zoom-in-95 duration-200',
           className
         )}
       >
         {/* Header */}
         {(title || closable) && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700/50">
             {title && (
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {title}
@@ -74,7 +86,7 @@ export function Modal({
             {closable && (
               <button
                 onClick={onClose}
-                className="p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-gray-800"
+                className="p-2 -mr-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-gray-800 transition-colors"
               >
                 <svg
                   className="w-5 h-5"
@@ -95,7 +107,7 @@ export function Modal({
         )}
 
         {/* Content */}
-        <div className="px-6 py-4">{children}</div>
+        <div className="px-6 py-5">{children}</div>
       </div>
     </div>
   );

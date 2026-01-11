@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import type { UIMessage } from 'ai';
-import { useAuthStore } from '@/stores/authStore';
 import { useE2EE } from '@/providers/E2EEProvider';
 import { useModelStore } from '@/stores/modelStore';
-import { getChat, updateChat, deleteChat } from '@/lib/api/chats';
+import { useChat, useUpdateChat, useDeleteChat } from '@/hooks/queries/useChats';
 import { getChatKey, decryptChatTitle, decryptChatContent, encryptChatContent, encryptChatTitle } from '@cortex/crypto';
 import type { ChatMessage } from '@cortex/types';
 import { Messages } from '@/components/chat/Messages';
@@ -22,10 +20,10 @@ interface DecryptedChat {
   id: string;
   title: string;
   messages: ChatMessage[];
-  created_at: number;
-  updated_at: number;
-  encrypted_chat_key: string;
-  chat_key_nonce: string;
+  createdAt: number;
+  updatedAt: number;
+  encryptedChatKey?: string;
+  chatKeyNonce?: string;
 }
 
 /**
@@ -68,126 +66,138 @@ function toChatMessage(msg: UIMessage, model?: string): ChatMessage {
 export function ChatPage() {
   const { chatId } = useParams({ strict: false });
   const navigate = useNavigate();
-  const { token } = useAuthStore();
   const { isUnlocked } = useE2EE();
-  const queryClient = useQueryClient();
   const { selectedModelId, setSelectedModel } = useModelStore();
 
   // Follow-up suggestions state
   const [followUps, setFollowUps] = useState<string[]>([]);
   const [isGeneratingFollowUps, setIsGeneratingFollowUps] = useState(false);
 
-  // Fetch and decrypt chat
-  const {
-    data: chat,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['chat', chatId],
-    queryFn: async (): Promise<DecryptedChat> => {
-      if (!token) throw new Error('Not authenticated');
-      if (!chatId) throw new Error('No chat ID');
+  // Fetch chat using Convex
+  const rawChat = useChat(chatId || '');
+  const updateChatMutation = useUpdateChat();
+  const deleteChatMutation = useDeleteChat();
 
-      const encrypted = await getChat(token, chatId);
+  // Decrypt chat data
+  const chat = useMemo((): DecryptedChat | null => {
+    if (!rawChat) return null;
 
-      if (isUnlocked) {
+    if (isUnlocked && rawChat.encryptedChatKey && rawChat.chatKeyNonce) {
+      try {
         getChatKey(
-          chatId,
-          encrypted.encrypted_chat_key,
-          encrypted.chat_key_nonce
+          rawChat.id,
+          rawChat.encryptedChatKey,
+          rawChat.chatKeyNonce
         );
 
-        const title = decryptChatTitle(
-          chatId,
-          encrypted.encrypted_chat_key,
-          encrypted.chat_key_nonce,
-          encrypted.encrypted_title,
-          encrypted.title_nonce
-        );
+        const title = rawChat.encryptedTitle && rawChat.titleNonce
+          ? decryptChatTitle(
+              rawChat.id,
+              rawChat.encryptedChatKey,
+              rawChat.chatKeyNonce,
+              rawChat.encryptedTitle,
+              rawChat.titleNonce
+            )
+          : 'Untitled';
 
-        const chatContent = decryptChatContent(
-          chatId,
-          encrypted.encrypted_chat_key,
-          encrypted.chat_key_nonce,
-          encrypted.encrypted_chat,
-          encrypted.chat_nonce
-        ) as { messages: ChatMessage[] };
+        const chatContent = rawChat.encryptedChat && rawChat.chatNonce
+          ? decryptChatContent(
+              rawChat.id,
+              rawChat.encryptedChatKey,
+              rawChat.chatKeyNonce,
+              rawChat.encryptedChat,
+              rawChat.chatNonce
+            ) as { messages: ChatMessage[] }
+          : { messages: [] };
 
         return {
-          id: encrypted.id,
+          id: rawChat.id,
           title,
           messages: chatContent.messages || [],
-          created_at: encrypted.created_at,
-          updated_at: encrypted.updated_at,
-          encrypted_chat_key: encrypted.encrypted_chat_key,
-          chat_key_nonce: encrypted.chat_key_nonce,
+          createdAt: rawChat.createdAt,
+          updatedAt: rawChat.updatedAt,
+          encryptedChatKey: rawChat.encryptedChatKey,
+          chatKeyNonce: rawChat.chatKeyNonce,
+        };
+      } catch {
+        return {
+          id: rawChat.id,
+          title: 'Encrypted',
+          messages: [],
+          createdAt: rawChat.createdAt,
+          updatedAt: rawChat.updatedAt,
+          encryptedChatKey: rawChat.encryptedChatKey,
+          chatKeyNonce: rawChat.chatKeyNonce,
         };
       }
+    }
 
-      return {
-        id: encrypted.id,
-        title: 'Encrypted',
-        messages: [],
-        created_at: encrypted.created_at,
-        updated_at: encrypted.updated_at,
-        encrypted_chat_key: encrypted.encrypted_chat_key,
-        chat_key_nonce: encrypted.chat_key_nonce,
-      };
-    },
-    enabled: !!token && !!chatId,
-  });
+    return {
+      id: rawChat.id,
+      title: rawChat.titlePreview || 'Encrypted',
+      messages: [],
+      createdAt: rawChat.createdAt,
+      updatedAt: rawChat.updatedAt,
+      encryptedChatKey: rawChat.encryptedChatKey,
+      chatKeyNonce: rawChat.chatKeyNonce,
+    };
+  }, [rawChat, isUnlocked]);
 
-  // Delete chat mutation
-  const deleteMutation = useMutation({
-    mutationFn: () => deleteChat(token!, chatId!),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['chats'] });
+  const isLoading = rawChat === undefined;
+
+  // Handle delete
+  const handleDelete = useCallback(async () => {
+    if (!chatId) return;
+    try {
+      await deleteChatMutation.mutateAsync(chatId);
       navigate({ to: '/' });
       toast.success('Chat deleted');
-    },
-    onError: () => {
+    } catch {
       toast.error('Failed to delete chat');
-    },
-  });
+    }
+  }, [chatId, deleteChatMutation, navigate]);
 
   // Handle title change
   const handleTitleChange = useCallback(async (newTitle: string) => {
-    if (!token || !chat || !chatId) return;
+    if (!chat || !chatId || !chat.encryptedChatKey || !chat.chatKeyNonce) return;
 
     try {
       const encrypted = encryptChatTitle(
         chatId,
-        chat.encrypted_chat_key,
-        chat.chat_key_nonce,
+        chat.encryptedChatKey,
+        chat.chatKeyNonce,
         newTitle
       );
 
-      await updateChat(token, chatId, {
-        encrypted_title: encrypted.encryptedTitle,
-        title_nonce: encrypted.titleNonce,
+      await updateChatMutation.mutateAsync({
+        id: chatId,
+        data: {
+          encryptedTitle: encrypted.encryptedTitle,
+          titleNonce: encrypted.titleNonce,
+        },
       });
 
-      // Update local cache
-      queryClient.setQueryData(['chat', chatId], (old: DecryptedChat | undefined) =>
-        old ? { ...old, title: newTitle } : old
-      );
-      queryClient.invalidateQueries({ queryKey: ['chats'] });
       toast.success('Title updated');
     } catch {
       toast.error('Failed to update title');
     }
-  }, [chat, chatId, queryClient, token]);
+  }, [chat, chatId, updateChatMutation]);
 
   // Ref to track pending user message for persistence
   const pendingUserMessageRef = useRef<ChatMessage | null>(null);
+  // Ref to track current messages for persistence
+  const currentMessagesRef = useRef<ChatMessage[]>([]);
+
+  // Keep currentMessagesRef in sync with chat.messages
+  useEffect(() => {
+    if (chat?.messages) {
+      currentMessagesRef.current = chat.messages;
+    }
+  }, [chat?.messages]);
 
   // Handle message completion - persist user + assistant messages
   const handleFinish = useCallback(async (message: UIMessage) => {
-    if (!token || !chatId) return;
-
-    // Get current chat from cache (need fresh data)
-    const currentChat = queryClient.getQueryData<DecryptedChat>(['chat', chatId]);
-    if (!currentChat) return;
+    if (!chatId || !chat?.encryptedChatKey || !chat?.chatKeyNonce) return;
 
     // Build final messages: stored + pending user + assistant
     const pendingUserMessage = pendingUserMessageRef.current;
@@ -195,35 +205,32 @@ export function ChatPage() {
 
     let finalMessages: ChatMessage[];
     if (pendingUserMessage) {
-      finalMessages = [...currentChat.messages, pendingUserMessage, assistantMessage];
+      finalMessages = [...currentMessagesRef.current, pendingUserMessage, assistantMessage];
       pendingUserMessageRef.current = null; // Clear pending
     } else {
       // No pending user message - this shouldn't happen but handle gracefully
-      finalMessages = [...currentChat.messages, assistantMessage];
+      finalMessages = [...currentMessagesRef.current, assistantMessage];
     }
 
-    // Update local cache
-    queryClient.setQueryData(['chat', chatId], {
-      ...currentChat,
-      messages: finalMessages,
-    });
+    // Update ref for next message
+    currentMessagesRef.current = finalMessages;
 
     // Encrypt and save to server
     try {
       const encrypted = encryptChatContent(
         chatId,
-        currentChat.encrypted_chat_key,
-        currentChat.chat_key_nonce,
+        chat.encryptedChatKey,
+        chat.chatKeyNonce,
         { messages: finalMessages }
       );
 
-      await updateChat(token, chatId, {
-        encrypted_chat: encrypted.encryptedChat,
-        chat_nonce: encrypted.chatNonce,
+      await updateChatMutation.mutateAsync({
+        id: chatId,
+        data: {
+          encryptedChat: encrypted.encryptedChat,
+          chatNonce: encrypted.chatNonce,
+        },
       });
-
-      // Invalidate chats list to update sidebar
-      queryClient.invalidateQueries({ queryKey: ['chats'] });
 
       // Generate follow-up suggestions asynchronously
       if (selectedModelId) {
@@ -243,7 +250,7 @@ export function ChatPage() {
       console.error('Failed to save chat:', saveError);
       toast.error('Message sent but failed to save');
     }
-  }, [chatId, queryClient, selectedModelId, token]);
+  }, [chatId, chat?.encryptedChatKey, chat?.chatKeyNonce, selectedModelId, updateChatMutation]);
 
   // Use the direct chat hook
   const {
@@ -314,7 +321,7 @@ export function ChatPage() {
 
   // Handle sending a message
   const handleSendMessage = useCallback(async (content: string) => {
-    if (!isUnlocked || !token || !chat || !selectedModelId || !chatId) {
+    if (!isUnlocked || !chat || !selectedModelId || !chatId) {
       if (!selectedModelId) {
         toast.error('Please select a model first');
       }
@@ -351,7 +358,7 @@ export function ChatPage() {
         toast.error(err instanceof Error ? err.message : 'Failed to send message');
       }
     }
-  }, [chat, chatId, isLoadingCredentials, isReady, isUnlocked, selectedModelId, sendMessage, token]);
+  }, [chat, chatId, isLoadingCredentials, isReady, isUnlocked, selectedModelId, sendMessage]);
 
   if (isLoading) {
     return (
@@ -364,7 +371,7 @@ export function ChatPage() {
     );
   }
 
-  if (error) {
+  if (!chat) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center max-w-md">
@@ -373,9 +380,9 @@ export function ChatPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <p className="text-red-600 dark:text-red-400 font-medium mb-2">Failed to load chat</p>
+          <p className="text-red-600 dark:text-red-400 font-medium mb-2">Chat not found</p>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {error instanceof Error ? error.message : 'Unknown error'}
+            This chat may have been deleted or doesn't exist.
           </p>
         </div>
       </div>
@@ -390,7 +397,7 @@ export function ChatPage() {
           title={chat?.title || 'Chat'}
           chatId={chatId || ''}
           onTitleChange={isUnlocked ? handleTitleChange : undefined}
-          onDelete={() => deleteMutation.mutate()}
+          onDelete={handleDelete}
         />
         <div className="pr-4">
           <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />

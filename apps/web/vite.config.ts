@@ -19,6 +19,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
       '@cortex/crypto': path.resolve(__dirname, '../../packages/crypto/src/sodium'),
       '@cortex/types': path.resolve(__dirname, '../../packages/types/src'),
+      'convex/_generated': path.resolve(__dirname, '../../convex/_generated'),
     },
   },
   optimizeDeps: {

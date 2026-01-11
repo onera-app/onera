@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
-import { useAuthStore } from '@/stores/authStore';
-import { login, signup } from '@/lib/api/auth';
+import { useAuthActions } from '@convex-dev/auth/react';
+import { useConvexAuth } from 'convex/react';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
+import { useEffect } from 'react';
 
 export function AuthPage() {
   const navigate = useNavigate();
-  const { login: setAuth } = useAuthStore();
+  const { signIn } = useAuthActions();
+  const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState({
@@ -17,16 +19,25 @@ export function AuthPage() {
     name: '',
   });
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && !authLoading) {
+      navigate({ to: '/' });
+    }
+  }, [isAuthenticated, authLoading, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const response = isLogin
-        ? await login({ email: form.email, password: form.password })
-        : await signup(form);
-
-      setAuth(response.token, response.user);
+      const flow = isLogin ? 'signIn' : 'signUp';
+      await signIn('password', {
+        email: form.email,
+        password: form.password,
+        name: form.name || undefined,
+        flow,
+      });
       toast.success(isLogin ? 'Welcome back!' : 'Account created successfully');
       navigate({ to: '/' });
     } catch (err) {

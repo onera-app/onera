@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import { useCredentials, useDeleteCredential } from '@/hooks/queries/useCredentials';
 import { useE2EE } from '@/providers/E2EEProvider';
-import { LLM_PROVIDERS } from '@/lib/api';
+import { LLM_PROVIDERS } from '@/lib/types';
 import dayjs from 'dayjs';
 
 interface ConnectionsListProps {
@@ -10,7 +10,9 @@ interface ConnectionsListProps {
 }
 
 export function ConnectionsList({ onAddConnection, onEditConnection }: ConnectionsListProps) {
-  const { data: credentials = [], isLoading } = useCredentials();
+  const credentialsData = useCredentials();
+  const credentials = credentialsData ?? [];
+  const isLoading = credentialsData === undefined;
   const deleteCredential = useDeleteCredential();
   const { isUnlocked } = useE2EE();
 
@@ -105,7 +107,7 @@ export function ConnectionsList({ onAddConnection, onEditConnection }: Connectio
                       {provider?.name || credential.provider}
                     </p>
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                      Added {dayjs(credential.created_at).format('MMM D, YYYY')}
+                      Added {dayjs(credential.createdAt).format('MMM D, YYYY')}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">

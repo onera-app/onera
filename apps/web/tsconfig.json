@@ -21,9 +21,10 @@
     "paths": {
       "@/*": ["./src/*"],
       "@cortex/crypto": ["../../packages/crypto/src/sodium"],
-      "@cortex/types": ["../../packages/types/src"]
+      "@cortex/types": ["../../packages/types/src"],
+      "convex/_generated/*": ["../../convex/_generated/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "../../convex"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

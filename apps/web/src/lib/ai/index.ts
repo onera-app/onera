@@ -3,6 +3,10 @@
  * Provides direct browser-to-provider AI chat functionality with E2EE support
  */
 
+// Import for local use
+import { clearCredentialCache as _clearCredentialCache } from './credentials';
+import { clearProviderCache as _clearProviderCache } from './providers';
+
 // Types
 export type {
   DecryptedCredential,
@@ -13,16 +17,18 @@ export type {
 
 // Credential management
 export {
-  getDecryptedCredentials,
+  decryptRawCredentials,
+  setCredentialCache,
   getCredentialById,
   clearCredentialCache,
   invalidateCredentialCache,
   hasCredentialsCache,
+  getCachedCredentials,
   parseModelId,
   createModelId,
-  hasConnections,
-  getAvailableModels,
+  getAvailableModelsFromCredentials,
   type ModelOption,
+  type RawCredential,
 } from './credentials';
 
 // Provider factory
@@ -51,10 +57,6 @@ export {
  * Call on logout, lock, or when credentials change
  */
 export function clearAllAICaches(): void {
-  // Import dynamically to avoid circular dependencies
-  const { clearCredentialCache } = require('./credentials');
-  const { clearProviderCache } = require('./providers');
-
-  clearCredentialCache();
-  clearProviderCache();
+  _clearCredentialCache();
+  _clearProviderCache();
 }

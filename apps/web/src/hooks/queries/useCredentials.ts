@@ -1,72 +1,92 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { credentialsApi, type CredentialCreate } from '@/lib/api';
-import { useAuthStore } from '@/stores/authStore';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from 'convex/_generated/api';
+import type { Id } from 'convex/_generated/dataModel';
 import { clearAllAICaches } from '@/lib/ai';
 
-export const credentialKeys = {
-  all: ['credentials'] as const,
-  list: () => [...credentialKeys.all, 'list'] as const,
-};
-
 export function useCredentials() {
-  const token = useAuthStore((s) => s.token);
-
-  return useQuery({
-    queryKey: credentialKeys.list(),
-    queryFn: () => credentialsApi.getAll(token!),
-    enabled: !!token,
-  });
-}
-
-/**
- * Helper to invalidate all credential and model-related queries
- */
-function invalidateCredentialQueries(queryClient: ReturnType<typeof useQueryClient>) {
-  // Clear the AI caches so new credentials are used
-  clearAllAICaches();
-  // Invalidate credentials list
-  queryClient.invalidateQueries({ queryKey: credentialKeys.list() });
-  // Invalidate decrypted credentials
-  queryClient.invalidateQueries({ queryKey: ['decryptedCredentials'] });
-  // Invalidate available models so they're refetched with new credentials
-  queryClient.invalidateQueries({ queryKey: ['availableModels'] });
-  // Invalidate hasConnections check
-  queryClient.invalidateQueries({ queryKey: ['hasConnections'] });
+  return useQuery(api.credentials.list);
 }
 
 export function useCreateCredential() {
-  const queryClient = useQueryClient();
-  const token = useAuthStore((s) => s.token);
+  const createCredential = useMutation(api.credentials.create);
 
-  return useMutation({
-    mutationFn: (data: CredentialCreate) => credentialsApi.create(data, token!),
-    onSuccess: () => {
-      invalidateCredentialQueries(queryClient);
+  return {
+    mutateAsync: async (data: {
+      provider: string;
+      name: string;
+      encryptedData: string;
+      iv: string;
+    }) => {
+      // Clear AI caches so new credentials are used
+      clearAllAICaches();
+      return createCredential(data);
     },
-  });
+    mutate: (data: {
+      provider: string;
+      name: string;
+      encryptedData: string;
+      iv: string;
+    }) => {
+      clearAllAICaches();
+      createCredential(data);
+    },
+  };
 }
 
 export function useUpdateCredential() {
-  const queryClient = useQueryClient();
-  const token = useAuthStore((s) => s.token);
+  const updateCredential = useMutation(api.credentials.update);
 
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: CredentialCreate }) =>
-      credentialsApi.update(id, data, token!),
-    onSuccess: () => {
-      invalidateCredentialQueries(queryClient);
+  return {
+    mutateAsync: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: {
+        provider: string;
+        name: string;
+        encryptedData: string;
+        iv: string;
+      };
+    }) => {
+      clearAllAICaches();
+      return updateCredential({
+        credentialId: id as Id<'credentials'>,
+        ...data,
+      });
     },
-  });
+    mutate: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: {
+        provider: string;
+        name: string;
+        encryptedData: string;
+        iv: string;
+      };
+    }) => {
+      clearAllAICaches();
+      updateCredential({
+        credentialId: id as Id<'credentials'>,
+        ...data,
+      });
+    },
+  };
 }
 
 export function useDeleteCredential() {
-  const queryClient = useQueryClient();
-  const token = useAuthStore((s) => s.token);
+  const deleteCredential = useMutation(api.credentials.remove);
 
-  return useMutation({
-    mutationFn: (id: string) => credentialsApi.delete(id, token!),
-    onSuccess: () => {
-      invalidateCredentialQueries(queryClient);
+  return {
+    mutateAsync: async (id: string) => {
+      clearAllAICaches();
+      return deleteCredential({ credentialId: id as Id<'credentials'> });
     },
-  });
+    mutate: (id: string) => {
+      clearAllAICaches();
+      deleteCredential({ credentialId: id as Id<'credentials'> });
+    },
+  };
 }

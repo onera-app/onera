@@ -1,26 +1,57 @@
 @import "tailwindcss";
 
-/* Custom theme variables */
+/* OpenWebUI-inspired theme variables */
 @theme {
-  --color-gray-950: oklch(0.09 0.01 260);
-  --color-gray-900: oklch(0.13 0.01 260);
-  --color-gray-800: oklch(0.18 0.01 260);
-  --color-gray-700: oklch(0.27 0.01 260);
-  --color-gray-600: oklch(0.37 0.01 260);
-  --color-gray-500: oklch(0.47 0.01 260);
-  --color-gray-400: oklch(0.57 0.01 260);
-  --color-gray-300: oklch(0.7 0.01 260);
-  --color-gray-200: oklch(0.82 0.005 260);
-  --color-gray-100: oklch(0.93 0.003 260);
-  --color-gray-50: oklch(0.97 0.002 260);
+  /* Gray scale - neutral with slight warmth */
+  --color-gray-950: oklch(0.09 0.005 260);
+  --color-gray-900: oklch(0.13 0.005 260);
+  --color-gray-850: oklch(0.16 0.005 260);
+  --color-gray-800: oklch(0.18 0.005 260);
+  --color-gray-700: oklch(0.27 0.005 260);
+  --color-gray-600: oklch(0.37 0.005 260);
+  --color-gray-500: oklch(0.47 0.005 260);
+  --color-gray-400: oklch(0.57 0.005 260);
+  --color-gray-300: oklch(0.7 0.005 260);
+  --color-gray-200: oklch(0.82 0.003 260);
+  --color-gray-100: oklch(0.93 0.002 260);
+  --color-gray-50: oklch(0.97 0.001 260);
+
+  /* Sidebar - always dark like OpenWebUI/ChatGPT */
+  --color-sidebar-bg: oklch(0.12 0.005 260);
+  --color-sidebar-hover: oklch(0.18 0.005 260);
+  --color-sidebar-active: oklch(0.22 0.005 260);
+  --color-sidebar-border: oklch(0.20 0.005 260);
+
+  /* Accent colors - teal/green like OpenWebUI */
+  --color-accent: oklch(0.72 0.15 165);
+  --color-accent-hover: oklch(0.65 0.15 165);
+  --color-accent-muted: oklch(0.72 0.08 165);
+
+  /* Semantic colors */
+  --color-success: oklch(0.72 0.17 145);
+  --color-warning: oklch(0.75 0.15 85);
+  --color-error: oklch(0.65 0.2 25);
+  --color-info: oklch(0.7 0.15 250);
 }
 
 /* Base styles */
+html {
+  font-size: calc(14px * var(--ui-scale, 1));
+}
+
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-feature-settings: 'rlig' 1, 'calt' 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+}
+
+/* UI Scale support */
+:root {
+  --ui-scale: 1;
+  --sidebar-width: 260px;
 }
 
 /* Scrollbar styling */
@@ -89,8 +120,36 @@ body {
 /* OLED dark mode */
 .oled-dark {
   --color-gray-950: oklch(0 0 0);
-  --color-gray-900: oklch(0.08 0.01 260);
+  --color-gray-900: oklch(0.06 0.005 260);
+  --color-sidebar-bg: oklch(0 0 0);
+  --color-sidebar-hover: oklch(0.1 0.005 260);
+  --color-sidebar-active: oklch(0.14 0.005 260);
 }
+
+/* Sidebar always dark styling */
+.sidebar {
+  background: var(--color-sidebar-bg);
+  color: oklch(0.9 0.005 260);
+}
+
+.sidebar-item {
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  transition: background-color 150ms ease;
+}
+
+.sidebar-item:hover {
+  background: var(--color-sidebar-hover);
+}
+
+.sidebar-item.active {
+  background: var(--color-sidebar-active);
+}
+
+/* Chat density variants */
+.chat-density-compact .message-gap { gap: 0.75rem; }
+.chat-density-normal .message-gap { gap: 1.25rem; }
+.chat-density-comfortable .message-gap { gap: 1.75rem; }
 
 /* Animation utilities */
 @keyframes fade-in {

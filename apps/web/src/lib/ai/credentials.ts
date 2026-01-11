@@ -4,7 +4,6 @@
  */
 
 import { decryptCredentials, isUnlocked, secureZero } from '@cortex/crypto';
-import { credentialsApi } from '@/lib/api';
 import type { DecryptedCredential } from './types';
 import type { LLMProvider } from '@cortex/types';
 
@@ -12,23 +11,26 @@ import type { LLMProvider } from '@cortex/types';
 let cachedCredentials: DecryptedCredential[] | null = null;
 
 /**
- * Fetch and decrypt all credentials
+ * Raw credential format from Convex
  */
-export async function getDecryptedCredentials(token: string): Promise<DecryptedCredential[]> {
+export interface RawCredential {
+  id: string;
+  provider: string;
+  name: string;
+  encryptedData: string;
+  iv: string;
+}
+
+/**
+ * Decrypt credentials from raw encrypted format
+ * Used by hooks that already have credentials from Convex
+ */
+export function decryptRawCredentials(encrypted: RawCredential[]): DecryptedCredential[] {
   if (!isUnlocked()) {
     throw new Error('E2EE not unlocked');
   }
 
-  // Return cached if available
-  if (cachedCredentials) {
-    return cachedCredentials;
-  }
-
-  // Fetch encrypted credentials from server
-  const encrypted = await credentialsApi.getAll(token);
-
   if (encrypted.length === 0) {
-    cachedCredentials = [];
     return [];
   }
 
@@ -38,13 +40,13 @@ export async function getDecryptedCredentials(token: string): Promise<DecryptedC
       id: c.id,
       provider: c.provider,
       name: c.name,
-      encrypted_data: c.encrypted_data,
+      encrypted_data: c.encryptedData,
       iv: c.iv,
     }))
   );
 
   // Filter failed decryptions and transform to our format
-  cachedCredentials = decrypted
+  return decrypted
     .filter((c) => c.api_key && !c.api_key.includes('[Decryption failed]'))
     .map((c) => ({
       id: c.id,
@@ -55,8 +57,14 @@ export async function getDecryptedCredentials(token: string): Promise<DecryptedC
       orgId: c.org_id,
       config: c.config,
     }));
+}
 
-  return cachedCredentials;
+/**
+ * Set the credential cache directly
+ * Used by hooks that fetch and decrypt credentials via Convex
+ */
+export function setCredentialCache(credentials: DecryptedCredential[]): void {
+  cachedCredentials = credentials;
 }
 
 /**
@@ -103,6 +111,13 @@ export function hasCredentialsCache(): boolean {
 }
 
 /**
+ * Get cached credentials
+ */
+export function getCachedCredentials(): DecryptedCredential[] {
+  return cachedCredentials || [];
+}
+
+/**
  * Parse model ID to extract credential ID and model name
  * Format: credentialId:modelName
  */
@@ -124,18 +139,6 @@ export function parseModelId(modelId: string): { credentialId: string; modelName
  */
 export function createModelId(credentialId: string, modelName: string): string {
   return `${credentialId}:${modelName}`;
-}
-
-/**
- * Check if any credentials/connections are configured
- */
-export async function hasConnections(token: string): Promise<boolean> {
-  try {
-    const credentials = await credentialsApi.getAll(token);
-    return credentials.length > 0;
-  } catch {
-    return false;
-  }
 }
 
 /**
@@ -234,14 +237,13 @@ async function fetchOllamaModels(baseUrl: string): Promise<{ id: string; name: s
 }
 
 /**
- * Get available models from all configured credentials
+ * Get available models from decrypted credentials
  */
-export async function getAvailableModels(token: string): Promise<ModelOption[]> {
+export async function getAvailableModelsFromCredentials(credentials: DecryptedCredential[]): Promise<ModelOption[]> {
   if (!isUnlocked()) {
     return [];
   }
 
-  const credentials = await getDecryptedCredentials(token);
   const allModels: ModelOption[] = [];
 
   for (const cred of credentials) {

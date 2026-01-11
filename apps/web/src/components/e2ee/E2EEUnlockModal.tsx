@@ -1,55 +1,55 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useAuthStore } from '@/stores/authStore';
+import { useQuery } from 'convex/react';
+import { api } from 'convex/_generated/api';
 import { useE2EEStore } from '@/stores/e2eeStore';
 import { unlockWithPasswordFlow, type StorableUserKeys } from '@cortex/crypto';
-import { getUserKeys } from '@/lib/api/userKeys';
 import { Modal } from '@/components/common/Modal';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 
-// Convert API response to StorableUserKeys format
-function toStorableKeys(apiKeys: {
-  kek_salt: string;
-  kek_ops_limit: number;
-  kek_mem_limit: number;
-  encrypted_master_key: string;
-  master_key_nonce: string;
-  public_key: string;
-  encrypted_private_key: string;
-  private_key_nonce: string;
-  encrypted_recovery_key?: string;
-  recovery_key_nonce?: string;
-  master_key_recovery?: string;
-  master_key_recovery_nonce?: string;
+// Convert Convex response to StorableUserKeys format
+function toStorableKeys(keys: {
+  kekSalt: string;
+  kekOpsLimit: number;
+  kekMemLimit: number;
+  encryptedMasterKey: string;
+  masterKeyNonce: string;
+  publicKey: string;
+  encryptedPrivateKey: string;
+  privateKeyNonce: string;
+  encryptedRecoveryKey: string;
+  recoveryKeyNonce: string;
+  masterKeyRecovery: string;
+  masterKeyRecoveryNonce: string;
 }): StorableUserKeys {
   return {
-    kekSalt: apiKeys.kek_salt,
-    kekOpsLimit: apiKeys.kek_ops_limit,
-    kekMemLimit: apiKeys.kek_mem_limit,
-    encryptedMasterKey: apiKeys.encrypted_master_key,
-    masterKeyNonce: apiKeys.master_key_nonce,
-    publicKey: apiKeys.public_key,
-    encryptedPrivateKey: apiKeys.encrypted_private_key,
-    privateKeyNonce: apiKeys.private_key_nonce,
-    encryptedRecoveryKey: apiKeys.encrypted_recovery_key || '',
-    recoveryKeyNonce: apiKeys.recovery_key_nonce || '',
-    masterKeyRecovery: apiKeys.master_key_recovery || '',
-    masterKeyRecoveryNonce: apiKeys.master_key_recovery_nonce || '',
+    kekSalt: keys.kekSalt,
+    kekOpsLimit: keys.kekOpsLimit,
+    kekMemLimit: keys.kekMemLimit,
+    encryptedMasterKey: keys.encryptedMasterKey,
+    masterKeyNonce: keys.masterKeyNonce,
+    publicKey: keys.publicKey,
+    encryptedPrivateKey: keys.encryptedPrivateKey,
+    privateKeyNonce: keys.privateKeyNonce,
+    encryptedRecoveryKey: keys.encryptedRecoveryKey || '',
+    recoveryKeyNonce: keys.recoveryKeyNonce || '',
+    masterKeyRecovery: keys.masterKeyRecovery || '',
+    masterKeyRecoveryNonce: keys.masterKeyRecoveryNonce || '',
   };
 }
 
 export function E2EEUnlockModal() {
-  const { token } = useAuthStore();
   const { setStatus, setError } = useE2EEStore();
+  const userKeys = useQuery(api.userKeys.get);
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!token) {
-      toast.error('Not authenticated');
+    if (!userKeys) {
+      toast.error('Unable to fetch encryption keys');
       return;
     }
 
@@ -57,9 +57,7 @@ export function E2EEUnlockModal() {
     setStatus('unlocking');
 
     try {
-      // Fetch user keys from server
-      const apiKeys = await getUserKeys(token);
-      const storableKeys = toStorableKeys(apiKeys);
+      const storableKeys = toStorableKeys(userKeys);
 
       // Unlock with password and keys
       await unlockWithPasswordFlow(password, storableKeys);
@@ -95,7 +93,7 @@ export function E2EEUnlockModal() {
         />
 
         <div className="flex gap-2">
-          <Button type="submit" className="flex-1" disabled={isLoading}>
+          <Button type="submit" className="flex-1" disabled={isLoading || !userKeys}>
             {isLoading ? 'Unlocking...' : 'Unlock'}
           </Button>
         </div>

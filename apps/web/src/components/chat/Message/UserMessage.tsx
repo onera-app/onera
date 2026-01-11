@@ -49,7 +49,7 @@ export function UserMessage({ content, onEdit, onCopy }: UserMessageProps) {
   if (isEditing) {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[85%] w-full">
+        <div className="max-w-[80%] w-full">
           <textarea
             ref={textareaRef}
             value={editValue}
@@ -69,22 +69,22 @@ export function UserMessage({ content, onEdit, onCopy }: UserMessageProps) {
             }}
             className={cn(
               'w-full px-4 py-3 rounded-2xl resize-none',
-              'bg-blue-600 text-white',
-              'focus:outline-none focus:ring-2 focus:ring-blue-400',
-              'placeholder-blue-200'
+              'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white',
+              'focus:outline-none focus:ring-2 focus:ring-accent',
+              'placeholder-gray-500'
             )}
             rows={1}
           />
           <div className="flex items-center justify-end gap-2 mt-2">
             <button
               onClick={handleCancelEdit}
-              className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+              className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleSaveEdit}
-              className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="px-3 py-1.5 text-sm bg-accent text-white rounded-lg hover:bg-accent-hover transition-colors"
             >
               Save & Submit
             </button>
@@ -96,16 +96,20 @@ export function UserMessage({ content, onEdit, onCopy }: UserMessageProps) {
 
   return (
     <div className="group flex justify-end gap-2">
+      {/* Actions - appear on hover */}
       <MessageActions
         onCopy={handleCopy}
         onEdit={onEdit ? handleStartEdit : undefined}
         isUser
-        className="self-center"
+        className="self-center opacity-0 group-hover:opacity-100 transition-opacity"
       />
+
+      {/* Message bubble - subtle dark/light styling */}
       <div
         className={cn(
-          'max-w-[85%] rounded-2xl px-4 py-3',
-          'bg-blue-600 text-white'
+          'max-w-[80%] rounded-2xl px-4 py-3',
+          'bg-gray-200 dark:bg-gray-700',
+          'text-gray-900 dark:text-white'
         )}
       >
         <p className="whitespace-pre-wrap break-words">{content}</p>

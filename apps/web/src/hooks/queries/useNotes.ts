@@ -1,71 +1,107 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { notesApi, type NoteCreate, type NoteUpdate } from '@/lib/api';
-import { useAuthStore } from '@/stores/authStore';
-
-export const noteKeys = {
-  all: ['notes'] as const,
-  lists: () => [...noteKeys.all, 'list'] as const,
-  list: (filters: { folderId?: string; archived?: boolean }) =>
-    [...noteKeys.lists(), filters] as const,
-  details: () => [...noteKeys.all, 'detail'] as const,
-  detail: (id: string) => [...noteKeys.details(), id] as const,
-};
+import { useQuery, useMutation } from 'convex/react';
+import { api } from 'convex/_generated/api';
+import type { Id } from 'convex/_generated/dataModel';
 
 export function useNotes(folderId?: string, archived = false) {
-  const token = useAuthStore((s) => s.token);
-
-  return useQuery({
-    queryKey: noteKeys.list({ folderId, archived }),
-    queryFn: () => notesApi.getAll(token!, folderId, archived),
-    enabled: !!token,
+  return useQuery(api.notes.list, {
+    folderId: folderId as Id<'folders'> | undefined,
+    archived,
   });
 }
 
 export function useNote(id: string) {
-  const token = useAuthStore((s) => s.token);
-
-  return useQuery({
-    queryKey: noteKeys.detail(id),
-    queryFn: () => notesApi.get(id, token!),
-    enabled: !!token && !!id,
-  });
+  return useQuery(api.notes.get, { noteId: id as Id<'notes'> });
 }
 
 export function useCreateNote() {
-  const queryClient = useQueryClient();
-  const token = useAuthStore((s) => s.token);
+  const createNote = useMutation(api.notes.create);
 
-  return useMutation({
-    mutationFn: (data: NoteCreate) => notesApi.create(data, token!),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: noteKeys.lists() });
+  return {
+    mutateAsync: async (data: {
+      encryptedTitle: string;
+      titleNonce: string;
+      encryptedContent: string;
+      contentNonce: string;
+      folderId?: string;
+    }) => {
+      return createNote({
+        ...data,
+        folderId: data.folderId as Id<'folders'> | undefined,
+      });
     },
-  });
+    mutate: (data: {
+      encryptedTitle: string;
+      titleNonce: string;
+      encryptedContent: string;
+      contentNonce: string;
+      folderId?: string;
+    }) => {
+      createNote({
+        ...data,
+        folderId: data.folderId as Id<'folders'> | undefined,
+      });
+    },
+  };
 }
 
 export function useUpdateNote() {
-  const queryClient = useQueryClient();
-  const token = useAuthStore((s) => s.token);
+  const updateNote = useMutation(api.notes.update);
 
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: NoteUpdate }) =>
-      notesApi.update(id, data, token!),
-    onSuccess: (updatedNote) => {
-      queryClient.setQueryData(noteKeys.detail(updatedNote.id), updatedNote);
-      queryClient.invalidateQueries({ queryKey: noteKeys.lists() });
+  return {
+    mutateAsync: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: {
+        encryptedTitle?: string;
+        titleNonce?: string;
+        encryptedContent?: string;
+        contentNonce?: string;
+        folderId?: string | null;
+        pinned?: boolean;
+        archived?: boolean;
+      };
+    }) => {
+      return updateNote({
+        noteId: id as Id<'notes'>,
+        ...data,
+        folderId: data.folderId === null ? null : (data.folderId as Id<'folders'> | undefined),
+      });
     },
-  });
+    mutate: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: {
+        encryptedTitle?: string;
+        titleNonce?: string;
+        encryptedContent?: string;
+        contentNonce?: string;
+        folderId?: string | null;
+        pinned?: boolean;
+        archived?: boolean;
+      };
+    }) => {
+      updateNote({
+        noteId: id as Id<'notes'>,
+        ...data,
+        folderId: data.folderId === null ? null : (data.folderId as Id<'folders'> | undefined),
+      });
+    },
+  };
 }
 
 export function useDeleteNote() {
-  const queryClient = useQueryClient();
-  const token = useAuthStore((s) => s.token);
+  const deleteNote = useMutation(api.notes.remove);
 
-  return useMutation({
-    mutationFn: (id: string) => notesApi.delete(id, token!),
-    onSuccess: (_, deletedId) => {
-      queryClient.removeQueries({ queryKey: noteKeys.detail(deletedId) });
-      queryClient.invalidateQueries({ queryKey: noteKeys.lists() });
+  return {
+    mutateAsync: async (id: string) => {
+      return deleteNote({ noteId: id as Id<'notes'> });
     },
-  });
+    mutate: (id: string) => {
+      deleteNote({ noteId: id as Id<'notes'> });
+    },
+  };
 }
