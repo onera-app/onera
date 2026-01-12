@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import hljs from 'highlight.js';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Copy, Check } from 'lucide-react';
 
 interface CodeBlockProps {
   code: string;
@@ -46,53 +48,50 @@ export function CodeBlock({
   const languageLabel = getLanguageLabel(displayLanguage);
 
   return (
-    <div className="group relative rounded-lg overflow-hidden bg-gray-900 dark:bg-gray-950 my-3">
+    <div className="group relative rounded-lg overflow-hidden bg-slate-900 dark:bg-slate-950 my-3">
       {/* Header bar */}
-      <div className="flex items-center justify-between px-4 py-2 bg-gray-800 dark:bg-gray-900 border-b border-gray-700">
+      <div className="flex items-center justify-between px-4 py-2 bg-slate-800 dark:bg-slate-900 border-b border-slate-700">
         <div className="flex items-center gap-2">
           {filename && (
             <>
-              <span className="text-xs text-gray-400">{filename}</span>
-              <span className="text-gray-600">|</span>
+              <span className="text-xs text-slate-400">{filename}</span>
+              <span className="text-slate-600">|</span>
             </>
           )}
-          <span className="text-xs text-gray-500 font-mono">{languageLabel}</span>
+          <span className="text-xs text-slate-500 font-mono">{languageLabel}</span>
         </div>
 
-        {/* Copy button - always visible */}
-        <button
+        {/* Copy button */}
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={handleCopy}
           className={cn(
-            'flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-colors',
+            'h-7 px-2 text-xs',
             copied
-              ? 'text-success bg-success/10'
-              : 'text-gray-400 hover:text-white hover:bg-gray-700'
+              ? 'text-green-400 hover:text-green-400'
+              : 'text-slate-400 hover:text-white hover:bg-slate-700'
           )}
-          title={copied ? 'Copied!' : 'Copy code'}
         >
           {copied ? (
             <>
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              <span>Copied</span>
+              <Check className="h-3.5 w-3.5 mr-1.5" />
+              Copied
             </>
           ) : (
             <>
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-              <span>Copy</span>
+              <Copy className="h-3.5 w-3.5 mr-1.5" />
+              Copy
             </>
           )}
-        </button>
+        </Button>
       </div>
 
       {/* Code content */}
       <div className="overflow-x-auto">
         <pre className={cn('p-4 text-sm', showLineNumbers && 'pl-12 relative')}>
           {showLineNumbers && (
-            <div className="absolute left-0 top-0 pt-4 pb-4 px-3 text-right text-gray-600 select-none border-r border-gray-700 bg-gray-900/50">
+            <div className="absolute left-0 top-0 pt-4 pb-4 px-3 text-right text-slate-600 select-none border-r border-slate-700 bg-slate-900/50">
               {code.split('\n').map((_, i) => (
                 <div key={i} className="leading-6">
                   {i + 1}
@@ -103,7 +102,7 @@ export function CodeBlock({
           <code
             ref={codeRef}
             className={cn(
-              'text-gray-100 font-mono leading-6',
+              'text-slate-100 font-mono leading-6',
               language && `language-${displayLanguage}`
             )}
           >

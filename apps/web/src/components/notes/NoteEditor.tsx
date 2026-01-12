@@ -2,8 +2,17 @@ import { useState, useEffect } from 'react';
 import { useNote, useUpdateNote } from '@/hooks/queries/useNotes';
 import { useFolders } from '@/hooks/queries/useFolders';
 import { RichTextEditor } from './RichTextEditor';
-import { Button } from '@/components/common/Button';
-import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import dayjs from 'dayjs';
 import {
   decryptNoteTitle,
@@ -11,6 +20,7 @@ import {
   encryptNoteTitle,
   encryptNoteContent,
 } from '@cortex/crypto';
+import { FileText, Archive, ArchiveRestore, Save } from 'lucide-react';
 
 interface NoteEditorProps {
   noteId: string;
@@ -52,7 +62,7 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
 
   // Handle folder change
   const handleFolderChange = (newFolderId: string) => {
-    setFolderId(newFolderId || null);
+    setFolderId(newFolderId === 'none' ? null : newFolderId);
     setHasChanges(true);
   };
 
@@ -108,8 +118,12 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-gray-500">Loading note...</div>
+      <div className="flex flex-col h-full bg-background p-6">
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-1/3" />
+          <Skeleton className="h-4 w-1/4" />
+          <Skeleton className="h-64 w-full" />
+        </div>
       </div>
     );
   }
@@ -117,10 +131,8 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
   if (!note) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-center text-gray-500">
-          <svg className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
+        <div className="text-center text-muted-foreground">
+          <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
           <p>Select a note to edit</p>
         </div>
       </div>
@@ -128,32 +140,38 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-950">
+    <div className="flex flex-col h-full bg-background">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border">
         <div className="flex items-center gap-4 flex-1">
           {/* Folder selector */}
-          <select
-            value={folderId || ''}
-            onChange={(e) => handleFolderChange(e.target.value)}
-            className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+          <Select
+            value={folderId || 'none'}
+            onValueChange={handleFolderChange}
           >
-            <option value="">No folder</option>
-            {folders.map((folder) => (
-              <option key={folder.id} value={folder.id}>
-                {folder.name}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="No folder" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">No folder</SelectItem>
+              {folders.map((folder) => (
+                <SelectItem key={folder.id} value={folder.id}>
+                  {folder.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           {/* Last updated */}
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="text-xs text-muted-foreground">
             Updated {dayjs(note.updatedAt).format('MMM D, YYYY h:mm A')}
           </span>
 
           {/* Unsaved indicator */}
           {hasChanges && (
-            <span className="text-xs text-amber-500 font-medium">Unsaved changes</span>
+            <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+              Unsaved changes
+            </Badge>
           )}
         </div>
 
@@ -163,13 +181,24 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
             variant="ghost"
             onClick={handleToggleArchive}
           >
-            {note.archived ? 'Unarchive' : 'Archive'}
+            {note.archived ? (
+              <>
+                <ArchiveRestore className="h-4 w-4 mr-1" />
+                Unarchive
+              </>
+            ) : (
+              <>
+                <Archive className="h-4 w-4 mr-1" />
+                Archive
+              </>
+            )}
           </Button>
           <Button
             size="sm"
             onClick={handleSave}
             disabled={!hasChanges || isSaving}
           >
+            <Save className="h-4 w-4 mr-1" />
             {isSaving ? 'Saving...' : 'Save'}
           </Button>
         </div>
@@ -177,15 +206,12 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
 
       {/* Title */}
       <div className="px-6 py-4">
-        <input
+        <Input
           type="text"
           value={title}
           onChange={(e) => handleTitleChange(e.target.value)}
           placeholder="Note title"
-          className={cn(
-            'w-full text-2xl font-bold bg-transparent border-none outline-none',
-            'text-gray-900 dark:text-white placeholder-gray-400'
-          )}
+          className="text-2xl font-bold border-none shadow-none px-0 focus-visible:ring-0 h-auto"
         />
       </div>
 

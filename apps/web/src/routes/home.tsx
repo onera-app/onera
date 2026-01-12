@@ -12,7 +12,10 @@ import { MessageInput } from '@/components/chat/MessageInput';
 import { ModelSelector } from '@/components/chat/ModelSelector';
 import { Messages } from '@/components/chat/Messages';
 import { useDirectChat } from '@/hooks/useDirectChat';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
+import { Sparkles, Lock, AlertTriangle, Mail, Lightbulb, Code, ArrowRight } from 'lucide-react';
 
 /**
  * Convert UIMessage (AI SDK format) to ChatMessage (storage format)
@@ -36,36 +39,13 @@ function toChatMessage(msg: UIMessage, model?: string): ChatMessage {
   };
 }
 
-// Suggested prompts for new users - more conversational
+// Suggested prompts for new users
 const SUGGESTIONS = [
-  { text: 'Help me write a professional email', icon: 'mail' },
-  { text: 'Explain a complex topic simply', icon: 'lightbulb' },
-  { text: 'Write code for a specific task', icon: 'code' },
-  { text: 'Brainstorm creative ideas', icon: 'sparkles' },
+  { text: 'Help me write a professional email', icon: Mail },
+  { text: 'Explain a complex topic simply', icon: Lightbulb },
+  { text: 'Write code for a specific task', icon: Code },
+  { text: 'Brainstorm creative ideas', icon: Sparkles },
 ];
-
-const IconMap = {
-  mail: (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-    </svg>
-  ),
-  lightbulb: (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-    </svg>
-  ),
-  code: (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
-    </svg>
-  ),
-  sparkles: (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
-    </svg>
-  ),
-};
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -232,9 +212,9 @@ export function HomePage() {
   // Show streaming UI if we have messages
   if (displayMessages.length > 0 || isStreaming) {
     return (
-      <div className="flex flex-col h-full bg-white dark:bg-gray-950">
+      <div className="flex flex-col h-full bg-background">
         {/* Header */}
-        <header className="flex items-center justify-center p-4 border-b border-gray-100 dark:border-gray-800/50">
+        <header className="flex items-center justify-center p-4 border-b border-border">
           <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />
         </header>
 
@@ -248,21 +228,13 @@ export function HomePage() {
         </div>
 
         {/* Input */}
-        <div className="p-4 bg-white dark:bg-gray-950">
+        <div className="p-4 bg-background">
           {isStreaming ? (
             <div className="flex items-center justify-center gap-4 py-2">
-              <span className="text-sm text-gray-500 dark:text-gray-400">Generating response...</span>
-              <button
-                onClick={handleStopStreaming}
-                className={cn(
-                  'px-4 py-2 text-sm font-medium rounded-xl',
-                  'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900',
-                  'hover:bg-gray-800 dark:hover:bg-gray-200',
-                  'transition-colors shadow-soft-sm'
-                )}
-              >
+              <span className="text-sm text-muted-foreground">Generating response...</span>
+              <Button onClick={handleStopStreaming}>
                 Stop
-              </button>
+              </Button>
             </div>
           ) : (
             <MessageInput
@@ -276,9 +248,9 @@ export function HomePage() {
     );
   }
 
-  // Show welcome screen - Claude-inspired design
+  // Show welcome screen
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-950">
+    <div className="flex flex-col h-full bg-background">
       {/* Minimal header with model selector */}
       <header className="flex items-center justify-center p-4">
         <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />
@@ -289,47 +261,31 @@ export function HomePage() {
         <div className="w-full max-w-2xl">
           {/* Brand mark */}
           <div className="text-center mb-10">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-accent/20 to-secondary/20 mb-5 shadow-soft rotate-3">
-              <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
-              </svg>
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-5 shadow-sm rotate-3">
+              <Sparkles className="w-8 h-8 text-primary" />
             </div>
-            <h1 className="font-display text-3xl sm:text-4xl font-medium text-gray-900 dark:text-white mb-3 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-semibold mb-3 tracking-tight">
               What can I help with?
             </h1>
-            <p className="text-gray-500 dark:text-gray-400 text-base">
+            <p className="text-muted-foreground text-base">
               Your conversations are end-to-end encrypted
             </p>
           </div>
 
           {/* No connections warning */}
           {!hasAnyConnections && isUnlocked && (
-            <div className="mb-8 p-4 bg-warning/5 border border-warning/20 rounded-2xl">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-5 h-5 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                  </svg>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-gray-900 dark:text-white text-sm">
-                    No API Keys Connected
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
-                    Add an API key to start chatting with AI models.
-                  </p>
-                  <Link
-                    to="/workspace/connections"
-                    className="inline-flex items-center gap-1.5 mt-2.5 text-sm font-medium text-accent hover:text-accent-hover transition-colors"
-                  >
-                    Add API Key
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                    </svg>
+            <Alert className="mb-8">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>No API Keys Connected</AlertTitle>
+              <AlertDescription className="flex items-center justify-between">
+                <span>Add an API key to start chatting with AI models.</span>
+                <Button variant="link" asChild className="p-0 h-auto">
+                  <Link to="/workspace/connections" className="flex items-center gap-1">
+                    Add API Key <ArrowRight className="h-4 w-4" />
                   </Link>
-                </div>
-              </div>
-            </div>
+                </Button>
+              </AlertDescription>
+            </Alert>
           )}
 
           {/* Message input - prominent */}
@@ -352,31 +308,26 @@ export function HomePage() {
           {/* Suggestion chips */}
           {hasAnyConnections && selectedModelId && isUnlocked && (
             <div className="flex flex-wrap justify-center gap-2">
-              {SUGGESTIONS.map((suggestion, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleSendMessage(suggestion.text)}
-                  className={cn(
-                    'inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl',
-                    'text-sm text-gray-600 dark:text-gray-300',
-                    'bg-gray-50 dark:bg-gray-900',
-                    'border border-gray-200 dark:border-gray-700/50',
-                    'hover:bg-gray-100 dark:hover:bg-gray-800',
-                    'hover:border-gray-300 dark:hover:border-gray-600',
-                    'transition-all duration-150',
-                    'animate-in fade-in-up',
-                    index === 0 && 'stagger-1',
-                    index === 1 && 'stagger-2',
-                    index === 2 && 'stagger-3',
-                    index === 3 && 'stagger-4'
-                  )}
-                >
-                  <span className="text-gray-400 dark:text-gray-500">
-                    {IconMap[suggestion.icon as keyof typeof IconMap]}
-                  </span>
-                  <span>{suggestion.text}</span>
-                </button>
-              ))}
+              {SUGGESTIONS.map((suggestion, index) => {
+                const Icon = suggestion.icon;
+                return (
+                  <Button
+                    key={index}
+                    variant="outline"
+                    onClick={() => handleSendMessage(suggestion.text)}
+                    className={cn(
+                      'animate-in fade-in-up',
+                      index === 0 && 'stagger-1',
+                      index === 1 && 'stagger-2',
+                      index === 2 && 'stagger-3',
+                      index === 3 && 'stagger-4'
+                    )}
+                  >
+                    <Icon className="h-4 w-4 mr-2 text-muted-foreground" />
+                    {suggestion.text}
+                  </Button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -384,10 +335,8 @@ export function HomePage() {
 
       {/* Footer - minimal */}
       <footer className="p-4 text-center">
-        <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center justify-center gap-1.5">
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-          </svg>
+        <p className="text-xs text-muted-foreground flex items-center justify-center gap-1.5">
+          <Lock className="h-3.5 w-3.5" />
           End-to-end encrypted
         </p>
       </footer>

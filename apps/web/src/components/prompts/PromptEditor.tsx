@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react';
 import { usePrompt, useUpdatePrompt, useCreatePrompt } from '@/hooks/queries/usePrompts';
-import { Button } from '@/components/common/Button';
-import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import dayjs from 'dayjs';
+import { MessageSquareText, Save } from 'lucide-react';
 
 interface PromptEditorProps {
   promptId?: string;
@@ -46,7 +51,6 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
   // Save prompt
   const handleSave = async () => {
     if (!name.trim() || !content.trim()) {
-      alert('Name and content are required');
       return;
     }
 
@@ -90,8 +94,14 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
 
   if (isLoading && !isNew) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-gray-500">Loading prompt...</div>
+      <div className="flex flex-col h-full bg-background p-6">
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-1/3" />
+          <Skeleton className="h-4 w-1/4" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-48 w-full" />
+        </div>
       </div>
     );
   }
@@ -99,10 +109,8 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
   if (!prompt && !isNew) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-center text-gray-500">
-          <svg className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-          </svg>
+        <div className="text-center text-muted-foreground">
+          <MessageSquareText className="w-16 h-16 mx-auto mb-4 opacity-50" />
           <p>Select a prompt to edit</p>
         </div>
       </div>
@@ -110,20 +118,22 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
   }
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-950">
+    <div className="flex flex-col h-full bg-background">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border">
         <div className="flex items-center gap-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-lg font-semibold">
             {isNew ? 'New Prompt' : 'Edit Prompt'}
           </h2>
           {!isNew && prompt && (
-            <span className="text-xs text-gray-500 dark:text-gray-400">
+            <span className="text-xs text-muted-foreground">
               Updated {dayjs(prompt.updated_at).format('MMM D, YYYY h:mm A')}
             </span>
           )}
           {hasChanges && (
-            <span className="text-xs text-amber-500 font-medium">Unsaved changes</span>
+            <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+              Unsaved changes
+            </Badge>
           )}
         </div>
 
@@ -142,6 +152,7 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
             onClick={handleSave}
             disabled={(!hasChanges && !isNew) || isSaving || !name.trim() || !content.trim()}
           >
+            <Save className="h-4 w-4 mr-1" />
             {isSaving ? 'Saving...' : isNew ? 'Create' : 'Save'}
           </Button>
         </div>
@@ -150,68 +161,46 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
       {/* Form */}
       <div className="flex-1 p-6 overflow-y-auto space-y-6">
         {/* Name */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Name <span className="text-red-500">*</span>
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="name">
+            Name <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="name"
             type="text"
             value={name}
             onChange={(e) => handleChange(setName)(e.target.value)}
             placeholder="e.g., Code Review Helper"
-            className={cn(
-              'w-full px-3 py-2 rounded-lg',
-              'border border-gray-200 dark:border-gray-700',
-              'bg-white dark:bg-gray-800',
-              'text-gray-900 dark:text-white',
-              'placeholder-gray-400',
-              'focus:outline-none focus:ring-2 focus:ring-blue-500'
-            )}
           />
         </div>
 
         {/* Description */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Description
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="description">Description</Label>
+          <Input
+            id="description"
             type="text"
             value={description}
             onChange={(e) => handleChange(setDescription)(e.target.value)}
             placeholder="Brief description of what this prompt does"
-            className={cn(
-              'w-full px-3 py-2 rounded-lg',
-              'border border-gray-200 dark:border-gray-700',
-              'bg-white dark:bg-gray-800',
-              'text-gray-900 dark:text-white',
-              'placeholder-gray-400',
-              'focus:outline-none focus:ring-2 focus:ring-blue-500'
-            )}
           />
         </div>
 
         {/* Content */}
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Content <span className="text-red-500">*</span>
-          </label>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+        <div className="space-y-2">
+          <Label htmlFor="content">
+            Content <span className="text-destructive">*</span>
+          </Label>
+          <p className="text-xs text-muted-foreground">
             Use {'{{variable}}'} syntax for placeholders that will be filled in when using the prompt.
           </p>
-          <textarea
+          <Textarea
+            id="content"
             value={content}
             onChange={(e) => handleChange(setContent)(e.target.value)}
             placeholder="Enter your prompt template here..."
             rows={12}
-            className={cn(
-              'w-full px-3 py-2 rounded-lg resize-none font-mono text-sm',
-              'border border-gray-200 dark:border-gray-700',
-              'bg-white dark:bg-gray-800',
-              'text-gray-900 dark:text-white',
-              'placeholder-gray-400',
-              'focus:outline-none focus:ring-2 focus:ring-blue-500'
-            )}
+            className="font-mono text-sm resize-none"
           />
         </div>
       </div>

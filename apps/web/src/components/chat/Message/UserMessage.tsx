@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { MessageActions } from './MessageActions';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 
 interface UserMessageProps {
   content: string;
@@ -54,7 +56,7 @@ export function UserMessage({ content, onEdit, onCopy }: UserMessageProps) {
       <div className="flex justify-end animate-in fade-in-scale">
         <div className="max-w-[85%] w-full">
           <div className="relative">
-            <textarea
+            <Textarea
               ref={textareaRef}
               value={editValue}
               onChange={(e) => {
@@ -72,43 +74,26 @@ export function UserMessage({ content, onEdit, onCopy }: UserMessageProps) {
                 }
               }}
               className={cn(
-                'w-full px-4 py-3.5 rounded-2xl resize-none',
-                'bg-gray-100 dark:bg-gray-800/80 text-gray-900 dark:text-white',
-                'border-2 border-accent/30',
-                'focus:outline-none focus:border-accent',
-                'placeholder-gray-400 dark:placeholder-gray-500',
-                'text-[15px] leading-relaxed',
-                'transition-colors duration-150'
+                'w-full px-4 py-3.5 rounded-xl resize-none',
+                'border-2 border-ring',
+                'text-[15px] leading-relaxed'
               )}
               rows={1}
             />
           </div>
           <div className="flex items-center justify-end gap-2 mt-3">
-            <button
+            <Button
+              variant="ghost"
               onClick={handleCancelEdit}
-              className={cn(
-                'px-4 py-2 text-sm font-medium rounded-xl',
-                'text-gray-600 dark:text-gray-400',
-                'hover:bg-gray-100 dark:hover:bg-gray-800',
-                'transition-colors duration-150'
-              )}
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleSaveEdit}
               disabled={!editValue.trim() || editValue.trim() === content}
-              className={cn(
-                'px-4 py-2 text-sm font-medium rounded-xl',
-                'bg-accent text-white',
-                'hover:bg-accent-hover',
-                'disabled:opacity-50 disabled:cursor-not-allowed',
-                'transition-all duration-150',
-                'shadow-soft-sm'
-              )}
             >
               Save & Submit
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -117,7 +102,7 @@ export function UserMessage({ content, onEdit, onCopy }: UserMessageProps) {
 
   return (
     <div className="group flex justify-end gap-3">
-      {/* Actions - appear on hover */}
+      {/* Actions */}
       <div className="self-center flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <MessageActions
           onCopy={handleCopy}
@@ -125,17 +110,17 @@ export function UserMessage({ content, onEdit, onCopy }: UserMessageProps) {
           isUser
         />
         {copied && (
-          <span className="text-xs text-success animate-in fade-in">Copied!</span>
+          <span className="text-xs text-green-600 dark:text-green-400 animate-in fade-in">Copied!</span>
         )}
       </div>
 
-      {/* Message bubble - refined styling */}
+      {/* Message bubble */}
       <div
         className={cn(
-          'max-w-[85%] rounded-2xl px-4 py-3',
-          'bg-accent/10 dark:bg-accent/15',
-          'text-gray-800 dark:text-gray-100',
-          'shadow-soft-sm'
+          'max-w-[85%] rounded-xl px-4 py-3',
+          'bg-primary/10',
+          'text-foreground',
+          'shadow-sm'
         )}
       >
         <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed">{content}</p>

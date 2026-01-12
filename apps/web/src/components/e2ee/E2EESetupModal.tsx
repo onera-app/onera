@@ -4,9 +4,18 @@ import { useMutation } from 'convex/react';
 import { api } from 'convex/_generated/api';
 import { useE2EEStore } from '@/stores/e2eeStore';
 import { setupUserKeys, type RecoveryKeyInfo } from '@cortex/crypto';
-import { Modal } from '@/components/common/Modal';
-import { Button } from '@/components/common/Button';
-import { Input } from '@/components/common/Input';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { ShieldCheck, AlertTriangle } from 'lucide-react';
 
 type Step = 'password' | 'recovery' | 'confirm';
 
@@ -40,7 +49,6 @@ export function E2EESetupModal() {
     try {
       const { recoveryInfo: info, storableKeys } = await setupUserKeys(password);
 
-      // Save keys to server via Convex
       await createUserKeys({
         kekSalt: storableKeys.kekSalt,
         kekOpsLimit: storableKeys.kekOpsLimit,
@@ -72,7 +80,6 @@ export function E2EESetupModal() {
 
     if (!recoveryInfo) return;
 
-    // Check if user entered the first 4 words correctly
     const firstFourWords = recoveryInfo.mnemonic.split(' ').slice(0, 4).join(' ');
     if (confirmInput.toLowerCase().trim() !== firstFourWords.toLowerCase()) {
       toast.error('Please enter the first 4 words of your recovery phrase');
@@ -85,103 +92,123 @@ export function E2EESetupModal() {
   };
 
   return (
-    <Modal open onClose={() => {}} title="Set Up E2EE" closable={false}>
-      {step === 'password' && (
-        <form onSubmit={handleSetupPassword} className="space-y-4">
-          <p className="text-gray-500 dark:text-gray-400">
-            Create a password to encrypt your chats. This password will be used
-            to unlock your encryption on each device.
-          </p>
+    <Dialog open>
+      <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-primary" />
+            Set Up E2EE
+          </DialogTitle>
+          <DialogDescription>
+            {step === 'password' && 'Create a password to encrypt your chats.'}
+            {step === 'recovery' && 'Save your recovery phrase securely.'}
+            {step === 'confirm' && 'Confirm you\'ve saved your recovery phrase.'}
+          </DialogDescription>
+        </DialogHeader>
 
-          <Input
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoFocus
-            autoComplete="new-password"
-            minLength={8}
-          />
-
-          <Input
-            label="Confirm Password"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            autoComplete="new-password"
-            minLength={8}
-          />
-
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Setting up...' : 'Continue'}
-          </Button>
-        </form>
-      )}
-
-      {step === 'recovery' && recoveryInfo && (
-        <div className="space-y-4">
-          <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-            <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium mb-2">
-              Save your recovery phrase
+        {step === 'password' && (
+          <form onSubmit={handleSetupPassword} className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              This password will be used to unlock your encryption on each device.
             </p>
-            <p className="text-sm text-yellow-700 dark:text-yellow-300">
-              Write down these {recoveryInfo.wordCount} words and store them safely. You'll need them
-              to recover your account if you forget your password.
-            </p>
-          </div>
 
-          <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg font-mono text-sm space-y-2">
-            {recoveryInfo.formattedGroups.map((group, idx) => (
-              <div key={idx} className="flex gap-4">
-                {group.map((word, wordIdx) => (
-                  <span key={wordIdx} className="flex-1">
-                    <span className="text-gray-400 mr-1">{idx * 4 + wordIdx + 1}.</span>
-                    {word}
-                  </span>
-                ))}
-              </div>
-            ))}
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoFocus
+                autoComplete="new-password"
+                minLength={8}
+              />
+            </div>
 
-          <Button onClick={() => setStep('confirm')} className="w-full">
-            I've saved my recovery phrase
-          </Button>
-        </div>
-      )}
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirm Password</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                autoComplete="new-password"
+                minLength={8}
+              />
+            </div>
 
-      {step === 'confirm' && recoveryInfo && (
-        <form onSubmit={handleConfirmRecovery} className="space-y-4">
-          <p className="text-gray-500 dark:text-gray-400">
-            To confirm you've saved your recovery phrase, enter the first 4
-            words below.
-          </p>
-
-          <Input
-            label="First 4 words"
-            type="text"
-            value={confirmInput}
-            onChange={(e) => setConfirmInput(e.target.value)}
-            placeholder="Enter the first 4 words..."
-            required
-            autoFocus
-          />
-
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => setStep('recovery')}
-            >
-              Back
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Setting up...' : 'Continue'}
             </Button>
-            <Button type="submit" className="flex-1">
-              Confirm
+          </form>
+        )}
+
+        {step === 'recovery' && recoveryInfo && (
+          <div className="space-y-4">
+            <Alert className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-amber-800 dark:text-amber-200">
+                Write down these {recoveryInfo.wordCount} words and store them safely. You'll need them
+                to recover your account if you forget your password.
+              </AlertDescription>
+            </Alert>
+
+            <div className="p-4 bg-muted rounded-lg font-mono text-sm space-y-2">
+              {recoveryInfo.formattedGroups.map((group, idx) => (
+                <div key={idx} className="flex gap-4">
+                  {group.map((word, wordIdx) => (
+                    <span key={wordIdx} className="flex-1">
+                      <span className="text-muted-foreground mr-1">{idx * 4 + wordIdx + 1}.</span>
+                      {word}
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
+
+            <Button onClick={() => setStep('confirm')} className="w-full">
+              I've saved my recovery phrase
             </Button>
           </div>
-        </form>
-      )}
-    </Modal>
+        )}
+
+        {step === 'confirm' && recoveryInfo && (
+          <form onSubmit={handleConfirmRecovery} className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              To confirm you've saved your recovery phrase, enter the first 4
+              words below.
+            </p>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirm-words">First 4 words</Label>
+              <Input
+                id="confirm-words"
+                type="text"
+                value={confirmInput}
+                onChange={(e) => setConfirmInput(e.target.value)}
+                placeholder="Enter the first 4 words..."
+                required
+                autoFocus
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setStep('recovery')}
+              >
+                Back
+              </Button>
+              <Button type="submit" className="flex-1">
+                Confirm
+              </Button>
+            </div>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }

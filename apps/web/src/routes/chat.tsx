@@ -15,6 +15,10 @@ import { ModelSelector } from '@/components/chat/ModelSelector';
 import { FollowUps } from '@/components/chat/FollowUps';
 import { useDirectChat } from '@/hooks/useDirectChat';
 import { generateFollowUps } from '@/lib/ai';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertTriangle, Loader2 } from 'lucide-react';
+
 interface DecryptedChat {
   id: string;
   title: string;
@@ -361,14 +365,16 @@ export function ChatPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full bg-white dark:bg-gray-950">
+      <div className="flex items-center justify-center h-full bg-background">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent/20 to-secondary/20 flex items-center justify-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-accent" />
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Loading conversation...</p>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-32" />
+          </div>
         </div>
       </div>
     );
@@ -376,28 +382,24 @@ export function ChatPage() {
 
   if (!chat) {
     return (
-      <div className="flex items-center justify-center h-full bg-white dark:bg-gray-950">
+      <div className="flex items-center justify-center h-full bg-background">
         <div className="text-center max-w-md px-4">
-          <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-error/10 flex items-center justify-center">
-            <svg className="w-8 h-8 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-            </svg>
-          </div>
-          <h2 className="font-display text-xl text-gray-900 dark:text-white mb-2">
-            Chat not found
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            This conversation may have been deleted or doesn't exist.
-          </p>
+          <Alert variant="destructive" className="mb-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Chat not found</AlertTitle>
+            <AlertDescription>
+              This conversation may have been deleted or doesn't exist.
+            </AlertDescription>
+          </Alert>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-950">
-      {/* Chat header - refined */}
-      <header className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800/50">
+    <div className="flex flex-col h-full bg-background">
+      {/* Chat header */}
+      <header className="flex items-center justify-between px-4 py-3 border-b border-border">
         <ChatNavbar
           title={chat?.title || 'Chat'}
           chatId={chatId || ''}
@@ -420,7 +422,7 @@ export function ChatPage() {
       </div>
 
       {/* Input area */}
-      <div className="p-4 bg-white dark:bg-gray-950">
+      <div className="p-4 bg-background">
         <div className="max-w-3xl mx-auto">
           {/* Follow-up suggestions */}
           {!isStreaming && followUps.length > 0 && (
@@ -433,8 +435,8 @@ export function ChatPage() {
 
           {/* Loading follow-ups indicator */}
           {isGeneratingFollowUps && (
-            <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-3">
-              <div className="w-3 h-3 border-2 border-gray-300 border-t-accent rounded-full animate-spin" />
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+              <Loader2 className="h-3 w-3 animate-spin" />
               <span>Generating suggestions...</span>
             </div>
           )}

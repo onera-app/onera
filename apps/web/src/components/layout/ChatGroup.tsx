@@ -22,7 +22,7 @@ export function ChatGroup({ group, chats, onDelete, onRename }: ChatGroupProps) 
     <div className="mb-2">
       {/* Group header */}
       <div className="px-4 py-2">
-        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
           {DATE_GROUP_LABELS[group]}
         </h3>
       </div>

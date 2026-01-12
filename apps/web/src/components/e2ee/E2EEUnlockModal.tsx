@@ -4,9 +4,17 @@ import { useQuery } from 'convex/react';
 import { api } from 'convex/_generated/api';
 import { useE2EEStore } from '@/stores/e2eeStore';
 import { unlockWithPasswordFlow, type StorableUserKeys } from '@cortex/crypto';
-import { Modal } from '@/components/common/Modal';
-import { Button } from '@/components/common/Button';
-import { Input } from '@/components/common/Input';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Lock } from 'lucide-react';
 
 // Convert Convex response to StorableUserKeys format
 function toStorableKeys(keys: {
@@ -58,8 +66,6 @@ export function E2EEUnlockModal() {
 
     try {
       const storableKeys = toStorableKeys(userKeys);
-
-      // Unlock with password and keys
       await unlockWithPasswordFlow(password, storableKeys);
       setStatus('unlocked');
       toast.success('E2EE unlocked');
@@ -75,40 +81,48 @@ export function E2EEUnlockModal() {
   };
 
   return (
-    <Modal open onClose={() => {}} title="Unlock E2EE" closable={false}>
-      <form onSubmit={handleUnlock} className="space-y-4">
-        <p className="text-gray-500 dark:text-gray-400">
-          Enter your password to unlock end-to-end encryption and access your
-          chats.
-        </p>
+    <Dialog open>
+      <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Lock className="h-5 w-5 text-primary" />
+            Unlock E2EE
+          </DialogTitle>
+          <DialogDescription>
+            Enter your password to unlock end-to-end encryption and access your chats.
+          </DialogDescription>
+        </DialogHeader>
 
-        <Input
-          label="Password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          autoFocus
-          autoComplete="current-password"
-        />
+        <form onSubmit={handleUnlock} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoFocus
+              autoComplete="current-password"
+            />
+          </div>
 
-        <div className="flex gap-2">
-          <Button type="submit" className="flex-1" disabled={isLoading || !userKeys}>
+          <Button type="submit" className="w-full" disabled={isLoading || !userKeys}>
             {isLoading ? 'Unlocking...' : 'Unlock'}
           </Button>
-        </div>
 
-        <button
-          type="button"
-          className="w-full text-sm text-blue-600 dark:text-blue-400 hover:underline"
-          onClick={() => {
-            // TODO: Implement recovery flow
-            toast.info('Recovery flow coming soon');
-          }}
-        >
-          Forgot password? Use recovery phrase
-        </button>
-      </form>
-    </Modal>
+          <Button
+            type="button"
+            variant="link"
+            className="w-full text-sm"
+            onClick={() => {
+              toast.info('Recovery flow coming soon');
+            }}
+          >
+            Forgot password? Use recovery phrase
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
