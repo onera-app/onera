@@ -31,9 +31,9 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
   // Load note data
   useEffect(() => {
     if (note) {
-      setTitle(decryptNoteTitle(note.encrypted_title, note.title_nonce));
-      setContent(decryptNoteContent(note.encrypted_content, note.content_nonce));
-      setFolderId(note.folder_id);
+      setTitle(decryptNoteTitle(note.encryptedTitle, note.titleNonce));
+      setContent(decryptNoteContent(note.encryptedContent, note.contentNonce));
+      setFolderId(note.folderId);
       setHasChanges(false);
     }
   }, [note]);
@@ -68,11 +68,11 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
       await updateNote.mutateAsync({
         id: note.id,
         data: {
-          encrypted_title: encryptedTitle.encrypted_title,
-          title_nonce: encryptedTitle.title_nonce,
-          encrypted_content: encryptedContent.encrypted_content,
-          content_nonce: encryptedContent.content_nonce,
-          folder_id: folderId || undefined,
+          encryptedTitle: encryptedTitle.encryptedTitle,
+          titleNonce: encryptedTitle.titleNonce,
+          encryptedContent: encryptedContent.encryptedContent,
+          contentNonce: encryptedContent.contentNonce,
+          folderId: folderId || undefined,
         },
       });
       setHasChanges(false);
@@ -148,7 +148,7 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
 
           {/* Last updated */}
           <span className="text-xs text-gray-500 dark:text-gray-400">
-            Updated {dayjs(note.updated_at).format('MMM D, YYYY h:mm A')}
+            Updated {dayjs(note.updatedAt).format('MMM D, YYYY h:mm A')}
           </span>
 
           {/* Unsaved indicator */}

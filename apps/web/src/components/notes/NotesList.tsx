@@ -26,12 +26,11 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
     const encryptedData = encryptNote('New Note', '<p></p>');
 
     await createNote.mutateAsync({
-      id: noteId,
-      encrypted_title: encryptedData.encrypted_title,
-      title_nonce: encryptedData.title_nonce,
-      encrypted_content: encryptedData.encrypted_content,
-      content_nonce: encryptedData.content_nonce,
-      folder_id: selectedFolderId,
+      encryptedTitle: encryptedData.encryptedTitle,
+      titleNonce: encryptedData.titleNonce,
+      encryptedContent: encryptedData.encryptedContent,
+      contentNonce: encryptedData.contentNonce,
+      folderId: selectedFolderId,
     });
     onSelectNote(noteId);
   };
@@ -47,8 +46,8 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
   };
 
   // Decrypt note title
-  const getTitle = (note: { encrypted_title: string; title_nonce: string }) => {
-    return decryptNoteTitle(note.encrypted_title, note.title_nonce);
+  const getTitle = (note: { encryptedTitle: string; titleNonce: string }) => {
+    return decryptNoteTitle(note.encryptedTitle, note.titleNonce);
   };
 
   return (
@@ -117,7 +116,7 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
                       {getTitle(note)}
                     </h3>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {dayjs(note.updated_at).format('MMM D, YYYY h:mm A')}
+                      {dayjs(note.updatedAt).format('MMM D, YYYY h:mm A')}
                     </p>
                   </div>
                   <button

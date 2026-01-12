@@ -3,14 +3,22 @@ import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 
 export function useNotes(folderId?: string, archived = false) {
-  return useQuery(api.notes.list, {
+  const data = useQuery(api.notes.list, {
     folderId: folderId as Id<'folders'> | undefined,
     archived,
   });
+  return {
+    data,
+    isLoading: data === undefined,
+  };
 }
 
 export function useNote(id: string) {
-  return useQuery(api.notes.get, { noteId: id as Id<'notes'> });
+  const data = useQuery(api.notes.get, { noteId: id as Id<'notes'> });
+  return {
+    data,
+    isLoading: data === undefined,
+  };
 }
 
 export function useCreateNote() {

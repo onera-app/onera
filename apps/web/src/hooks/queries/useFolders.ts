@@ -3,11 +3,19 @@ import { api } from 'convex/_generated/api';
 import type { Id } from 'convex/_generated/dataModel';
 
 export function useFolders() {
-  return useQuery(api.folders.list);
+  const data = useQuery(api.folders.list);
+  return {
+    data,
+    isLoading: data === undefined,
+  };
 }
 
 export function useFolder(id: string) {
-  return useQuery(api.folders.get, { folderId: id as Id<'folders'> });
+  const data = useQuery(api.folders.get, { folderId: id as Id<'folders'> });
+  return {
+    data,
+    isLoading: data === undefined,
+  };
 }
 
 export function useCreateFolder() {

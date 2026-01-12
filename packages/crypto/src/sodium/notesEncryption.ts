@@ -10,16 +10,16 @@ import { getMasterKey, isUnlocked } from './keyManager';
  * Encrypted note data for storage
  */
 export interface EncryptedNoteData {
-	encrypted_title: string;
-	title_nonce: string;
-	encrypted_content: string;
-	content_nonce: string;
+	encryptedTitle: string;
+	titleNonce: string;
+	encryptedContent: string;
+	contentNonce: string;
 }
 
 /**
  * Encrypt note title
  */
-export function encryptNoteTitle(title: string): { encrypted_title: string; title_nonce: string } {
+export function encryptNoteTitle(title: string): { encryptedTitle: string; titleNonce: string } {
 	if (!isUnlocked()) {
 		throw new Error('E2EE not unlocked');
 	}
@@ -28,22 +28,22 @@ export function encryptNoteTitle(title: string): { encrypted_title: string; titl
 	const encrypted = encryptString(title, masterKey);
 
 	return {
-		encrypted_title: encrypted.ciphertext,
-		title_nonce: encrypted.nonce
+		encryptedTitle: encrypted.ciphertext,
+		titleNonce: encrypted.nonce
 	};
 }
 
 /**
  * Decrypt note title
  */
-export function decryptNoteTitle(encrypted_title: string, title_nonce: string): string {
+export function decryptNoteTitle(encryptedTitle: string, titleNonce: string): string {
 	if (!isUnlocked()) {
 		throw new Error('E2EE not unlocked');
 	}
 
 	try {
 		const masterKey = getMasterKey();
-		return decryptString({ ciphertext: encrypted_title, nonce: title_nonce }, masterKey);
+		return decryptString({ ciphertext: encryptedTitle, nonce: titleNonce }, masterKey);
 	} catch (error) {
 		console.error('Failed to decrypt note title:', error);
 		return 'Untitled';
@@ -53,7 +53,7 @@ export function decryptNoteTitle(encrypted_title: string, title_nonce: string): 
 /**
  * Encrypt note content
  */
-export function encryptNoteContent(content: string): { encrypted_content: string; content_nonce: string } {
+export function encryptNoteContent(content: string): { encryptedContent: string; contentNonce: string } {
 	if (!isUnlocked()) {
 		throw new Error('E2EE not unlocked');
 	}
@@ -62,22 +62,22 @@ export function encryptNoteContent(content: string): { encrypted_content: string
 	const encrypted = encryptString(content, masterKey);
 
 	return {
-		encrypted_content: encrypted.ciphertext,
-		content_nonce: encrypted.nonce
+		encryptedContent: encrypted.ciphertext,
+		contentNonce: encrypted.nonce
 	};
 }
 
 /**
  * Decrypt note content
  */
-export function decryptNoteContent(encrypted_content: string, content_nonce: string): string {
+export function decryptNoteContent(encryptedContent: string, contentNonce: string): string {
 	if (!isUnlocked()) {
 		throw new Error('E2EE not unlocked');
 	}
 
 	try {
 		const masterKey = getMasterKey();
-		return decryptString({ ciphertext: encrypted_content, nonce: content_nonce }, masterKey);
+		return decryptString({ ciphertext: encryptedContent, nonce: contentNonce }, masterKey);
 	} catch (error) {
 		console.error('Failed to decrypt note content:', error);
 		return '';
@@ -101,13 +101,13 @@ export function encryptNote(title: string, content: string): EncryptedNoteData {
  * Decrypt a complete note (title + content)
  */
 export function decryptNote(
-	encrypted_title: string,
-	title_nonce: string,
-	encrypted_content: string,
-	content_nonce: string
+	encryptedTitle: string,
+	titleNonce: string,
+	encryptedContent: string,
+	contentNonce: string
 ): { title: string; content: string } {
 	return {
-		title: decryptNoteTitle(encrypted_title, title_nonce),
-		content: decryptNoteContent(encrypted_content, content_nonce)
+		title: decryptNoteTitle(encryptedTitle, titleNonce),
+		content: decryptNoteContent(encryptedContent, contentNonce)
 	};
 }
