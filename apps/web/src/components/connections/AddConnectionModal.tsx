@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useCreateCredential, useUpdateCredential } from '@/hooks/queries/useCredentials';
 import { LLM_PROVIDERS, type Credential } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { encryptCredential, decryptCredential, isUnlocked } from '@cortex/crypto';
+import { encryptCredential, decryptCredential, isUnlocked } from '@onera/crypto';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

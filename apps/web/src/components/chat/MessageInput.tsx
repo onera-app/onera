@@ -16,7 +16,7 @@ interface MessageInputProps {
 export function MessageInput({
   onSend,
   disabled = false,
-  placeholder = 'Message Cortex...',
+  placeholder = 'Message Onera...',
   onStop,
   isStreaming = false,
 }: MessageInputProps) {

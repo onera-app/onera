@@ -2,7 +2,7 @@
  * AI Module Type Definitions
  */
 
-import type { LLMProvider } from '@cortex/types';
+import type { LLMProvider } from '@onera/types';
 
 /**
  * Decrypted credential ready for use with AI SDK providers

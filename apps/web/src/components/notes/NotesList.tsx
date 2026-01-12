@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import dayjs from 'dayjs';
 import { v4 as uuid } from 'uuid';
-import { encryptNote, decryptNoteTitle } from '@cortex/crypto';
+import { encryptNote, decryptNoteTitle } from '@onera/crypto';
 import { Plus, FileText, Trash2 } from 'lucide-react';
 
 interface NotesListProps {

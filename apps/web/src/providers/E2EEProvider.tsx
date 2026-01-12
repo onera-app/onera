@@ -12,7 +12,7 @@ import {
   getPrivateKey,
   getPublicKey,
   subscribe as subscribeToCrypto,
-} from '@cortex/crypto';
+} from '@onera/crypto';
 import { clearAllAICaches } from '@/lib/ai';
 
 interface E2EEContextValue {

@@ -1,5 +1,5 @@
 {
-	"name": "cortex",
+	"name": "onera",
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
@@ -8,8 +8,8 @@
 		"packages/*"
 	],
 	"scripts": {
-		"dev": "turbo run dev --filter=@cortex/web",
-		"dev:web": "turbo run dev --filter=@cortex/web",
+		"dev": "turbo run dev --filter=@onera/web",
+		"dev:web": "turbo run dev --filter=@onera/web",
 		"dev:convex": "bunx convex dev",
 		"build": "turbo run build",
 		"test": "turbo run test",

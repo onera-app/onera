@@ -32,7 +32,7 @@ test.describe('Debug User Flow', () => {
 		await page.screenshot({ path: 'test-results/debug-1-auth-page.png' });
 		
 		// Check if page loaded
-		const heading = page.getByRole('heading', { name: 'Cortex' });
+		const heading = page.getByRole('heading', { name: 'Onera' });
 		await expect(heading).toBeVisible({ timeout: 10000 });
 		console.log('Auth page loaded successfully');
 		

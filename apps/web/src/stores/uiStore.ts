@@ -59,7 +59,7 @@ export const useUIStore = create<UIState>()(
       setSidebarSearchQuery: (sidebarSearchQuery) => set({ sidebarSearchQuery }),
     }),
     {
-      name: 'cortex-ui',
+      name: 'onera-ui',
       onRehydrateStorage: () => (state) => {
         // Apply stored values to CSS variables on hydration
         if (state) {

@@ -58,7 +58,7 @@ export function AuthPage() {
               <Sparkles className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-2xl">Cortex</CardTitle>
+              <CardTitle className="text-2xl">Onera</CardTitle>
               <CardDescription>E2EE AI Chat</CardDescription>
             </div>
           </CardHeader>

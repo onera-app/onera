@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import { useQuery } from 'convex/react';
 import { api } from 'convex/_generated/api';
 import { useE2EEStore } from '@/stores/e2eeStore';
-import { unlockWithPasswordFlow, type StorableUserKeys } from '@cortex/crypto';
+import { unlockWithPasswordFlow, type StorableUserKeys } from '@onera/crypto';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

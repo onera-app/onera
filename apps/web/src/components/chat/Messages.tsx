@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import type { ChatMessage } from '@cortex/types';
+import type { ChatMessage } from '@onera/types';
 import { UserMessage, AssistantMessage } from './Message';
 import { cn } from '@/lib/utils';
 import { MessageSquare } from 'lucide-react';

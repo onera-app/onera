@@ -19,7 +19,7 @@ import {
   decryptNoteContent,
   encryptNoteTitle,
   encryptNoteContent,
-} from '@cortex/crypto';
+} from '@onera/crypto';
 import { FileText, Archive, ArchiveRestore, Save } from 'lucide-react';
 
 interface NoteEditorProps {

@@ -1,5 +1,5 @@
 /**
- * Cortex Shared Types
+ * Onera Shared Types
  */
 
 // User types

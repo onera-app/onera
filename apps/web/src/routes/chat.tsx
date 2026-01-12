@@ -6,8 +6,8 @@ import type { UIMessage } from 'ai';
 import { useE2EE } from '@/providers/E2EEProvider';
 import { useModelStore } from '@/stores/modelStore';
 import { useChat, useUpdateChat, useDeleteChat } from '@/hooks/queries/useChats';
-import { getChatKey, decryptChatTitle, decryptChatContent, encryptChatContent, encryptChatTitle } from '@cortex/crypto';
-import type { ChatMessage } from '@cortex/types';
+import { getChatKey, decryptChatTitle, decryptChatContent, encryptChatContent, encryptChatTitle } from '@onera/crypto';
+import type { ChatMessage } from '@onera/types';
 import { Messages } from '@/components/chat/Messages';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { ChatNavbar } from '@/components/chat/ChatNavbar';
@@ -451,7 +451,7 @@ export function ChatPage() {
                 ? 'Unlock E2EE to send messages'
                 : !selectedModelId
                 ? 'Select a model to continue'
-                : 'Message Cortex...'
+                : 'Message Onera...'
             }
           />
         </div>

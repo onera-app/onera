@@ -6,8 +6,8 @@ import { useE2EE } from '@/providers/E2EEProvider';
 import { useModelStore } from '@/stores/modelStore';
 import { useCreateChat } from '@/hooks/queries/useChats';
 import { useCredentials } from '@/hooks/queries/useCredentials';
-import { createEncryptedChat } from '@cortex/crypto';
-import type { ChatMessage } from '@cortex/types';
+import { createEncryptedChat } from '@onera/crypto';
+import type { ChatMessage } from '@onera/types';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { ModelSelector } from '@/components/chat/ModelSelector';
 import { Messages } from '@/components/chat/Messages';
@@ -240,7 +240,7 @@ export function HomePage() {
             <MessageInput
               onSend={handleSendMessage}
               disabled={!isUnlocked || isCreating}
-              placeholder="Message Cortex..."
+              placeholder="Message Onera..."
             />
           )}
         </div>
@@ -300,7 +300,7 @@ export function HomePage() {
                   ? 'Add an API key to start chatting'
                   : !selectedModelId
                   ? 'Select a model above to start'
-                  : 'Message Cortex...'
+                  : 'Message Onera...'
               }
             />
           </div>

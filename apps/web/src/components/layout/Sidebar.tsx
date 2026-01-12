@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUIStore } from '@/stores/uiStore';
 import { useE2EE } from '@/providers/E2EEProvider';
 import { useChats, useDeleteChat } from '@/hooks/queries/useChats';
-import { decryptChatTitle } from '@cortex/crypto';
+import { decryptChatTitle } from '@onera/crypto';
 import { cn } from '@/lib/utils';
 import { groupByDate, type DateGroup } from '@/lib/dateGrouping';
 import { SidebarSearch } from './SidebarSearch';
@@ -158,7 +158,7 @@ export function Sidebar() {
               </TooltipTrigger>
               <TooltipContent side="right">Close sidebar</TooltipContent>
             </Tooltip>
-            <span className="font-semibold text-sidebar-primary-foreground tracking-tight">Cortex</span>
+            <span className="font-semibold text-sidebar-primary-foreground tracking-tight">Onera</span>
           </div>
 
           <Tooltip>

@@ -20,8 +20,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@cortex/crypto": ["../../packages/crypto/src/sodium"],
-      "@cortex/types": ["../../packages/types/src"],
+      "@onera/crypto": ["../../packages/crypto/src/sodium"],
+      "@onera/types": ["../../packages/types/src"],
       "convex/_generated/*": ["../../convex/_generated/*"]
     }
   },

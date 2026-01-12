@@ -1,5 +1,5 @@
 # =============================================================================
-# Cortex Web - Multi-stage Docker Build
+# Onera Web - Multi-stage Docker Build
 # =============================================================================
 # Stage 1: Build with Bun in a monorepo context
 # Stage 2: Serve with Nginx Alpine for minimal image size
@@ -34,7 +34,7 @@ ARG BUILD_HASH=dev
 ENV VITE_BUILD_HASH=$BUILD_HASH
 
 # Build the web application
-RUN bun run build --filter=@cortex/web
+RUN bun run build --filter=@onera/web
 
 # -----------------------------------------------------------------------------
 # Stage 2: Nginx Runtime

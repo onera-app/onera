@@ -1,6 +1,6 @@
 #!/bin/sh
 # =============================================================================
-# Cortex Web - Docker Entrypoint
+# Onera Web - Docker Entrypoint
 # =============================================================================
 # This script runs at container startup to inject runtime environment variables
 # into the pre-built JavaScript files. This allows the same Docker image to be

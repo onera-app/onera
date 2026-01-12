@@ -6,7 +6,7 @@
 import { generateText } from 'ai';
 import { getModelForCredential } from './providers';
 import { getCredentialById, parseModelId } from './credentials';
-import type { ChatMessage } from '@cortex/types';
+import type { ChatMessage } from '@onera/types';
 
 /**
  * Default prompt for title generation

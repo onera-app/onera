@@ -26,6 +26,6 @@ export const useAuthStore = create<AuthState>()((set) => ({
     localStorage.removeItem('e2ee_session_private_key');
     sessionStorage.removeItem('e2ee_session_key');
     // Clear legacy storage
-    localStorage.removeItem('cortex-auth');
+    localStorage.removeItem('onera-auth');
   },
 }));

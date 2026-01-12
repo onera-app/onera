@@ -6,7 +6,7 @@ const API_URL = 'http://localhost:8000';
 const testPassword = 'TestPassword123!';
 const testName = 'Test User';
 
-test.describe('Cortex E2EE Chat Application', () => {
+test.describe('Onera E2EE Chat Application', () => {
 	test.beforeAll(async ({ request }) => {
 		// Verify backend is running
 		const health = await request.get(`${API_URL}/health`);
@@ -16,8 +16,8 @@ test.describe('Cortex E2EE Chat Application', () => {
 	test('should load auth page and show branding', async ({ page }) => {
 		await page.goto(`${BASE_URL}/auth`);
 		
-		// Check for Cortex heading
-		await expect(page.getByRole('heading', { name: 'Cortex' })).toBeVisible();
+		// Check for Onera heading
+		await expect(page.getByRole('heading', { name: 'Onera' })).toBeVisible();
 		await expect(page.getByText('End-to-End Encrypted AI Chat')).toBeVisible();
 	});
 

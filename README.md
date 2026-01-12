@@ -1,10 +1,10 @@
-# Cortex
+# Onera
 
 End-to-End Encrypted AI Chat Application
 
 ## Overview
 
-Cortex is a privacy-focused AI chat application that provides true end-to-end encryption for all conversations. Your messages, prompts, and responses are encrypted before leaving your browser - the server never sees your plaintext data.
+Onera is a privacy-focused AI chat application that provides true end-to-end encryption for all conversations. Your messages, prompts, and responses are encrypted before leaving your browser - the server never sees your plaintext data.
 
 ## Features
 
@@ -33,7 +33,7 @@ Cortex is a privacy-focused AI chat application that provides true end-to-end en
                             │                    │
                             ▼                    ▼
                     ┌───────────────┐    ┌──────────────┐
-                    │ Cortex Server │    │ LLM Provider │
+                    │ Onera Server  │    │ LLM Provider │
                     │ (encrypted    │    │ (OpenAI,     │
                     │  blob store)  │    │  Anthropic,  │
                     └───────────────┘    │  Ollama)     │
@@ -52,7 +52,7 @@ Cortex is a privacy-focused AI chat application that provides true end-to-end en
 
 ```bash
 # Navigate to project
-cd cortex
+cd onera
 
 # Install dependencies
 bun install
@@ -65,7 +65,7 @@ bun run dev
 
 ```bash
 # Navigate to backend
-cd cortex/backend
+cd onera/backend
 
 # Create virtual environment
 python -m venv .venv
@@ -89,7 +89,7 @@ VITE_API_BASE_URL=http://localhost:8000
 
 # Backend (in backend/.env)
 SECRET_KEY=your-secret-key-change-in-production
-DATABASE_URL=sqlite+aiosqlite:///./cortex.db
+DATABASE_URL=sqlite+aiosqlite:///./onera.db
 ```
 
 ## Security Model

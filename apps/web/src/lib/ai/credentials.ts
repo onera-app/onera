@@ -3,9 +3,9 @@
  * Handles E2EE decryption and caching of LLM credentials
  */
 
-import { decryptCredentials, isUnlocked, secureZero } from '@cortex/crypto';
+import { decryptCredentials, isUnlocked, secureZero } from '@onera/crypto';
 import type { DecryptedCredential } from './types';
-import type { LLMProvider } from '@cortex/types';
+import type { LLMProvider } from '@onera/types';
 
 // In-memory credential cache
 let cachedCredentials: DecryptedCredential[] | null = null;

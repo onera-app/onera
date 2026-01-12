@@ -36,7 +36,7 @@ export const useModelStore = create<ModelState>()(
       },
     }),
     {
-      name: 'cortex-model',
+      name: 'onera-model',
       partialize: (state) => ({
         selectedModelId: state.selectedModelId,
         recentModels: state.recentModels,

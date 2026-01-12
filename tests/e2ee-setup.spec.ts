@@ -25,8 +25,8 @@ test.describe('E2EE Setup Flow', () => {
 		// Set auth in localStorage before navigating
 		await page.goto(BASE_URL);
 		await page.evaluate(({ token, user }) => {
-			localStorage.setItem('cortex_token', token);
-			localStorage.setItem('cortex_user', JSON.stringify(user));
+			localStorage.setItem('onera_token', token);
+			localStorage.setItem('onera_user', JSON.stringify(user));
 		}, { token, user });
 
 		// Navigate to home page
@@ -76,8 +76,8 @@ test.describe('E2EE Setup Flow', () => {
 
 		await page.goto(BASE_URL);
 		await page.evaluate(({ token, user }) => {
-			localStorage.setItem('cortex_token', token);
-			localStorage.setItem('cortex_user', JSON.stringify(user));
+			localStorage.setItem('onera_token', token);
+			localStorage.setItem('onera_user', JSON.stringify(user));
 		}, { token, user });
 
 		await page.goto(BASE_URL);
@@ -87,8 +87,8 @@ test.describe('E2EE Setup Flow', () => {
 		// Check store values
 		const storeValues = await page.evaluate(() => {
 			return {
-				token: localStorage.getItem('cortex_token'),
-				user: localStorage.getItem('cortex_user'),
+				token: localStorage.getItem('onera_token'),
+				user: localStorage.getItem('onera_user'),
 				// Check if stores are available via window
 				windowKeys: Object.keys(window).filter(k => k.includes('svelte') || k.includes('store'))
 			};
