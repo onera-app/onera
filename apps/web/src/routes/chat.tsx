@@ -15,7 +15,6 @@ import { ModelSelector } from '@/components/chat/ModelSelector';
 import { FollowUps } from '@/components/chat/FollowUps';
 import { useDirectChat } from '@/hooks/useDirectChat';
 import { generateFollowUps } from '@/lib/ai';
-
 interface DecryptedChat {
   id: string;
   title: string;
@@ -134,7 +133,7 @@ export function ChatPage() {
 
     return {
       id: rawChat.id,
-      title: rawChat.titlePreview || 'Encrypted',
+      title: 'Encrypted',
       messages: [],
       createdAt: rawChat.createdAt,
       updatedAt: rawChat.updatedAt,
@@ -362,10 +361,14 @@ export function ChatPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="flex flex-col items-center gap-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-gray-600 dark:border-gray-600 dark:border-t-gray-300" />
-          <p className="text-sm text-gray-500 dark:text-gray-400">Loading chat...</p>
+      <div className="flex items-center justify-center h-full bg-white dark:bg-gray-950">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent/20 to-secondary/20 flex items-center justify-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-accent" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading conversation...</p>
         </div>
       </div>
     );
@@ -373,16 +376,18 @@ export function ChatPage() {
 
   if (!chat) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center max-w-md">
-          <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-            <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      <div className="flex items-center justify-center h-full bg-white dark:bg-gray-950">
+        <div className="text-center max-w-md px-4">
+          <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-error/10 flex items-center justify-center">
+            <svg className="w-8 h-8 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
             </svg>
           </div>
-          <p className="text-red-600 dark:text-red-400 font-medium mb-2">Chat not found</p>
+          <h2 className="font-display text-xl text-gray-900 dark:text-white mb-2">
+            Chat not found
+          </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            This chat may have been deleted or doesn't exist.
+            This conversation may have been deleted or doesn't exist.
           </p>
         </div>
       </div>
@@ -391,18 +396,18 @@ export function ChatPage() {
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-950">
-      {/* Chat header */}
-      <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800">
+      {/* Chat header - refined */}
+      <header className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800/50">
         <ChatNavbar
           title={chat?.title || 'Chat'}
           chatId={chatId || ''}
           onTitleChange={isUnlocked ? handleTitleChange : undefined}
           onDelete={handleDelete}
         />
-        <div className="pr-4">
+        <div className="flex-shrink-0">
           <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />
         </div>
-      </div>
+      </header>
 
       {/* Messages */}
       <div className="flex-1 overflow-hidden">
@@ -414,22 +419,22 @@ export function ChatPage() {
         />
       </div>
 
-      {/* Input */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
+      {/* Input area */}
+      <div className="p-4 bg-white dark:bg-gray-950">
         <div className="max-w-3xl mx-auto">
           {/* Follow-up suggestions */}
           {!isStreaming && followUps.length > 0 && (
             <FollowUps
               followUps={followUps}
               onSelect={handleSendMessage}
-              className="mb-3"
+              className="mb-4"
             />
           )}
 
           {/* Loading follow-ups indicator */}
           {isGeneratingFollowUps && (
-            <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-2">
-              <div className="w-3 h-3 border-2 border-gray-300 border-t-gray-500 dark:border-gray-600 dark:border-t-gray-400 rounded-full animate-spin" />
+            <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-3">
+              <div className="w-3 h-3 border-2 border-gray-300 border-t-accent rounded-full animate-spin" />
               <span>Generating suggestions...</span>
             </div>
           )}
@@ -443,8 +448,8 @@ export function ChatPage() {
               !isUnlocked
                 ? 'Unlock E2EE to send messages'
                 : !selectedModelId
-                ? 'Select a model to start chatting'
-                : 'Send a message...'
+                ? 'Select a model to continue'
+                : 'Message Cortex...'
             }
           />
         </div>

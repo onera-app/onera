@@ -11,6 +11,7 @@ interface UserMessageProps {
 export function UserMessage({ content, onEdit, onCopy }: UserMessageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(content);
+  const [copied, setCopied] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -23,8 +24,10 @@ export function UserMessage({ content, onEdit, onCopy }: UserMessageProps) {
     }
   }, [isEditing]);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(content);
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
     onCopy?.();
   };
 
@@ -48,43 +51,61 @@ export function UserMessage({ content, onEdit, onCopy }: UserMessageProps) {
 
   if (isEditing) {
     return (
-      <div className="flex justify-end">
-        <div className="max-w-[80%] w-full">
-          <textarea
-            ref={textareaRef}
-            value={editValue}
-            onChange={(e) => {
-              setEditValue(e.target.value);
-              e.target.style.height = 'auto';
-              e.target.style.height = `${e.target.scrollHeight}px`;
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSaveEdit();
-              }
-              if (e.key === 'Escape') {
-                handleCancelEdit();
-              }
-            }}
-            className={cn(
-              'w-full px-4 py-3 rounded-2xl resize-none',
-              'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white',
-              'focus:outline-none focus:ring-2 focus:ring-accent',
-              'placeholder-gray-500'
-            )}
-            rows={1}
-          />
-          <div className="flex items-center justify-end gap-2 mt-2">
+      <div className="flex justify-end animate-in fade-in-scale">
+        <div className="max-w-[85%] w-full">
+          <div className="relative">
+            <textarea
+              ref={textareaRef}
+              value={editValue}
+              onChange={(e) => {
+                setEditValue(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${e.target.scrollHeight}px`;
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSaveEdit();
+                }
+                if (e.key === 'Escape') {
+                  handleCancelEdit();
+                }
+              }}
+              className={cn(
+                'w-full px-4 py-3.5 rounded-2xl resize-none',
+                'bg-gray-100 dark:bg-gray-800/80 text-gray-900 dark:text-white',
+                'border-2 border-accent/30',
+                'focus:outline-none focus:border-accent',
+                'placeholder-gray-400 dark:placeholder-gray-500',
+                'text-[15px] leading-relaxed',
+                'transition-colors duration-150'
+              )}
+              rows={1}
+            />
+          </div>
+          <div className="flex items-center justify-end gap-2 mt-3">
             <button
               onClick={handleCancelEdit}
-              className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+              className={cn(
+                'px-4 py-2 text-sm font-medium rounded-xl',
+                'text-gray-600 dark:text-gray-400',
+                'hover:bg-gray-100 dark:hover:bg-gray-800',
+                'transition-colors duration-150'
+              )}
             >
               Cancel
             </button>
             <button
               onClick={handleSaveEdit}
-              className="px-3 py-1.5 text-sm bg-accent text-white rounded-lg hover:bg-accent-hover transition-colors"
+              disabled={!editValue.trim() || editValue.trim() === content}
+              className={cn(
+                'px-4 py-2 text-sm font-medium rounded-xl',
+                'bg-accent text-white',
+                'hover:bg-accent-hover',
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+                'transition-all duration-150',
+                'shadow-soft-sm'
+              )}
             >
               Save & Submit
             </button>
@@ -95,24 +116,29 @@ export function UserMessage({ content, onEdit, onCopy }: UserMessageProps) {
   }
 
   return (
-    <div className="group flex justify-end gap-2">
+    <div className="group flex justify-end gap-3">
       {/* Actions - appear on hover */}
-      <MessageActions
-        onCopy={handleCopy}
-        onEdit={onEdit ? handleStartEdit : undefined}
-        isUser
-        className="self-center opacity-0 group-hover:opacity-100 transition-opacity"
-      />
+      <div className="self-center flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <MessageActions
+          onCopy={handleCopy}
+          onEdit={onEdit ? handleStartEdit : undefined}
+          isUser
+        />
+        {copied && (
+          <span className="text-xs text-success animate-in fade-in">Copied!</span>
+        )}
+      </div>
 
-      {/* Message bubble - subtle dark/light styling */}
+      {/* Message bubble - refined styling */}
       <div
         className={cn(
-          'max-w-[80%] rounded-2xl px-4 py-3',
-          'bg-gray-200 dark:bg-gray-700',
-          'text-gray-900 dark:text-white'
+          'max-w-[85%] rounded-2xl px-4 py-3',
+          'bg-accent/10 dark:bg-accent/15',
+          'text-gray-800 dark:text-gray-100',
+          'shadow-soft-sm'
         )}
       >
-        <p className="whitespace-pre-wrap break-words">{content}</p>
+        <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed">{content}</p>
       </div>
     </div>
   );

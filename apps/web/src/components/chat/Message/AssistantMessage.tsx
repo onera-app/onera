@@ -12,48 +12,77 @@ interface AssistantMessageProps {
   onRegenerate?: () => void;
 }
 
-// Provider-specific icons
-function getModelIcon(model?: string): { icon: string; gradient: string } {
-  if (!model) return { icon: 'AI', gradient: 'from-accent to-accent-hover' };
+// Provider-specific styling
+function getModelStyle(model?: string): { letter: string; bg: string; text: string; name: string } {
+  if (!model) return { letter: 'AI', bg: 'bg-gray-100 dark:bg-gray-800', text: 'text-gray-600 dark:text-gray-300', name: 'Assistant' };
 
   const modelLower = model.toLowerCase();
 
   if (modelLower.includes('claude') || modelLower.includes('anthropic')) {
-    return { icon: 'A', gradient: 'from-orange-500 to-amber-500' };
+    return {
+      letter: 'C',
+      bg: 'bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30',
+      text: 'text-orange-700 dark:text-orange-300',
+      name: formatModelName(model)
+    };
   }
   if (modelLower.includes('gpt') || modelLower.includes('openai')) {
-    return { icon: 'G', gradient: 'from-emerald-500 to-teal-500' };
+    return {
+      letter: 'G',
+      bg: 'bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30',
+      text: 'text-emerald-700 dark:text-emerald-300',
+      name: formatModelName(model)
+    };
   }
   if (modelLower.includes('gemini') || modelLower.includes('google')) {
-    return { icon: 'G', gradient: 'from-blue-500 to-indigo-500' };
+    return {
+      letter: 'G',
+      bg: 'bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30',
+      text: 'text-blue-700 dark:text-blue-300',
+      name: formatModelName(model)
+    };
   }
   if (modelLower.includes('llama') || modelLower.includes('meta')) {
-    return { icon: 'L', gradient: 'from-purple-500 to-pink-500' };
+    return {
+      letter: 'L',
+      bg: 'bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30',
+      text: 'text-purple-700 dark:text-purple-300',
+      name: formatModelName(model)
+    };
   }
   if (modelLower.includes('mistral')) {
-    return { icon: 'M', gradient: 'from-cyan-500 to-blue-500' };
+    return {
+      letter: 'M',
+      bg: 'bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30',
+      text: 'text-cyan-700 dark:text-cyan-300',
+      name: formatModelName(model)
+    };
   }
 
-  return { icon: 'AI', gradient: 'from-accent to-accent-hover' };
+  return {
+    letter: 'AI',
+    bg: 'bg-gradient-to-br from-gray-100 to-slate-100 dark:from-gray-800 dark:to-slate-800',
+    text: 'text-gray-600 dark:text-gray-300',
+    name: formatModelName(model)
+  };
 }
 
-// Extract short model name
-function getModelName(model?: string): string | undefined {
-  if (!model) return undefined;
+function formatModelName(model?: string): string {
+  if (!model) return 'Assistant';
 
   // Handle provider:model format
   const parts = model.split(':');
   const modelPart = parts.length > 1 ? parts[1] : parts[0];
 
-  // Shorten common model names
-  const shortened = modelPart
-    .replace('claude-', '')
+  return modelPart
+    .replace('claude-', 'Claude ')
     .replace('gpt-', 'GPT-')
     .replace('-turbo', ' Turbo')
     .replace('-preview', ' Preview')
-    .replace('-latest', '');
-
-  return shortened;
+    .replace('-latest', '')
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, l => l.toUpperCase())
+    .trim();
 }
 
 export function AssistantMessage({
@@ -65,11 +94,12 @@ export function AssistantMessage({
 }: AssistantMessageProps) {
   const [copied, setCopied] = useState(false);
 
-  // Parse markdown to HTML - sanitized with DOMPurify to prevent XSS
-  const htmlContent = useMemo(() => {
+  // Parse markdown and sanitize with DOMPurify to prevent XSS attacks
+  // DOMPurify is a trusted sanitizer that removes malicious content
+  const sanitizedHtml = useMemo(() => {
     if (!content) return '';
-    // DOMPurify sanitizes the HTML to prevent XSS attacks
-    return DOMPurify.sanitize(marked.parse(content) as string);
+    const rawHtml = marked.parse(content) as string;
+    return DOMPurify.sanitize(rawHtml);
   }, [content]);
 
   const handleCopy = useCallback(async () => {
@@ -79,79 +109,65 @@ export function AssistantMessage({
     onCopy?.();
   }, [content, onCopy]);
 
-  const { icon, gradient } = getModelIcon(model);
-  const modelName = getModelName(model);
+  const { letter, bg, text, name } = getModelStyle(model);
 
   return (
-    <div className="group flex gap-3">
-      {/* Model avatar */}
-      <div
-        className={cn(
-          'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold shadow-sm',
-          `bg-gradient-to-br ${gradient}`
-        )}
-      >
-        {icon}
-      </div>
-
-      <div className="flex-1 min-w-0">
-        {/* Model name */}
-        {modelName && (
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 font-medium flex items-center gap-1.5">
-            <span>{modelName}</span>
-            {isStreaming && (
-              <span className="inline-flex items-center gap-1">
-                <span className="w-1 h-1 bg-accent rounded-full animate-pulse" />
+    <div className="group">
+      {/* Model indicator - subtle, above content */}
+      <div className="flex items-center gap-2.5 mb-3">
+        <div
+          className={cn(
+            'flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-semibold shadow-soft-sm',
+            bg,
+            text
+          )}
+        >
+          {letter}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+            {name}
+          </span>
+          {isStreaming && (
+            <span className="flex items-center gap-1.5 text-xs text-accent">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
               </span>
-            )}
-          </div>
-        )}
-
-        {/* Content - using sanitized HTML */}
-        <div className="relative">
-          {content ? (
-            <div
-              className={cn(
-                'prose prose-sm dark:prose-invert max-w-none',
-                // Code block styling
-                'prose-pre:bg-transparent prose-pre:p-0 prose-pre:my-0',
-                // Inline code
-                'prose-code:text-accent prose-code:bg-accent/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-[\'\'] prose-code:after:content-[\'\']',
-                // Links
-                'prose-a:text-accent prose-a:no-underline hover:prose-a:underline',
-                // Lists
-                'prose-li:marker:text-gray-400'
-              )}
-              // Safe: content is sanitized with DOMPurify above
-              dangerouslySetInnerHTML={{ __html: htmlContent }}
-            />
-          ) : isStreaming ? (
-            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 py-1">
-              <div className="flex gap-1">
-                <span className="w-2 h-2 bg-accent/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-2 h-2 bg-accent/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-2 h-2 bg-accent/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
-              <span className="text-sm">Thinking...</span>
-            </div>
-          ) : null}
-
-          {/* Streaming cursor */}
-          {isStreaming && content && (
-            <span className="inline-block w-2 h-4 bg-accent/70 ml-0.5 animate-pulse rounded-sm" />
+              <span className="font-medium">Thinking</span>
+            </span>
           )}
         </div>
+      </div>
 
-        {/* Actions - always visible but more subtle */}
+      {/* Content - full width prose */}
+      <div className="relative pl-9">
+        {content ? (
+          <div
+            className="prose prose-gray dark:prose-invert max-w-none"
+            dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
+          />
+        ) : isStreaming ? (
+          <div className="flex items-center gap-3 py-2">
+            <div className="flex gap-1.5">
+              <span className="w-2 h-2 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-2 h-2 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-2 h-2 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            </div>
+            <span className="text-sm text-gray-500 dark:text-gray-400">Generating response...</span>
+          </div>
+        ) : null}
+
+        {/* Actions - appear on hover */}
         {!isStreaming && content && (
-          <div className="mt-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="mt-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <MessageActions
               onCopy={handleCopy}
               onRegenerate={onRegenerate}
               isUser={false}
             />
             {copied && (
-              <span className="text-xs text-success ml-2">Copied!</span>
+              <span className="text-xs text-success ml-2 animate-in fade-in">Copied!</span>
             )}
           </div>
         )}
