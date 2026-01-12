@@ -1,6 +1,5 @@
-import { useMemo, useState, useCallback } from 'react';
-import { marked } from 'marked';
-import DOMPurify from 'dompurify';
+import { useState, useCallback } from 'react';
+import { Streamdown } from 'streamdown';
 import { MessageActions } from './MessageActions';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -96,13 +95,6 @@ export function AssistantMessage({
 }: AssistantMessageProps) {
   const [copied, setCopied] = useState(false);
 
-  // Parse markdown and sanitize with DOMPurify to prevent XSS attacks
-  const sanitizedHtml = useMemo(() => {
-    if (!content) return '';
-    const rawHtml = marked.parse(content) as string;
-    return DOMPurify.sanitize(rawHtml);
-  }, [content]);
-
   const handleCopy = useCallback(async () => {
     await navigator.clipboard.writeText(content);
     setCopied(true);
@@ -140,10 +132,7 @@ export function AssistantMessage({
       {/* Content */}
       <div className="relative pl-9">
         {content ? (
-          <div
-            className="prose max-w-none"
-            dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
-          />
+          <Streamdown>{content}</Streamdown>
         ) : isStreaming ? (
           <div className="flex items-center gap-3 py-2">
             <div className="flex gap-1.5">
