@@ -1,7 +1,7 @@
 # =============================================================================
 # Onera Web - Multi-stage Docker Build
 # =============================================================================
-FROM oven/bun:1.3-alpine AS builder
+FROM oven/bun:alpine AS builder
 WORKDIR /app
 
 ARG VITE_API_URL

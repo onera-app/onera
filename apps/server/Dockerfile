@@ -1,7 +1,8 @@
 # =============================================================================
 # Onera Server - Multi-stage Docker Build
 # =============================================================================
-FROM oven/bun:1.3-alpine AS base
+# Use specific bun version that supports lockfileVersion 1
+FROM oven/bun:alpine AS base
 WORKDIR /app
 
 # Install build dependencies for native modules (better-sqlite3)
@@ -26,7 +27,7 @@ WORKDIR /app/apps/server
 RUN bun build src/index.ts --outdir dist --target bun
 
 # Production
-FROM oven/bun:1.3-alpine AS runner
+FROM oven/bun:alpine AS runner
 ENV NODE_ENV=production
 WORKDIR /app
 
@@ -36,18 +37,26 @@ RUN apk add --no-cache sqlite-libs
 # Create data directory for SQLite database
 RUN mkdir -p /app/data && chown -R bun:bun /app/data
 
+# Copy built artifacts
 COPY --from=builder /app/apps/server/dist ./dist
 COPY --from=builder /app/apps/server/drizzle ./drizzle
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/server/node_modules ./apps/server/node_modules
 
-# Run migrations and start server
-COPY --from=builder /app/apps/server/src/db/migrate.ts ./src/db/migrate.ts
-COPY --from=builder /app/apps/server/src/db/client.ts ./src/db/client.ts
-COPY --from=builder /app/apps/server/src/db/schema.ts ./src/db/schema.ts
+# Copy migration files for runtime migrations
+COPY --from=builder /app/apps/server/src/db ./src/db
+
+# Create entrypoint script that runs migrations then starts server
+RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
+    echo 'set -e' >> /app/entrypoint.sh && \
+    echo 'echo "Running database migrations..."' >> /app/entrypoint.sh && \
+    echo 'bun run src/db/migrate.ts' >> /app/entrypoint.sh && \
+    echo 'echo "Starting server..."' >> /app/entrypoint.sh && \
+    echo 'exec bun run dist/index.js' >> /app/entrypoint.sh && \
+    chmod +x /app/entrypoint.sh
 
 EXPOSE 3000
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
 
-CMD ["bun", "run", "dist/index.js"]
+CMD ["/app/entrypoint.sh"]

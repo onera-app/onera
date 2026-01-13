@@ -3,9 +3,13 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "../db/client";
 import * as schema from "../db/schema";
 
+// Determine if we're in production (behind HTTPS proxy)
+const isProduction = process.env.NODE_ENV === "production";
+const baseURL = process.env.BETTER_AUTH_URL || "http://localhost:3000";
+
 export const auth = betterAuth({
   appName: "Onera",
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  baseURL,
   secret: process.env.BETTER_AUTH_SECRET,
 
   database: drizzleAdapter(db, {
@@ -31,6 +35,14 @@ export const auth = betterAuth({
       enabled: true,
       maxAge: 60 * 5, // 5 minutes
     },
+  },
+
+  // Advanced configuration for production behind nginx proxy
+  advanced: {
+    // Use secure cookies in production (HTTPS)
+    useSecureCookies: isProduction,
+    // Trust the X-Forwarded-* headers from nginx proxy
+    cookiePrefix: "onera",
   },
 
   // In production, FRONTEND_URL is set to the tenant's public URL (https://subdomain.baseDomain)
