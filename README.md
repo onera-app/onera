@@ -86,15 +86,20 @@ bun run docker:down
 
 ## Environment Variables
 
-Create a `.env` file in the root directory:
+Create a `.env` file in the root directory (copy from `.env.example`):
 
 ```env
-# API Configuration
-VITE_API_BASE_URL=http://localhost:8000
+# Database (SQLite)
+DATABASE_URL=file:./data/onera.db
 
-# Backend (in backend/.env)
-SECRET_KEY=your-secret-key-change-in-production
-DATABASE_URL=sqlite+aiosqlite:///./onera.db
+# Authentication
+BETTER_AUTH_SECRET=your-32-character-or-longer-secret-key
+BETTER_AUTH_URL=http://localhost:3000
+
+# URLs
+FRONTEND_URL=http://localhost:5173
+VITE_API_URL=http://localhost:3000
+VITE_WS_URL=http://localhost:3000
 ```
 
 ## Security Model
@@ -129,7 +134,7 @@ DATABASE_URL=sqlite+aiosqlite:///./onera.db
 
 ### Backend
 - Hono server with tRPC
-- PostgreSQL with Drizzle ORM
+- SQLite with Drizzle ORM
 - Better Auth for authentication
 - Bun runtime
 

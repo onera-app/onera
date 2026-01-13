@@ -12,8 +12,14 @@ import { trpc } from "@/lib/trpc";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
+// Check if we're in production (relative URL) or development (absolute URL)
+const isRelativeUrl = API_URL.startsWith("/");
+
+// For production behind nginx proxy, use empty string (same origin)
+// For development, use the full API URL
+// Note: better-auth client with empty baseURL will use current origin
 export const authClient = createAuthClient({
-  baseURL: API_URL,
+  baseURL: isRelativeUrl ? "" : API_URL,
 });
 
 interface User {

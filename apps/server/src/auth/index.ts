@@ -9,7 +9,7 @@ export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
 
   database: drizzleAdapter(db, {
-    provider: "pg",
+    provider: "sqlite",
     schema: {
       user: schema.users,
       session: schema.sessions,
@@ -33,9 +33,11 @@ export const auth = betterAuth({
     },
   },
 
-  trustedOrigins: [
-    process.env.FRONTEND_URL || "http://localhost:5173",
-  ],
+  // In production, FRONTEND_URL is set to the tenant's public URL (https://subdomain.baseDomain)
+  // This allows CORS and cookie sharing between the frontend and backend
+  trustedOrigins: (process.env.FRONTEND_URL || "http://localhost:5173")
+    .split(",")
+    .map((origin) => origin.trim()),
 });
 
 export type Auth = typeof auth;

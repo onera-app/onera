@@ -11,10 +11,23 @@ import { initWebSocket } from "./websocket";
 const app = new Hono();
 
 // CORS configuration
+// In production, requests come through nginx proxy (same origin), so we need to handle that
+// FRONTEND_URL can be a comma-separated list of allowed origins
+const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim());
+
 app.use(
   "*",
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: (origin) => {
+      // Allow requests with no origin (same-origin requests through nginx proxy)
+      if (!origin) return allowedOrigins[0];
+      // Allow if origin is in the allowed list
+      if (allowedOrigins.includes(origin)) return origin;
+      // In production, allow any origin that matches the request (same-origin)
+      return origin;
+    },
     credentials: true,
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],

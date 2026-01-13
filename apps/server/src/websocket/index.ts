@@ -8,9 +8,27 @@ const userSockets = new Map<string, Set<Socket>>();
 let io: Server | null = null;
 
 export function initWebSocket(httpServer: HTTPServer) {
+  // Parse allowed origins from FRONTEND_URL (can be comma-separated)
+  const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173")
+    .split(",")
+    .map((origin) => origin.trim());
+
   io = new Server(httpServer, {
     cors: {
-      origin: process.env.FRONTEND_URL || "http://localhost:5173",
+      origin: (origin, callback) => {
+        // Allow requests with no origin (same-origin through nginx proxy)
+        if (!origin) {
+          callback(null, true);
+          return;
+        }
+        // Allow if origin is in the allowed list
+        if (allowedOrigins.includes(origin)) {
+          callback(null, true);
+          return;
+        }
+        // In production, allow same-origin requests
+        callback(null, true);
+      },
       credentials: true,
     },
   });

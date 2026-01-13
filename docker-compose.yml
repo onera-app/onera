@@ -1,40 +1,21 @@
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: onera-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-onera}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
-      POSTGRES_DB: ${POSTGRES_DB:-onera}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-onera}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - onera-network
-
   server:
     build:
       context: .
       dockerfile: apps/server/Dockerfile
     container_name: onera-server
     restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-onera}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-onera}
+      # SQLite database stored in volume
+      DATABASE_URL: file:/app/data/onera.db
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
       PORT: 3000
       NODE_ENV: production
+    volumes:
+      # Persist SQLite database
+      - server_data:/app/data
     ports:
       - "3000:3000"
     networks:
@@ -57,7 +38,7 @@ services:
       - onera-network
 
 volumes:
-  postgres_data:
+  server_data:
 
 networks:
   onera-network:

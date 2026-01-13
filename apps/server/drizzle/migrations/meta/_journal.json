@@ -1,12 +1,12 @@
 {
   "version": "7",
-  "dialect": "postgresql",
+  "dialect": "sqlite",
   "entries": [
     {
       "idx": 0,
       "version": "7",
-      "when": 1768283425151,
-      "tag": "0000_lush_joystick",
+      "when": 1736784000000,
+      "tag": "0000_init",
       "breakpoints": true
     }
   ]

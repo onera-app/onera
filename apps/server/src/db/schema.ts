@@ -1,45 +1,61 @@
 import {
-  pgTable,
-  uuid,
-  varchar,
+  sqliteTable,
   text,
-  boolean,
   integer,
-  timestamp,
   index,
   uniqueIndex,
-} from "drizzle-orm/pg-core";
+} from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
+
+// Helper for generating UUIDs in SQLite
+// SQLite doesn't have native UUID, so we use text with a default random UUID
+const uuid = (name: string) => text(name);
+const uuidPrimaryKey = (name: string) =>
+  text(name)
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID());
+
+// Helper for timestamps - SQLite stores as integer (Unix timestamp in ms)
+const timestamp = (name: string) => integer(name, { mode: "timestamp_ms" });
 
 // ============================================
 // Better Auth Tables
 // ============================================
 
 // Users table (Better Auth core table)
-export const users = pgTable(
+export const users = sqliteTable(
   "user",
   {
     id: text("id").primaryKey(),
     name: text("name").notNull(),
     email: text("email").notNull().unique(),
-    emailVerified: boolean("email_verified").default(false).notNull(),
+    emailVerified: integer("email_verified", { mode: "boolean" })
+      .default(false)
+      .notNull(),
     image: text("image"),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
   },
-  (table) => [
-    uniqueIndex("idx_user_email").on(table.email),
-  ]
+  (table) => [uniqueIndex("idx_user_email").on(table.email)]
 );
 
 // Sessions table (Better Auth)
-export const sessions = pgTable(
+export const sessions = sqliteTable(
   "session",
   {
     id: text("id").primaryKey(),
-    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
     token: text("token").notNull().unique(),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
     userId: text("user_id")
@@ -53,7 +69,7 @@ export const sessions = pgTable(
 );
 
 // Accounts table (Better Auth - for password and OAuth providers)
-export const accounts = pgTable(
+export const accounts = sqliteTable(
   "account",
   {
     id: text("id").primaryKey(),
@@ -65,32 +81,36 @@ export const accounts = pgTable(
     accessToken: text("access_token"),
     refreshToken: text("refresh_token"),
     idToken: text("id_token"),
-    accessTokenExpiresAt: timestamp("access_token_expires_at", { withTimezone: true }),
-    refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { withTimezone: true }),
+    accessTokenExpiresAt: timestamp("access_token_expires_at"),
+    refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
     scope: text("scope"),
     password: text("password"),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
   },
-  (table) => [
-    index("idx_account_user_id").on(table.userId),
-  ]
+  (table) => [index("idx_account_user_id").on(table.userId)]
 );
 
 // Verification table (Better Auth - for email verification, password reset)
-export const verifications = pgTable(
+export const verifications = sqliteTable(
   "verification",
   {
     id: text("id").primaryKey(),
     identifier: text("identifier").notNull(),
     value: text("value").notNull(),
-    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    createdAt: timestamp("created_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
   },
-  (table) => [
-    index("idx_verification_identifier").on(table.identifier),
-  ]
+  (table) => [index("idx_verification_identifier").on(table.identifier)]
 );
 
 // ============================================
@@ -98,10 +118,10 @@ export const verifications = pgTable(
 // ============================================
 
 // User encryption keys (E2EE)
-export const userKeys = pgTable(
+export const userKeys = sqliteTable(
   "user_keys",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: uuidPrimaryKey("id"),
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" })
@@ -123,28 +143,34 @@ export const userKeys = pgTable(
     masterKeyRecovery: text("master_key_recovery").notNull(),
     masterKeyRecoveryNonce: text("master_key_recovery_nonce").notNull(),
     // Timestamps
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
   },
-  (table) => [
-    index("idx_user_keys_user_id").on(table.userId),
-  ]
+  (table) => [index("idx_user_keys_user_id").on(table.userId)]
 );
 
 // Folders (hierarchical)
-export const folders = pgTable(
+export const folders = sqliteTable(
   "folders",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: uuidPrimaryKey("id"),
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    name: varchar("name", { length: 255 }).notNull(),
-    parentId: uuid("parent_id").references((): any => folders.id, {
+    name: text("name").notNull(),
+    parentId: text("parent_id").references((): any => folders.id, {
       onDelete: "set null",
     }),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
   },
   (table) => [
     index("idx_folders_user_id").on(table.userId),
@@ -153,15 +179,17 @@ export const folders = pgTable(
 );
 
 // Chats (encrypted)
-export const chats = pgTable(
+export const chats = sqliteTable(
   "chats",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: uuidPrimaryKey("id"),
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     // Encryption metadata
-    isEncrypted: boolean("is_encrypted").default(true).notNull(),
+    isEncrypted: integer("is_encrypted", { mode: "boolean" })
+      .default(true)
+      .notNull(),
     encryptedChatKey: text("encrypted_chat_key"),
     chatKeyNonce: text("chat_key_nonce"),
     // Encrypted content
@@ -172,14 +200,18 @@ export const chats = pgTable(
     // Plaintext preview
     titlePreview: text("title_preview"),
     // Organization
-    folderId: uuid("folder_id").references(() => folders.id, {
+    folderId: text("folder_id").references(() => folders.id, {
       onDelete: "set null",
     }),
-    pinned: boolean("pinned").default(false).notNull(),
-    archived: boolean("archived").default(false).notNull(),
+    pinned: integer("pinned", { mode: "boolean" }).default(false).notNull(),
+    archived: integer("archived", { mode: "boolean" }).default(false).notNull(),
     // Timestamps
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
   },
   (table) => [
     index("idx_chats_user_id").on(table.userId),
@@ -189,10 +221,10 @@ export const chats = pgTable(
 );
 
 // Notes (encrypted)
-export const notes = pgTable(
+export const notes = sqliteTable(
   "notes",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: uuidPrimaryKey("id"),
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -202,14 +234,18 @@ export const notes = pgTable(
     encryptedContent: text("encrypted_content").notNull(),
     contentNonce: text("content_nonce").notNull(),
     // Organization
-    folderId: uuid("folder_id").references(() => folders.id, {
+    folderId: text("folder_id").references(() => folders.id, {
       onDelete: "set null",
     }),
-    pinned: boolean("pinned").default(false).notNull(),
-    archived: boolean("archived").default(false).notNull(),
+    pinned: integer("pinned", { mode: "boolean" }).default(false).notNull(),
+    archived: integer("archived", { mode: "boolean" }).default(false).notNull(),
     // Timestamps
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
   },
   (table) => [
     index("idx_notes_user_id").on(table.userId),
@@ -219,42 +255,46 @@ export const notes = pgTable(
 );
 
 // Credentials (encrypted API keys)
-export const credentials = pgTable(
+export const credentials = sqliteTable(
   "credentials",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: uuidPrimaryKey("id"),
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    provider: varchar("provider", { length: 50 }).notNull(),
-    name: varchar("name", { length: 255 }).notNull(),
+    provider: text("provider").notNull(),
+    name: text("name").notNull(),
     encryptedData: text("encrypted_data").notNull(),
     iv: text("iv").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
   },
-  (table) => [
-    index("idx_credentials_user_id").on(table.userId),
-  ]
+  (table) => [index("idx_credentials_user_id").on(table.userId)]
 );
 
 // Prompts (templates)
-export const prompts = pgTable(
+export const prompts = sqliteTable(
   "prompts",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: uuidPrimaryKey("id"),
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    name: varchar("name", { length: 255 }).notNull(),
+    name: text("name").notNull(),
     description: text("description"),
     content: text("content").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
   },
-  (table) => [
-    index("idx_prompts_user_id").on(table.userId),
-  ]
+  (table) => [index("idx_prompts_user_id").on(table.userId)]
 );
 
 // Type exports

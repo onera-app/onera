@@ -3,7 +3,24 @@ import { io, Socket } from "socket.io-client";
 import { useAuth } from "@/providers/AuthProvider";
 import { trpc } from "@/lib/trpc";
 
+// WebSocket URL - empty string or undefined means connect to same origin
+// In production, nginx proxies /socket.io/ to the server container
+// In development, connect directly to the server at localhost:3000
 const WS_URL = import.meta.env.VITE_WS_URL || import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+// Get the Socket.IO connection URL
+function getSocketUrl(): string | undefined {
+  // Empty string or "/" means connect to same origin (production)
+  if (!WS_URL || WS_URL === "/" || WS_URL === "") {
+    return undefined; // Socket.IO will connect to the current origin
+  }
+  // If it's a relative path like "/api", connect to same origin
+  if (WS_URL.startsWith("/")) {
+    return undefined;
+  }
+  // Otherwise, it's an absolute URL (development)
+  return WS_URL;
+}
 
 export function useRealtimeUpdates() {
   const { isAuthenticated } = useAuth();
@@ -20,7 +37,9 @@ export function useRealtimeUpdates() {
     }
 
     // Connect to WebSocket with credentials
-    const socket = io(WS_URL, {
+    // undefined URL means connect to same origin (production behind nginx proxy)
+    const socketUrl = getSocketUrl();
+    const socket = io(socketUrl, {
       withCredentials: true,
       transports: ["websocket", "polling"],
     });
