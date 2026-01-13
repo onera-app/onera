@@ -4,6 +4,9 @@
 FROM oven/bun:alpine AS builder
 WORKDIR /app
 
+# Install build tools for native modules (needed for some dependencies)
+RUN apk add --no-cache python3 make g++
+
 ARG VITE_API_URL
 ARG VITE_WS_URL
 ARG BUILD_HASH=dev
