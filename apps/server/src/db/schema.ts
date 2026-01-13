@@ -9,7 +9,6 @@ import { sql } from "drizzle-orm";
 
 // Helper for generating UUIDs in SQLite
 // SQLite doesn't have native UUID, so we use text with a default random UUID
-const uuid = (name: string) => text(name);
 const uuidPrimaryKey = (name: string) =>
   text(name)
     .primaryKey()
