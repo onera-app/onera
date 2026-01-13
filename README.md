@@ -44,11 +44,10 @@ Onera is a privacy-focused AI chat application that provides true end-to-end enc
 
 ### Prerequisites
 
-- [Bun](https://bun.sh) (v1.0+)
-- Python 3.10+ (for backend)
-- Node.js 18+ (optional, for npm compatibility)
+- [Bun](https://bun.sh) (v1.1+)
+- Docker & Docker Compose (for containerized deployment)
 
-### Frontend Setup
+### Development Setup
 
 ```bash
 # Navigate to project
@@ -57,26 +56,32 @@ cd onera
 # Install dependencies
 bun install
 
-# Start development server
+# Start all services (web + server)
 bun run dev
+
+# Or start individually
+bun run dev:web     # Frontend only
+bun run dev:server  # Backend only
 ```
 
-### Backend Setup
+### Database Setup
 
 ```bash
-# Navigate to backend
-cd onera/backend
+# Generate migrations
+bun run db:generate
 
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # Linux/macOS
-# .venv\Scripts\activate   # Windows
+# Run migrations
+bun run db:migrate
+```
 
-# Install dependencies
-pip install -r requirements.txt
+### Docker Setup
 
-# Start server
-python main.py
+```bash
+# Build and run all containers
+bun run docker:up
+
+# Stop containers
+bun run docker:down
 ```
 
 ## Environment Variables
@@ -123,10 +128,10 @@ DATABASE_URL=sqlite+aiosqlite:///./onera.db
 - BIP39 for recovery phrases
 
 ### Backend
-- FastAPI with async SQLAlchemy
-- SQLite with aiosqlite
-- JWT authentication
-- Pydantic for validation
+- Hono server with tRPC
+- PostgreSQL with Drizzle ORM
+- Better Auth for authentication
+- Bun runtime
 
 ## Development
 

@@ -3,9 +3,11 @@ import { createAuthClient } from "better-auth/react";
 import {
   setupUserKeys,
   unlockWithPasswordFlow,
+  clearSession,
   type StorableUserKeys,
   type RecoveryKeyInfo,
 } from "@onera/crypto";
+import { useE2EEStore } from "@/stores/e2eeStore";
 import { trpc } from "@/lib/trpc";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -68,6 +70,8 @@ function toStorableKeys(keys: {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const trpcUtils = trpc.useUtils();
+  const e2eeStore = useE2EEStore();
 
   // tRPC mutations for E2EE key management
   const createUserKeysMutation = trpc.userKeys.create.useMutation();
@@ -101,7 +105,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fetchSession();
   }, []);
 
+  // Clear all E2EE state (crypto session, storage, store, and query cache)
+  const clearE2EEState = async () => {
+    clearSession();
+    localStorage.removeItem("e2ee_session_master_key");
+    localStorage.removeItem("e2ee_session_private_key");
+    sessionStorage.removeItem("e2ee_session_key");
+    e2eeStore.reset();
+    await trpcUtils.invalidate();
+  };
+
   const signIn = async (email: string, password: string) => {
+    // Clear any existing E2EE state from previous user before signin
+    await clearE2EEState();
+
     // 1. Authenticate with Better Auth
     const result = await authClient.signIn.email({
       email,
@@ -123,6 +140,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, name: string): Promise<RecoveryKeyInfo> => {
+    // Clear any existing E2EE state from previous user before signup
+    await clearE2EEState();
+
     // 1. Create account with Better Auth
     const result = await authClient.signUp.email({
       email,
@@ -160,11 +180,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    // Clear E2EE session keys
-    localStorage.removeItem("e2ee_session_master_key");
-    localStorage.removeItem("e2ee_session_private_key");
-    sessionStorage.removeItem("e2ee_session_key");
-
+    await clearE2EEState();
     await authClient.signOut();
     setUser(null);
   };

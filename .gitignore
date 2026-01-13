@@ -27,7 +27,7 @@ dist/
 
 # Logs
 *.log
-npm-debug.log*
+bun-debug.log*
 
 # Bun
 bun.lockb
