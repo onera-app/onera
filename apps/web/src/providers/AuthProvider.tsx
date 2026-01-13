@@ -1,5 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { createAuthClient } from "better-auth/react";
+import {
+  setupUserKeys,
+  unlockWithPasswordFlow,
+  type StorableUserKeys,
+  type RecoveryKeyInfo,
+} from "@onera/crypto";
+import { trpc } from "@/lib/trpc";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -20,16 +27,53 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, name: string) => Promise<void>;
+  signUp: (email: string, password: string, name: string) => Promise<RecoveryKeyInfo>;
   signOut: () => Promise<void>;
   refetch: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+// Convert API response to StorableUserKeys format
+function toStorableKeys(keys: {
+  kekSalt: string;
+  kekOpsLimit: number;
+  kekMemLimit: number;
+  encryptedMasterKey: string;
+  masterKeyNonce: string;
+  publicKey: string;
+  encryptedPrivateKey: string;
+  privateKeyNonce: string;
+  encryptedRecoveryKey: string;
+  recoveryKeyNonce: string;
+  masterKeyRecovery: string;
+  masterKeyRecoveryNonce: string;
+}): StorableUserKeys {
+  return {
+    kekSalt: keys.kekSalt,
+    kekOpsLimit: keys.kekOpsLimit,
+    kekMemLimit: keys.kekMemLimit,
+    encryptedMasterKey: keys.encryptedMasterKey,
+    masterKeyNonce: keys.masterKeyNonce,
+    publicKey: keys.publicKey,
+    encryptedPrivateKey: keys.encryptedPrivateKey,
+    privateKeyNonce: keys.privateKeyNonce,
+    encryptedRecoveryKey: keys.encryptedRecoveryKey || "",
+    recoveryKeyNonce: keys.recoveryKeyNonce || "",
+    masterKeyRecovery: keys.masterKeyRecovery || "",
+    masterKeyRecoveryNonce: keys.masterKeyRecoveryNonce || "",
+  };
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // tRPC mutations for E2EE key management
+  const createUserKeysMutation = trpc.userKeys.create.useMutation();
+  const userKeysQuery = trpc.userKeys.get.useQuery(undefined, {
+    enabled: false, // Only fetch when needed
+  });
 
   const fetchSession = async () => {
     try {
@@ -58,6 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    // 1. Authenticate with Better Auth
     const result = await authClient.signIn.email({
       email,
       password,
@@ -68,9 +113,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     await fetchSession();
+
+    // 2. Fetch user keys and unlock E2EE with the same password
+    const keysResult = await userKeysQuery.refetch();
+    if (keysResult.data) {
+      const storableKeys = toStorableKeys(keysResult.data);
+      await unlockWithPasswordFlow(password, storableKeys);
+    }
   };
 
-  const signUp = async (email: string, password: string, name: string) => {
+  const signUp = async (email: string, password: string, name: string): Promise<RecoveryKeyInfo> => {
+    // 1. Create account with Better Auth
     const result = await authClient.signUp.email({
       email,
       password,
@@ -82,6 +135,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     await fetchSession();
+
+    // 2. Setup E2EE keys using the same password
+    const { recoveryInfo, storableKeys } = await setupUserKeys(password);
+
+    // 3. Store the encrypted keys on the server
+    await createUserKeysMutation.mutateAsync({
+      kekSalt: storableKeys.kekSalt,
+      kekOpsLimit: storableKeys.kekOpsLimit,
+      kekMemLimit: storableKeys.kekMemLimit,
+      encryptedMasterKey: storableKeys.encryptedMasterKey,
+      masterKeyNonce: storableKeys.masterKeyNonce,
+      publicKey: storableKeys.publicKey,
+      encryptedPrivateKey: storableKeys.encryptedPrivateKey,
+      privateKeyNonce: storableKeys.privateKeyNonce,
+      encryptedRecoveryKey: storableKeys.encryptedRecoveryKey,
+      recoveryKeyNonce: storableKeys.recoveryKeyNonce,
+      masterKeyRecovery: storableKeys.masterKeyRecovery,
+      masterKeyRecoveryNonce: storableKeys.masterKeyRecoveryNonce,
+    });
+
+    // Return recovery info so the UI can show it to the user
+    return recoveryInfo;
   };
 
   const signOut = async () => {

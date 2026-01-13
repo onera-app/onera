@@ -99,7 +99,7 @@ export function E2EESetupModal() {
             Set Up E2EE
           </DialogTitle>
           <DialogDescription>
-            {step === 'password' && 'Create a password to encrypt your chats.'}
+            {step === 'password' && 'Enter your account password to enable encryption.'}
             {step === 'recovery' && 'Save your recovery phrase securely.'}
             {step === 'confirm' && 'Confirm you\'ve saved your recovery phrase.'}
           </DialogDescription>
@@ -108,11 +108,11 @@ export function E2EESetupModal() {
         {step === 'password' && (
           <form onSubmit={handleSetupPassword} className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              This password will be used to unlock your encryption on each device.
+              Your account password will be used to encrypt your data. Enter it below to set up end-to-end encryption.
             </p>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Account Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -120,7 +120,7 @@ export function E2EESetupModal() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoFocus
-                autoComplete="new-password"
+                autoComplete="current-password"
                 minLength={8}
               />
             </div>
@@ -133,7 +133,7 @@ export function E2EESetupModal() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                autoComplete="new-password"
+                autoComplete="current-password"
                 minLength={8}
               />
             </div>

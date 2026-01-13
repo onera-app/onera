@@ -88,13 +88,13 @@ export function E2EEUnlockModal() {
             Unlock E2EE
           </DialogTitle>
           <DialogDescription>
-            Enter your password to unlock end-to-end encryption and access your chats.
+            Enter your account password to unlock end-to-end encryption and access your chats.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleUnlock} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Account Password</Label>
             <Input
               id="password"
               type="password"
