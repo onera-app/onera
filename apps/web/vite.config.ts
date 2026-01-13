@@ -8,15 +8,20 @@ import { createRequire } from 'module';
 function libsodiumResolver(): Plugin {
   return {
     name: 'libsodium-resolver',
-    resolveId(id, importer) {
-      // Resolve the ./libsodium-sumo.mjs import from libsodium-wrappers-sumo
-      if (id === './libsodium-sumo.mjs' && importer?.includes('libsodium-wrappers-sumo')) {
-        const require = createRequire(import.meta.url);
-        const libsodiumSumoPath = require.resolve('libsodium-sumo');
-        // Navigate from CJS entry to ESM entry
-        return path.resolve(path.dirname(libsodiumSumoPath), '../modules-sumo-esm/libsodium-sumo.mjs');
-      }
-      return null;
+    enforce: 'pre',
+    resolveId: {
+      order: 'pre',
+      async handler(id, importer) {
+        // Resolve the ./libsodium-sumo.mjs import from libsodium-wrappers-sumo
+        if (id === './libsodium-sumo.mjs' && importer?.includes('libsodium-wrappers-sumo')) {
+          const require = createRequire(import.meta.url);
+          const libsodiumSumoPath = require.resolve('libsodium-sumo');
+          // Navigate from CJS entry to ESM entry
+          const resolved = path.resolve(path.dirname(libsodiumSumoPath), '../modules-sumo-esm/libsodium-sumo.mjs');
+          return { id: resolved };
+        }
+        return null;
+      },
     },
   };
 }
