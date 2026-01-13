@@ -332,7 +332,7 @@ export function HomePage() {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-5 shadow-sm rotate-3">
               <Sparkles className="w-8 h-8 text-primary" />
             </div>
-            <h1 className="text-3xl sm:text-4xl font-semibold mb-3 tracking-tight">
+            <h1 className="heading-hero mb-3">
               What can I help with?
             </h1>
             <p className="text-muted-foreground text-base">

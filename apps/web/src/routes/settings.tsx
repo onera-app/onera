@@ -1,16 +1,16 @@
-import { AccountSettings, InterfaceSettings, E2EESettings } from '@/components/settings';
+import { AccountSettings, InterfaceSettings, E2EESettings, ToolsSettings } from '@/components/settings';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Layout, Lock } from 'lucide-react';
+import { User, Layout, Lock, Wrench } from 'lucide-react';
 
 export function SettingsPage() {
   return (
     <div className="flex h-full bg-background">
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto p-8">
-          <h1 className="text-2xl font-bold mb-6">Settings</h1>
+          <h1 className="heading-page mb-6">Settings</h1>
           
           <Tabs defaultValue="account" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsList className="grid w-full grid-cols-4 mb-6">
               <TabsTrigger value="account" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
                 Account
@@ -22,6 +22,10 @@ export function SettingsPage() {
               <TabsTrigger value="e2ee" className="flex items-center gap-2">
                 <Lock className="h-4 w-4" />
                 Encryption
+              </TabsTrigger>
+              <TabsTrigger value="tools" className="flex items-center gap-2">
+                <Wrench className="h-4 w-4" />
+                Tools
               </TabsTrigger>
             </TabsList>
             
@@ -35,6 +39,10 @@ export function SettingsPage() {
             
             <TabsContent value="e2ee">
               <E2EESettings />
+            </TabsContent>
+
+            <TabsContent value="tools">
+              <ToolsSettings />
             </TabsContent>
           </Tabs>
         </div>

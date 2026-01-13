@@ -117,10 +117,41 @@ export class DirectBrowserTransport {
 
   /**
    * Convert UI messages to model messages format for streamText
+   * Handles multimodal content (text + images)
    */
   private convertToModelMessages(messages: UIMessage[]): ModelMessage[] {
     return messages.map((msg) => {
-      // Extract text content from message parts
+      // Check if message has multimodal content
+      // Cast to any for type checking since UIMessage parts may include custom image types
+      const hasImages = msg.parts?.some(
+        (part) => (part as any).type === 'image' || (part as any).type === 'image_url'
+      );
+
+      if (hasImages) {
+        // Build multimodal content array
+        const content: Array<{ type: string; text?: string; image?: string }> = [];
+
+        if (msg.parts) {
+          for (const part of msg.parts) {
+            if (part.type === 'text') {
+              content.push({ type: 'text', text: part.text });
+            } else if ((part as any).type === 'image' || (part as any).type === 'image_url') {
+              // Handle both formats
+              const imageData = (part as any).image || (part as any).image_url?.url;
+              if (imageData) {
+                content.push({ type: 'image', image: imageData });
+              }
+            }
+          }
+        }
+
+        return {
+          role: msg.role as 'user' | 'assistant' | 'system',
+          content,
+        } as ModelMessage;
+      }
+
+      // Text-only message
       let textContent = '';
 
       if (msg.parts) {

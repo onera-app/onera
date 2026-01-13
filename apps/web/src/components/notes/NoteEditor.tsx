@@ -169,9 +169,7 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
 
           {/* Unsaved indicator */}
           {hasChanges && (
-            <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-              Unsaved changes
-            </Badge>
+            <Badge variant="warning">Unsaved changes</Badge>
           )}
         </div>
 

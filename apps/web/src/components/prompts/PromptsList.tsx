@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import dayjs from 'dayjs';
 import { Plus, Search, MessageSquareText, Trash2 } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface PromptsListProps {
   selectedPromptId?: string;
@@ -83,12 +84,12 @@ export function PromptsList({ selectedPromptId, onSelectPrompt, onCreatePrompt }
               ))}
             </div>
           ) : filteredPrompts.length === 0 ? (
-            <div className="p-8 text-center">
-              <MessageSquareText className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
-              <p className="text-muted-foreground">
-                {searchQuery ? 'No prompts match your search' : 'No prompts yet. Create one!'}
-              </p>
-            </div>
+            <EmptyState
+              icon={MessageSquareText}
+              size="md"
+              title={searchQuery ? 'No prompts match your search' : 'No prompts yet'}
+              description={searchQuery ? undefined : 'Create one to get started'}
+            />
           ) : (
             <div className="divide-y divide-border">
               {filteredPrompts.map((prompt) => (
@@ -118,14 +119,14 @@ export function PromptsList({ selectedPromptId, onSelectPrompt, onCreatePrompt }
                     </div>
                     <Button
                       variant="ghost"
-                      size="icon"
+                      size="icon-sm"
                       onClick={(e) => {
                         e.stopPropagation();
                         setDeletePromptId(prompt.id);
                       }}
-                      className="h-7 w-7 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
+                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 />
                     </Button>
                   </div>
                 </div>

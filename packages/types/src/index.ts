@@ -103,11 +103,65 @@ export interface ChatMessage {
 }
 
 export interface MessageContent {
-  type: 'text' | 'image_url';
+  type: 'text' | 'image_url' | 'file';
   text?: string;
   image_url?: {
     url: string;
   };
+  file?: {
+    id: string;
+    name: string;
+    type: string;
+  };
+}
+
+// Attachment types for file/image uploads
+export type AttachmentType = 'image' | 'document' | 'text';
+
+export interface Attachment {
+  id: string;
+  chatId: string;
+  type: AttachmentType;
+  mimeType: string;
+  fileName: string;
+  fileSize: number;
+  metadata: {
+    width?: number;
+    height?: number;
+    pageCount?: number;
+    extractedText?: string;
+  };
+  createdAt: number;
+}
+
+export interface EncryptedAttachment extends Attachment {
+  encryptedData: string;
+  iv: string;
+}
+
+// Search types
+export type SearchProvider = 'exa' | 'brave' | 'tavily' | 'serper' | 'firecrawl';
+
+export interface SearchResult {
+  title: string;
+  url: string;
+  snippet: string;
+  content?: string;
+  publishedDate?: string;
+  score?: number;
+}
+
+export interface SearchProviderConfig {
+  id: SearchProvider;
+  name: string;
+  enabled: boolean;
+  apiKey?: string;
+}
+
+export interface ToolsConfig {
+  searchEnabled: boolean;
+  defaultSearchProvider: SearchProvider | null;
+  searchProviders: SearchProviderConfig[];
 }
 
 export interface CreateChatForm {

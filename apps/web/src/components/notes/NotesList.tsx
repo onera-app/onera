@@ -27,6 +27,7 @@ import dayjs from 'dayjs';
 import { v4 as uuid } from 'uuid';
 import { encryptNote, decryptNoteTitle } from '@onera/crypto';
 import { Plus, FileText, Trash2 } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface NotesListProps {
   selectedNoteId?: string;
@@ -129,12 +130,12 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
               ))}
             </div>
           ) : notes.length === 0 ? (
-            <div className="p-8 text-center">
-              <FileText className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
-              <p className="text-muted-foreground">
-                {showArchived ? 'No archived notes' : 'No notes yet. Create one!'}
-              </p>
-            </div>
+            <EmptyState
+              icon={FileText}
+              size="md"
+              title={showArchived ? 'No archived notes' : 'No notes yet'}
+              description={showArchived ? undefined : 'Create one to get started'}
+            />
           ) : (
             <div className="divide-y divide-border">
               {notes.map((note) => (
@@ -159,14 +160,14 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
                     </div>
                     <Button
                       variant="ghost"
-                      size="icon"
+                      size="icon-sm"
                       onClick={(e) => {
                         e.stopPropagation();
                         setDeleteNoteId(note.id);
                       }}
-                      className="h-7 w-7 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
+                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 />
                     </Button>
                   </div>
                 </div>

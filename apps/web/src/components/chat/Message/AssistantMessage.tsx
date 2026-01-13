@@ -1,7 +1,7 @@
 import { useState, useCallback, memo } from 'react';
 import { Streamdown } from 'streamdown';
 import { MessageActions } from './MessageActions';
-import { cn } from '@/lib/utils';
+import { cn, getProviderStyle, formatModelName } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 
@@ -11,79 +11,6 @@ interface AssistantMessageProps {
   isStreaming?: boolean;
   onCopy?: () => void;
   onRegenerate?: () => void;
-}
-
-// Provider-specific styling
-function getModelStyle(model?: string): { letter: string; bg: string; text: string; name: string } {
-  if (!model) return { letter: 'AI', bg: 'bg-muted', text: 'text-muted-foreground', name: 'Assistant' };
-
-  const modelLower = model.toLowerCase();
-
-  if (modelLower.includes('claude') || modelLower.includes('anthropic')) {
-    return {
-      letter: 'C',
-      bg: 'bg-orange-100 dark:bg-orange-900/30',
-      text: 'text-orange-700 dark:text-orange-300',
-      name: formatModelName(model)
-    };
-  }
-  if (modelLower.includes('gpt') || modelLower.includes('openai')) {
-    return {
-      letter: 'G',
-      bg: 'bg-emerald-100 dark:bg-emerald-900/30',
-      text: 'text-emerald-700 dark:text-emerald-300',
-      name: formatModelName(model)
-    };
-  }
-  if (modelLower.includes('gemini') || modelLower.includes('google')) {
-    return {
-      letter: 'G',
-      bg: 'bg-blue-100 dark:bg-blue-900/30',
-      text: 'text-blue-700 dark:text-blue-300',
-      name: formatModelName(model)
-    };
-  }
-  if (modelLower.includes('llama') || modelLower.includes('meta')) {
-    return {
-      letter: 'L',
-      bg: 'bg-purple-100 dark:bg-purple-900/30',
-      text: 'text-purple-700 dark:text-purple-300',
-      name: formatModelName(model)
-    };
-  }
-  if (modelLower.includes('mistral')) {
-    return {
-      letter: 'M',
-      bg: 'bg-cyan-100 dark:bg-cyan-900/30',
-      text: 'text-cyan-700 dark:text-cyan-300',
-      name: formatModelName(model)
-    };
-  }
-
-  return {
-    letter: 'AI',
-    bg: 'bg-muted',
-    text: 'text-muted-foreground',
-    name: formatModelName(model)
-  };
-}
-
-function formatModelName(model?: string): string {
-  if (!model) return 'Assistant';
-
-  // Handle provider:model format
-  const parts = model.split(':');
-  const modelPart = parts.length > 1 ? parts[1] : parts[0];
-
-  return modelPart
-    .replace('claude-', 'Claude ')
-    .replace('gpt-', 'GPT-')
-    .replace('-turbo', ' Turbo')
-    .replace('-preview', ' Preview')
-    .replace('-latest', '')
-    .replace(/-/g, ' ')
-    .replace(/\b\w/g, l => l.toUpperCase())
-    .trim();
 }
 
 export const AssistantMessage = memo(function AssistantMessage({
@@ -102,14 +29,15 @@ export const AssistantMessage = memo(function AssistantMessage({
     onCopy?.();
   }, [content, onCopy]);
 
-  const { letter, bg, text, name } = getModelStyle(model);
+  const { letter, bgClass, textClass } = getProviderStyle(model);
+  const name = formatModelName(model);
 
   return (
     <div className="group">
       {/* Model indicator */}
       <div className="flex items-center gap-2.5 mb-3">
         <Avatar className="h-7 w-7">
-          <AvatarFallback className={cn('text-xs font-semibold', bg, text)}>
+          <AvatarFallback className={cn('text-xs font-semibold', bgClass, textClass)}>
             {letter}
           </AvatarFallback>
         </Avatar>

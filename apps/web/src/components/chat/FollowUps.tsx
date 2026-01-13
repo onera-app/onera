@@ -16,7 +16,7 @@ export const FollowUps = memo(function FollowUps({ followUps, onSelect, classNam
       <div className="text-xs font-medium text-muted-foreground mb-2">
         Suggested follow-ups
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         {followUps.map((followUp, idx) => (
           <Button
             key={idx}

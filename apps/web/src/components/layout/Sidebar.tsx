@@ -269,7 +269,7 @@ export function Sidebar() {
                       <div
                         className={cn(
                           'w-1.5 h-1.5 rounded-full transition-colors',
-                          isUnlocked ? 'bg-green-500' : 'bg-yellow-500 animate-pulse'
+                          isUnlocked ? 'bg-status-success-text' : 'bg-status-warning-text animate-pulse'
                         )}
                       />
                       <span className="text-[11px] text-muted-foreground">

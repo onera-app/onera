@@ -33,32 +33,28 @@ export function E2EESettings() {
       {/* Status Card */}
       <Card className={cn(
         isUnlocked
-          ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20'
-          : 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20'
+          ? 'border-status-success/50 bg-status-success/20'
+          : 'border-status-warning/50 bg-status-warning/20'
       )}>
         <CardContent className="flex items-center gap-4 p-4">
           <div className={cn(
             'w-10 h-10 rounded-full flex items-center justify-center',
             isUnlocked
-              ? 'bg-green-100 dark:bg-green-800 text-green-600 dark:text-green-300'
-              : 'bg-amber-100 dark:bg-amber-800 text-amber-600 dark:text-amber-300'
+              ? 'bg-status-success text-status-success-text'
+              : 'bg-status-warning text-status-warning-text'
           )}>
             {isUnlocked ? <Unlock className="h-5 w-5" /> : <Lock className="h-5 w-5" />}
           </div>
           <div className="flex-1">
             <p className={cn(
               'font-medium',
-              isUnlocked
-                ? 'text-green-700 dark:text-green-300'
-                : 'text-amber-700 dark:text-amber-300'
+              isUnlocked ? 'text-status-success-text' : 'text-status-warning-text'
             )}>
               E2EE is {isUnlocked ? 'Unlocked' : 'Locked'}
             </p>
             <p className={cn(
               'text-sm',
-              isUnlocked
-                ? 'text-green-600 dark:text-green-400'
-                : 'text-amber-600 dark:text-amber-400'
+              isUnlocked ? 'text-status-success-text/80' : 'text-status-warning-text/80'
             )}>
               {isUnlocked
                 ? 'Your chats and notes are accessible'

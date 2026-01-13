@@ -3,6 +3,7 @@ import type { ChatMessage } from '@onera/types';
 import { UserMessage, AssistantMessage } from './Message';
 import { cn } from '@/lib/utils';
 import { MessageSquare } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface MessagesProps {
   messages: ChatMessage[];
@@ -32,20 +33,12 @@ export const Messages = memo(function Messages({
   if (messages.length === 0 && !streamingMessage) {
     return (
       <div className="flex items-center justify-center h-full px-4">
-        <div className="text-center max-w-md">
-          {/* Empty state */}
-          <div className="relative mb-6">
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center rotate-3 shadow-sm">
-              <MessageSquare className="w-10 h-10 text-primary" />
-            </div>
-          </div>
-          <h3 className="text-xl font-semibold text-foreground mb-2">
-            Start a conversation
-          </h3>
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            Send a message to begin your encrypted conversation
-          </p>
-        </div>
+        <EmptyState
+          icon={MessageSquare}
+          size="lg"
+          title="Start a conversation"
+          description="Send a message to begin your encrypted conversation"
+        />
       </div>
     );
   }

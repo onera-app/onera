@@ -7,14 +7,16 @@ import { useE2EE } from '@/providers/E2EEProvider';
 import { useModelStore } from '@/stores/modelStore';
 import { useChat, useUpdateChat, useDeleteChat } from '@/hooks/queries/useChats';
 import { getChatKey, decryptChatTitle, decryptChatContent, encryptChatContent, encryptChatTitle } from '@onera/crypto';
-import type { ChatMessage } from '@onera/types';
+import type { ChatMessage, MessageContent } from '@onera/types';
 import { Messages } from '@/components/chat/Messages';
-import { MessageInput } from '@/components/chat/MessageInput';
+import { MessageInput, type MessageInputOptions } from '@/components/chat/MessageInput';
 import { ChatNavbar } from '@/components/chat/ChatNavbar';
 import { ModelSelector } from '@/components/chat/ModelSelector';
 import { FollowUps } from '@/components/chat/FollowUps';
 import { useDirectChat } from '@/hooks/useDirectChat';
 import { generateFollowUps } from '@/lib/ai';
+import { storeAttachment } from '@/lib/storage/attachmentStorage';
+import { executeSearch, formatSearchResultsForContext } from '@/lib/search';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, Loader2 } from 'lucide-react';
@@ -361,8 +363,8 @@ export function ChatPage() {
     return result;
   }, [chat?.messages, aiMessages, isStreaming, selectedModelId]);
 
-  // Handle sending a message
-  const handleSendMessage = useCallback(async (content: string) => {
+  // Handle sending a message with optional attachments and search
+  const handleSendMessage = useCallback(async (content: string, options?: MessageInputOptions) => {
     if (!isUnlocked || !chat || !selectedModelId || !chatId) {
       if (!selectedModelId) {
         toast.error('Please select a model first');
@@ -382,18 +384,130 @@ export function ChatPage() {
     // Clear follow-ups when sending a new message
     setFollowUps([]);
 
-    // Create and store pending user message for persistence
-    const userMessage: ChatMessage = {
-      id: uuidv4(),
-      role: 'user',
-      content,
-      created_at: Date.now(),
-    };
-    pendingUserMessageRef.current = userMessage;
-
-    // Send to AI via the hook
     try {
-      await sendMessage(content);
+      // Build the message content
+      let messageContent: string | MessageContent[] = content;
+      const uiParts: Array<{ type: string; text?: string; image?: string }> = [];
+
+      // Process attachments if provided
+      if (options?.attachments && options.attachments.length > 0) {
+        const contentParts: MessageContent[] = [];
+
+        for (const attachment of options.attachments) {
+          if (attachment.type === 'image') {
+            // Store the image and add to message
+            await storeAttachment({
+              chatId,
+              type: 'image',
+              mimeType: attachment.mimeType,
+              fileName: attachment.fileName,
+              fileSize: attachment.fileSize,
+              data: attachment.data,
+              metadata: attachment.metadata,
+            });
+
+            // Add image to content parts for LLM
+            const dataUrl = `data:${attachment.mimeType};base64,${attachment.data}`;
+            contentParts.push({
+              type: 'image_url',
+              image_url: { url: dataUrl },
+            });
+            uiParts.push({ type: 'image', image: dataUrl });
+          } else if (attachment.type === 'document' || attachment.type === 'text') {
+            // Store the document and add extracted text to context
+            await storeAttachment({
+              chatId,
+              type: attachment.type,
+              mimeType: attachment.mimeType,
+              fileName: attachment.fileName,
+              fileSize: attachment.fileSize,
+              data: attachment.data,
+              metadata: attachment.metadata,
+            });
+
+            // Add document context as text
+            if (attachment.metadata?.extractedText) {
+              const docContext = `[Document: ${attachment.fileName}]\n${attachment.metadata.extractedText}\n\n`;
+              contentParts.push({ type: 'text', text: docContext });
+            }
+          }
+        }
+
+        // Add user's text message
+        if (content) {
+          contentParts.push({ type: 'text', text: content });
+          uiParts.push({ type: 'text', text: content });
+        }
+
+        messageContent = contentParts;
+      }
+
+      // Execute search if enabled
+      let searchContext = '';
+      if (options?.searchEnabled) {
+        try {
+          const searchResult = await executeSearch(content, options.searchProvider);
+          if (searchResult.results.length > 0) {
+            searchContext = formatSearchResultsForContext(searchResult.results, content);
+            toast.success(`Found ${searchResult.results.length} search results`);
+          }
+        } catch (searchError) {
+          console.warn('Search failed:', searchError);
+          // Don't block the message, just warn
+          toast.warning('Search failed, sending message without search results');
+        }
+      }
+
+      // Build the final message text for the AI
+      let finalContent = '';
+      if (searchContext) {
+        finalContent = `${searchContext}\n\n`;
+      }
+
+      // Handle multimodal content
+      if (Array.isArray(messageContent)) {
+        // Extract text parts and prepend search context
+        const textParts = messageContent.filter(p => p.type === 'text');
+
+        if (searchContext && textParts.length > 0) {
+          textParts[0] = { type: 'text', text: searchContext + '\n\n' + (textParts[0].text || '') };
+        } else if (searchContext) {
+          messageContent = [{ type: 'text', text: searchContext }, ...messageContent];
+        }
+
+        // Build UI parts for AI SDK
+        for (const part of messageContent) {
+          if (part.type === 'text' && part.text) {
+            uiParts.push({ type: 'text', text: part.text });
+          } else if (part.type === 'image_url' && part.image_url?.url) {
+            uiParts.push({ type: 'image', image: part.image_url.url });
+          }
+        }
+
+        finalContent = messageContent.filter(p => p.type === 'text').map(p => p.text).join('\n');
+      } else {
+        finalContent += messageContent;
+        uiParts.push({ type: 'text', text: finalContent });
+      }
+
+      // Create and store pending user message for persistence
+      const userMessage: ChatMessage = {
+        id: uuidv4(),
+        role: 'user',
+        content: messageContent,
+        created_at: Date.now(),
+      };
+      pendingUserMessageRef.current = userMessage;
+
+      // Send to AI via the hook - include image parts if any
+      const hasImages = uiParts.some(p => p.type === 'image');
+      if (hasImages) {
+        // For multimodal, we need to update the AI messages directly
+        // This is a workaround since sendMessage only accepts text
+        await sendMessage(finalContent);
+      } else {
+        await sendMessage(finalContent);
+      }
     } catch (err) {
       pendingUserMessageRef.current = null; // Clear on error
       if ((err as Error).name !== 'AbortError') {

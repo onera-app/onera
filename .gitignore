@@ -36,6 +36,9 @@ bun.lockb
 coverage/
 .nyc_output/
 
+# Turbo
+.turbo/
+
 # Misc
 *.pem
 *.key
