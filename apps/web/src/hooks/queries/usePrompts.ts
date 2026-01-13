@@ -2,7 +2,10 @@ import { trpc } from "@/lib/trpc";
 
 export function usePrompts() {
   const query = trpc.prompts.list.useQuery();
-  return query.data;
+  return {
+    data: query.data ?? [],
+    isLoading: query.isLoading,
+  };
 }
 
 export function usePrompt(id: string) {
@@ -10,7 +13,10 @@ export function usePrompt(id: string) {
     { promptId: id },
     { enabled: !!id }
   );
-  return query.data;
+  return {
+    data: query.data,
+    isLoading: query.isLoading,
+  };
 }
 
 export function useCreatePrompt() {

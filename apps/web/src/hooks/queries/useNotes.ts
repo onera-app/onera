@@ -46,6 +46,7 @@ export function useCreateNote() {
     }) => {
       mutation.mutate(data);
     },
+    isPending: mutation.isPending,
   };
 }
 

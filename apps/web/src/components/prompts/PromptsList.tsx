@@ -27,7 +27,7 @@ interface PromptsListProps {
 export function PromptsList({ selectedPromptId, onSelectPrompt, onCreatePrompt }: PromptsListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [deletePromptId, setDeletePromptId] = useState<string | null>(null);
-  const { data: prompts = [], isLoading } = usePrompts();
+  const { data: prompts, isLoading } = usePrompts();
   const deletePrompt = useDeletePrompt();
 
   const filteredPrompts = prompts.filter(
@@ -114,7 +114,7 @@ export function PromptsList({ selectedPromptId, onSelectPrompt, onCreatePrompt }
                         </p>
                       )}
                       <p className="text-xs text-muted-foreground mt-1">
-                        {dayjs(prompt.updated_at).format('MMM D, YYYY')}
+                        {dayjs(prompt.updatedAt).format('MMM D, YYYY')}
                       </p>
                     </div>
                     <Button

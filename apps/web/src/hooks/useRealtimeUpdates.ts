@@ -55,7 +55,7 @@ export function useRealtimeUpdates() {
       utils.notes.list.invalidate();
     });
 
-    socket.on("note:updated", (note: { _id: string }) => {
+    socket.on("note:updated", (note: { id: string }) => {
       utils.notes.list.invalidate();
       utils.notes.get.invalidate({ noteId: note.id });
     });
@@ -69,7 +69,7 @@ export function useRealtimeUpdates() {
       utils.folders.list.invalidate();
     });
 
-    socket.on("folder:updated", (folder: { _id: string }) => {
+    socket.on("folder:updated", (folder: { id: string }) => {
       utils.folders.list.invalidate();
       utils.folders.get.invalidate({ folderId: folder.id });
     });
@@ -96,7 +96,7 @@ export function useRealtimeUpdates() {
       utils.prompts.list.invalidate();
     });
 
-    socket.on("prompt:updated", (prompt: { _id: string }) => {
+    socket.on("prompt:updated", (prompt: { id: string }) => {
       utils.prompts.list.invalidate();
       utils.prompts.get.invalidate({ promptId: prompt.id });
     });

@@ -3,6 +3,7 @@
 export interface LLMProvider {
   id: string;
   name: string;
+  description: string;
   icon: string;
   fields: {
     key: string;
@@ -17,6 +18,7 @@ export const LLM_PROVIDERS: LLMProvider[] = [
   {
     id: 'openai',
     name: 'OpenAI',
+    description: 'GPT-4, GPT-3.5 Turbo, and other OpenAI models',
     icon: '🤖',
     fields: [
       {
@@ -38,6 +40,7 @@ export const LLM_PROVIDERS: LLMProvider[] = [
   {
     id: 'anthropic',
     name: 'Anthropic',
+    description: 'Claude 3.5, Claude 3, and other Anthropic models',
     icon: '🧠',
     fields: [
       {
@@ -52,6 +55,7 @@ export const LLM_PROVIDERS: LLMProvider[] = [
   {
     id: 'ollama',
     name: 'Ollama',
+    description: 'Run local models with Ollama',
     icon: '🦙',
     fields: [
       {
@@ -66,6 +70,7 @@ export const LLM_PROVIDERS: LLMProvider[] = [
   {
     id: 'openrouter',
     name: 'OpenRouter',
+    description: 'Access multiple AI providers through a single API',
     icon: '🔀',
     fields: [
       {
@@ -80,6 +85,7 @@ export const LLM_PROVIDERS: LLMProvider[] = [
   {
     id: 'google',
     name: 'Google AI',
+    description: 'Gemini Pro and other Google AI models',
     icon: '🔷',
     fields: [
       {

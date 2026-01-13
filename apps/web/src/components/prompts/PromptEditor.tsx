@@ -17,7 +17,9 @@ interface PromptEditorProps {
 }
 
 export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEditorProps) {
-  const { data: prompt, isLoading } = usePrompt(promptId || '');
+  const promptQuery = usePrompt(promptId || '');
+  const prompt = promptQuery.data;
+  const isLoading = promptQuery.isLoading;
   const updatePrompt = useUpdatePrompt();
   const createPrompt = useCreatePrompt();
 
@@ -127,7 +129,7 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
           </h2>
           {!isNew && prompt && (
             <span className="text-xs text-muted-foreground">
-              Updated {dayjs(prompt.updated_at).format('MMM D, YYYY h:mm A')}
+              Updated {dayjs(prompt.updatedAt).format('MMM D, YYYY h:mm A')}
             </span>
           )}
           {hasChanges && (
