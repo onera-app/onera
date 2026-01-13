@@ -1,66 +1,72 @@
 # =============================================================================
-# Onera Web - Multi-stage Docker Build
+# Onera Web - Production Docker Build
 # =============================================================================
-# Stage 1: Build with Bun in a monorepo context
-# Stage 2: Serve with Nginx Alpine for minimal image size
+# This is a standalone Dockerfile for the web application, optimized for
+# production deployment to Azure Container Apps or similar platforms.
+#
+# Build:
+#   docker build -t onera-web \
+#     --build-arg VITE_API_URL=https://api.yourapp.com \
+#     --build-arg VITE_WS_URL=https://api.yourapp.com \
+#     .
+#
+# Run:
+#   docker run -p 80:80 onera-web
 # =============================================================================
 
-# -----------------------------------------------------------------------------
-# Stage 1: Builder
-# -----------------------------------------------------------------------------
-FROM oven/bun:1.1-alpine AS builder
-
+FROM node:22-alpine AS builder
 WORKDIR /app
 
-# Copy package manifests first for better layer caching
-COPY package.json bun.lock turbo.json ./
+ARG VITE_API_URL
+ARG VITE_WS_URL
+ARG BUILD_HASH=dev
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_WS_URL=$VITE_WS_URL
+ENV VITE_BUILD_HASH=$BUILD_HASH
+
+# Copy package files
+COPY package.json ./
 COPY apps/web/package.json ./apps/web/
+COPY apps/server/package.json ./apps/server/
 COPY packages/crypto/package.json ./packages/crypto/
 COPY packages/types/package.json ./packages/types/
 
-# Install dependencies
-RUN bun install --frozen-lockfile
+# Remove packageManager field and convert workspace:* to proper versions
+RUN apk add --no-cache jq && \
+    jq 'del(.packageManager)' package.json > tmp.json && mv tmp.json package.json && \
+    for pkg in apps/web apps/server packages/crypto packages/types; do \
+        if [ -f "$pkg/package.json" ]; then \
+            jq 'walk(if type == "object" then with_entries(if .value == "workspace:*" then .value = "*" else . end) else . end)' "$pkg/package.json" > tmp.json && mv tmp.json "$pkg/package.json"; \
+        fi; \
+    done && \
+    npm install --legacy-peer-deps --loglevel=error
 
 # Copy source code
 COPY . .
 
-# Build arguments for environment configuration
-# Use placeholder that will be replaced at runtime for flexibility
-ARG VITE_CONVEX_URL=__CONVEX_URL_PLACEHOLDER__
-ENV VITE_CONVEX_URL=$VITE_CONVEX_URL
-
-# Build argument for version tracking
-ARG BUILD_HASH=dev
-ENV VITE_BUILD_HASH=$BUILD_HASH
-
-# Build the web application
-RUN bun run build --filter=@onera/web
+# Build web app with vite
+WORKDIR /app/apps/web
+RUN npx vite build
 
 # -----------------------------------------------------------------------------
-# Stage 2: Nginx Runtime
+# Production Runtime
 # -----------------------------------------------------------------------------
-FROM nginx:alpine
+FROM nginx:alpine AS runner
 
-# Install envsubst for potential future env var templating
-RUN apk add --no-cache bash
+# Install wget for healthcheck
+RUN apk add --no-cache wget
 
-# Copy built assets from builder stage
+# Copy built assets
 COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
 
 # Copy Nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy entrypoint script for runtime env injection
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
-
-# Expose HTTP port
-EXPOSE 80
-
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost/health || exit 1
 
-# Use custom entrypoint for env var injection, then start nginx
-ENTRYPOINT ["/docker-entrypoint.sh"]
+# Expose HTTP port
+EXPOSE 80
+
 CMD ["nginx", "-g", "daemon off;"]
