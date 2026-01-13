@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect, type KeyboardEvent } from 'react';
+import { useState, useRef, useCallback, useEffect, memo, type KeyboardEvent } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,7 +13,7 @@ interface MessageInputProps {
   isStreaming?: boolean;
 }
 
-export function MessageInput({
+export const MessageInput = memo(function MessageInput({
   onSend,
   disabled = false,
   placeholder = 'Message Onera...',
@@ -162,4 +162,4 @@ export function MessageInput({
       </div>
     </div>
   );
-}
+});

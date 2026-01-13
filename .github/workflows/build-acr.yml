@@ -1,5 +1,5 @@
 # =============================================================================
-# GitHub Actions workflow to build and push cortex-web to Azure Container Registry
+# GitHub Actions workflow to build and push onera-web to Azure Container Registry
 # =============================================================================
 #
 # Triggers:
@@ -8,10 +8,11 @@
 #
 # Required Secrets:
 # - AZURE_CREDENTIALS: JSON credentials from service principal (az ad sp create-for-rbac --sdk-auth)
-# - ACR_LOGIN_SERVER: ACR server (e.g., cortexacr.azurecr.io)
+# - ACR_LOGIN_SERVER: ACR server (e.g., oneraacr.azurecr.io)
 #
 # Optional Secrets:
-# - VITE_CONVEX_URL: Convex deployment URL (can also use placeholder for runtime injection)
+# - VITE_API_URL: Backend API URL (can also use placeholder for runtime injection)
+# - VITE_WS_URL: WebSocket URL (can also use placeholder for runtime injection)
 # =============================================================================
 
 name: Build and Push to ACR
@@ -28,13 +29,13 @@ on:
         type: string
 
 env:
-  IMAGE_NAME: cortex-web
+  IMAGE_NAME: onera-web
 
 jobs:
   build-and-push:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -44,16 +45,19 @@ jobs:
 
       - name: Generate image tags
         id: tags
+        env:
+          GIT_SHA: ${{ github.sha }}
+          CUSTOM_TAG: ${{ inputs.tag }}
+          ACR_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
         run: |
-          SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
-          CUSTOM_TAG="${{ inputs.tag }}"
-          
+          SHA_SHORT=$(echo "$GIT_SHA" | cut -c1-7)
+
           if [ -n "$CUSTOM_TAG" ]; then
-            echo "tags=${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${CUSTOM_TAG},${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${SHA_SHORT},${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_OUTPUT
+            echo "tags=${ACR_SERVER}/${IMAGE_NAME}:${CUSTOM_TAG},${ACR_SERVER}/${IMAGE_NAME}:${SHA_SHORT},${ACR_SERVER}/${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
           else
-            echo "tags=${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${SHA_SHORT},${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_OUTPUT
+            echo "tags=${ACR_SERVER}/${IMAGE_NAME}:${SHA_SHORT},${ACR_SERVER}/${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
           fi
-          
+
           echo "sha_short=${SHA_SHORT}" >> $GITHUB_OUTPUT
 
       - name: Log in to Azure
@@ -62,37 +66,44 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Log in to Azure Container Registry
+        env:
+          ACR_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
         run: |
-          az acr login --name $(echo "${{ secrets.ACR_LOGIN_SERVER }}" | cut -d'.' -f1)
+          az acr login --name $(echo "$ACR_SERVER" | cut -d'.' -f1)
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile
+          file: ./apps/web/Dockerfile
           push: true
           tags: ${{ steps.tags.outputs.tags }}
           build-args: |
             BUILD_HASH=${{ steps.tags.outputs.sha_short }}
-            VITE_CONVEX_URL=__CONVEX_URL_PLACEHOLDER__
+            VITE_API_URL=${{ secrets.VITE_API_URL || 'http://localhost:3000' }}
+            VITE_WS_URL=${{ secrets.VITE_WS_URL || 'http://localhost:3000' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
 
       - name: Output image info
+        env:
+          ACR_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
+          SHA_SHORT: ${{ steps.tags.outputs.sha_short }}
+          TAGS: ${{ steps.tags.outputs.tags }}
         run: |
-          echo "### Image Published 🐳" >> $GITHUB_STEP_SUMMARY
+          echo "### Image Published" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Registry:** ${{ secrets.ACR_LOGIN_SERVER }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Image:** ${{ env.IMAGE_NAME }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Tags:** ${{ steps.tags.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Registry:** ${ACR_SERVER}" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** ${IMAGE_NAME}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tags:** ${TAGS}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "#### Pull command" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "docker pull ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ steps.tags.outputs.sha_short }}" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${ACR_SERVER}/${IMAGE_NAME}:${SHA_SHORT}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "#### Run command (with runtime env injection)" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "docker run -p 80:80 -e VITE_CONVEX_URL=https://your-convex-url.convex.cloud ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ steps.tags.outputs.sha_short }}" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "#### Run with Docker Compose (recommended)" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "docker compose up -d" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

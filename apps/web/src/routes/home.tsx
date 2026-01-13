@@ -4,14 +4,16 @@ import { toast } from 'sonner';
 import type { UIMessage } from 'ai';
 import { useE2EE } from '@/providers/E2EEProvider';
 import { useModelStore } from '@/stores/modelStore';
-import { useCreateChat } from '@/hooks/queries/useChats';
+import { useCreateChat, useUpdateChat } from '@/hooks/queries/useChats';
+import { trpc } from '@/lib/trpc';
 import { useCredentials } from '@/hooks/queries/useCredentials';
-import { createEncryptedChat } from '@onera/crypto';
+import { createEncryptedChat, encryptChatTitle, getChatKey } from '@onera/crypto';
 import type { ChatMessage } from '@onera/types';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { ModelSelector } from '@/components/chat/ModelSelector';
 import { Messages } from '@/components/chat/Messages';
 import { useDirectChat } from '@/hooks/useDirectChat';
+import { generateChatTitle } from '@/lib/ai';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
@@ -39,6 +41,18 @@ function toChatMessage(msg: UIMessage, model?: string): ChatMessage {
   };
 }
 
+/**
+ * Compare two message arrays for equality to avoid unnecessary re-renders
+ */
+function areMessagesEqual(a: ChatMessage[], b: ChatMessage[]): boolean {
+  if (a.length !== b.length) return false;
+  return a.every((msg, i) =>
+    msg.id === b[i].id &&
+    msg.content === b[i].content &&
+    msg.role === b[i].role
+  );
+}
+
 // Suggested prompts for new users
 const SUGGESTIONS = [
   { text: 'Help me write a professional email', icon: Mail },
@@ -52,11 +66,14 @@ export function HomePage() {
   const { isUnlocked } = useE2EE();
   const { selectedModelId, setSelectedModel } = useModelStore();
   const createChat = useCreateChat();
+  const updateChat = useUpdateChat();
+  const utils = trpc.useUtils();
 
   const [isCreating, setIsCreating] = useState(false);
   const pendingNavigateRef = useRef<string | null>(null);
+  const prevDisplayMessagesRef = useRef<ChatMessage[]>([]);
 
-  // Check if user has connections using Convex
+  // Check if user has connections
   const credentials = useCredentials();
   const hasAnyConnections = credentials && credentials.length > 0;
 
@@ -89,8 +106,16 @@ export function HomePage() {
   const isStreaming = status === 'streaming' || status === 'submitted';
 
   // Convert AI SDK messages to ChatMessage format for display
+  // Uses ref comparison to return stable reference when content unchanged
   const displayMessages = useMemo(() => {
-    return aiMessages.map(msg => toChatMessage(msg, selectedModelId || undefined));
+    const result = aiMessages.map(msg => toChatMessage(msg, selectedModelId || undefined));
+
+    // Return same reference if content unchanged to prevent re-renders
+    if (areMessagesEqual(prevDisplayMessagesRef.current, result)) {
+      return prevDisplayMessagesRef.current;
+    }
+    prevDisplayMessagesRef.current = result;
+    return result;
   }, [aiMessages, selectedModelId]);
 
   // Get streaming content from the last message if it's streaming
@@ -126,6 +151,9 @@ export function HomePage() {
         return;
       }
 
+      // Set immediately to prevent duplicate calls from concurrent renders
+      pendingNavigateRef.current = 'creating';
+
       const finalMessages = aiMessages.map(msg => toChatMessage(msg, selectedModelId || undefined));
       const firstUserMsg = finalMessages.find(m => m.role === 'user');
       const content = firstUserMsg?.content || 'New Chat';
@@ -146,8 +174,48 @@ export function HomePage() {
           chatNonce: encryptedData.chatNonce,
         });
 
+        // Pre-populate the cache to avoid loading state on chat page
+        utils.chats.get.setData({ chatId: createdChat.id }, createdChat);
+
         pendingNavigateRef.current = createdChat.id;
         navigate({ to: '/c/$chatId', params: { chatId: createdChat.id } });
+
+        // Generate AI title asynchronously (fire-and-forget)
+        if (selectedModelId) {
+          generateChatTitle(finalMessages, selectedModelId)
+            .then(async (generatedTitle) => {
+              if (generatedTitle && createdChat.encryptedChatKey && createdChat.chatKeyNonce) {
+                try {
+                  // Ensure chat key is in cache
+                  getChatKey(createdChat.id, createdChat.encryptedChatKey, createdChat.chatKeyNonce);
+
+                  const encrypted = encryptChatTitle(
+                    createdChat.id,
+                    createdChat.encryptedChatKey,
+                    createdChat.chatKeyNonce,
+                    generatedTitle
+                  );
+
+                  await updateChat.mutateAsync({
+                    id: createdChat.id,
+                    data: {
+                      encryptedTitle: encrypted.encryptedTitle,
+                      titleNonce: encrypted.titleNonce,
+                    },
+                  });
+
+                  // Invalidate to refresh sidebar and chat page
+                  utils.chats.list.invalidate();
+                  utils.chats.get.invalidate({ chatId: createdChat.id });
+                } catch (titleError) {
+                  console.warn('Failed to update title:', titleError);
+                }
+              }
+            })
+            .catch((err) => {
+              console.warn('Title generation failed:', err);
+            });
+        }
       } catch (err) {
         pendingNavigateRef.current = null;
         toast.error(err instanceof Error ? err.message : 'Failed to create chat');
@@ -156,7 +224,7 @@ export function HomePage() {
     };
 
     createAndNavigate();
-  }, [aiMessages, isStreaming, isCreating, selectedModelId, navigate, createChat]);
+  }, [aiMessages, isStreaming, isCreating, selectedModelId, navigate, createChat, updateChat, utils]);
 
   // Reset state when needed
   useEffect(() => {

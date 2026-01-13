@@ -1,25 +1,34 @@
-import { useQuery, useMutation } from 'convex/react';
-import { api } from 'convex/_generated/api';
+import { trpc } from "@/lib/trpc";
 
 /**
  * Check if user has E2EE keys set up
  */
 export function useUserKeysCheck() {
-  return useQuery(api.userKeys.check);
+  const query = trpc.userKeys.check.useQuery();
+  return query.data;
 }
 
 /**
  * Get user's E2EE key material
  */
 export function useUserKeys() {
-  return useQuery(api.userKeys.get);
+  const query = trpc.userKeys.get.useQuery(undefined, {
+    retry: false,
+  });
+  return query.data;
 }
 
 /**
  * Create user E2EE keys
  */
 export function useCreateUserKeys() {
-  const createUserKeys = useMutation(api.userKeys.create);
+  const utils = trpc.useUtils();
+  const mutation = trpc.userKeys.create.useMutation({
+    onSuccess: () => {
+      utils.userKeys.check.invalidate();
+      utils.userKeys.get.invalidate();
+    },
+  });
 
   return {
     mutateAsync: async (data: {
@@ -36,7 +45,7 @@ export function useCreateUserKeys() {
       masterKeyRecovery: string;
       masterKeyRecoveryNonce: string;
     }) => {
-      return createUserKeys(data);
+      return mutation.mutateAsync(data);
     },
     mutate: (data: {
       kekSalt: string;
@@ -52,7 +61,7 @@ export function useCreateUserKeys() {
       masterKeyRecovery: string;
       masterKeyRecoveryNonce: string;
     }) => {
-      createUserKeys(data);
+      mutation.mutate(data);
     },
   };
 }
@@ -61,7 +70,12 @@ export function useCreateUserKeys() {
  * Update user E2EE keys (for password change)
  */
 export function useUpdateUserKeys() {
-  const updateUserKeys = useMutation(api.userKeys.update);
+  const utils = trpc.useUtils();
+  const mutation = trpc.userKeys.update.useMutation({
+    onSuccess: () => {
+      utils.userKeys.get.invalidate();
+    },
+  });
 
   return {
     mutateAsync: async (data: {
@@ -71,7 +85,7 @@ export function useUpdateUserKeys() {
       encryptedMasterKey?: string;
       masterKeyNonce?: string;
     }) => {
-      return updateUserKeys(data);
+      return mutation.mutateAsync(data);
     },
     mutate: (data: {
       kekSalt?: string;
@@ -80,7 +94,7 @@ export function useUpdateUserKeys() {
       encryptedMasterKey?: string;
       masterKeyNonce?: string;
     }) => {
-      updateUserKeys(data);
+      mutation.mutate(data);
     },
   };
 }

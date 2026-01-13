@@ -19,7 +19,6 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
       '@onera/crypto': path.resolve(__dirname, '../../packages/crypto/src/sodium'),
       '@onera/types': path.resolve(__dirname, '../../packages/types/src'),
-      'convex/_generated': path.resolve(__dirname, '../../convex/_generated'),
     },
   },
   optimizeDeps: {
@@ -34,10 +33,10 @@ export default defineConfig({
     noExternal: ['libsodium-wrappers-sumo'],
   },
   server: {
-    port: 3000,
+    port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:3000',
         changeOrigin: true,
       },
     },

@@ -95,6 +95,16 @@ export function useDirectChat({
   const { selectedModelId, setSelectedModel } = useModelStore();
   const transportRef = useRef<DirectBrowserTransport | null>(null);
 
+  // Stable refs for callbacks to avoid recreating chatOptions on every render
+  const onFinishRef = useRef(onFinish);
+  const onErrorRef = useRef(onError);
+
+  // Update refs when callbacks change (no dependency tracking needed)
+  useEffect(() => {
+    onFinishRef.current = onFinish;
+    onErrorRef.current = onError;
+  });
+
   // Fetch credentials from Convex
   const rawCredentials = useCredentials();
   const isLoadingCredentials = rawCredentials === undefined;
@@ -111,15 +121,19 @@ export function useDirectChat({
         encryptedData: c.encryptedData,
         iv: c.iv,
       }));
-      const decrypted = decryptRawCredentials(raw);
-      // Update the credential cache for provider lookups
-      setCredentialCache(decrypted);
-      return decrypted;
+      return decryptRawCredentials(raw);
     } catch (err) {
       console.error('Failed to decrypt credentials:', err);
       return [];
     }
   }, [rawCredentials, isUnlocked]);
+
+  // Update credential cache when credentials change (moved out of useMemo)
+  useEffect(() => {
+    if (credentials.length > 0) {
+      setCredentialCache(credentials);
+    }
+  }, [credentials]);
 
   // Check if transport is ready
   const isReady = useMemo(() => {
@@ -151,6 +165,7 @@ export function useDirectChat({
   }, [selectedModelId, temperature, maxTokens, systemPrompt]);
 
   // Create chat options with our transport - ALWAYS provide transport
+  // Uses refs for callbacks to avoid recreating on every render
   const chatOptions = useMemo((): ChatInit<UIMessage> => {
     // Create a transport if we don't have one yet
     if (!transportRef.current) {
@@ -166,12 +181,11 @@ export function useDirectChat({
       id: chatId,
       messages: initialMessages,
       transport: transportRef.current as any, // Type cast needed due to generic constraints
-      onFinish: onFinish
-        ? ({ message }) => onFinish(message)
-        : undefined,
-      onError,
+      onFinish: ({ message }) => onFinishRef.current?.(message),
+      onError: (error) => onErrorRef.current?.(error),
     };
-  }, [chatId, initialMessages, selectedModelId, temperature, maxTokens, systemPrompt, onFinish, onError]);
+  }, [chatId, initialMessages, selectedModelId, temperature, maxTokens, systemPrompt]);
+  // REMOVED: onFinish, onError from dependencies - using refs instead
 
   // Use AI SDK's useChat with our transport
   const chat = useChat(chatOptions);
@@ -187,14 +201,14 @@ export function useDirectChat({
               ? 'No model selected'
               : 'No credentials available'
         );
-        onError?.(error);
+        onErrorRef.current?.(error);
         throw error;
       }
 
       // Use the chat's sendMessage with text format
       await chat.sendMessage({ text: content });
     },
-    [isReady, isUnlocked, selectedModelId, chat.sendMessage, onError]
+    [isReady, isUnlocked, selectedModelId, chat.sendMessage]
   );
 
   return {

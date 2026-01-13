@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -7,7 +8,7 @@ interface FollowUpsProps {
   className?: string;
 }
 
-export function FollowUps({ followUps, onSelect, className }: FollowUpsProps) {
+export const FollowUps = memo(function FollowUps({ followUps, onSelect, className }: FollowUpsProps) {
   if (followUps.length === 0) return null;
 
   return (
@@ -29,4 +30,4 @@ export function FollowUps({ followUps, onSelect, className }: FollowUpsProps) {
       </div>
     </div>
   );
-}
+});

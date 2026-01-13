@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useCallback, type ReactNode } from 'react';
-import { useConvexAuth, useQuery } from 'convex/react';
-import { api } from 'convex/_generated/api';
+import { useAuth } from '@/providers/AuthProvider';
+import { useUserKeysCheck } from '@/hooks/queries/useUserKeys';
 import { useE2EEStore, type E2EEStatus } from '@/stores/e2eeStore';
 import {
   initializeE2EE,
@@ -35,7 +35,7 @@ interface E2EEContextValue {
 const E2EEContext = createContext<E2EEContextValue | null>(null);
 
 export function E2EEProvider({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useConvexAuth();
+  const { isAuthenticated } = useAuth();
   const {
     status,
     error,
@@ -47,11 +47,8 @@ export function E2EEProvider({ children }: { children: ReactNode }) {
     setError,
   } = useE2EEStore();
 
-  // Check if user has keys using Convex
-  const userKeysCheck = useQuery(
-    api.userKeys.check,
-    isAuthenticated ? {} : 'skip'
-  );
+  // Check if user has keys
+  const userKeysCheck = useUserKeysCheck();
 
   // Initialize E2EE and subscribe to state changes
   useEffect(() => {
@@ -79,7 +76,7 @@ export function E2EEProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, [setReady, setStatus, setError]);
 
-  // Update needsSetup based on Convex query result
+  // Update needsSetup based on query result
   useEffect(() => {
     if (!isAuthenticated || !ready) return;
 

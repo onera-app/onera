@@ -1,14 +1,18 @@
-import { useQuery, useMutation } from 'convex/react';
-import { api } from 'convex/_generated/api';
-import type { Id } from 'convex/_generated/dataModel';
-import { clearAllAICaches } from '@/lib/ai';
+import { trpc } from "@/lib/trpc";
+import { clearAllAICaches } from "@/lib/ai";
 
 export function useCredentials() {
-  return useQuery(api.credentials.list);
+  const query = trpc.credentials.list.useQuery();
+  return query.data;
 }
 
 export function useCreateCredential() {
-  const createCredential = useMutation(api.credentials.create);
+  const utils = trpc.useUtils();
+  const mutation = trpc.credentials.create.useMutation({
+    onSuccess: () => {
+      utils.credentials.list.invalidate();
+    },
+  });
 
   return {
     mutateAsync: async (data: {
@@ -19,7 +23,7 @@ export function useCreateCredential() {
     }) => {
       // Clear AI caches so new credentials are used
       clearAllAICaches();
-      return createCredential(data);
+      return mutation.mutateAsync(data);
     },
     mutate: (data: {
       provider: string;
@@ -28,13 +32,18 @@ export function useCreateCredential() {
       iv: string;
     }) => {
       clearAllAICaches();
-      createCredential(data);
+      mutation.mutate(data);
     },
   };
 }
 
 export function useUpdateCredential() {
-  const updateCredential = useMutation(api.credentials.update);
+  const utils = trpc.useUtils();
+  const mutation = trpc.credentials.update.useMutation({
+    onSuccess: () => {
+      utils.credentials.list.invalidate();
+    },
+  });
 
   return {
     mutateAsync: async ({
@@ -50,8 +59,8 @@ export function useUpdateCredential() {
       };
     }) => {
       clearAllAICaches();
-      return updateCredential({
-        credentialId: id as Id<'credentials'>,
+      return mutation.mutateAsync({
+        credentialId: id,
         ...data,
       });
     },
@@ -68,8 +77,8 @@ export function useUpdateCredential() {
       };
     }) => {
       clearAllAICaches();
-      updateCredential({
-        credentialId: id as Id<'credentials'>,
+      mutation.mutate({
+        credentialId: id,
         ...data,
       });
     },
@@ -77,16 +86,21 @@ export function useUpdateCredential() {
 }
 
 export function useDeleteCredential() {
-  const deleteCredential = useMutation(api.credentials.remove);
+  const utils = trpc.useUtils();
+  const mutation = trpc.credentials.remove.useMutation({
+    onSuccess: () => {
+      utils.credentials.list.invalidate();
+    },
+  });
 
   return {
     mutateAsync: async (id: string) => {
       clearAllAICaches();
-      return deleteCredential({ credentialId: id as Id<'credentials'> });
+      return mutation.mutateAsync({ credentialId: id });
     },
     mutate: (id: string) => {
       clearAllAICaches();
-      deleteCredential({ credentialId: id as Id<'credentials'> });
+      mutation.mutate({ credentialId: id });
     },
   };
 }

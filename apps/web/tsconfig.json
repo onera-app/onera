@@ -21,10 +21,9 @@
     "paths": {
       "@/*": ["./src/*"],
       "@onera/crypto": ["../../packages/crypto/src/sodium"],
-      "@onera/types": ["../../packages/types/src"],
-      "convex/_generated/*": ["../../convex/_generated/*"]
+      "@onera/types": ["../../packages/types/src"]
     }
   },
-  "include": ["src", "../../convex"],
+  "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

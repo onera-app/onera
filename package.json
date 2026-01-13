@@ -8,15 +8,20 @@
 		"packages/*"
 	],
 	"scripts": {
-		"dev": "turbo run dev --filter=@onera/web",
+		"dev": "turbo run dev",
 		"dev:web": "turbo run dev --filter=@onera/web",
-		"dev:convex": "bunx convex dev",
+		"dev:server": "turbo run dev --filter=@onera/server",
 		"build": "turbo run build",
 		"test": "turbo run test",
 		"lint": "turbo run lint",
 		"type-check": "turbo run type-check",
 		"format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
-		"clean": "turbo run clean && rm -rf node_modules"
+		"clean": "turbo run clean && rm -rf node_modules",
+		"db:generate": "turbo run db:generate --filter=@onera/server",
+		"db:migrate": "turbo run db:migrate --filter=@onera/server",
+		"docker:up": "docker compose up -d",
+		"docker:down": "docker compose down",
+		"docker:build": "docker compose build"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.57.0",
@@ -27,9 +32,5 @@
 		"turbo": "^2.3.0",
 		"typescript": "^5.7.0"
 	},
-	"packageManager": "bun@1.1.38",
-	"dependencies": {
-		"@convex-dev/auth": "0.0.90",
-		"convex": "1.31.3"
-	}
+	"packageManager": "bun@1.1.38"
 }

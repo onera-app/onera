@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { Streamdown } from 'streamdown';
 import { MessageActions } from './MessageActions';
 import { cn } from '@/lib/utils';
@@ -86,7 +86,7 @@ function formatModelName(model?: string): string {
     .trim();
 }
 
-export function AssistantMessage({
+export const AssistantMessage = memo(function AssistantMessage({
   content,
   model,
   isStreaming,
@@ -160,4 +160,4 @@ export function AssistantMessage({
       </div>
     </div>
   );
-}
+});

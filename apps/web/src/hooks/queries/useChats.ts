@@ -1,26 +1,38 @@
-import { useQuery, useMutation } from 'convex/react';
-import { api } from 'convex/_generated/api';
-import type { Id } from 'convex/_generated/dataModel';
+import { trpc } from "@/lib/trpc";
 
 /**
  * List all chats for the current user
  */
 export function useChats() {
-  return useQuery(api.chats.list);
+  const query = trpc.chats.list.useQuery();
+  return query.data;
 }
 
 /**
  * Get a specific chat by ID
  */
 export function useChat(id: string) {
-  return useQuery(api.chats.get, { chatId: id as Id<'chats'> });
+  const query = trpc.chats.get.useQuery(
+    { chatId: id },
+    {
+      enabled: !!id,
+      // Keep previous data while refetching to prevent loading flicker
+      placeholderData: (previousData) => previousData,
+    }
+  );
+  return query.data;
 }
 
 /**
  * Create a new encrypted chat
  */
 export function useCreateChat() {
-  const createChat = useMutation(api.chats.create);
+  const utils = trpc.useUtils();
+  const mutation = trpc.chats.create.useMutation({
+    onSuccess: () => {
+      utils.chats.list.invalidate();
+    },
+  });
 
   return {
     mutateAsync: async (data: {
@@ -32,10 +44,7 @@ export function useCreateChat() {
       chatNonce: string;
       folderId?: string;
     }) => {
-      return createChat({
-        ...data,
-        folderId: data.folderId as Id<'folders'> | undefined,
-      });
+      return mutation.mutateAsync(data);
     },
     mutate: (data: {
       encryptedChatKey: string;
@@ -46,10 +55,7 @@ export function useCreateChat() {
       chatNonce: string;
       folderId?: string;
     }) => {
-      createChat({
-        ...data,
-        folderId: data.folderId as Id<'folders'> | undefined,
-      });
+      mutation.mutate(data);
     },
   };
 }
@@ -58,7 +64,17 @@ export function useCreateChat() {
  * Update an existing chat
  */
 export function useUpdateChat() {
-  const updateChat = useMutation(api.chats.update);
+  const utils = trpc.useUtils();
+  const mutation = trpc.chats.update.useMutation({
+    onSuccess: (_data, variables) => {
+      // Only invalidate list if title was updated (for sidebar display)
+      // Don't invalidate on message saves to avoid re-render cascade
+      if (variables.encryptedTitle) {
+        utils.chats.list.invalidate();
+      }
+      // Never invalidate chats.get - local state is source of truth
+    },
+  });
 
   return {
     mutateAsync: async ({
@@ -76,10 +92,9 @@ export function useUpdateChat() {
         archived?: boolean;
       };
     }) => {
-      return updateChat({
-        chatId: id as Id<'chats'>,
+      return mutation.mutateAsync({
+        chatId: id,
         ...data,
-        folderId: data.folderId === null ? null : (data.folderId as Id<'folders'> | undefined),
       });
     },
     mutate: ({
@@ -97,10 +112,9 @@ export function useUpdateChat() {
         archived?: boolean;
       };
     }) => {
-      updateChat({
-        chatId: id as Id<'chats'>,
+      mutation.mutate({
+        chatId: id,
         ...data,
-        folderId: data.folderId === null ? null : (data.folderId as Id<'folders'> | undefined),
       });
     },
   };
@@ -110,14 +124,19 @@ export function useUpdateChat() {
  * Delete a chat
  */
 export function useDeleteChat() {
-  const deleteChat = useMutation(api.chats.remove);
+  const utils = trpc.useUtils();
+  const mutation = trpc.chats.remove.useMutation({
+    onSuccess: () => {
+      utils.chats.list.invalidate();
+    },
+  });
 
   return {
     mutateAsync: async (id: string) => {
-      return deleteChat({ chatId: id as Id<'chats'> });
+      return mutation.mutateAsync({ chatId: id });
     },
     mutate: (id: string) => {
-      deleteChat({ chatId: id as Id<'chats'> });
+      mutation.mutate({ chatId: id });
     },
   };
 }

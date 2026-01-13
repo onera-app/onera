@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useMutation } from 'convex/react';
-import { api } from 'convex/_generated/api';
+import { trpc } from '@/lib/trpc';
 import { useE2EEStore } from '@/stores/e2eeStore';
 import { setupUserKeys, type RecoveryKeyInfo } from '@onera/crypto';
 import { Button } from '@/components/ui/button';
@@ -21,7 +20,7 @@ type Step = 'password' | 'recovery' | 'confirm';
 
 export function E2EESetupModal() {
   const { setStatus, setNeedsSetup, setError } = useE2EEStore();
-  const createUserKeys = useMutation(api.userKeys.create);
+  const createUserKeysMutation = trpc.userKeys.create.useMutation();
 
   const [step, setStep] = useState<Step>('password');
   const [password, setPassword] = useState('');
@@ -49,7 +48,7 @@ export function E2EESetupModal() {
     try {
       const { recoveryInfo: info, storableKeys } = await setupUserKeys(password);
 
-      await createUserKeys({
+      await createUserKeysMutation.mutateAsync({
         kekSalt: storableKeys.kekSalt,
         kekOpsLimit: storableKeys.kekOpsLimit,
         kekMemLimit: storableKeys.kekMemLimit,

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, memo } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useUIStore } from '@/stores/uiStore';
 import { cn } from '@/lib/utils';
@@ -16,7 +16,7 @@ interface ChatNavbarProps {
   onArchive?: () => void;
 }
 
-export function ChatNavbar({
+export const ChatNavbar = memo(function ChatNavbar({
   title,
   chatId: _chatId,
   onTitleChange,
@@ -184,4 +184,4 @@ export function ChatNavbar({
       </AlertDialog>
     </header>
   );
-}
+});

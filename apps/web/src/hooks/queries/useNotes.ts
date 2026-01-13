@@ -1,28 +1,31 @@
-import { useQuery, useMutation } from 'convex/react';
-import { api } from 'convex/_generated/api';
-import type { Id } from 'convex/_generated/dataModel';
+import { trpc } from "@/lib/trpc";
 
 export function useNotes(folderId?: string, archived = false) {
-  const data = useQuery(api.notes.list, {
-    folderId: folderId as Id<'folders'> | undefined,
-    archived,
-  });
+  const query = trpc.notes.list.useQuery({ folderId, archived });
   return {
-    data,
-    isLoading: data === undefined,
+    data: query.data,
+    isLoading: query.isLoading,
   };
 }
 
 export function useNote(id: string) {
-  const data = useQuery(api.notes.get, { noteId: id as Id<'notes'> });
+  const query = trpc.notes.get.useQuery(
+    { noteId: id },
+    { enabled: !!id }
+  );
   return {
-    data,
-    isLoading: data === undefined,
+    data: query.data,
+    isLoading: query.isLoading,
   };
 }
 
 export function useCreateNote() {
-  const createNote = useMutation(api.notes.create);
+  const utils = trpc.useUtils();
+  const mutation = trpc.notes.create.useMutation({
+    onSuccess: () => {
+      utils.notes.list.invalidate();
+    },
+  });
 
   return {
     mutateAsync: async (data: {
@@ -32,10 +35,7 @@ export function useCreateNote() {
       contentNonce: string;
       folderId?: string;
     }) => {
-      return createNote({
-        ...data,
-        folderId: data.folderId as Id<'folders'> | undefined,
-      });
+      return mutation.mutateAsync(data);
     },
     mutate: (data: {
       encryptedTitle: string;
@@ -44,16 +44,19 @@ export function useCreateNote() {
       contentNonce: string;
       folderId?: string;
     }) => {
-      createNote({
-        ...data,
-        folderId: data.folderId as Id<'folders'> | undefined,
-      });
+      mutation.mutate(data);
     },
   };
 }
 
 export function useUpdateNote() {
-  const updateNote = useMutation(api.notes.update);
+  const utils = trpc.useUtils();
+  const mutation = trpc.notes.update.useMutation({
+    onSuccess: (data) => {
+      utils.notes.list.invalidate();
+      utils.notes.get.invalidate({ noteId: data.id });
+    },
+  });
 
   return {
     mutateAsync: async ({
@@ -71,10 +74,9 @@ export function useUpdateNote() {
         archived?: boolean;
       };
     }) => {
-      return updateNote({
-        noteId: id as Id<'notes'>,
+      return mutation.mutateAsync({
+        noteId: id,
         ...data,
-        folderId: data.folderId === null ? null : (data.folderId as Id<'folders'> | undefined),
       });
     },
     mutate: ({
@@ -92,24 +94,28 @@ export function useUpdateNote() {
         archived?: boolean;
       };
     }) => {
-      updateNote({
-        noteId: id as Id<'notes'>,
+      mutation.mutate({
+        noteId: id,
         ...data,
-        folderId: data.folderId === null ? null : (data.folderId as Id<'folders'> | undefined),
       });
     },
   };
 }
 
 export function useDeleteNote() {
-  const deleteNote = useMutation(api.notes.remove);
+  const utils = trpc.useUtils();
+  const mutation = trpc.notes.remove.useMutation({
+    onSuccess: () => {
+      utils.notes.list.invalidate();
+    },
+  });
 
   return {
     mutateAsync: async (id: string) => {
-      return deleteNote({ noteId: id as Id<'notes'> });
+      return mutation.mutateAsync({ noteId: id });
     },
     mutate: (id: string) => {
-      deleteNote({ noteId: id as Id<'notes'> });
+      mutation.mutate({ noteId: id });
     },
   };
 }

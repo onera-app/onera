@@ -66,6 +66,18 @@ function toChatMessage(msg: UIMessage, model?: string): ChatMessage {
   };
 }
 
+/**
+ * Compare two message arrays for equality to avoid unnecessary re-renders
+ */
+function areMessagesEqual(a: ChatMessage[], b: ChatMessage[]): boolean {
+  if (a.length !== b.length) return false;
+  return a.every((msg, i) =>
+    msg.id === b[i].id &&
+    msg.content === b[i].content &&
+    msg.role === b[i].role
+  );
+}
+
 export function ChatPage() {
   const { chatId } = useParams({ strict: false });
   const navigate = useNavigate();
@@ -190,6 +202,8 @@ export function ChatPage() {
   const pendingUserMessageRef = useRef<ChatMessage | null>(null);
   // Ref to track current messages for persistence
   const currentMessagesRef = useRef<ChatMessage[]>([]);
+  // Ref to track previous display messages for stable references
+  const prevDisplayMessagesRef = useRef<ChatMessage[]>([]);
 
   // Keep currentMessagesRef in sync with chat.messages
   useEffect(() => {
@@ -279,8 +293,24 @@ export function ChatPage() {
     if (chat?.messages && chat.messages.length > 0) {
       const uiMessages = chat.messages.map(toUIMessage);
       setMessages(uiMessages);
+
+      // Generate follow-ups for existing chat if none exist and not streaming
+      if (followUps.length === 0 && !isGeneratingFollowUps && selectedModelId && status !== 'streaming') {
+        setIsGeneratingFollowUps(true);
+        generateFollowUps(chat.messages, selectedModelId, 3)
+          .then((suggestions) => {
+            setFollowUps(suggestions);
+          })
+          .catch((err) => {
+            console.warn('Failed to generate follow-ups:', err);
+          })
+          .finally(() => {
+            setIsGeneratingFollowUps(false);
+          });
+      }
     }
-  }, [chat?.messages, setMessages]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chat?.id]); // Only depend on chat.id to avoid re-running on every message update
 
   // Derive streaming state from AI SDK status
   const isStreaming = status === 'streaming' || status === 'submitted';
@@ -305,8 +335,10 @@ export function ChatPage() {
   }, [aiMessages, isStreaming]);
 
   // Get display messages - combine stored messages with streaming state
+  // Uses ref comparison to return stable reference when content unchanged
   const displayMessages = useMemo(() => {
     const storedMessages = chat?.messages || [];
+    let result: ChatMessage[];
 
     // If we have AI messages that include more than stored (user sent new message)
     if (aiMessages.length > storedMessages.length) {
@@ -315,11 +347,18 @@ export function ChatPage() {
         ? aiMessages.filter((m, i) => !(m.role === 'assistant' && i === aiMessages.length - 1))
         : aiMessages;
 
-      return messagesToShow.map(m => toChatMessage(m, m.role === 'assistant' ? selectedModelId || undefined : undefined));
+      result = messagesToShow.map(m => toChatMessage(m, m.role === 'assistant' ? selectedModelId || undefined : undefined));
+    } else {
+      // Use stored messages
+      result = storedMessages;
     }
 
-    // Use stored messages
-    return storedMessages;
+    // Return same reference if content unchanged to prevent re-renders
+    if (areMessagesEqual(prevDisplayMessagesRef.current, result)) {
+      return prevDisplayMessagesRef.current;
+    }
+    prevDisplayMessagesRef.current = result;
+    return result;
   }, [chat?.messages, aiMessages, isStreaming, selectedModelId]);
 
   // Handle sending a message

@@ -1,30 +1,44 @@
-import { useQuery, useMutation } from 'convex/react';
-import { api } from 'convex/_generated/api';
-import type { Id } from 'convex/_generated/dataModel';
+import { trpc } from "@/lib/trpc";
 
 export function usePrompts() {
-  return useQuery(api.prompts.list);
+  const query = trpc.prompts.list.useQuery();
+  return query.data;
 }
 
 export function usePrompt(id: string) {
-  return useQuery(api.prompts.get, { promptId: id as Id<'prompts'> });
+  const query = trpc.prompts.get.useQuery(
+    { promptId: id },
+    { enabled: !!id }
+  );
+  return query.data;
 }
 
 export function useCreatePrompt() {
-  const createPrompt = useMutation(api.prompts.create);
+  const utils = trpc.useUtils();
+  const mutation = trpc.prompts.create.useMutation({
+    onSuccess: () => {
+      utils.prompts.list.invalidate();
+    },
+  });
 
   return {
     mutateAsync: async (data: { name: string; description?: string; content: string }) => {
-      return createPrompt(data);
+      return mutation.mutateAsync(data);
     },
     mutate: (data: { name: string; description?: string; content: string }) => {
-      createPrompt(data);
+      mutation.mutate(data);
     },
   };
 }
 
 export function useUpdatePrompt() {
-  const updatePrompt = useMutation(api.prompts.update);
+  const utils = trpc.useUtils();
+  const mutation = trpc.prompts.update.useMutation({
+    onSuccess: (data) => {
+      utils.prompts.list.invalidate();
+      utils.prompts.get.invalidate({ promptId: data.id });
+    },
+  });
 
   return {
     mutateAsync: async ({
@@ -34,8 +48,8 @@ export function useUpdatePrompt() {
       id: string;
       data: { name?: string; description?: string | null; content?: string };
     }) => {
-      return updatePrompt({
-        promptId: id as Id<'prompts'>,
+      return mutation.mutateAsync({
+        promptId: id,
         ...data,
       });
     },
@@ -46,8 +60,8 @@ export function useUpdatePrompt() {
       id: string;
       data: { name?: string; description?: string | null; content?: string };
     }) => {
-      updatePrompt({
-        promptId: id as Id<'prompts'>,
+      mutation.mutate({
+        promptId: id,
         ...data,
       });
     },
@@ -55,14 +69,19 @@ export function useUpdatePrompt() {
 }
 
 export function useDeletePrompt() {
-  const deletePrompt = useMutation(api.prompts.remove);
+  const utils = trpc.useUtils();
+  const mutation = trpc.prompts.remove.useMutation({
+    onSuccess: () => {
+      utils.prompts.list.invalidate();
+    },
+  });
 
   return {
     mutateAsync: async (id: string) => {
-      return deletePrompt({ promptId: id as Id<'prompts'> });
+      return mutation.mutateAsync({ promptId: id });
     },
     mutate: (id: string) => {
-      deletePrompt({ promptId: id as Id<'prompts'> });
+      mutation.mutate({ promptId: id });
     },
   };
 }

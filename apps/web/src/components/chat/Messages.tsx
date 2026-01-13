@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, memo } from 'react';
 import type { ChatMessage } from '@onera/types';
 import { UserMessage, AssistantMessage } from './Message';
 import { cn } from '@/lib/utils';
@@ -13,7 +13,7 @@ interface MessagesProps {
   onRegenerateMessage?: (messageId: string) => void;
 }
 
-export function Messages({
+export const Messages = memo(function Messages({
   messages,
   streamingMessage,
   isStreaming,
@@ -102,7 +102,7 @@ export function Messages({
       </div>
     </div>
   );
-}
+});
 
 function getMessageContent(message: ChatMessage): string {
   if (typeof message.content === 'string') {

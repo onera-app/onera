@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, memo } from 'react';
 import { cn } from '@/lib/utils';
 import { MessageActions } from './MessageActions';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ interface UserMessageProps {
   onCopy?: () => void;
 }
 
-export function UserMessage({ content, onEdit, onCopy }: UserMessageProps) {
+export const UserMessage = memo(function UserMessage({ content, onEdit, onCopy }: UserMessageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(content);
   const [copied, setCopied] = useState(false);
@@ -127,4 +127,4 @@ export function UserMessage({ content, onEdit, onCopy }: UserMessageProps) {
       </div>
     </div>
   );
-}
+});

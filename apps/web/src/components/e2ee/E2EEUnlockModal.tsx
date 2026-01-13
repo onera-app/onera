@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useQuery } from 'convex/react';
-import { api } from 'convex/_generated/api';
+import { trpc } from '@/lib/trpc';
 import { useE2EEStore } from '@/stores/e2eeStore';
 import { unlockWithPasswordFlow, type StorableUserKeys } from '@onera/crypto';
 import { Button } from '@/components/ui/button';
@@ -49,7 +48,7 @@ function toStorableKeys(keys: {
 
 export function E2EEUnlockModal() {
   const { setStatus, setError } = useE2EEStore();
-  const userKeys = useQuery(api.userKeys.get);
+  const { data: userKeys } = trpc.userKeys.get.useQuery();
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 

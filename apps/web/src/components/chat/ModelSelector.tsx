@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useCallback, type KeyboardEvent } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback, memo, type KeyboardEvent } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useE2EE } from '@/providers/E2EEProvider';
 import { useCredentials } from '@/hooks/queries/useCredentials';
@@ -35,7 +35,7 @@ function fuzzyMatch(text: string, query: string): boolean {
   return queryIndex === queryLower.length;
 }
 
-export function ModelSelector({ value, onChange }: ModelSelectorProps) {
+export const ModelSelector = memo(function ModelSelector({ value, onChange }: ModelSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [models, setModels] = useState<ModelOption[]>([]);
@@ -307,7 +307,7 @@ export function ModelSelector({ value, onChange }: ModelSelectorProps) {
       )}
     </div>
   );
-}
+});
 
 function groupModelsByProvider(models: ModelOption[]): [string, ModelOption[]][] {
   const groups = new Map<string, ModelOption[]>();

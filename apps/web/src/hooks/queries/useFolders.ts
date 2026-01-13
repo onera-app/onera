@@ -1,44 +1,50 @@
-import { useQuery, useMutation } from 'convex/react';
-import { api } from 'convex/_generated/api';
-import type { Id } from 'convex/_generated/dataModel';
+import { trpc } from "@/lib/trpc";
 
 export function useFolders() {
-  const data = useQuery(api.folders.list);
+  const query = trpc.folders.list.useQuery();
   return {
-    data,
-    isLoading: data === undefined,
+    data: query.data,
+    isLoading: query.isLoading,
   };
 }
 
 export function useFolder(id: string) {
-  const data = useQuery(api.folders.get, { folderId: id as Id<'folders'> });
+  const query = trpc.folders.get.useQuery(
+    { folderId: id },
+    { enabled: !!id }
+  );
   return {
-    data,
-    isLoading: data === undefined,
+    data: query.data,
+    isLoading: query.isLoading,
   };
 }
 
 export function useCreateFolder() {
-  const createFolder = useMutation(api.folders.create);
+  const utils = trpc.useUtils();
+  const mutation = trpc.folders.create.useMutation({
+    onSuccess: () => {
+      utils.folders.list.invalidate();
+    },
+  });
 
   return {
     mutateAsync: async (data: { name: string; parentId?: string }) => {
-      return createFolder({
-        name: data.name,
-        parentId: data.parentId as Id<'folders'> | undefined,
-      });
+      return mutation.mutateAsync(data);
     },
     mutate: (data: { name: string; parentId?: string }) => {
-      createFolder({
-        name: data.name,
-        parentId: data.parentId as Id<'folders'> | undefined,
-      });
+      mutation.mutate(data);
     },
   };
 }
 
 export function useUpdateFolder() {
-  const updateFolder = useMutation(api.folders.update);
+  const utils = trpc.useUtils();
+  const mutation = trpc.folders.update.useMutation({
+    onSuccess: (data) => {
+      utils.folders.list.invalidate();
+      utils.folders.get.invalidate({ folderId: data.id });
+    },
+  });
 
   return {
     mutateAsync: async ({
@@ -48,10 +54,9 @@ export function useUpdateFolder() {
       id: string;
       data: { name?: string; parentId?: string | null };
     }) => {
-      return updateFolder({
-        folderId: id as Id<'folders'>,
-        name: data.name,
-        parentId: data.parentId === null ? null : (data.parentId as Id<'folders'> | undefined),
+      return mutation.mutateAsync({
+        folderId: id,
+        ...data,
       });
     },
     mutate: ({
@@ -61,24 +66,28 @@ export function useUpdateFolder() {
       id: string;
       data: { name?: string; parentId?: string | null };
     }) => {
-      updateFolder({
-        folderId: id as Id<'folders'>,
-        name: data.name,
-        parentId: data.parentId === null ? null : (data.parentId as Id<'folders'> | undefined),
+      mutation.mutate({
+        folderId: id,
+        ...data,
       });
     },
   };
 }
 
 export function useDeleteFolder() {
-  const deleteFolder = useMutation(api.folders.remove);
+  const utils = trpc.useUtils();
+  const mutation = trpc.folders.remove.useMutation({
+    onSuccess: () => {
+      utils.folders.list.invalidate();
+    },
+  });
 
   return {
     mutateAsync: async (id: string) => {
-      return deleteFolder({ folderId: id as Id<'folders'> });
+      return mutation.mutateAsync({ folderId: id });
     },
     mutate: (id: string) => {
-      deleteFolder({ folderId: id as Id<'folders'> });
+      mutation.mutate({ folderId: id });
     },
   };
 }

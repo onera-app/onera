@@ -1,6 +1,6 @@
 import { Outlet, useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
-import { useConvexAuth } from 'convex/react';
+import { useAuth } from '@/hooks/useAuth';
 import { useE2EEStore } from '@/stores/e2eeStore';
 import { useUIStore } from '@/stores/uiStore';
 import { Sidebar } from '@/components/layout/Sidebar';
@@ -15,7 +15,7 @@ import { PanelLeft, Sparkles } from 'lucide-react';
 
 export function AppLayout() {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading } = useConvexAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const { status: e2eeStatus, needsSetup } = useE2EEStore();
   const { sidebarOpen, toggleSidebar, chatDensity } = useUIStore();
 

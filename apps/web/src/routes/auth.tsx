@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
-import { useAuthActions } from '@convex-dev/auth/react';
-import { useConvexAuth } from 'convex/react';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,8 +10,7 @@ import { Sparkles, Lock } from 'lucide-react';
 
 export function AuthPage() {
   const navigate = useNavigate();
-  const { signIn } = useAuthActions();
-  const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
+  const { isAuthenticated, isLoading: authLoading, signIn, signUp } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState({
@@ -33,14 +31,13 @@ export function AuthPage() {
     setIsLoading(true);
 
     try {
-      const flow = isLogin ? 'signIn' : 'signUp';
-      await signIn('password', {
-        email: form.email,
-        password: form.password,
-        name: form.name || undefined,
-        flow,
-      });
-      toast.success(isLogin ? 'Welcome back!' : 'Account created successfully');
+      if (isLogin) {
+        await signIn(form.email, form.password);
+        toast.success('Welcome back!');
+      } else {
+        await signUp(form.email, form.password, form.name || undefined);
+        toast.success('Account created successfully');
+      }
       navigate({ to: '/' });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Authentication failed');
