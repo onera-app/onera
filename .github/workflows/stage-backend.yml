@@ -21,7 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
 
     steps:
       - name: Checkout repository
@@ -71,26 +70,9 @@ jobs:
           
           ls -la
 
-      - name: Log in to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F5094834B54F4C09AA9D62C0129CCFEB }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_A33B6C6AFF5B42A8A4C69DA340A29101 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C3BDC8F14E9E43A595CBEA7FC555AE12 }}
-
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: deploy/
-
-      - name: Configure startup command
-        run: |
-          az webapp config set \
-            --name ${{ env.AZURE_WEBAPP_NAME }} \
-            --resource-group onera \
-            --startup-file "startup.sh"
-
-      - name: Azure logout
-        run: az logout
-        if: always()
