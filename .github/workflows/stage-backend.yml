@@ -41,12 +41,12 @@ jobs:
 
       - name: Prepare deployment package
         run: |
-          mkdir -p deploy
+          mkdir -p deploy/src
           
           # Copy built files
           cp -r apps/server/dist deploy/
           cp -r apps/server/drizzle deploy/
-          cp -r apps/server/src/db deploy/src/db
+          cp -r apps/server/src/db deploy/src/
           cp apps/server/package.json deploy/
           
           # Install production dependencies in deploy folder
