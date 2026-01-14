@@ -5,9 +5,6 @@
 FROM oven/bun:alpine AS base
 WORKDIR /app
 
-# Install build dependencies for native modules (better-sqlite3)
-RUN apk add --no-cache python3 make g++ sqlite-dev
-
 # Install dependencies
 FROM base AS deps
 COPY package.json bun.lock turbo.json ./
@@ -31,20 +28,19 @@ FROM oven/bun:alpine AS runner
 ENV NODE_ENV=production
 WORKDIR /app
 
-# Install runtime dependencies for SQLite
-RUN apk add --no-cache sqlite-libs
-
 # Create data directory for SQLite database
 RUN mkdir -p /app/data && chown -R bun:bun /app/data
 
 # Copy built artifacts
 COPY --from=builder /app/apps/server/dist ./dist
 COPY --from=builder /app/apps/server/drizzle ./drizzle
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps/server/node_modules ./apps/server/node_modules
 
 # Copy migration files for runtime migrations
 COPY --from=builder /app/apps/server/src/db ./src/db
+
+# Copy package files and install dependencies
+COPY --from=builder /app/apps/server/package.json ./package.json
+RUN bun install --production
 
 # Create entrypoint script that runs migrations then starts server
 RUN echo '#!/bin/sh' > /app/entrypoint.sh && \

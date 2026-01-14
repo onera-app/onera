@@ -1,5 +1,5 @@
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import Database from "better-sqlite3";
+import { drizzle } from "drizzle-orm/bun-sqlite";
+import { Database } from "bun:sqlite";
 import * as schema from "./schema";
 import path from "path";
 import fs from "fs";
@@ -15,15 +15,15 @@ if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
 
-// Create SQLite database connection
+// Create SQLite database connection using Bun's native SQLite
 const sqlite = new Database(dbPath);
 
 // Enable WAL mode for better concurrent performance
-sqlite.pragma("journal_mode = WAL");
+sqlite.run("PRAGMA journal_mode = WAL");
 
 // Enable foreign keys
-sqlite.pragma("foreign_keys = ON");
+sqlite.run("PRAGMA foreign_keys = ON");
 
 export const db = drizzle(sqlite, { schema });
 
-export type Database = typeof db;
+export type DrizzleDatabase = typeof db;

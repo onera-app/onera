@@ -11,9 +11,9 @@ CREATE TABLE IF NOT EXISTS `user` (
   `created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
   `updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL
 );
-
+--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS `idx_user_email` ON `user` (`email`);
-
+--> statement-breakpoint
 -- Better Auth: Sessions table
 CREATE TABLE IF NOT EXISTS `session` (
   `id` text PRIMARY KEY NOT NULL,
@@ -25,10 +25,11 @@ CREATE TABLE IF NOT EXISTS `session` (
   `user_agent` text,
   `user_id` text NOT NULL REFERENCES `user` (`id`) ON DELETE CASCADE
 );
-
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS `idx_session_user_id` ON `session` (`user_id`);
+--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS `idx_session_token` ON `session` (`token`);
-
+--> statement-breakpoint
 -- Better Auth: Accounts table
 CREATE TABLE IF NOT EXISTS `account` (
   `id` text PRIMARY KEY NOT NULL,
@@ -45,9 +46,9 @@ CREATE TABLE IF NOT EXISTS `account` (
   `created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
   `updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL
 );
-
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS `idx_account_user_id` ON `account` (`user_id`);
-
+--> statement-breakpoint
 -- Better Auth: Verifications table
 CREATE TABLE IF NOT EXISTS `verification` (
   `id` text PRIMARY KEY NOT NULL,
@@ -57,9 +58,9 @@ CREATE TABLE IF NOT EXISTS `verification` (
   `created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
   `updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL
 );
-
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS `idx_verification_identifier` ON `verification` (`identifier`);
-
+--> statement-breakpoint
 -- Application: User encryption keys (E2EE)
 CREATE TABLE IF NOT EXISTS `user_keys` (
   `id` text PRIMARY KEY NOT NULL,
@@ -79,9 +80,9 @@ CREATE TABLE IF NOT EXISTS `user_keys` (
   `created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
   `updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL
 );
-
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS `idx_user_keys_user_id` ON `user_keys` (`user_id`);
-
+--> statement-breakpoint
 -- Application: Folders (hierarchical)
 CREATE TABLE IF NOT EXISTS `folders` (
   `id` text PRIMARY KEY NOT NULL,
@@ -91,10 +92,11 @@ CREATE TABLE IF NOT EXISTS `folders` (
   `created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
   `updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL
 );
-
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS `idx_folders_user_id` ON `folders` (`user_id`);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS `idx_folders_parent_id` ON `folders` (`parent_id`);
-
+--> statement-breakpoint
 -- Application: Chats (encrypted)
 CREATE TABLE IF NOT EXISTS `chats` (
   `id` text PRIMARY KEY NOT NULL,
@@ -113,11 +115,13 @@ CREATE TABLE IF NOT EXISTS `chats` (
   `created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
   `updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL
 );
-
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS `idx_chats_user_id` ON `chats` (`user_id`);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS `idx_chats_folder_id` ON `chats` (`folder_id`);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS `idx_chats_user_updated` ON `chats` (`user_id`, `updated_at`);
-
+--> statement-breakpoint
 -- Application: Notes (encrypted)
 CREATE TABLE IF NOT EXISTS `notes` (
   `id` text PRIMARY KEY NOT NULL,
@@ -132,11 +136,13 @@ CREATE TABLE IF NOT EXISTS `notes` (
   `created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
   `updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL
 );
-
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS `idx_notes_user_id` ON `notes` (`user_id`);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS `idx_notes_folder_id` ON `notes` (`folder_id`);
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS `idx_notes_user_archived` ON `notes` (`user_id`, `archived`);
-
+--> statement-breakpoint
 -- Application: Credentials (encrypted API keys)
 CREATE TABLE IF NOT EXISTS `credentials` (
   `id` text PRIMARY KEY NOT NULL,
@@ -148,9 +154,9 @@ CREATE TABLE IF NOT EXISTS `credentials` (
   `created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
   `updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL
 );
-
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS `idx_credentials_user_id` ON `credentials` (`user_id`);
-
+--> statement-breakpoint
 -- Application: Prompts (templates)
 CREATE TABLE IF NOT EXISTS `prompts` (
   `id` text PRIMARY KEY NOT NULL,
@@ -161,5 +167,5 @@ CREATE TABLE IF NOT EXISTS `prompts` (
   `created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
   `updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL
 );
-
+--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS `idx_prompts_user_id` ON `prompts` (`user_id`);
