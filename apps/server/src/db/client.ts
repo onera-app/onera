@@ -18,11 +18,13 @@ if (!fs.existsSync(dbDir)) {
 // Create SQLite database connection using Bun's native SQLite
 const sqlite = new Database(dbPath);
 
-// Enable WAL mode for better concurrent performance
-sqlite.run("PRAGMA journal_mode = WAL");
-
-// Enable foreign keys
-sqlite.run("PRAGMA foreign_keys = ON");
+// Production SQLite optimizations
+sqlite.run("PRAGMA journal_mode = WAL");        // Better concurrent performance
+sqlite.run("PRAGMA foreign_keys = ON");         // Enforce referential integrity
+sqlite.run("PRAGMA synchronous = NORMAL");      // Good balance of safety/speed
+sqlite.run("PRAGMA cache_size = -64000");       // 64MB cache
+sqlite.run("PRAGMA busy_timeout = 5000");       // Wait 5s on lock contention
+sqlite.run("PRAGMA temp_store = MEMORY");       // Store temp tables in memory
 
 export const db = drizzle(sqlite, { schema });
 

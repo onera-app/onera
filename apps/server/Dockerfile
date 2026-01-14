@@ -40,7 +40,8 @@ COPY --from=builder /app/apps/server/src/db ./src/db
 
 # Copy package files and install dependencies
 COPY --from=builder /app/apps/server/package.json ./package.json
-RUN bun install --production
+RUN bun install --production && \
+    rm -rf ~/.bun/install/cache
 
 # Create entrypoint script that runs migrations then starts server
 RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
@@ -50,6 +51,9 @@ RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
     echo 'echo "Starting server..."' >> /app/entrypoint.sh && \
     echo 'exec bun run dist/index.js' >> /app/entrypoint.sh && \
     chmod +x /app/entrypoint.sh
+
+# Run as non-root user
+USER bun
 
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \

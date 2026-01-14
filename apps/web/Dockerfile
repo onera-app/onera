@@ -29,8 +29,7 @@ COPY . .
 
 # Build web app
 WORKDIR /app/apps/web
-# Debug: Print env vars to verify they're set
-RUN echo "VITE_API_URL=$VITE_API_URL" && echo "VITE_WS_URL=$VITE_WS_URL" && bun run build
+RUN bun run build
 
 # Serve with nginx
 FROM nginx:alpine AS runner
