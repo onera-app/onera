@@ -1,0 +1,96 @@
+# Deploy Onera Backend to Azure Web App
+name: Deploy Onera Backend to Azure
+
+on:
+  push:
+    branches:
+      - staging
+    paths:
+      - 'apps/server/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'bun.lock'
+      - '.github/workflows/stage-backend.yml'
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: onera-backend-stage
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build server
+        working-directory: apps/server
+        run: bun build src/index.ts --outdir dist --target bun
+
+      - name: Prepare deployment package
+        run: |
+          mkdir -p deploy
+          
+          # Copy built files
+          cp -r apps/server/dist deploy/
+          cp -r apps/server/drizzle deploy/
+          cp -r apps/server/src/db deploy/src/db
+          cp apps/server/package.json deploy/
+          
+          # Install production dependencies in deploy folder
+          cd deploy
+          bun install --production
+          
+          # Create startup script
+          cat > startup.sh << 'EOF'
+          #!/bin/bash
+          echo "Installing Bun..."
+          curl -fsSL https://bun.sh/install | bash
+          export BUN_INSTALL="$HOME/.bun"
+          export PATH="$BUN_INSTALL/bin:$PATH"
+          
+          echo "Running migrations..."
+          bun run src/db/migrate.ts || echo "Migration skipped"
+          
+          echo "Starting server..."
+          bun run dist/index.js
+          EOF
+          chmod +x startup.sh
+          
+          ls -la
+
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          package: deploy/
+
+      - name: Configure startup command
+        run: |
+          az webapp config set \
+            --name ${{ env.AZURE_WEBAPP_NAME }} \
+            --resource-group onera \
+            --startup-file "startup.sh"
+
+      - name: Azure logout
+        run: az logout
+        if: always()
