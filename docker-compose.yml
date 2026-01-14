@@ -1,21 +1,50 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: onera-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: onera
+      POSTGRES_USER: onera
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - onera-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U onera -d onera"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 64M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   server:
     build:
       context: .
       dockerfile: apps/server/Dockerfile
     container_name: onera-server
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
-      # SQLite database stored in volume
-      DATABASE_URL: file:/app/data/onera.db
+      # PostgreSQL connection string
+      DATABASE_URL: postgresql://onera:${POSTGRES_PASSWORD}@postgres:5432/onera
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
       PORT: 3000
       NODE_ENV: production
-    volumes:
-      # Persist SQLite database
-      - server_data:/app/data
     ports:
       - "3000:3000"
     networks:
@@ -60,7 +89,7 @@ services:
         max-file: "3"
 
 volumes:
-  server_data:
+  postgres_data:
 
 networks:
   onera-network:

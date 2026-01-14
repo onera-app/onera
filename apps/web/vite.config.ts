@@ -77,6 +77,7 @@ export default defineConfig({
   optimizeDeps: {
     include: ['libsodium-wrappers-sumo'],
     esbuildOptions: {
+      target: 'esnext',
       define: {
         global: 'globalThis',
       },

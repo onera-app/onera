@@ -27,11 +27,13 @@ export function AuthPage() {
   });
 
   // Redirect if already authenticated (only if not showing recovery phrase)
+  // Note: We check !isLoading to prevent redirect during signup flow
+  // (fetchSession sets isAuthenticated before setStep('recovery') runs)
   useEffect(() => {
-    if (isAuthenticated && !authLoading && step === 'credentials') {
+    if (isAuthenticated && !authLoading && !isLoading && step === 'credentials') {
       navigate({ to: '/' });
     }
-  }, [isAuthenticated, authLoading, navigate, step]);
+  }, [isAuthenticated, authLoading, isLoading, navigate, step]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

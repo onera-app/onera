@@ -27,11 +27,13 @@
     "better-auth": "^1.2.5",
     "drizzle-orm": "^0.38.4",
     "hono": "^4.7.4",
+    "pg": "^8.13.1",
     "socket.io": "^4.8.1",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/bun": "^1.2.0",
+    "@types/pg": "^8.11.10",
     "drizzle-kit": "^0.30.4",
     "typescript": "^5.7.0"
   }

@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { router, protectedProcedure } from "../trpc";
-import { db } from "../../db/client";
-import { folders } from "../../db/schema";
+import { db, folders } from "../../db/client";
 import { eq, and, asc } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { broadcastToUser } from "../../websocket";
