@@ -203,7 +203,7 @@ export function ChatPage() {
     if (!chatId) return;
     try {
       await deleteChatMutation.mutateAsync(chatId);
-      navigate({ to: '/' });
+      navigate({ to: '/app' });
       toast.success('Chat deleted');
     } catch {
       toast.error('Failed to delete chat');

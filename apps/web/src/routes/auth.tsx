@@ -31,7 +31,7 @@ export function AuthPage() {
   // (fetchSession sets isAuthenticated before setStep('recovery') runs)
   useEffect(() => {
     if (isAuthenticated && !authLoading && !isLoading && step === 'credentials') {
-      navigate({ to: '/' });
+      navigate({ to: '/app' });
     }
   }, [isAuthenticated, authLoading, isLoading, navigate, step]);
 
@@ -43,7 +43,7 @@ export function AuthPage() {
       if (isLogin) {
         await signIn(form.email, form.password);
         toast.success('Welcome back!');
-        navigate({ to: '/' });
+        navigate({ to: '/app' });
       } else {
         const recovery = await signUp(form.email, form.password, form.name || form.email.split('@')[0]);
         setRecoveryInfo(recovery);
@@ -69,7 +69,7 @@ export function AuthPage() {
     }
 
     toast.success('Setup complete! Welcome to Onera.');
-    navigate({ to: '/' });
+    navigate({ to: '/app' });
   };
 
   // Recovery phrase display step

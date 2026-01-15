@@ -70,7 +70,7 @@ export const ChatNavbar = memo(function ChatNavbar({
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => navigate({ to: '/' })}
+        onClick={() => navigate({ to: '/app' })}
         title="New chat"
       >
         <Plus className="h-5 w-5" />

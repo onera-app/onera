@@ -130,7 +130,7 @@ export function ChatItem({
         onDragEnd={handleDragEnd}
       >
         <Link
-          to="/c/$chatId"
+          to="/app/c/$chatId"
           params={{ chatId: id }}
           className={cn(
             'flex items-center w-full py-2.5 px-3 rounded-xl text-[13px] transition-all duration-150',

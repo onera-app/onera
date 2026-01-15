@@ -9,55 +9,65 @@ import { HomePage } from './routes/home';
 import { ChatPage } from './routes/chat';
 import { NotesPage } from './routes/notes';
 import { PromptsPage } from './routes/prompts';
+import { LandingPage } from './routes/landing';
+
 // Root route with layout
 const rootRoute = createRootRoute({
   component: RootLayout,
 });
 
-// Auth route (no app layout)
+// Landing page at / (public)
+const landingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/',
+  component: LandingPage,
+});
+
+// Auth route (login/signup)
 const authRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/auth',
   component: AuthPage,
 });
 
-// App layout route (authenticated)
+// App layout route (authenticated) - all app routes under /app
 const appRoute = createRoute({
   getParentRoute: () => rootRoute,
-  id: '_app',
+  path: '/app',
   component: AppLayout,
 });
 
-// Home route (new chat)
+// Dashboard/Home route (new chat) - /app
 const homeRoute = createRoute({
   getParentRoute: () => appRoute,
   path: '/',
   component: HomePage,
 });
 
-// Chat route
+// Chat route - /app/c/:chatId
 const chatRoute = createRoute({
   getParentRoute: () => appRoute,
   path: '/c/$chatId',
   component: ChatPage,
 });
 
-// Notes route
+// Notes route - /app/notes
 const notesRoute = createRoute({
   getParentRoute: () => appRoute,
   path: '/notes',
   component: NotesPage,
 });
 
-// Prompts route
+// Prompts route - /app/prompts
 const promptsRoute = createRoute({
   getParentRoute: () => appRoute,
-  path: '/workspace/prompts',
+  path: '/prompts',
   component: PromptsPage,
 });
 
 // Build the route tree
 export const routeTree = rootRoute.addChildren([
+  landingRoute,
   authRoute,
   appRoute.addChildren([homeRoute, chatRoute, notesRoute, promptsRoute]),
 ]);

@@ -204,7 +204,7 @@ export function HomePage() {
         utils.chats.get.setData({ chatId: createdChat.id }, createdChat);
 
         pendingNavigateRef.current = createdChat.id;
-        navigate({ to: '/c/$chatId', params: { chatId: createdChat.id } });
+        navigate({ to: '/app/c/$chatId', params: { chatId: createdChat.id } });
 
         // Generate AI title asynchronously (fire-and-forget)
         if (selectedModelId) {

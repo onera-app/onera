@@ -185,7 +185,7 @@ export function Sidebar() {
   const isLoading = rawChats === undefined;
 
   const handleNewChat = () => {
-    navigate({ to: '/' });
+    navigate({ to: '/app' });
   };
 
   const handleLogout = async () => {
@@ -289,7 +289,7 @@ export function Sidebar() {
         {/* Header */}
         <header className="relative flex items-center justify-between px-3 py-3 h-14">
           <Link
-            to="/"
+            to="/app"
             className="flex items-center gap-2.5 group"
           >
             <div className="relative w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm transition-transform duration-200 group-hover:scale-105">
@@ -361,7 +361,7 @@ export function Sidebar() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  to="/notes"
+                  to="/app/notes"
                   className="flex-1 flex items-center justify-center p-2 rounded-lg text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-all duration-200"
                 >
                   <FileText className="h-4 w-4" />
