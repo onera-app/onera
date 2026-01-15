@@ -1,0 +1,63 @@
+name: Deploy Production Backend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/server/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'bun.lock'
+  workflow_dispatch:
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build server for Node.js
+        run: bun build src/index.ts --outdir dist --target node
+        working-directory: apps/server
+
+      - name: Prepare deployment package
+        run: |
+          mkdir -p deploy
+          cp -r apps/server/dist deploy/
+          cp -r apps/server/drizzle deploy/
+          cp -r apps/server/src/db deploy/src/db
+          cp apps/server/package.json deploy/
+          # Create startup script
+          echo '{"scripts":{"start":"node dist/index.js"}}' > deploy/package.json.tmp
+          # Merge with original package.json
+          bun -e "
+            const orig = require('./apps/server/package.json');
+            const pkg = { ...orig, scripts: { start: 'node dist/index.js' }, main: 'dist/index.js' };
+            delete pkg.devDependencies;
+            console.log(JSON.stringify(pkg, null, 2));
+          " > deploy/package.json
+
+      - name: Install production dependencies
+        run: |
+          cd deploy
+          bun install --production
+        
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'onera-backend'
+          slot-name: 'Production'
+          package: deploy
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_303C3F9E87D747E3A6A48DC0BDF2369D }}
