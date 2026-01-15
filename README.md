@@ -86,21 +86,23 @@ bun run docker:down
 
 ## Environment Variables
 
-Create a `.env` file in the root directory (copy from `.env.example`):
+Create a `.env` file in the root directory.
 
-```env
-# Database (SQLite)
-DATABASE_URL=file:./data/onera.db
+Required (any mode):
 
-# Authentication
-BETTER_AUTH_SECRET=your-32-character-or-longer-secret-key
-BETTER_AUTH_URL=http://localhost:3000
+- `BETTER_AUTH_SECRET` (32+ chars)
 
-# URLs
-FRONTEND_URL=http://localhost:5173
-VITE_API_URL=http://localhost:3000
-VITE_WS_URL=http://localhost:3000
-```
+Optional (defaults shown):
+
+- `DATABASE_URL` = `file:./data/onera.db`
+- `BETTER_AUTH_URL` = `http://localhost:3000`
+- `FRONTEND_URL` = `http://localhost:5173`
+- `VITE_API_URL` = `http://localhost:3000`
+- `VITE_WS_URL` = `http://localhost:3000` (falls back to `VITE_API_URL` if unset)
+
+Docker-only:
+
+- `POSTGRES_PASSWORD` (required by `docker-compose.yml`)
 
 ## Security Model
 
