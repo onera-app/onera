@@ -34,14 +34,12 @@ jobs:
 
       - name: Prepare deployment package
         run: |
-          mkdir -p deploy
+          mkdir -p deploy/src
           cp -r apps/server/dist deploy/
           cp -r apps/server/drizzle deploy/
           cp -r apps/server/src/db deploy/src/db
           cp apps/server/package.json deploy/
-          # Create startup script
-          echo '{"scripts":{"start":"node dist/index.js"}}' > deploy/package.json.tmp
-          # Merge with original package.json
+          # Create package.json with Node.js start script
           bun -e "
             const orig = require('./apps/server/package.json');
             const pkg = { ...orig, scripts: { start: 'node dist/index.js' }, main: 'dist/index.js' };
