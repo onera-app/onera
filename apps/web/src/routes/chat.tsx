@@ -259,6 +259,10 @@ export function ChatPage() {
   const handleFinish = useCallback(async (message: UIMessage) => {
     if (!chatId || !chat?.encryptedChatKey || !chat?.chatKeyNonce) return;
 
+    // Capture encryption keys for use in async callbacks
+    const encryptedChatKey = chat.encryptedChatKey;
+    const chatKeyNonce = chat.chatKeyNonce;
+
     // Build final messages: stored + pending user + assistant
     const pendingUserMessage = pendingUserMessageRef.current;
     const assistantMessage = toChatMessage(message, selectedModelId || undefined);
@@ -320,8 +324,8 @@ export function ChatPage() {
     try {
       const encrypted = encryptChatContent(
         chatId,
-        chat.encryptedChatKey,
-        chat.chatKeyNonce,
+        encryptedChatKey,
+        chatKeyNonce,
         history as unknown as Record<string, unknown>
       );
 
@@ -351,8 +355,8 @@ export function ChatPage() {
               try {
                 const encryptedWithFollowUps = encryptChatContent(
                   chatId,
-                  chat.encryptedChatKey,
-                  chat.chatKeyNonce,
+                  encryptedChatKey,
+                  chatKeyNonce,
                   currentHistoryRef.current as unknown as Record<string, unknown>
                 );
 
