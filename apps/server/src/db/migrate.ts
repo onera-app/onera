@@ -1,17 +1,10 @@
-import { migrate as migrateSqlite } from "drizzle-orm/bun-sqlite/migrator";
-import { migrate as migratePg } from "drizzle-orm/node-postgres/migrator";
-import { db, isPostgres } from "./client";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
+import { db } from "./client";
 
 async function runMigrations() {
-  console.log(
-    `Running migrations for ${isPostgres ? "PostgreSQL" : "SQLite"}...`
-  );
+  console.log("Running PostgreSQL migrations...");
 
-  if (isPostgres) {
-    await migratePg(db as any, { migrationsFolder: "./drizzle/migrations-pg" });
-  } else {
-    migrateSqlite(db as any, { migrationsFolder: "./drizzle/migrations" });
-  }
+  await migrate(db, { migrationsFolder: "./drizzle/migrations-pg" });
 
   console.log("Migrations complete!");
   process.exit(0);

@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db, schema, isPostgres } from "../db/client";
+import { db, schema } from "../db/client";
 
 // Determine if we're in production (behind HTTPS proxy)
 const isProduction = process.env.NODE_ENV === "production";
@@ -12,7 +12,7 @@ export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
 
   database: drizzleAdapter(db as any, {
-    provider: isPostgres ? "pg" : "sqlite",
+    provider: "pg",
     schema: {
       user: schema.users,
       session: schema.sessions,
