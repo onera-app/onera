@@ -1,5 +1,4 @@
-# Deploy Onera Backend to Azure Web App
-name: Build and deploy Onera Backend to Azure Web App
+name: Stage Backend
 
 on:
   push:
