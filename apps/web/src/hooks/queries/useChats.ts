@@ -67,9 +67,9 @@ export function useUpdateChat() {
   const utils = trpc.useUtils();
   const mutation = trpc.chats.update.useMutation({
     onSuccess: (_data, variables) => {
-      // Only invalidate list if title was updated (for sidebar display)
+      // Invalidate list if title or folder was updated (for sidebar display)
       // Don't invalidate on message saves to avoid re-render cascade
-      if (variables.encryptedTitle) {
+      if (variables.encryptedTitle || variables.folderId !== undefined) {
         utils.chats.list.invalidate();
       }
       // Never invalidate chats.get - local state is source of truth

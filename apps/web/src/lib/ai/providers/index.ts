@@ -5,11 +5,28 @@
 
 import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createMistral } from '@ai-sdk/mistral';
+import { createGroq } from '@ai-sdk/groq';
+import { createXai } from '@ai-sdk/xai';
+import { createDeepSeek } from '@ai-sdk/deepseek';
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import type { LanguageModel } from 'ai';
 import type { DecryptedCredential } from '../types';
 
+// Type for provider instances
+type ProviderInstance =
+  | ReturnType<typeof createOpenAI>
+  | ReturnType<typeof createAnthropic>
+  | ReturnType<typeof createGoogleGenerativeAI>
+  | ReturnType<typeof createMistral>
+  | ReturnType<typeof createGroq>
+  | ReturnType<typeof createXai>
+  | ReturnType<typeof createDeepSeek>
+  | ReturnType<typeof createOpenAICompatible>;
+
 // Cache provider instances by credential ID
-const providerCache = new Map<string, ReturnType<typeof createOpenAI> | ReturnType<typeof createAnthropic>>();
+const providerCache = new Map<string, ProviderInstance>();
 
 /**
  * Get or create a model instance for a credential
@@ -25,8 +42,6 @@ export function getModelForCredential(
   if (!provider) {
     switch (credential.provider) {
       case 'openai':
-      case 'azure':
-      case 'custom':
         provider = createOpenAI({
           apiKey: credential.apiKey,
           baseURL: credential.baseUrl || 'https://api.openai.com/v1',
@@ -45,11 +60,89 @@ export function getModelForCredential(
         });
         break;
 
+      case 'google':
+        provider = createGoogleGenerativeAI({
+          apiKey: credential.apiKey,
+          baseURL: credential.baseUrl,
+        });
+        break;
+
+      case 'xai':
+        provider = createXai({
+          apiKey: credential.apiKey,
+          baseURL: credential.baseUrl,
+        });
+        break;
+
+      case 'groq':
+        provider = createGroq({
+          apiKey: credential.apiKey,
+          baseURL: credential.baseUrl,
+        });
+        break;
+
+      case 'mistral':
+        provider = createMistral({
+          apiKey: credential.apiKey,
+          baseURL: credential.baseUrl,
+        });
+        break;
+
+      case 'deepseek':
+        provider = createDeepSeek({
+          apiKey: credential.apiKey,
+          baseURL: credential.baseUrl,
+        });
+        break;
+
+      case 'openrouter':
+        provider = createOpenAICompatible({
+          name: 'openrouter',
+          apiKey: credential.apiKey,
+          baseURL: 'https://openrouter.ai/api/v1',
+        });
+        break;
+
+      case 'together':
+        provider = createOpenAICompatible({
+          name: 'together',
+          apiKey: credential.apiKey,
+          baseURL: 'https://api.together.xyz/v1',
+        });
+        break;
+
+      case 'fireworks':
+        provider = createOpenAICompatible({
+          name: 'fireworks',
+          apiKey: credential.apiKey,
+          baseURL: 'https://api.fireworks.ai/inference/v1',
+        });
+        break;
+
       case 'ollama':
         // Ollama uses OpenAI-compatible API
-        provider = createOpenAI({
+        provider = createOpenAICompatible({
+          name: 'ollama',
           apiKey: credential.apiKey || 'ollama', // Ollama doesn't require key
           baseURL: credential.baseUrl || 'http://localhost:11434/v1',
+        });
+        break;
+
+      case 'lmstudio':
+        // LM Studio uses OpenAI-compatible API
+        provider = createOpenAICompatible({
+          name: 'lmstudio',
+          apiKey: credential.apiKey || 'lmstudio',
+          baseURL: credential.baseUrl || 'http://localhost:1234/v1',
+        });
+        break;
+
+      case 'custom':
+        // Custom OpenAI-compatible endpoint
+        provider = createOpenAICompatible({
+          name: 'custom',
+          apiKey: credential.apiKey || 'custom',
+          baseURL: credential.baseUrl || '',
         });
         break;
 
@@ -61,8 +154,25 @@ export function getModelForCredential(
   }
 
   // Return the model instance
-  // The provider function takes the model name and returns a LanguageModel
-  return (provider as ReturnType<typeof createOpenAI>)(modelName);
+  // Different providers have different methods to get models
+  if (credential.provider === 'google') {
+    return (provider as ReturnType<typeof createGoogleGenerativeAI>)(modelName);
+  } else if (credential.provider === 'anthropic') {
+    return (provider as ReturnType<typeof createAnthropic>)(modelName);
+  } else if (credential.provider === 'mistral') {
+    return (provider as ReturnType<typeof createMistral>)(modelName);
+  } else if (credential.provider === 'groq') {
+    return (provider as ReturnType<typeof createGroq>)(modelName);
+  } else if (credential.provider === 'xai') {
+    return (provider as ReturnType<typeof createXai>)(modelName);
+  } else if (credential.provider === 'deepseek') {
+    return (provider as ReturnType<typeof createDeepSeek>)(modelName);
+  } else if (['openrouter', 'together', 'fireworks', 'ollama', 'lmstudio', 'custom'].includes(credential.provider)) {
+    return (provider as ReturnType<typeof createOpenAICompatible>).chatModel(modelName);
+  } else {
+    // OpenAI and fallback
+    return (provider as ReturnType<typeof createOpenAI>)(modelName);
+  }
 }
 
 /**
@@ -82,23 +192,27 @@ export function getDefaultBaseUrl(provider: string): string {
       return 'https://api.openai.com/v1';
     case 'anthropic':
       return 'https://api.anthropic.com';
+    case 'google':
+      return 'https://generativelanguage.googleapis.com/v1beta';
+    case 'xai':
+      return 'https://api.x.ai/v1';
+    case 'groq':
+      return 'https://api.groq.com/openai/v1';
+    case 'mistral':
+      return 'https://api.mistral.ai/v1';
+    case 'deepseek':
+      return 'https://api.deepseek.com';
+    case 'openrouter':
+      return 'https://openrouter.ai/api/v1';
+    case 'together':
+      return 'https://api.together.xyz/v1';
+    case 'fireworks':
+      return 'https://api.fireworks.ai/inference/v1';
     case 'ollama':
       return 'http://localhost:11434/v1';
+    case 'lmstudio':
+      return 'http://localhost:1234/v1';
     default:
       return '';
   }
 }
-
-/**
- * Static model lists for providers without a models API
- */
-export const ANTHROPIC_MODELS = [
-  { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4' },
-  { id: 'claude-opus-4-20250514', name: 'Claude Opus 4' },
-  { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet' },
-  { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet' },
-  { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku' },
-  { id: 'claude-3-opus-20240229', name: 'Claude 3 Opus' },
-  { id: 'claude-3-sonnet-20240229', name: 'Claude 3 Sonnet' },
-  { id: 'claude-3-haiku-20240307', name: 'Claude 3 Haiku' },
-];

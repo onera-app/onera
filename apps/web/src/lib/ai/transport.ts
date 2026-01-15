@@ -3,9 +3,19 @@
  * Enables direct browser-to-provider communication for E2EE compliance
  */
 
-import { streamText, type UIMessage, type UIMessageChunk, type ModelMessage } from 'ai';
+import {
+  streamText,
+  wrapLanguageModel,
+  extractReasoningMiddleware,
+  type UIMessage,
+  type UIMessageChunk,
+  type ModelMessage,
+} from 'ai';
+import { google } from '@ai-sdk/google';
+import { xai } from '@ai-sdk/xai';
 import { getModelForCredential } from './providers';
 import { getCredentialById, parseModelId } from './credentials';
+import type { NativeSearchSettings, NativeSearchProvider } from '@/stores/toolsStore';
 
 /**
  * Options for DirectBrowserTransport
@@ -30,6 +40,14 @@ export interface DirectBrowserTransportOptions {
    * Optional system prompt
    */
   systemPrompt?: string;
+
+  /**
+   * Native search settings for supported providers (Google, xAI)
+   */
+  nativeSearch?: {
+    enabled: boolean;
+    settings?: NativeSearchSettings;
+  };
 }
 
 /**
@@ -68,7 +86,7 @@ export class DirectBrowserTransport {
     abortSignal: AbortSignal | undefined;
   }): Promise<ReadableStream<UIMessageChunk>> {
     const { messages, abortSignal } = options;
-    const { modelId, temperature, maxTokens, systemPrompt } = this.options;
+    const { modelId, temperature, maxTokens, systemPrompt, nativeSearch } = this.options;
 
     // Parse the model ID to get credential and model name
     const { credentialId, modelName } = parseModelId(modelId);
@@ -84,24 +102,75 @@ export class DirectBrowserTransport {
     }
 
     // Get the AI SDK model instance
-    const model = getModelForCredential(credential, modelName);
+    const baseModel = getModelForCredential(credential, modelName);
+
+    // Wrap with reasoning middleware to extract <think>/<thinking>/<reason>/<reasoning> tags
+    // This enables proper handling of reasoning models like DeepSeek R1, Claude, etc.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const model = wrapLanguageModel({
+      model: baseModel as any,
+      middleware: extractReasoningMiddleware({
+        tagName: 'think',
+      }),
+    });
 
     // Convert UIMessages to ModelMessages for streamText
     const modelMessages = this.convertToModelMessages(messages);
 
+    // Build tools object based on provider and native search settings
+    const tools = this.buildNativeSearchTools(credential.provider, nativeSearch);
+
     // Call streamText directly in the browser
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = streamText({
-      model,
+      model: model as any,
       system: systemPrompt,
       messages: modelMessages,
       temperature: temperature ?? 0.7,
       maxOutputTokens: maxTokens ?? 4096,
       abortSignal,
+      ...(tools && { tools }),
     });
 
     // Convert to UIMessageStream and return as ReadableStream
     // toUIMessageStream returns an AsyncIterableStream which extends ReadableStream
     return result.toUIMessageStream() as unknown as ReadableStream<UIMessageChunk>;
+  }
+
+  /**
+   * Build native search tools based on provider type
+   * Returns tools object compatible with streamText
+   */
+  private buildNativeSearchTools(
+    provider: string,
+    nativeSearch?: { enabled: boolean; settings?: NativeSearchSettings }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Record<string, any> | undefined {
+    if (!nativeSearch?.enabled) {
+      return undefined;
+    }
+
+    const settings = nativeSearch.settings;
+
+    switch (provider) {
+      case 'google':
+        // Google Gemini native search grounding
+        return {
+          google_search: google.tools.googleSearch({}),
+        };
+
+      case 'xai':
+        // xAI Grok native web search
+        return {
+          web_search: xai.tools.webSearch({
+            allowedDomains: settings?.allowedDomains,
+            enableImageUnderstanding: settings?.enableImageUnderstanding ?? true,
+          }),
+        };
+
+      default:
+        return undefined;
+    }
   }
 
   /**
@@ -177,4 +246,22 @@ export function createDirectBrowserTransport(
   options: DirectBrowserTransportOptions
 ): DirectBrowserTransport {
   return new DirectBrowserTransport(options);
+}
+
+/**
+ * Check if a provider supports native search
+ */
+export function supportsNativeSearch(provider: string): provider is NativeSearchProvider {
+  return provider === 'google' || provider === 'xai';
+}
+
+/**
+ * Get the current provider from a model ID
+ */
+export function getProviderFromModelId(modelId: string): string | null {
+  const { credentialId } = parseModelId(modelId);
+  if (!credentialId) return null;
+
+  const credential = getCredentialById(credentialId);
+  return credential?.provider || null;
 }

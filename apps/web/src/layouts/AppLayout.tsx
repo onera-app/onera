@@ -7,6 +7,7 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { ResizeHandle } from '@/components/layout/ResizeHandle';
 import { E2EEUnlockModal } from '@/components/e2ee/E2EEUnlockModal';
 import { E2EESetupModal } from '@/components/e2ee/E2EESetupModal';
+import { SettingsModal } from '@/features/settings-modal';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -17,7 +18,7 @@ export function AppLayout() {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useAuth();
   const { status: e2eeStatus, needsSetup } = useE2EEStore();
-  const { sidebarOpen, toggleSidebar, chatDensity } = useUIStore();
+  const { sidebarOpen, toggleSidebar, chatDensity, settingsModalOpen, settingsModalTab, closeSettingsModal } = useUIStore();
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -88,6 +89,13 @@ export function AppLayout() {
 
         {/* E2EE Unlock Modal */}
         {!needsSetup && e2eeStatus === 'locked' && <E2EEUnlockModal />}
+
+        {/* Settings Modal */}
+        <SettingsModal
+          open={settingsModalOpen}
+          onOpenChange={(open) => !open && closeSettingsModal()}
+          initialTab={settingsModalTab}
+        />
       </div>
     </TooltipProvider>
   );

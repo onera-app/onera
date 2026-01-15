@@ -11,6 +11,8 @@ import { AttachmentPreview, type PendingAttachment } from './AttachmentPreview';
 import { SearchToggle } from './SearchToggle';
 import { processFile } from '@/lib/fileProcessing';
 import { useToolsStore } from '@/stores/toolsStore';
+import { useUIStore } from '@/stores/uiStore';
+import { RichTextMessageInput } from '@/features/rich-text-input';
 import type { ProcessedFile } from '@/lib/fileProcessing';
 import type { SearchProvider } from '@onera/types';
 
@@ -29,6 +31,44 @@ interface MessageInputProps {
 }
 
 export const MessageInput = memo(function MessageInput({
+  onSend,
+  disabled = false,
+  placeholder = 'Message Onera...',
+  onStop,
+  isStreaming = false,
+}: MessageInputProps) {
+  // Check if rich text input is enabled
+  const useRichTextInput = useUIStore((s) => s.useRichTextInput);
+
+  // Use rich text input if enabled
+  if (useRichTextInput) {
+    return (
+      <RichTextMessageInput
+        onSend={onSend}
+        disabled={disabled}
+        placeholder={placeholder}
+        onStop={onStop}
+        isStreaming={isStreaming}
+      />
+    );
+  }
+
+  // Fallback to simple textarea input
+  return (
+    <SimpleMessageInput
+      onSend={onSend}
+      disabled={disabled}
+      placeholder={placeholder}
+      onStop={onStop}
+      isStreaming={isStreaming}
+    />
+  );
+});
+
+/**
+ * Simple textarea-based message input (legacy)
+ */
+const SimpleMessageInput = memo(function SimpleMessageInput({
   onSend,
   disabled = false,
   placeholder = 'Message Onera...',

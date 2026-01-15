@@ -4,6 +4,8 @@ import { persist } from 'zustand/middleware';
 export type Theme = 'light' | 'dark' | 'oled-dark' | 'system';
 export type ChatDensity = 'compact' | 'normal' | 'comfortable';
 
+export type SettingsTab = 'general' | 'interface' | 'connections' | 'tools' | 'audio' | 'data' | 'account' | 'encryption' | 'about';
+
 interface UIState {
   // Theme & appearance
   theme: Theme;
@@ -15,6 +17,13 @@ interface UIState {
   sidebarWidth: number;
   sidebarSearchQuery: string;
 
+  // Input preferences
+  useRichTextInput: boolean;
+
+  // Settings modal
+  settingsModalOpen: boolean;
+  settingsModalTab: SettingsTab;
+
   // Actions
   setTheme: (theme: Theme) => void;
   setUIScale: (scale: number) => void;
@@ -23,6 +32,9 @@ interface UIState {
   setSidebarOpen: (open: boolean) => void;
   setSidebarWidth: (width: number) => void;
   setSidebarSearchQuery: (query: string) => void;
+  setUseRichTextInput: (enabled: boolean) => void;
+  openSettingsModal: (tab?: SettingsTab) => void;
+  closeSettingsModal: () => void;
 }
 
 // Sidebar width constraints (OpenWebUI style)
@@ -39,6 +51,9 @@ export const useUIStore = create<UIState>()(
       sidebarOpen: true,
       sidebarWidth: SIDEBAR_DEFAULT_WIDTH,
       sidebarSearchQuery: '',
+      useRichTextInput: true, // Default to rich text input
+      settingsModalOpen: false,
+      settingsModalTab: 'general' as SettingsTab,
 
       setTheme: (theme) => set({ theme }),
       setUIScale: (uiScale) => {
@@ -57,15 +72,29 @@ export const useUIStore = create<UIState>()(
         set({ sidebarWidth: clamped });
       },
       setSidebarSearchQuery: (sidebarSearchQuery) => set({ sidebarSearchQuery }),
+      setUseRichTextInput: (useRichTextInput) => set({ useRichTextInput }),
+      openSettingsModal: (tab) => set({ settingsModalOpen: true, settingsModalTab: tab || 'general' }),
+      closeSettingsModal: () => set({ settingsModalOpen: false }),
     }),
     {
       name: 'onera-ui',
+      version: 2, // Bump version for migration
       onRehydrateStorage: () => (state) => {
         // Apply stored values to CSS variables on hydration
         if (state) {
           document.documentElement.style.setProperty('--ui-scale', String(state.uiScale));
           document.documentElement.style.setProperty('--sidebar-width', `${state.sidebarWidth}px`);
         }
+      },
+      migrate: (persistedState: unknown, version: number) => {
+        const state = persistedState as Partial<UIState>;
+        if (version < 2) {
+          return {
+            ...state,
+            useRichTextInput: true, // Default to rich text
+          };
+        }
+        return state as UIState;
       },
     }
   )

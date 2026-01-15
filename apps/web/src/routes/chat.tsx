@@ -7,16 +7,23 @@ import { useE2EE } from '@/providers/E2EEProvider';
 import { useModelStore } from '@/stores/modelStore';
 import { useChat, useUpdateChat, useDeleteChat } from '@/hooks/queries/useChats';
 import { getChatKey, decryptChatTitle, decryptChatContent, encryptChatContent, encryptChatTitle } from '@onera/crypto';
-import type { ChatMessage, MessageContent } from '@onera/types';
+import type { ChatMessage, MessageContent, ChatHistory } from '@onera/types';
 import { Messages } from '@/components/chat/Messages';
+import {
+  createMessagesList,
+  createBranchFromEdit,
+  switchToBranch,
+} from '@/lib/messageTree';
 import { MessageInput, type MessageInputOptions } from '@/components/chat/MessageInput';
 import { ChatNavbar } from '@/components/chat/ChatNavbar';
 import { ModelSelector } from '@/components/chat/ModelSelector';
 import { FollowUps } from '@/components/chat/FollowUps';
 import { useDirectChat } from '@/hooks/useDirectChat';
-import { generateFollowUps } from '@/lib/ai';
+import { generateFollowUps, getProviderFromModelId, supportsNativeSearch } from '@/lib/ai';
 import { storeAttachment } from '@/lib/storage/attachmentStorage';
-import { executeSearch, formatSearchResultsForContext } from '@/lib/search';
+import { executeSearch, formatSearchResultsForContext, type SearchResult } from '@/lib/search';
+import type { Source } from '@/components/chat/Sources';
+import { useToolsStore, type NativeSearchProvider } from '@/stores/toolsStore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, Loader2 } from 'lucide-react';
@@ -25,6 +32,7 @@ interface DecryptedChat {
   id: string;
   title: string;
   messages: ChatMessage[];
+  history: ChatHistory;
   createdAt: number;
   updatedAt: number;
   encryptedChatKey?: string;
@@ -85,10 +93,30 @@ export function ChatPage() {
   const navigate = useNavigate();
   const { isUnlocked } = useE2EE();
   const { selectedModelId, setSelectedModel } = useModelStore();
+  const { nativeSearchSettings, getNativeSearchSettings } = useToolsStore();
 
   // Follow-up suggestions state
   const [followUps, setFollowUps] = useState<string[]>([]);
   const [isGeneratingFollowUps, setIsGeneratingFollowUps] = useState(false);
+
+  // Search sources state - stores results from the current/last search
+  const [searchSources, setSearchSources] = useState<Source[]>([]);
+
+  // Determine native search settings based on current provider
+  const nativeSearch = useMemo(() => {
+    if (!selectedModelId) return undefined;
+
+    const provider = getProviderFromModelId(selectedModelId);
+    if (!provider || !supportsNativeSearch(provider)) return undefined;
+
+    const settings = getNativeSearchSettings(provider as NativeSearchProvider);
+    if (!settings?.enabled) return undefined;
+
+    return {
+      enabled: true,
+      settings,
+    };
+  }, [selectedModelId, getNativeSearchSettings, nativeSearchSettings]);
 
   // Fetch chat using Convex
   const rawChat = useChat(chatId || '');
@@ -117,30 +145,36 @@ export function ChatPage() {
             )
           : 'Untitled';
 
-        const chatContent = rawChat.encryptedChat && rawChat.chatNonce
+        const history: ChatHistory = rawChat.encryptedChat && rawChat.chatNonce
           ? decryptChatContent(
               rawChat.id,
               rawChat.encryptedChatKey,
               rawChat.chatKeyNonce,
               rawChat.encryptedChat,
               rawChat.chatNonce
-            ) as { messages: ChatMessage[] }
-          : { messages: [] };
+            ) as unknown as ChatHistory
+          : { currentId: null, messages: {} };
+
+        // Get linear messages from history for display
+        const messages = createMessagesList(history);
 
         return {
           id: rawChat.id,
           title,
-          messages: chatContent.messages || [],
+          messages,
+          history,
           createdAt: rawChat.createdAt,
           updatedAt: rawChat.updatedAt,
           encryptedChatKey: rawChat.encryptedChatKey,
           chatKeyNonce: rawChat.chatKeyNonce,
         };
       } catch {
+        const emptyHistory: ChatHistory = { currentId: null, messages: {} };
         return {
           id: rawChat.id,
           title: 'Encrypted',
           messages: [],
+          history: emptyHistory,
           createdAt: rawChat.createdAt,
           updatedAt: rawChat.updatedAt,
           encryptedChatKey: rawChat.encryptedChatKey,
@@ -149,10 +183,12 @@ export function ChatPage() {
       }
     }
 
+    const emptyHistory: ChatHistory = { currentId: null, messages: {} };
     return {
       id: rawChat.id,
       title: 'Encrypted',
       messages: [],
+      history: emptyHistory,
       createdAt: rawChat.createdAt,
       updatedAt: rawChat.updatedAt,
       encryptedChatKey: rawChat.encryptedChatKey,
@@ -204,15 +240,20 @@ export function ChatPage() {
   const pendingUserMessageRef = useRef<ChatMessage | null>(null);
   // Ref to track current messages for persistence
   const currentMessagesRef = useRef<ChatMessage[]>([]);
+  // Ref to track current history for persistence
+  const currentHistoryRef = useRef<ChatHistory>({ currentId: null, messages: {} });
   // Ref to track previous display messages for stable references
   const prevDisplayMessagesRef = useRef<ChatMessage[]>([]);
 
-  // Keep currentMessagesRef in sync with chat.messages
+  // Keep currentMessagesRef and currentHistoryRef in sync with chat
   useEffect(() => {
     if (chat?.messages) {
       currentMessagesRef.current = chat.messages;
     }
-  }, [chat?.messages]);
+    if (chat?.history) {
+      currentHistoryRef.current = chat.history;
+    }
+  }, [chat?.messages, chat?.history]);
 
   // Handle message completion - persist user + assistant messages
   const handleFinish = useCallback(async (message: UIMessage) => {
@@ -222,17 +263,58 @@ export function ChatPage() {
     const pendingUserMessage = pendingUserMessageRef.current;
     const assistantMessage = toChatMessage(message, selectedModelId || undefined);
 
-    let finalMessages: ChatMessage[];
+    // Get current history or initialize empty (deep copy to avoid mutations)
+    const history: ChatHistory = {
+      currentId: currentHistoryRef.current.currentId,
+      messages: { ...currentHistoryRef.current.messages },
+    };
+
+    // Find the current leaf message (parent for new messages)
+    let parentId: string | null = history.currentId;
+
+    // Add pending user message to history
     if (pendingUserMessage) {
-      finalMessages = [...currentMessagesRef.current, pendingUserMessage, assistantMessage];
+      // Add parentId and childrenIds to user message
+      const userMsgWithTree: ChatMessage = {
+        ...pendingUserMessage,
+        parentId,
+        childrenIds: [],
+      };
+
+      // Update parent's childrenIds if it exists
+      if (parentId && history.messages[parentId]) {
+        history.messages[parentId] = {
+          ...history.messages[parentId],
+          childrenIds: [...(history.messages[parentId].childrenIds || []), pendingUserMessage.id],
+        };
+      }
+
+      history.messages[pendingUserMessage.id] = userMsgWithTree;
+      parentId = pendingUserMessage.id;
       pendingUserMessageRef.current = null; // Clear pending
-    } else {
-      // No pending user message - this shouldn't happen but handle gracefully
-      finalMessages = [...currentMessagesRef.current, assistantMessage];
     }
 
-    // Update ref for next message
-    currentMessagesRef.current = finalMessages;
+    // Add assistant message to history
+    const assistantMsgWithTree: ChatMessage = {
+      ...assistantMessage,
+      parentId,
+      childrenIds: [],
+    };
+
+    // Update parent's childrenIds if it exists
+    if (parentId && history.messages[parentId]) {
+      history.messages[parentId] = {
+        ...history.messages[parentId],
+        childrenIds: [...(history.messages[parentId].childrenIds || []), assistantMessage.id],
+      };
+    }
+
+    history.messages[assistantMessage.id] = assistantMsgWithTree;
+    history.currentId = assistantMessage.id;
+
+    // Update refs for next message
+    currentHistoryRef.current = history;
+    currentMessagesRef.current = createMessagesList(history);
 
     // Encrypt and save to server
     try {
@@ -240,7 +322,7 @@ export function ChatPage() {
         chatId,
         chat.encryptedChatKey,
         chat.chatKeyNonce,
-        { messages: finalMessages }
+        history as unknown as Record<string, unknown>
       );
 
       await updateChatMutation.mutateAsync({
@@ -251,12 +333,40 @@ export function ChatPage() {
         },
       });
 
-      // Generate follow-up suggestions asynchronously
+      // Generate follow-up suggestions asynchronously and persist them
       if (selectedModelId) {
         setIsGeneratingFollowUps(true);
-        generateFollowUps(finalMessages, selectedModelId, 3)
-          .then((suggestions) => {
+        generateFollowUps(currentMessagesRef.current, selectedModelId, 3)
+          .then(async (suggestions) => {
             setFollowUps(suggestions);
+
+            // Persist follow-ups to the assistant message
+            if (suggestions.length > 0 && currentHistoryRef.current.messages[assistantMessage.id]) {
+              currentHistoryRef.current.messages[assistantMessage.id] = {
+                ...currentHistoryRef.current.messages[assistantMessage.id],
+                followUps: suggestions,
+              };
+
+              // Re-encrypt and save with follow-ups
+              try {
+                const encryptedWithFollowUps = encryptChatContent(
+                  chatId,
+                  chat.encryptedChatKey,
+                  chat.chatKeyNonce,
+                  currentHistoryRef.current as unknown as Record<string, unknown>
+                );
+
+                await updateChatMutation.mutateAsync({
+                  id: chatId,
+                  data: {
+                    encryptedChat: encryptedWithFollowUps.encryptedChat,
+                    chatNonce: encryptedWithFollowUps.chatNonce,
+                  },
+                });
+              } catch (followUpSaveError) {
+                console.warn('Failed to persist follow-ups:', followUpSaveError);
+              }
+            }
           })
           .catch((err) => {
             console.warn('Failed to generate follow-ups:', err);
@@ -288,6 +398,7 @@ export function ChatPage() {
         toast.error(error.message || 'Failed to get response');
       }
     },
+    nativeSearch,
   });
 
   // Sync decrypted messages to AI SDK state when chat loads
@@ -296,19 +407,14 @@ export function ChatPage() {
       const uiMessages = chat.messages.map(toUIMessage);
       setMessages(uiMessages);
 
-      // Generate follow-ups for existing chat if none exist and not streaming
-      if (followUps.length === 0 && !isGeneratingFollowUps && selectedModelId && status !== 'streaming') {
-        setIsGeneratingFollowUps(true);
-        generateFollowUps(chat.messages, selectedModelId, 3)
-          .then((suggestions) => {
-            setFollowUps(suggestions);
-          })
-          .catch((err) => {
-            console.warn('Failed to generate follow-ups:', err);
-          })
-          .finally(() => {
-            setIsGeneratingFollowUps(false);
-          });
+      // Load persisted follow-ups from the last assistant message
+      const lastMessage = chat.messages[chat.messages.length - 1];
+      if (lastMessage?.role === 'assistant' && lastMessage.followUps && lastMessage.followUps.length > 0) {
+        // Use persisted follow-ups
+        setFollowUps(lastMessage.followUps);
+      } else {
+        // Clear any stale follow-ups
+        setFollowUps([]);
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -317,24 +423,26 @@ export function ChatPage() {
   // Derive streaming state from AI SDK status
   const isStreaming = status === 'streaming' || status === 'submitted';
 
-  // Get streaming content from the last message if it's streaming
-  const streamingContent = useMemo(() => {
+  // Get streaming message parts from the last message if it's streaming
+  // Includes both text and reasoning parts from the AI SDK
+  const streamingParts = useMemo(() => {
     if (!isStreaming) return undefined;
 
     const lastMessage = aiMessages[aiMessages.length - 1];
-    if (lastMessage?.role === 'assistant') {
-      let content = '';
-      if (lastMessage.parts) {
-        for (const part of lastMessage.parts) {
-          if (part.type === 'text') {
-            content += part.text;
-          }
-        }
-      }
-      return content;
+    if (lastMessage?.role === 'assistant' && lastMessage.parts) {
+      return lastMessage.parts;
     }
-    return '';
+    return [];
   }, [aiMessages, isStreaming]);
+
+  // Extract text content for backward compatibility
+  const streamingContent = useMemo(() => {
+    if (!streamingParts) return undefined;
+    return streamingParts
+      .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
+      .map((part) => part.text)
+      .join('');
+  }, [streamingParts]);
 
   // Get display messages - combine stored messages with streaming state
   // Uses ref comparison to return stable reference when content unchanged
@@ -381,8 +489,11 @@ export function ChatPage() {
       return;
     }
 
-    // Clear follow-ups when sending a new message
+    // Clear follow-ups and search sources when sending a new message
     setFollowUps([]);
+    if (!options?.searchEnabled) {
+      setSearchSources([]);
+    }
 
     try {
       // Build the message content
@@ -450,9 +561,21 @@ export function ChatPage() {
           if (searchResult.results.length > 0) {
             searchContext = formatSearchResultsForContext(searchResult.results, content);
             toast.success(`Found ${searchResult.results.length} search results`);
+
+            // Convert search results to sources for display
+            const sources: Source[] = searchResult.results.map((r: SearchResult) => ({
+              sourceType: 'url',
+              url: r.url,
+              title: r.title,
+              domain: r.url ? new URL(r.url).hostname.replace(/^www\./, '') : undefined,
+            }));
+            setSearchSources(sources);
+          } else {
+            setSearchSources([]);
           }
         } catch (searchError) {
           console.warn('Search failed:', searchError);
+          setSearchSources([]);
           // Don't block the message, just warn
           toast.warning('Search failed, sending message without search results');
         }
@@ -516,6 +639,155 @@ export function ChatPage() {
     }
   }, [chat, chatId, isLoadingCredentials, isReady, isUnlocked, selectedModelId, sendMessage]);
 
+  // Handle message edit - creates a new branch
+  const handleEditMessage = useCallback(async (messageId: string, newContent: string) => {
+    if (!chat || !chatId || !chat.encryptedChatKey || !chat.chatKeyNonce) return;
+
+    try {
+      // Create a new branch from the edit
+      const { history: newHistory } = createBranchFromEdit(
+        currentHistoryRef.current,
+        messageId,
+        newContent
+      );
+
+      // Update refs
+      currentHistoryRef.current = newHistory;
+      currentMessagesRef.current = createMessagesList(newHistory);
+
+      // Encrypt and save to server
+      const encrypted = encryptChatContent(
+        chatId,
+        chat.encryptedChatKey,
+        chat.chatKeyNonce,
+        newHistory as unknown as Record<string, unknown>
+      );
+
+      await updateChatMutation.mutateAsync({
+        id: chatId,
+        data: {
+          encryptedChat: encrypted.encryptedChat,
+          chatNonce: encrypted.chatNonce,
+        },
+      });
+
+      toast.success('Message edited - new branch created');
+
+      // Now re-send to get a new AI response
+      // The AI messages need to be updated to reflect the new branch
+      const newMessages = createMessagesList(newHistory);
+      const uiMessages = newMessages.map(toUIMessage);
+      setMessages(uiMessages);
+
+      // Trigger a new AI response by sending the edited message
+      if (selectedModelId && isReady) {
+        await sendMessage(newContent);
+      }
+    } catch (error) {
+      console.error('Failed to edit message:', error);
+      toast.error('Failed to edit message');
+    }
+  }, [chat, chatId, updateChatMutation, setMessages, selectedModelId, isReady, sendMessage]);
+
+  // Handle branch switching
+  const handleSwitchBranch = useCallback(async (messageId: string) => {
+    if (!chat || !chatId || !chat.encryptedChatKey || !chat.chatKeyNonce) return;
+
+    try {
+      // Switch to the new branch
+      const newHistory = switchToBranch(currentHistoryRef.current, messageId);
+
+      // Update refs
+      currentHistoryRef.current = newHistory;
+      currentMessagesRef.current = createMessagesList(newHistory);
+
+      // Encrypt and save to server
+      const encrypted = encryptChatContent(
+        chatId,
+        chat.encryptedChatKey,
+        chat.chatKeyNonce,
+        newHistory as unknown as Record<string, unknown>
+      );
+
+      await updateChatMutation.mutateAsync({
+        id: chatId,
+        data: {
+          encryptedChat: encrypted.encryptedChat,
+          chatNonce: encrypted.chatNonce,
+        },
+      });
+
+      // Update AI messages to reflect the switched branch
+      const newMessages = createMessagesList(newHistory);
+      const uiMessages = newMessages.map(toUIMessage);
+      setMessages(uiMessages);
+
+      // Load follow-ups from the new branch's last assistant message
+      const lastMessage = newMessages[newMessages.length - 1];
+      if (lastMessage?.role === 'assistant' && lastMessage.followUps && lastMessage.followUps.length > 0) {
+        setFollowUps(lastMessage.followUps);
+      } else {
+        setFollowUps([]);
+      }
+    } catch (error) {
+      console.error('Failed to switch branch:', error);
+      toast.error('Failed to switch branch');
+    }
+  }, [chat, chatId, updateChatMutation, setMessages]);
+
+  // Handle message regeneration
+  const handleRegenerateMessage = useCallback(async (
+    messageId: string,
+    options?: { modifier?: string }
+  ) => {
+    if (!chat || !chatId || !selectedModelId || !isReady) return;
+
+    try {
+      // Find the message index
+      const messageIndex = displayMessages.findIndex(m => m.id === messageId);
+      if (messageIndex === -1) return;
+
+      // Get all messages up to (but not including) the message to regenerate
+      // This should include the user message that prompted this response
+      const messagesToKeep = displayMessages.slice(0, messageIndex);
+      const userMessage = messagesToKeep[messagesToKeep.length - 1];
+
+      if (!userMessage || userMessage.role !== 'user') {
+        toast.error('Cannot regenerate: no user message found');
+        return;
+      }
+
+      // Clear follow-ups
+      setFollowUps([]);
+
+      // Get the user message content
+      let userContent = typeof userMessage.content === 'string'
+        ? userMessage.content
+        : userMessage.content.filter(c => c.type === 'text').map(c => c.text).join('\n');
+
+      // Apply modifier if provided (e.g., "Please be more concise")
+      if (options?.modifier) {
+        userContent = `${userContent}\n\n${options.modifier}`;
+      }
+
+      // Set up messages for regeneration (all messages up to the user message)
+      const uiMessages = messagesToKeep.map(toUIMessage);
+      setMessages(uiMessages);
+
+      // Store the pending user message for persistence (without modifier in stored content)
+      pendingUserMessageRef.current = {
+        ...userMessage,
+        id: userMessage.id, // Keep same ID for the original user message
+      };
+
+      // Send the message again to regenerate
+      await sendMessage(userContent);
+    } catch (error) {
+      console.error('Failed to regenerate message:', error);
+      toast.error('Failed to regenerate message');
+    }
+  }, [chat, chatId, selectedModelId, isReady, displayMessages, setMessages, sendMessage]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full bg-background">
@@ -568,9 +840,15 @@ export function ChatPage() {
       <div className="flex-1 overflow-hidden">
         <Messages
           messages={displayMessages}
+          history={chat.history}
           streamingMessage={streamingContent}
+          streamingParts={streamingParts}
+          streamingSources={searchSources}
           streamingModel={selectedModelId || undefined}
           isStreaming={isStreaming}
+          onEditMessage={handleEditMessage}
+          onRegenerateMessage={handleRegenerateMessage}
+          onSwitchBranch={handleSwitchBranch}
         />
       </div>
 

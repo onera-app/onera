@@ -17,6 +17,7 @@ import {
   clearProviderCache,
   type RawCredential,
 } from '@/lib/ai';
+import type { NativeSearchSettings } from '@/stores/toolsStore';
 
 interface UseDirectChatOptions {
   /**
@@ -53,6 +54,14 @@ interface UseDirectChatOptions {
    * Optional max tokens
    */
   maxTokens?: number;
+
+  /**
+   * Native search settings for supported providers (Google, xAI)
+   */
+  nativeSearch?: {
+    enabled: boolean;
+    settings?: NativeSearchSettings;
+  };
 }
 
 interface UseDirectChatReturn extends Omit<UseChatHelpers<UIMessage>, 'sendMessage'> {
@@ -90,6 +99,7 @@ export function useDirectChat({
   systemPrompt,
   temperature = 0.7,
   maxTokens = 4096,
+  nativeSearch,
 }: UseDirectChatOptions): UseDirectChatReturn {
   const { isUnlocked } = useE2EE();
   const { selectedModelId, setSelectedModel } = useModelStore();
@@ -148,6 +158,7 @@ export function useDirectChat({
         temperature,
         maxTokens,
         systemPrompt,
+        nativeSearch,
       });
     }
   }, []);
@@ -160,9 +171,10 @@ export function useDirectChat({
         temperature,
         maxTokens,
         systemPrompt,
+        nativeSearch,
       });
     }
-  }, [selectedModelId, temperature, maxTokens, systemPrompt]);
+  }, [selectedModelId, temperature, maxTokens, systemPrompt, nativeSearch]);
 
   // Create chat options with our transport - ALWAYS provide transport
   // Uses refs for callbacks to avoid recreating on every render
@@ -174,6 +186,7 @@ export function useDirectChat({
         temperature,
         maxTokens,
         systemPrompt,
+        nativeSearch,
       });
     }
 
@@ -184,7 +197,7 @@ export function useDirectChat({
       onFinish: ({ message }) => onFinishRef.current?.(message),
       onError: (error) => onErrorRef.current?.(error),
     };
-  }, [chatId, initialMessages, selectedModelId, temperature, maxTokens, systemPrompt]);
+  }, [chatId, initialMessages, selectedModelId, temperature, maxTokens, systemPrompt, nativeSearch]);
   // REMOVED: onFinish, onError from dependencies - using refs instead
 
   // Use AI SDK's useChat with our transport

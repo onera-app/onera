@@ -58,11 +58,24 @@ interface EncryptedApiKey {
   iv: string;
 }
 
+// Native AI SDK search providers (built-in to the AI providers)
+export type NativeSearchProvider = 'google' | 'xai';
+
+export interface NativeSearchSettings {
+  enabled: boolean;
+  // xAI-specific settings
+  allowedDomains?: string[];
+  enableImageUnderstanding?: boolean;
+}
+
 interface ToolsState {
   // Search settings
   searchEnabled: boolean;
   searchEnabledByDefault: boolean;
   defaultSearchProvider: SearchProvider | null;
+
+  // Native AI SDK search settings (per AI provider)
+  nativeSearchSettings: Record<NativeSearchProvider, NativeSearchSettings>;
 
   // Encrypted API keys (stored in localStorage)
   encryptedApiKeys: EncryptedApiKey[];
@@ -72,6 +85,12 @@ interface ToolsState {
   setSearchEnabledByDefault: (enabled: boolean) => void;
   setDefaultSearchProvider: (provider: SearchProvider | null) => void;
 
+  // Native search settings
+  setNativeSearchEnabled: (provider: NativeSearchProvider, enabled: boolean) => void;
+  setNativeSearchSettings: (provider: NativeSearchProvider, settings: Partial<NativeSearchSettings>) => void;
+  getNativeSearchSettings: (provider: NativeSearchProvider) => NativeSearchSettings;
+  isNativeSearchEnabled: (provider: NativeSearchProvider) => boolean;
+
   // API key management
   setProviderApiKey: (provider: SearchProvider, apiKey: string) => void;
   getProviderApiKey: (provider: SearchProvider) => string | null;
@@ -80,12 +99,19 @@ interface ToolsState {
   getConfiguredProviders: () => SearchProvider[];
 }
 
+// Default native search settings
+const DEFAULT_NATIVE_SEARCH_SETTINGS: Record<NativeSearchProvider, NativeSearchSettings> = {
+  google: { enabled: false },
+  xai: { enabled: false, enableImageUnderstanding: true },
+};
+
 export const useToolsStore = create<ToolsState>()(
   persist(
     (set, get) => ({
       searchEnabled: false,
       searchEnabledByDefault: false,
       defaultSearchProvider: null,
+      nativeSearchSettings: { ...DEFAULT_NATIVE_SEARCH_SETTINGS },
       encryptedApiKeys: [],
 
       setSearchEnabled: (enabled) => set({ searchEnabled: enabled }),
@@ -94,6 +120,32 @@ export const useToolsStore = create<ToolsState>()(
 
       setDefaultSearchProvider: (provider) =>
         set({ defaultSearchProvider: provider }),
+
+      setNativeSearchEnabled: (provider, enabled) =>
+        set((state) => ({
+          nativeSearchSettings: {
+            ...state.nativeSearchSettings,
+            [provider]: { ...state.nativeSearchSettings[provider], enabled },
+          },
+        })),
+
+      setNativeSearchSettings: (provider, settings) =>
+        set((state) => ({
+          nativeSearchSettings: {
+            ...state.nativeSearchSettings,
+            [provider]: { ...state.nativeSearchSettings[provider], ...settings },
+          },
+        })),
+
+      getNativeSearchSettings: (provider) => {
+        const { nativeSearchSettings } = get();
+        return nativeSearchSettings[provider] || DEFAULT_NATIVE_SEARCH_SETTINGS[provider];
+      },
+
+      isNativeSearchEnabled: (provider) => {
+        const { nativeSearchSettings } = get();
+        return nativeSearchSettings[provider]?.enabled ?? false;
+      },
 
       setProviderApiKey: (provider, apiKey) => {
         if (!isUnlocked()) {
@@ -184,6 +236,7 @@ export const useToolsStore = create<ToolsState>()(
       partialize: (state) => ({
         searchEnabledByDefault: state.searchEnabledByDefault,
         defaultSearchProvider: state.defaultSearchProvider,
+        nativeSearchSettings: state.nativeSearchSettings,
         encryptedApiKeys: state.encryptedApiKeys,
       }),
     }

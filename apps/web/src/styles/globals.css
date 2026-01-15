@@ -291,6 +291,11 @@ body {
   100% { background-position: 200% 0; }
 }
 
+@keyframes pulse-size {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+}
+
 @keyframes accordion-down {
   from { height: 0; }
   to { height: var(--radix-accordion-content-height); }
@@ -510,3 +515,65 @@ body {
 .chat-density-compact .message-gap { gap: 1rem; }
 .chat-density-normal .message-gap { gap: 1.75rem; }
 .chat-density-comfortable .message-gap { gap: 2.5rem; }
+
+/* TipTap Rich Text Editor styles */
+.ProseMirror {
+  outline: none;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--color-muted-foreground);
+  pointer-events: none;
+  height: 0;
+}
+
+/* Mention styling in editor */
+.mention {
+  background: oklch(0.9 0.05 250);
+  color: oklch(0.4 0.15 250);
+  padding: 0.125rem 0.375rem;
+  border-radius: calc(var(--radius) - 4px);
+  font-weight: 500;
+  font-size: 0.9em;
+}
+
+.dark .mention {
+  background: oklch(0.35 0.08 250);
+  color: oklch(0.8 0.12 250);
+}
+
+/* Tippy.js mention dropdown theme */
+.tippy-box[data-theme~='mention-dropdown'] {
+  background: var(--color-popover);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+.tippy-box[data-theme~='mention-dropdown'] .tippy-content {
+  padding: 0;
+}
+
+.tippy-box[data-theme~='mention-dropdown'] .tippy-arrow {
+  display: none;
+}
+
+/* Streaming cursor effect */
+.streaming-cursor > :last-child::after,
+.streaming-cursor > :last-child > :last-child::after {
+  content: '';
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  margin-left: 0.1em;
+  background-color: var(--color-primary);
+  animation: cursor-blink 1s step-end infinite;
+  vertical-align: text-bottom;
+}
+
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}

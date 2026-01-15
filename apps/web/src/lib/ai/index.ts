@@ -36,13 +36,14 @@ export {
   getModelForCredential,
   clearProviderCache,
   getDefaultBaseUrl,
-  ANTHROPIC_MODELS,
 } from './providers';
 
 // Transport
 export {
   DirectBrowserTransport,
   createDirectBrowserTransport,
+  supportsNativeSearch,
+  getProviderFromModelId,
   type DirectBrowserTransportOptions,
 } from './transport';
 

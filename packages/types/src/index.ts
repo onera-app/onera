@@ -100,6 +100,27 @@ export interface ChatMessage {
   content: string | MessageContent[];
   created_at: number;
   model?: string;
+
+  // Branching support
+  parentId?: string | null;
+  childrenIds?: string[];
+
+  // Edit tracking
+  edited?: boolean;
+  editedAt?: number;
+
+  // Follow-up suggestions (stored on assistant messages)
+  followUps?: string[];
+}
+
+/**
+ * Chat history with message tree structure for branching support
+ */
+export interface ChatHistory {
+  /** The currently displayed leaf message ID */
+  currentId: string | null;
+  /** Map of message ID to message (tree structure) */
+  messages: Record<string, ChatMessage>;
 }
 
 export interface MessageContent {
@@ -207,7 +228,21 @@ export interface LLMCredential {
   config?: Record<string, unknown>;
 }
 
-export type LLMProvider = 'openai' | 'anthropic' | 'ollama' | 'azure' | 'custom';
+export type LLMProvider =
+  | 'openai'
+  | 'anthropic'
+  | 'google'
+  | 'xai'
+  | 'groq'
+  | 'mistral'
+  | 'deepseek'
+  | 'openrouter'
+  | 'together'
+  | 'fireworks'
+  | 'ollama'
+  | 'lmstudio'
+  | 'azure'
+  | 'custom';
 
 export interface CreateCredentialForm {
   provider: LLMProvider;

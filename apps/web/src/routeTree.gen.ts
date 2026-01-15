@@ -9,9 +9,6 @@ import { HomePage } from './routes/home';
 import { ChatPage } from './routes/chat';
 import { NotesPage } from './routes/notes';
 import { PromptsPage } from './routes/prompts';
-import { SettingsPage } from './routes/settings';
-import { ConnectionsPage } from './routes/connections';
-
 // Root route with layout
 const rootRoute = createRootRoute({
   component: RootLayout,
@@ -59,22 +56,8 @@ const promptsRoute = createRoute({
   component: PromptsPage,
 });
 
-// Settings route
-const settingsRoute = createRoute({
-  getParentRoute: () => appRoute,
-  path: '/settings',
-  component: SettingsPage,
-});
-
-// Connections route
-const connectionsRoute = createRoute({
-  getParentRoute: () => appRoute,
-  path: '/workspace/connections',
-  component: ConnectionsPage,
-});
-
 // Build the route tree
 export const routeTree = rootRoute.addChildren([
   authRoute,
-  appRoute.addChildren([homeRoute, chatRoute, notesRoute, promptsRoute, settingsRoute, connectionsRoute]),
+  appRoute.addChildren([homeRoute, chatRoute, notesRoute, promptsRoute]),
 ]);

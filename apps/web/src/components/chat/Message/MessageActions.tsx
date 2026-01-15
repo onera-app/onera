@@ -1,15 +1,21 @@
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Copy, Pencil, RefreshCw, Trash2 } from 'lucide-react';
+import { Copy, Pencil, Trash2 } from 'lucide-react';
+import { BranchNavigation, type BranchInfo } from './BranchNavigation';
+import { RegenerateMenu } from './RegenerateMenu';
+import type { RegenerateOptions } from './AssistantMessage';
 
 interface MessageActionsProps {
   onCopy?: () => void;
   onEdit?: () => void;
-  onRegenerate?: () => void;
+  onRegenerate?: (options?: RegenerateOptions) => void;
   onDelete?: () => void;
   isUser?: boolean;
   className?: string;
+  branchInfo?: BranchInfo | null;
+  onPreviousBranch?: () => void;
+  onNextBranch?: () => void;
 }
 
 export function MessageActions({
@@ -19,6 +25,9 @@ export function MessageActions({
   onDelete,
   isUser = false,
   className,
+  branchInfo,
+  onPreviousBranch,
+  onNextBranch,
 }: MessageActionsProps) {
   return (
     <div
@@ -27,6 +36,12 @@ export function MessageActions({
         className
       )}
     >
+      {/* Branch navigation */}
+      <BranchNavigation
+        branchInfo={branchInfo ?? null}
+        onPrevious={onPreviousBranch}
+        onNext={onNextBranch}
+      />
       {onCopy && (
         <Tooltip>
           <TooltipTrigger asChild>
@@ -62,14 +77,9 @@ export function MessageActions({
       {onRegenerate && !isUser && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onRegenerate}
-              className="h-7 w-7 text-muted-foreground hover:text-foreground"
-            >
-              <RefreshCw className="h-4 w-4" />
-            </Button>
+            <span>
+              <RegenerateMenu onRegenerate={onRegenerate} />
+            </span>
           </TooltipTrigger>
           <TooltipContent>Regenerate</TooltipContent>
         </Tooltip>

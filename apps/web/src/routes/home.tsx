@@ -1,14 +1,15 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { useNavigate, Link } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import type { UIMessage } from 'ai';
 import { useE2EE } from '@/providers/E2EEProvider';
 import { useModelStore } from '@/stores/modelStore';
+import { useUIStore } from '@/stores/uiStore';
 import { useCreateChat, useUpdateChat } from '@/hooks/queries/useChats';
 import { trpc } from '@/lib/trpc';
 import { useCredentials } from '@/hooks/queries/useCredentials';
 import { createEncryptedChat, encryptChatTitle, getChatKey } from '@onera/crypto';
-import type { ChatMessage } from '@onera/types';
+import type { ChatMessage, ChatHistory } from '@onera/types';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { ModelSelector } from '@/components/chat/ModelSelector';
 import { Messages } from '@/components/chat/Messages';
@@ -64,6 +65,7 @@ const SUGGESTIONS = [
 export function HomePage() {
   const navigate = useNavigate();
   const { isUnlocked } = useE2EE();
+  const { openSettingsModal } = useUIStore();
   const { selectedModelId, setSelectedModel } = useModelStore();
   const createChat = useCreateChat();
   const updateChat = useUpdateChat();
@@ -160,10 +162,34 @@ export function HomePage() {
       const initialTitle = (typeof content === 'string' ? content : 'New Chat').slice(0, 50) +
         ((typeof content === 'string' ? content : '').length > 50 ? '...' : '');
 
+      // Build proper ChatHistory tree structure
+      const history: ChatHistory = { currentId: null, messages: {} };
+      let parentId: string | null = null;
+
+      for (const msg of finalMessages) {
+        const msgWithTree: ChatMessage = {
+          ...msg,
+          parentId,
+          childrenIds: [],
+        };
+
+        // Update parent's childrenIds if it exists
+        if (parentId && history.messages[parentId]) {
+          history.messages[parentId] = {
+            ...history.messages[parentId],
+            childrenIds: [...(history.messages[parentId].childrenIds || []), msg.id],
+          };
+        }
+
+        history.messages[msg.id] = msgWithTree;
+        parentId = msg.id;
+      }
+
+      // Set currentId to the last message
+      history.currentId = parentId;
+
       try {
-        const { data: encryptedData } = await createEncryptedChat(initialTitle, {
-          messages: finalMessages,
-        });
+        const { data: encryptedData } = await createEncryptedChat(initialTitle, history as unknown as Record<string, unknown>);
 
         const createdChat = await createChat.mutateAsync({
           encryptedChatKey: encryptedData.encryptedChatKey,
@@ -347,10 +373,12 @@ export function HomePage() {
               <AlertTitle>No API Keys Connected</AlertTitle>
               <AlertDescription className="flex items-center justify-between">
                 <span>Add an API key to start chatting with AI models.</span>
-                <Button variant="link" asChild className="p-0 h-auto">
-                  <Link to="/workspace/connections" className="flex items-center gap-1">
-                    Add API Key <ArrowRight className="h-4 w-4" />
-                  </Link>
+                <Button
+                  variant="link"
+                  className="p-0 h-auto flex items-center gap-1"
+                  onClick={() => openSettingsModal('connections')}
+                >
+                  Add API Key <ArrowRight className="h-4 w-4" />
                 </Button>
               </AlertDescription>
             </Alert>

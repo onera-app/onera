@@ -151,87 +151,162 @@ export interface ModelOption {
   credentialId: string;
 }
 
-/**
- * Static model lists for providers without dynamic model endpoints
- */
-const ANTHROPIC_MODELS = [
-  { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4' },
-  { id: 'claude-opus-4-20250514', name: 'Claude Opus 4' },
-  { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet' },
-  { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet' },
-  { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku' },
-  { id: 'claude-3-opus-20240229', name: 'Claude 3 Opus' },
-  { id: 'claude-3-sonnet-20240229', name: 'Claude 3 Sonnet' },
-  { id: 'claude-3-haiku-20240307', name: 'Claude 3 Haiku' },
-];
 
 /**
- * Fetch models from OpenAI-compatible endpoint
+ * Provider endpoint configurations for model fetching
+ * Inspired by open-webui's unified approach
  */
-async function fetchOpenAIModels(
-  baseUrl: string,
-  apiKey: string,
-  orgId?: string
-): Promise<{ id: string; name: string }[]> {
-  try {
-    const headers: HeadersInit = {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    };
-    if (orgId) {
-      headers['OpenAI-Organization'] = orgId;
-    }
-
-    const response = await fetch(`${baseUrl}/models`, { headers });
-    if (!response.ok) {
-      console.warn(`Failed to fetch models from ${baseUrl}: ${response.status}`);
-      return [];
-    }
-
-    const data = await response.json();
-    const models = data.data || [];
-
-    // Filter to chat models (GPT, Claude if proxied, etc.)
-    return models
-      .filter((m: { id: string }) =>
-        m.id.includes('gpt') ||
-        m.id.includes('claude') ||
-        m.id.includes('o1') ||
-        m.id.includes('o3')
-      )
-      .map((m: { id: string }) => ({
-        id: m.id,
-        name: m.id,
-      }))
-      .sort((a: { id: string }, b: { id: string }) => a.id.localeCompare(b.id));
-  } catch (error) {
-    console.warn(`Error fetching OpenAI models from ${baseUrl}:`, error);
-    return [];
-  }
+interface ProviderEndpointConfig {
+  getUrl: (baseUrl?: string, apiKey?: string) => string;
+  getHeaders: (apiKey: string, orgId?: string) => HeadersInit;
+  parseResponse: (data: unknown) => { id: string; name: string }[];
+  filterModels?: (models: { id: string; name: string }[]) => { id: string; name: string }[];
 }
 
+// Excluded model patterns for OpenAI (non-chat models)
+const OPENAI_EXCLUDED_PATTERNS = ['babbage', 'davinci', 'embedding', 'tts', 'whisper', 'dall-e'];
+
+const PROVIDER_ENDPOINTS: Record<string, ProviderEndpointConfig> = {
+  // OpenAI and OpenAI-compatible providers use Bearer auth and /models endpoint
+  openai: {
+    getUrl: (baseUrl) => `${baseUrl || 'https://api.openai.com/v1'}/models`,
+    getHeaders: (apiKey, orgId) => ({
+      'Authorization': `Bearer ${apiKey}`,
+      ...(orgId && { 'OpenAI-Organization': orgId }),
+    }),
+    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || []).map((m) => ({ id: m.id, name: m.id })),
+    filterModels: (models) => models.filter((m) => !OPENAI_EXCLUDED_PATTERNS.some((p) => m.id.includes(p))),
+  },
+
+  anthropic: {
+    getUrl: () => 'https://api.anthropic.com/v1/models',
+    getHeaders: (apiKey) => ({
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    }),
+    parseResponse: (data) => ((data as { data?: { id: string; display_name?: string }[] }).data || [])
+      .map((m) => ({ id: m.id, name: m.display_name || m.id })),
+    filterModels: (models) => models.filter((m) => m.id.includes('claude')),
+  },
+
+  google: {
+    getUrl: (_, apiKey) => `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`,
+    getHeaders: () => ({}), // Auth is in URL
+    parseResponse: (data) => ((data as { models?: { name: string; displayName?: string; supportedGenerationMethods?: string[] }[] }).models || [])
+      .filter((m) => m.supportedGenerationMethods?.includes('generateContent'))
+      .map((m) => ({ id: m.name.replace('models/', ''), name: m.displayName || m.name.replace('models/', '') })),
+  },
+
+  xai: {
+    getUrl: (baseUrl) => `${baseUrl || 'https://api.x.ai/v1'}/models`,
+    getHeaders: (apiKey) => ({ 'Authorization': `Bearer ${apiKey}` }),
+    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || []).map((m) => ({ id: m.id, name: m.id })),
+  },
+
+  groq: {
+    getUrl: (baseUrl) => `${baseUrl || 'https://api.groq.com/openai/v1'}/models`,
+    getHeaders: (apiKey) => ({ 'Authorization': `Bearer ${apiKey}` }),
+    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || []).map((m) => ({ id: m.id, name: m.id })),
+  },
+
+  mistral: {
+    getUrl: (baseUrl) => `${baseUrl || 'https://api.mistral.ai/v1'}/models`,
+    getHeaders: (apiKey) => ({ 'Authorization': `Bearer ${apiKey}` }),
+    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || []).map((m) => ({ id: m.id, name: m.id })),
+  },
+
+  deepseek: {
+    getUrl: (baseUrl) => `${baseUrl || 'https://api.deepseek.com'}/models`,
+    getHeaders: (apiKey) => ({ 'Authorization': `Bearer ${apiKey}` }),
+    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || []).map((m) => ({ id: m.id, name: m.id })),
+  },
+
+  openrouter: {
+    getUrl: () => 'https://openrouter.ai/api/v1/models',
+    getHeaders: (apiKey) => ({ 'Authorization': `Bearer ${apiKey}` }),
+    parseResponse: (data) => ((data as { data?: { id: string; name?: string }[] }).data || [])
+      .map((m) => ({ id: m.id, name: m.name || m.id })),
+  },
+
+  together: {
+    getUrl: () => 'https://api.together.xyz/v1/models',
+    getHeaders: (apiKey) => ({ 'Authorization': `Bearer ${apiKey}` }),
+    parseResponse: (data) => (Array.isArray(data) ? data : [])
+      .filter((m: { type?: string }) => m.type === 'chat' || !m.type)
+      .map((m: { id: string; display_name?: string }) => ({ id: m.id, name: m.display_name || m.id })),
+  },
+
+  fireworks: {
+    getUrl: () => 'https://api.fireworks.ai/inference/v1/models',
+    getHeaders: (apiKey) => ({ 'Authorization': `Bearer ${apiKey}` }),
+    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || [])
+      .map((m) => ({ id: m.id, name: m.id.split('/').pop() || m.id })),
+  },
+
+  ollama: {
+    getUrl: (baseUrl) => `${(baseUrl || 'http://localhost:11434').replace('/v1', '')}/api/tags`,
+    getHeaders: () => ({}), // No auth needed
+    parseResponse: (data) => ((data as { models?: { name: string; model?: string }[] }).models || [])
+      .map((m) => ({ id: m.model || m.name, name: m.name })),
+  },
+
+  lmstudio: {
+    getUrl: (baseUrl) => `${baseUrl || 'http://localhost:1234/v1'}/models`,
+    getHeaders: () => ({}), // No auth needed
+    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || []).map((m) => ({ id: m.id, name: m.id })),
+  },
+
+  custom: {
+    getUrl: (baseUrl) => `${baseUrl}/models`,
+    getHeaders: (apiKey) => {
+      const headers: HeadersInit = {};
+      if (apiKey) {
+        (headers as Record<string, string>)['Authorization'] = `Bearer ${apiKey}`;
+      }
+      return headers;
+    },
+    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || []).map((m) => ({ id: m.id, name: m.id })),
+  },
+};
+
 /**
- * Fetch models from Ollama endpoint
+ * Unified model fetching function
+ * Fetches models from any supported provider using provider-specific configuration
  */
-async function fetchOllamaModels(baseUrl: string): Promise<{ id: string; name: string }[]> {
+async function fetchModelsForProvider(
+  provider: string,
+  apiKey: string,
+  baseUrl?: string,
+  orgId?: string
+): Promise<{ id: string; name: string }[]> {
+  const config = PROVIDER_ENDPOINTS[provider];
+  if (!config) {
+    console.warn(`Unknown provider: ${provider}`);
+    return [];
+  }
+
   try {
-    // Ollama uses /api/tags for model listing
-    const ollamaBase = baseUrl.replace('/v1', '');
-    const response = await fetch(`${ollamaBase}/api/tags`);
+    const url = config.getUrl(baseUrl, apiKey);
+    const headers = config.getHeaders(apiKey, orgId);
+
+    const response = await fetch(url, { headers });
     if (!response.ok) {
-      console.warn(`Failed to fetch Ollama models: ${response.status}`);
+      console.warn(`Failed to fetch ${provider} models: ${response.status}`);
       return [];
     }
 
     const data = await response.json();
-    const models = data.models || [];
+    let models = config.parseResponse(data);
 
-    return models.map((m: { name: string; model: string }) => ({
-      id: m.model || m.name,
-      name: m.name,
-    }));
+    // Apply provider-specific filtering if defined
+    if (config.filterModels) {
+      models = config.filterModels(models);
+    }
+
+    return models.sort((a, b) => a.id.localeCompare(b.id));
   } catch (error) {
-    console.warn('Error fetching Ollama models:', error);
+    console.warn(`Error fetching ${provider} models:`, error);
     return [];
   }
 }
@@ -246,29 +321,20 @@ export async function getAvailableModelsFromCredentials(credentials: DecryptedCr
 
   const allModels: ModelOption[] = [];
 
-  for (const cred of credentials) {
-    let models: { id: string; name: string }[] = [];
+  // Fetch models from all credentials in parallel
+  const modelPromises = credentials.map(async (cred) => {
+    const models = await fetchModelsForProvider(
+      cred.provider,
+      cred.apiKey,
+      cred.baseUrl,
+      cred.orgId
+    );
+    return { cred, models };
+  });
 
-    switch (cred.provider) {
-      case 'anthropic':
-        models = ANTHROPIC_MODELS;
-        break;
+  const results = await Promise.all(modelPromises);
 
-      case 'openai':
-      case 'azure':
-      case 'custom':
-        models = await fetchOpenAIModels(
-          cred.baseUrl || 'https://api.openai.com/v1',
-          cred.apiKey,
-          cred.orgId
-        );
-        break;
-
-      case 'ollama':
-        models = await fetchOllamaModels(cred.baseUrl || 'http://localhost:11434/v1');
-        break;
-    }
-
+  for (const { cred, models } of results) {
     // Add credential prefix to model IDs
     for (const model of models) {
       allModels.push({

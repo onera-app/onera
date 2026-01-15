@@ -32,5 +32,8 @@
 		"turbo": "^2.3.0",
 		"typescript": "^5.7.0"
 	},
-	"packageManager": "bun@1.2.5"
+	"packageManager": "bun@1.2.5",
+	"dependencies": {
+		"tippy.js": "6.3.7"
+	}
 }
