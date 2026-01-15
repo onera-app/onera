@@ -4,7 +4,6 @@ import {
   timestamp,
   boolean,
   integer,
-  bigint,
   uuid,
   index,
   uniqueIndex,
