@@ -36,7 +36,7 @@ jobs:
       - name: Run database migrations
         working-directory: apps/server
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL_STAGE }}
         run: bun run db:migrate
 
       - name: Prepare deployment package

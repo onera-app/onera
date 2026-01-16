@@ -17,8 +17,7 @@ CREATE TABLE "key_shares" (
 	"master_key_for_login_nonce" text NOT NULL,
 	"share_version" integer DEFAULT 1 NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "key_shares_user_id_unique" UNIQUE("user_id")
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 -- Add devices table for device tracking
