@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
-import * as schema from "./schema-pg";
+import * as schema from "./schema";
 
 // DATABASE_URL format: postgresql://user:pass@host:5432/db
 const dbUrl = process.env.DATABASE_URL;

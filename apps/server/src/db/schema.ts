@@ -1,21 +1,18 @@
 import {
-  sqliteTable,
+  pgTable,
   text,
+  timestamp,
+  boolean,
   integer,
+  uuid,
   index,
   uniqueIndex,
-} from "drizzle-orm/sqlite-core";
+} from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
-// Helper for generating UUIDs in SQLite
-// SQLite doesn't have native UUID, so we use text with a default random UUID
+// Helper for UUID primary keys with auto-generation
 const uuidPrimaryKey = (name: string) =>
-  text(name)
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID());
-
-// Helper for timestamps - SQLite stores as integer (Unix timestamp in ms)
-const timestamp = (name: string) => integer(name, { mode: "timestamp_ms" });
+  uuid(name).primaryKey().defaultRandom();
 
 // ============================================
 // Clerk Auth - No tables needed (managed by Clerk)
@@ -32,7 +29,7 @@ const timestamp = (name: string) => integer(name, { mode: "timestamp_ms" });
  * - Auth share: stored in Clerk metadata + backup here
  * - Recovery share: stored here, encrypted with recovery phrase
  */
-export const keyShares = sqliteTable(
+export const keyShares = pgTable(
   "key_shares",
   {
     id: uuidPrimaryKey("id"),
@@ -67,11 +64,11 @@ export const keyShares = sqliteTable(
     shareVersion: integer("share_version").default(1).notNull(),
 
     // Timestamps
-    createdAt: timestamp("created_at")
-      .default(sql`(unixepoch() * 1000)`)
+    createdAt: timestamp("created_at", { mode: "date" })
+      .default(sql`now()`)
       .notNull(),
-    updatedAt: timestamp("updated_at")
-      .default(sql`(unixepoch() * 1000)`)
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .default(sql`now()`)
       .notNull(),
   },
   (table) => [uniqueIndex("idx_key_shares_user_id").on(table.userId)]
@@ -81,7 +78,7 @@ export const keyShares = sqliteTable(
  * Registered devices for each user
  * Tracks devices that have been authorized to access the E2EE keys
  */
-export const devices = sqliteTable(
+export const devices = pgTable(
   "devices",
   {
     id: uuidPrimaryKey("id"),
@@ -91,14 +88,14 @@ export const devices = sqliteTable(
     userAgent: text("user_agent"), // Browser user agent for identification
 
     // Trust status
-    trusted: integer("trusted", { mode: "boolean" }).default(true).notNull(),
+    trusted: boolean("trusted").default(true).notNull(),
 
     // Activity tracking
-    lastSeenAt: timestamp("last_seen_at")
-      .default(sql`(unixepoch() * 1000)`)
+    lastSeenAt: timestamp("last_seen_at", { mode: "date" })
+      .default(sql`now()`)
       .notNull(),
-    createdAt: timestamp("created_at")
-      .default(sql`(unixepoch() * 1000)`)
+    createdAt: timestamp("created_at", { mode: "date" })
+      .default(sql`now()`)
       .notNull(),
   },
   (table) => [
@@ -112,20 +109,20 @@ export const devices = sqliteTable(
 // ============================================
 
 // Folders (hierarchical)
-export const folders = sqliteTable(
+export const folders = pgTable(
   "folders",
   {
     id: uuidPrimaryKey("id"),
     userId: text("user_id").notNull(), // Clerk user ID
     name: text("name").notNull(),
-    parentId: text("parent_id").references((): any => folders.id, {
+    parentId: uuid("parent_id").references((): any => folders.id, {
       onDelete: "set null",
     }),
-    createdAt: timestamp("created_at")
-      .default(sql`(unixepoch() * 1000)`)
+    createdAt: timestamp("created_at", { mode: "date" })
+      .default(sql`now()`)
       .notNull(),
-    updatedAt: timestamp("updated_at")
-      .default(sql`(unixepoch() * 1000)`)
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .default(sql`now()`)
       .notNull(),
   },
   (table) => [
@@ -135,15 +132,13 @@ export const folders = sqliteTable(
 );
 
 // Chats (encrypted)
-export const chats = sqliteTable(
+export const chats = pgTable(
   "chats",
   {
     id: uuidPrimaryKey("id"),
     userId: text("user_id").notNull(), // Clerk user ID
     // Encryption metadata
-    isEncrypted: integer("is_encrypted", { mode: "boolean" })
-      .default(true)
-      .notNull(),
+    isEncrypted: boolean("is_encrypted").default(true).notNull(),
     encryptedChatKey: text("encrypted_chat_key"),
     chatKeyNonce: text("chat_key_nonce"),
     // Encrypted content
@@ -154,17 +149,17 @@ export const chats = sqliteTable(
     // Plaintext preview
     titlePreview: text("title_preview"),
     // Organization
-    folderId: text("folder_id").references(() => folders.id, {
+    folderId: uuid("folder_id").references(() => folders.id, {
       onDelete: "set null",
     }),
-    pinned: integer("pinned", { mode: "boolean" }).default(false).notNull(),
-    archived: integer("archived", { mode: "boolean" }).default(false).notNull(),
+    pinned: boolean("pinned").default(false).notNull(),
+    archived: boolean("archived").default(false).notNull(),
     // Timestamps
-    createdAt: timestamp("created_at")
-      .default(sql`(unixepoch() * 1000)`)
+    createdAt: timestamp("created_at", { mode: "date" })
+      .default(sql`now()`)
       .notNull(),
-    updatedAt: timestamp("updated_at")
-      .default(sql`(unixepoch() * 1000)`)
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .default(sql`now()`)
       .notNull(),
   },
   (table) => [
@@ -175,7 +170,7 @@ export const chats = sqliteTable(
 );
 
 // Notes (encrypted)
-export const notes = sqliteTable(
+export const notes = pgTable(
   "notes",
   {
     id: uuidPrimaryKey("id"),
@@ -186,17 +181,17 @@ export const notes = sqliteTable(
     encryptedContent: text("encrypted_content").notNull(),
     contentNonce: text("content_nonce").notNull(),
     // Organization
-    folderId: text("folder_id").references(() => folders.id, {
+    folderId: uuid("folder_id").references(() => folders.id, {
       onDelete: "set null",
     }),
-    pinned: integer("pinned", { mode: "boolean" }).default(false).notNull(),
-    archived: integer("archived", { mode: "boolean" }).default(false).notNull(),
+    pinned: boolean("pinned").default(false).notNull(),
+    archived: boolean("archived").default(false).notNull(),
     // Timestamps
-    createdAt: timestamp("created_at")
-      .default(sql`(unixepoch() * 1000)`)
+    createdAt: timestamp("created_at", { mode: "date" })
+      .default(sql`now()`)
       .notNull(),
-    updatedAt: timestamp("updated_at")
-      .default(sql`(unixepoch() * 1000)`)
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .default(sql`now()`)
       .notNull(),
   },
   (table) => [
@@ -207,7 +202,7 @@ export const notes = sqliteTable(
 );
 
 // Credentials (encrypted API keys)
-export const credentials = sqliteTable(
+export const credentials = pgTable(
   "credentials",
   {
     id: uuidPrimaryKey("id"),
@@ -216,18 +211,18 @@ export const credentials = sqliteTable(
     name: text("name").notNull(),
     encryptedData: text("encrypted_data").notNull(),
     iv: text("iv").notNull(),
-    createdAt: timestamp("created_at")
-      .default(sql`(unixepoch() * 1000)`)
+    createdAt: timestamp("created_at", { mode: "date" })
+      .default(sql`now()`)
       .notNull(),
-    updatedAt: timestamp("updated_at")
-      .default(sql`(unixepoch() * 1000)`)
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .default(sql`now()`)
       .notNull(),
   },
   (table) => [index("idx_credentials_user_id").on(table.userId)]
 );
 
 // Prompts (templates)
-export const prompts = sqliteTable(
+export const prompts = pgTable(
   "prompts",
   {
     id: uuidPrimaryKey("id"),
@@ -235,11 +230,11 @@ export const prompts = sqliteTable(
     name: text("name").notNull(),
     description: text("description"),
     content: text("content").notNull(),
-    createdAt: timestamp("created_at")
-      .default(sql`(unixepoch() * 1000)`)
+    createdAt: timestamp("created_at", { mode: "date" })
+      .default(sql`now()`)
       .notNull(),
-    updatedAt: timestamp("updated_at")
-      .default(sql`(unixepoch() * 1000)`)
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .default(sql`now()`)
       .notNull(),
   },
   (table) => [index("idx_prompts_user_id").on(table.userId)]
@@ -251,8 +246,7 @@ export const prompts = sqliteTable(
 // ============================================
 
 // Legacy user encryption keys (Better Auth style)
-// Kept for reference during migration, should be removed in production
-export const userKeys = sqliteTable(
+export const userKeys = pgTable(
   "user_keys",
   {
     id: uuidPrimaryKey("id"),
@@ -274,11 +268,11 @@ export const userKeys = sqliteTable(
     masterKeyRecovery: text("master_key_recovery").notNull(),
     masterKeyRecoveryNonce: text("master_key_recovery_nonce").notNull(),
     // Timestamps
-    createdAt: timestamp("created_at")
-      .default(sql`(unixepoch() * 1000)`)
+    createdAt: timestamp("created_at", { mode: "date" })
+      .default(sql`now()`)
       .notNull(),
-    updatedAt: timestamp("updated_at")
-      .default(sql`(unixepoch() * 1000)`)
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .default(sql`now()`)
       .notNull(),
   },
   (table) => [index("idx_user_keys_user_id").on(table.userId)]
