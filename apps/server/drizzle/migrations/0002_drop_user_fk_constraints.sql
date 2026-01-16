@@ -8,4 +8,10 @@ ALTER TABLE "notes" DROP CONSTRAINT IF EXISTS "notes_user_id_user_id_fk";--> sta
 ALTER TABLE "prompts" DROP CONSTRAINT IF EXISTS "prompts_user_id_user_id_fk";--> statement-breakpoint
 ALTER TABLE "user_keys" DROP CONSTRAINT IF EXISTS "user_keys_user_id_user_id_fk";--> statement-breakpoint
 ALTER TABLE "account" DROP CONSTRAINT IF EXISTS "account_user_id_user_id_fk";--> statement-breakpoint
-ALTER TABLE "session" DROP CONSTRAINT IF EXISTS "session_user_id_user_id_fk";
+ALTER TABLE "session" DROP CONSTRAINT IF EXISTS "session_user_id_user_id_fk";--> statement-breakpoint
+
+-- Drop legacy Better Auth tables (no longer used with Clerk)
+DROP TABLE IF EXISTS "session";--> statement-breakpoint
+DROP TABLE IF EXISTS "account";--> statement-breakpoint
+DROP TABLE IF EXISTS "verification";--> statement-breakpoint
+DROP TABLE IF EXISTS "user";

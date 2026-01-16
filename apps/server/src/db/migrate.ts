@@ -4,7 +4,7 @@ import { db } from "./client";
 async function runMigrations() {
   console.log("Running PostgreSQL migrations...");
 
-  await migrate(db, { migrationsFolder: "./drizzle/migrations-pg" });
+  await migrate(db, { migrationsFolder: "./drizzle/migrations" });
 
   console.log("Migrations complete!");
   process.exit(0);
