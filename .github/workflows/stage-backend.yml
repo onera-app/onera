@@ -31,7 +31,7 @@ jobs:
 
       - name: Build server
         working-directory: apps/server
-        run: bun build src/index.ts --outdir dist --target bun
+        run: bun build src/index.ts --outdir dist --target node
 
       - name: Prepare deployment package
         run: |
@@ -47,14 +47,11 @@ jobs:
           cd deploy
           bun install --production
           
-          # Create startup script for Bun
+          # Create startup script for Node.js
           cat > startup.sh << 'EOF'
           #!/bin/bash
-          curl -fsSL https://bun.sh/install | bash
-          export BUN_INSTALL="$HOME/.bun"
-          export PATH="$BUN_INSTALL/bin:$PATH"
-          bun run src/db/migrate.ts || true
-          bun run dist/index.js
+          # Run migrations then start the server
+          node dist/index.js
           EOF
           chmod +x startup.sh
 
