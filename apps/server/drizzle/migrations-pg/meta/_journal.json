@@ -15,6 +15,13 @@
       "when": 1737072000000,
       "tag": "0001_add_key_shares_devices",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1737073000000,
+      "tag": "0002_drop_user_fk_constraints",
+      "breakpoints": true
     }
   ]
 }
