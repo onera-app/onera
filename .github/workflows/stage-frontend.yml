@@ -34,6 +34,7 @@ jobs:
         env:
           VITE_API_URL: https://api-stage.onera.app
           VITE_WS_URL: https://api-stage.onera.app
+          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
           NODE_OPTIONS: --max-old-space-size=4096
 
       - name: Copy SWA config
