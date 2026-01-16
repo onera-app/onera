@@ -88,7 +88,7 @@ export function SSOCallbackPage() {
         try {
           // Transfer the OAuth verification to sign-in flow
           const result = await signIn?.create({ transfer: true });
-          if (result?.status === 'complete' && result.createdSessionId) {
+          if (result?.status === 'complete' && result.createdSessionId && setSignInActive) {
             await setSignInActive({ session: result.createdSessionId });
             // Wait for Clerk to update
             await new Promise(resolve => setTimeout(resolve, 100));
@@ -101,14 +101,14 @@ export function SSOCallbackPage() {
           setStep('error');
           return;
         }
-      } else if (signUp?.status === 'complete' && signUp.createdSessionId) {
+      } else if (signUp?.status === 'complete' && signUp.createdSessionId && setSignUpActive) {
         console.log('SignUp complete, setting active session...');
         processingRef.current = true;
         await setSignUpActive({ session: signUp.createdSessionId });
         await new Promise(resolve => setTimeout(resolve, 100));
         userId = clerk.user?.id || null;
         isNewUser = true;
-      } else if (signIn?.status === 'complete' && signIn.createdSessionId) {
+      } else if (signIn?.status === 'complete' && signIn.createdSessionId && setSignInActive) {
         console.log('SignIn complete, setting active session...');
         processingRef.current = true;
         await setSignInActive({ session: signIn.createdSessionId });
@@ -135,7 +135,7 @@ export function SSOCallbackPage() {
       }
     }
 
-    async function handleE2EE(userId: string, presumedNewUser: boolean) {
+    async function handleE2EE(userId: string, _presumedNewUser: boolean) {
       // Check if user has existing key shares
       let keyShares = null;
       try {
