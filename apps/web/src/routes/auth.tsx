@@ -1,186 +1,68 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth, useSignInWithE2EE } from '@/providers/ClerkAuthProvider';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Sparkles, Lock, AlertTriangle, ShieldCheck } from 'lucide-react';
-import type { RecoveryKeyInfo } from '@onera/crypto';
+import { Sparkles, Lock, AlertTriangle, Loader2 } from 'lucide-react';
 
-type AuthStep = 'credentials' | 'recovery' | 'confirm';
+// Google icon component
+function GoogleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+  );
+}
+
+// Apple icon component
+function AppleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+    </svg>
+  );
+}
 
 export function AuthPage() {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading: authLoading, signIn, signUp } = useAuth();
-  const [isLogin, setIsLogin] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const [step, setStep] = useState<AuthStep>('credentials');
-  const [recoveryInfo, setRecoveryInfo] = useState<RecoveryKeyInfo | null>(null);
-  const [confirmInput, setConfirmInput] = useState('');
-  const [form, setForm] = useState({
-    email: '',
-    password: '',
-    name: '',
-  });
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isLoaded, isLoading, error, signInWithOAuth } = useSignInWithE2EE();
+  const [loadingProvider, setLoadingProvider] = useState<'google' | 'apple' | null>(null);
 
-  // Redirect if already authenticated (only if not showing recovery phrase)
-  // Note: We check !isLoading to prevent redirect during signup flow
-  // (fetchSession sets isAuthenticated before setStep('recovery') runs)
+  // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated && !authLoading && !isLoading && step === 'credentials') {
+    if (isAuthenticated && !authLoading) {
       navigate({ to: '/app' });
     }
-  }, [isAuthenticated, authLoading, isLoading, navigate, step]);
+  }, [isAuthenticated, authLoading, navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
+  const handleGoogleSignIn = async () => {
     try {
-      if (isLogin) {
-        await signIn(form.email, form.password);
-        toast.success('Welcome back!');
-        navigate({ to: '/app' });
-      } else {
-        const recovery = await signUp(form.email, form.password, form.name || form.email.split('@')[0]);
-        setRecoveryInfo(recovery);
-        setStep('recovery');
-        toast.success('Account created! Please save your recovery phrase.');
-      }
+      setLoadingProvider('google');
+      await signInWithOAuth('oauth_google');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Authentication failed');
-    } finally {
-      setIsLoading(false);
+      toast.error(err instanceof Error ? err.message : 'Google sign in failed');
+      setLoadingProvider(null);
     }
   };
 
-  const handleConfirmRecovery = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!recoveryInfo) return;
-
-    const firstFourWords = recoveryInfo.mnemonic.split(' ').slice(0, 4).join(' ');
-    if (confirmInput.toLowerCase().trim() !== firstFourWords.toLowerCase()) {
-      toast.error('Please enter the first 4 words of your recovery phrase');
-      return;
+  const handleAppleSignIn = async () => {
+    try {
+      setLoadingProvider('apple');
+      await signInWithOAuth('oauth_apple');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Apple sign in failed');
+      setLoadingProvider(null);
     }
-
-    toast.success('Setup complete! Welcome to Onera.');
-    navigate({ to: '/app' });
   };
 
-  // Recovery phrase display step
-  if (step === 'recovery' && recoveryInfo) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-        <div className="w-full max-w-md">
-          <Card>
-            <CardHeader className="text-center space-y-4">
-              <div className="mx-auto w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <ShieldCheck className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <CardTitle className="text-2xl">Save Your Recovery Phrase</CardTitle>
-                <CardDescription>
-                  Write these words down and store them safely
-                </CardDescription>
-              </div>
-            </CardHeader>
+  const isButtonLoading = isLoading || loadingProvider !== null;
 
-            <CardContent className="space-y-4">
-              <Alert className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20">
-                <AlertTriangle className="h-4 w-4 text-amber-600" />
-                <AlertDescription className="text-amber-800 dark:text-amber-200">
-                  Write down these {recoveryInfo.wordCount} words and store them safely. You'll need them
-                  to recover your account if you forget your password.
-                </AlertDescription>
-              </Alert>
-
-              <div className="p-4 bg-muted rounded-lg font-mono text-sm space-y-2">
-                {recoveryInfo.formattedGroups.map((group, idx) => (
-                  <div key={idx} className="flex gap-4">
-                    {group.map((word, wordIdx) => (
-                      <span key={wordIdx} className="flex-1">
-                        <span className="text-muted-foreground mr-1">{idx * 4 + wordIdx + 1}.</span>
-                        {word}
-                      </span>
-                    ))}
-                  </div>
-                ))}
-              </div>
-
-              <Button onClick={() => setStep('confirm')} className="w-full">
-                I've saved my recovery phrase
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  // Confirm recovery phrase step
-  if (step === 'confirm' && recoveryInfo) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-        <div className="w-full max-w-md">
-          <Card>
-            <CardHeader className="text-center space-y-4">
-              <div className="mx-auto w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <ShieldCheck className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <CardTitle className="text-2xl">Confirm Recovery Phrase</CardTitle>
-                <CardDescription>
-                  Verify you've saved your recovery phrase
-                </CardDescription>
-              </div>
-            </CardHeader>
-
-            <CardContent>
-              <form onSubmit={handleConfirmRecovery} className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  To confirm you've saved your recovery phrase, enter the first 4
-                  words below.
-                </p>
-
-                <div className="space-y-2">
-                  <Label htmlFor="confirm-words">First 4 words</Label>
-                  <Input
-                    id="confirm-words"
-                    type="text"
-                    value={confirmInput}
-                    onChange={(e) => setConfirmInput(e.target.value)}
-                    placeholder="Enter the first 4 words..."
-                    required
-                    autoFocus
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setStep('recovery')}
-                  >
-                    Back
-                  </Button>
-                  <Button type="submit" className="flex-1">
-                    Confirm
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  // Login/Signup form
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-md">
@@ -190,71 +72,51 @@ export function AuthPage() {
               <Sparkles className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-2xl">Onera</CardTitle>
-              <CardDescription>E2EE AI Chat</CardDescription>
+              <CardTitle className="text-2xl">Welcome to Onera</CardTitle>
+              <CardDescription>E2EE AI Chat - Your conversations, encrypted</CardDescription>
             </div>
           </CardHeader>
 
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {!isLogin && (
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    autoComplete="name"
-                    placeholder="Your name (optional)"
-                  />
-                </div>
-              )}
+          <CardContent className="space-y-4">
+            {error && (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  required
-                  autoComplete="email"
-                  placeholder="you@example.com"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  required
-                  autoComplete={isLogin ? 'current-password' : 'new-password'}
-                  minLength={8}
-                  placeholder="••••••••"
-                />
-              </div>
-
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Loading...' : isLogin ? 'Sign In' : 'Create Account'}
-              </Button>
-            </form>
-          </CardContent>
-
-          <CardFooter className="flex flex-col gap-4">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-primary hover:underline"
+            <Button
+              variant="outline"
+              className="w-full h-12 text-base font-medium"
+              onClick={handleGoogleSignIn}
+              disabled={!isLoaded || isButtonLoading}
             >
-              {isLogin
-                ? "Don't have an account? Sign up"
-                : 'Already have an account? Sign in'}
-            </button>
-          </CardFooter>
+              {loadingProvider === 'google' ? (
+                <Loader2 className="w-5 h-5 mr-3 animate-spin" />
+              ) : (
+                <GoogleIcon className="w-5 h-5 mr-3" />
+              )}
+              Continue with Google
+            </Button>
+
+            <Button
+              variant="outline"
+              className="w-full h-12 text-base font-medium"
+              onClick={handleAppleSignIn}
+              disabled={!isLoaded || isButtonLoading}
+            >
+              {loadingProvider === 'apple' ? (
+                <Loader2 className="w-5 h-5 mr-3 animate-spin" />
+              ) : (
+                <AppleIcon className="w-5 h-5 mr-3" />
+              )}
+              Continue with Apple
+            </Button>
+
+            <p className="text-xs text-center text-muted-foreground pt-2">
+              By continuing, you agree to our Terms of Service and Privacy Policy
+            </p>
+          </CardContent>
         </Card>
 
         {/* Security note */}

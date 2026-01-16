@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
+import { useAuth } from "@clerk/clerk-react";
 import { trpc } from "@/lib/trpc";
 
 // In production, VITE_API_URL is "/api" and tRPC endpoint is "/api/trpc"
@@ -17,7 +18,13 @@ function getTrpcUrl(): string {
   return `${API_URL}/trpc`;
 }
 
+/**
+ * TRPC Provider that includes Clerk JWT in Authorization header
+ * Must be used inside ClerkProvider
+ */
 export function TRPCProvider({ children }: { children: React.ReactNode }) {
+  const { getToken } = useAuth();
+
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -30,20 +37,33 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
       })
   );
 
-  const [trpcClient] = useState(() =>
-    trpc.createClient({
-      links: [
-        httpBatchLink({
-          url: getTrpcUrl(),
-          fetch(url, options) {
-            return fetch(url, {
-              ...options,
-              credentials: "include",
-            });
-          },
-        }),
-      ],
-    })
+  // Create tRPC client with JWT token injection
+  const trpcClient = useMemo(
+    () =>
+      trpc.createClient({
+        links: [
+          httpBatchLink({
+            url: getTrpcUrl(),
+            async headers() {
+              // Get JWT token from Clerk
+              const token = await getToken();
+              if (token) {
+                return {
+                  Authorization: `Bearer ${token}`,
+                };
+              }
+              return {};
+            },
+            fetch(url, options) {
+              return fetch(url, {
+                ...options,
+                credentials: "include",
+              });
+            },
+          }),
+        ],
+      }),
+    [getToken]
   );
 
   return (

@@ -18,129 +18,54 @@ const uuidPrimaryKey = (name: string) =>
 const timestamp = (name: string) => integer(name, { mode: "timestamp_ms" });
 
 // ============================================
-// Better Auth Tables
+// Clerk Auth - No tables needed (managed by Clerk)
+// User ID is the Clerk user ID (string like "user_xxx")
 // ============================================
 
-// Users table (Better Auth core table)
-export const users = sqliteTable(
-  "user",
-  {
-    id: text("id").primaryKey(),
-    name: text("name").notNull(),
-    email: text("email").notNull().unique(),
-    emailVerified: integer("email_verified", { mode: "boolean" })
-      .default(false)
-      .notNull(),
-    image: text("image"),
-    createdAt: timestamp("created_at")
-      .default(sql`(unixepoch() * 1000)`)
-      .notNull(),
-    updatedAt: timestamp("updated_at")
-      .default(sql`(unixepoch() * 1000)`)
-      .notNull(),
-  },
-  (table) => [uniqueIndex("idx_user_email").on(table.email)]
-);
-
-// Sessions table (Better Auth)
-export const sessions = sqliteTable(
-  "session",
-  {
-    id: text("id").primaryKey(),
-    expiresAt: timestamp("expires_at").notNull(),
-    token: text("token").notNull().unique(),
-    createdAt: timestamp("created_at")
-      .default(sql`(unixepoch() * 1000)`)
-      .notNull(),
-    updatedAt: timestamp("updated_at")
-      .default(sql`(unixepoch() * 1000)`)
-      .notNull(),
-    ipAddress: text("ip_address"),
-    userAgent: text("user_agent"),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-  },
-  (table) => [
-    index("idx_session_user_id").on(table.userId),
-    uniqueIndex("idx_session_token").on(table.token),
-  ]
-);
-
-// Accounts table (Better Auth - for password and OAuth providers)
-export const accounts = sqliteTable(
-  "account",
-  {
-    id: text("id").primaryKey(),
-    accountId: text("account_id").notNull(),
-    providerId: text("provider_id").notNull(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    accessToken: text("access_token"),
-    refreshToken: text("refresh_token"),
-    idToken: text("id_token"),
-    accessTokenExpiresAt: timestamp("access_token_expires_at"),
-    refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
-    scope: text("scope"),
-    password: text("password"),
-    createdAt: timestamp("created_at")
-      .default(sql`(unixepoch() * 1000)`)
-      .notNull(),
-    updatedAt: timestamp("updated_at")
-      .default(sql`(unixepoch() * 1000)`)
-      .notNull(),
-  },
-  (table) => [index("idx_account_user_id").on(table.userId)]
-);
-
-// Verification table (Better Auth - for email verification, password reset)
-export const verifications = sqliteTable(
-  "verification",
-  {
-    id: text("id").primaryKey(),
-    identifier: text("identifier").notNull(),
-    value: text("value").notNull(),
-    expiresAt: timestamp("expires_at").notNull(),
-    createdAt: timestamp("created_at")
-      .default(sql`(unixepoch() * 1000)`)
-      .notNull(),
-    updatedAt: timestamp("updated_at")
-      .default(sql`(unixepoch() * 1000)`)
-      .notNull(),
-  },
-  (table) => [index("idx_verification_identifier").on(table.identifier)]
-);
-
 // ============================================
-// Application Tables
+// Key Shares (E2EE with 3-share system)
 // ============================================
 
-// User encryption keys (E2EE)
-export const userKeys = sqliteTable(
-  "user_keys",
+/**
+ * Key shares for the 3-share E2EE system
+ * - Device share: stored in localStorage (not in DB)
+ * - Auth share: stored in Clerk metadata + backup here
+ * - Recovery share: stored here, encrypted with recovery phrase
+ */
+export const keyShares = sqliteTable(
+  "key_shares",
   {
     id: uuidPrimaryKey("id"),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" })
-      .unique(),
-    // KEK derivation params
-    kekSalt: text("kek_salt").notNull(),
-    kekOpsLimit: integer("kek_ops_limit").notNull(),
-    kekMemLimit: integer("kek_mem_limit").notNull(),
-    // Encrypted master key
-    encryptedMasterKey: text("encrypted_master_key").notNull(),
-    masterKeyNonce: text("master_key_nonce").notNull(),
-    // Public/private key pair
+    userId: text("user_id").notNull().unique(), // Clerk user ID (e.g., "user_2abc123")
+
+    // Auth share (encrypted, backup in case Clerk metadata fails)
+    encryptedAuthShare: text("encrypted_auth_share").notNull(),
+    authShareNonce: text("auth_share_nonce").notNull(),
+
+    // Recovery share (encrypted with recovery key derived from mnemonic)
+    encryptedRecoveryShare: text("encrypted_recovery_share").notNull(),
+    recoveryShareNonce: text("recovery_share_nonce").notNull(),
+
+    // Key pair
     publicKey: text("public_key").notNull(),
     encryptedPrivateKey: text("encrypted_private_key").notNull(),
     privateKeyNonce: text("private_key_nonce").notNull(),
-    // Recovery key
-    encryptedRecoveryKey: text("encrypted_recovery_key").notNull(),
-    recoveryKeyNonce: text("recovery_key_nonce").notNull(),
+
+    // Master key encrypted with recovery key (for recovery phrase-based unlock)
     masterKeyRecovery: text("master_key_recovery").notNull(),
     masterKeyRecoveryNonce: text("master_key_recovery_nonce").notNull(),
+
+    // Recovery key encrypted with master key (for viewing recovery phrase)
+    encryptedRecoveryKey: text("encrypted_recovery_key").notNull(),
+    recoveryKeyNonce: text("recovery_key_nonce").notNull(),
+
+    // Master key encrypted with user-ID-derived key (for normal login)
+    encryptedMasterKeyForLogin: text("encrypted_master_key_for_login").notNull(),
+    masterKeyForLoginNonce: text("master_key_for_login_nonce").notNull(),
+
+    // Share version for rotation tracking
+    shareVersion: integer("share_version").default(1).notNull(),
+
     // Timestamps
     createdAt: timestamp("created_at")
       .default(sql`(unixepoch() * 1000)`)
@@ -149,17 +74,49 @@ export const userKeys = sqliteTable(
       .default(sql`(unixepoch() * 1000)`)
       .notNull(),
   },
-  (table) => [index("idx_user_keys_user_id").on(table.userId)]
+  (table) => [uniqueIndex("idx_key_shares_user_id").on(table.userId)]
 );
+
+/**
+ * Registered devices for each user
+ * Tracks devices that have been authorized to access the E2EE keys
+ */
+export const devices = sqliteTable(
+  "devices",
+  {
+    id: uuidPrimaryKey("id"),
+    userId: text("user_id").notNull(), // Clerk user ID
+    deviceId: text("device_id").notNull(), // Browser-generated device ID
+    deviceName: text("device_name"), // User-friendly name (e.g., "Chrome on MacBook")
+    userAgent: text("user_agent"), // Browser user agent for identification
+
+    // Trust status
+    trusted: integer("trusted", { mode: "boolean" }).default(true).notNull(),
+
+    // Activity tracking
+    lastSeenAt: timestamp("last_seen_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
+    createdAt: timestamp("created_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
+  },
+  (table) => [
+    index("idx_devices_user_id").on(table.userId),
+    uniqueIndex("idx_devices_user_device").on(table.userId, table.deviceId),
+  ]
+);
+
+// ============================================
+// Application Tables
+// ============================================
 
 // Folders (hierarchical)
 export const folders = sqliteTable(
   "folders",
   {
     id: uuidPrimaryKey("id"),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    userId: text("user_id").notNull(), // Clerk user ID
     name: text("name").notNull(),
     parentId: text("parent_id").references((): any => folders.id, {
       onDelete: "set null",
@@ -182,9 +139,7 @@ export const chats = sqliteTable(
   "chats",
   {
     id: uuidPrimaryKey("id"),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    userId: text("user_id").notNull(), // Clerk user ID
     // Encryption metadata
     isEncrypted: integer("is_encrypted", { mode: "boolean" })
       .default(true)
@@ -224,9 +179,7 @@ export const notes = sqliteTable(
   "notes",
   {
     id: uuidPrimaryKey("id"),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    userId: text("user_id").notNull(), // Clerk user ID
     // Encrypted content
     encryptedTitle: text("encrypted_title").notNull(),
     titleNonce: text("title_nonce").notNull(),
@@ -258,9 +211,7 @@ export const credentials = sqliteTable(
   "credentials",
   {
     id: uuidPrimaryKey("id"),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    userId: text("user_id").notNull(), // Clerk user ID
     provider: text("provider").notNull(),
     name: text("name").notNull(),
     encryptedData: text("encrypted_data").notNull(),
@@ -280,9 +231,7 @@ export const prompts = sqliteTable(
   "prompts",
   {
     id: uuidPrimaryKey("id"),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    userId: text("user_id").notNull(), // Clerk user ID
     name: text("name").notNull(),
     description: text("description"),
     content: text("content").notNull(),
@@ -296,17 +245,53 @@ export const prompts = sqliteTable(
   (table) => [index("idx_prompts_user_id").on(table.userId)]
 );
 
+// ============================================
+// Legacy Tables (for migration compatibility)
+// DEPRECATED: Will be removed after migration
+// ============================================
+
+// Legacy user encryption keys (Better Auth style)
+// Kept for reference during migration, should be removed in production
+export const userKeys = sqliteTable(
+  "user_keys",
+  {
+    id: uuidPrimaryKey("id"),
+    userId: text("user_id").notNull().unique(),
+    // KEK derivation params (Better Auth style)
+    kekSalt: text("kek_salt").notNull(),
+    kekOpsLimit: integer("kek_ops_limit").notNull(),
+    kekMemLimit: integer("kek_mem_limit").notNull(),
+    // Encrypted master key
+    encryptedMasterKey: text("encrypted_master_key").notNull(),
+    masterKeyNonce: text("master_key_nonce").notNull(),
+    // Public/private key pair
+    publicKey: text("public_key").notNull(),
+    encryptedPrivateKey: text("encrypted_private_key").notNull(),
+    privateKeyNonce: text("private_key_nonce").notNull(),
+    // Recovery key
+    encryptedRecoveryKey: text("encrypted_recovery_key").notNull(),
+    recoveryKeyNonce: text("recovery_key_nonce").notNull(),
+    masterKeyRecovery: text("master_key_recovery").notNull(),
+    masterKeyRecoveryNonce: text("master_key_recovery_nonce").notNull(),
+    // Timestamps
+    createdAt: timestamp("created_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
+  },
+  (table) => [index("idx_user_keys_user_id").on(table.userId)]
+);
+
+// ============================================
 // Type exports
-export type User = typeof users.$inferSelect;
-export type NewUser = typeof users.$inferInsert;
-export type Session = typeof sessions.$inferSelect;
-export type NewSession = typeof sessions.$inferInsert;
-export type Account = typeof accounts.$inferSelect;
-export type NewAccount = typeof accounts.$inferInsert;
-export type Verification = typeof verifications.$inferSelect;
-export type NewVerification = typeof verifications.$inferInsert;
-export type UserKey = typeof userKeys.$inferSelect;
-export type NewUserKey = typeof userKeys.$inferInsert;
+// ============================================
+
+export type KeyShare = typeof keyShares.$inferSelect;
+export type NewKeyShare = typeof keyShares.$inferInsert;
+export type Device = typeof devices.$inferSelect;
+export type NewDevice = typeof devices.$inferInsert;
 export type Folder = typeof folders.$inferSelect;
 export type NewFolder = typeof folders.$inferInsert;
 export type Chat = typeof chats.$inferSelect;
@@ -317,3 +302,7 @@ export type Credential = typeof credentials.$inferSelect;
 export type NewCredential = typeof credentials.$inferInsert;
 export type Prompt = typeof prompts.$inferSelect;
 export type NewPrompt = typeof prompts.$inferInsert;
+
+// Legacy types (for migration)
+export type UserKey = typeof userKeys.$inferSelect;
+export type NewUserKey = typeof userKeys.$inferInsert;

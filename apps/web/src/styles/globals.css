@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @source "../node_modules/streamdown/dist/*.js";
 
 /*
@@ -132,9 +133,6 @@
   --color-status-warning: oklch(0.28 0.08 85);
   --color-status-warning-text: oklch(0.80 0.12 85);
 }
-
-/* Typography */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* Base styles */
 html {

@@ -113,6 +113,9 @@ export {
 	isStrictSessionLockingEnabled,
 	subscribe,
 	getState,
+	setDecryptedKeys,
+	setMasterKey,
+	setKeyPair,
 	type E2EESecuritySettings,
 	type E2EEState,
 	type E2EEStatusType
@@ -168,3 +171,6 @@ export {
 	decryptNote,
 	type EncryptedNoteData
 } from './notesEncryption';
+
+// Key Sharding (re-export for convenience)
+export * from '../sharding';

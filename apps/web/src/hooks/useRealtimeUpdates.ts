@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
-import { useAuth } from "@/providers/AuthProvider";
+import { useAuth } from "@/providers/ClerkAuthProvider";
 import { trpc } from "@/lib/trpc";
 
 // WebSocket URL - empty string or undefined means connect to same origin
@@ -23,7 +23,7 @@ function getSocketUrl(): string | undefined {
 }
 
 export function useRealtimeUpdates() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, getToken } = useAuth();
   const utils = trpc.useUtils();
   const socketRef = useRef<Socket | null>(null);
 
@@ -36,97 +36,115 @@ export function useRealtimeUpdates() {
       return;
     }
 
-    // Connect to WebSocket with credentials
-    // undefined URL means connect to same origin (production behind nginx proxy)
-    const socketUrl = getSocketUrl();
-    const socket = io(socketUrl, {
-      withCredentials: true,
-      transports: ["websocket", "polling"],
-    });
+    let socket: Socket | null = null;
+    let mounted = true;
 
-    socketRef.current = socket;
+    // Connect to WebSocket with JWT token for authentication
+    const connectWithToken = async () => {
+      const token = await getToken();
 
-    socket.on("connect", () => {
-      console.log("WebSocket connected");
-    });
+      if (!mounted) return;
 
-    socket.on("disconnect", () => {
-      console.log("WebSocket disconnected");
-    });
+      // Connect to WebSocket
+      // undefined URL means connect to same origin (production behind nginx proxy)
+      const socketUrl = getSocketUrl();
+      socket = io(socketUrl, {
+        withCredentials: true,
+        transports: ["websocket", "polling"],
+        auth: {
+          token,
+        },
+      });
 
-    // Chat events
-    socket.on("chat:created", () => {
-      utils.chats.list.invalidate();
-    });
+      socketRef.current = socket;
 
-    socket.on("chat:updated", () => {
-      // Only invalidate the list to update sidebar
-      // Don't invalidate chats.get - local state already has data and it causes refresh flicker
-      utils.chats.list.invalidate();
-    });
+      socket.on("connect", () => {
+        console.log("WebSocket connected");
+      });
 
-    socket.on("chat:deleted", () => {
-      utils.chats.list.invalidate();
-    });
+      socket.on("disconnect", () => {
+        console.log("WebSocket disconnected");
+      });
 
-    // Note events
-    socket.on("note:created", () => {
-      utils.notes.list.invalidate();
-    });
+      // Chat events
+      socket.on("chat:created", () => {
+        utils.chats.list.invalidate();
+      });
 
-    socket.on("note:updated", (note: { id: string }) => {
-      utils.notes.list.invalidate();
-      utils.notes.get.invalidate({ noteId: note.id });
-    });
+      socket.on("chat:updated", () => {
+        // Only invalidate the list to update sidebar
+        // Don't invalidate chats.get - local state already has data and it causes refresh flicker
+        utils.chats.list.invalidate();
+      });
 
-    socket.on("note:deleted", () => {
-      utils.notes.list.invalidate();
-    });
+      socket.on("chat:deleted", () => {
+        utils.chats.list.invalidate();
+      });
 
-    // Folder events
-    socket.on("folder:created", () => {
-      utils.folders.list.invalidate();
-    });
+      // Note events
+      socket.on("note:created", () => {
+        utils.notes.list.invalidate();
+      });
 
-    socket.on("folder:updated", (folder: { id: string }) => {
-      utils.folders.list.invalidate();
-      utils.folders.get.invalidate({ folderId: folder.id });
-    });
+      socket.on("note:updated", (note: { id: string }) => {
+        utils.notes.list.invalidate();
+        utils.notes.get.invalidate({ noteId: note.id });
+      });
 
-    socket.on("folder:deleted", () => {
-      utils.folders.list.invalidate();
-    });
+      socket.on("note:deleted", () => {
+        utils.notes.list.invalidate();
+      });
 
-    // Credential events
-    socket.on("credential:created", () => {
-      utils.credentials.list.invalidate();
-    });
+      // Folder events
+      socket.on("folder:created", () => {
+        utils.folders.list.invalidate();
+      });
 
-    socket.on("credential:updated", () => {
-      utils.credentials.list.invalidate();
-    });
+      socket.on("folder:updated", (folder: { id: string }) => {
+        utils.folders.list.invalidate();
+        utils.folders.get.invalidate({ folderId: folder.id });
+      });
 
-    socket.on("credential:deleted", () => {
-      utils.credentials.list.invalidate();
-    });
+      socket.on("folder:deleted", () => {
+        utils.folders.list.invalidate();
+      });
 
-    // Prompt events
-    socket.on("prompt:created", () => {
-      utils.prompts.list.invalidate();
-    });
+      // Credential events
+      socket.on("credential:created", () => {
+        utils.credentials.list.invalidate();
+      });
 
-    socket.on("prompt:updated", (prompt: { id: string }) => {
-      utils.prompts.list.invalidate();
-      utils.prompts.get.invalidate({ promptId: prompt.id });
-    });
+      socket.on("credential:updated", () => {
+        utils.credentials.list.invalidate();
+      });
 
-    socket.on("prompt:deleted", () => {
-      utils.prompts.list.invalidate();
-    });
+      socket.on("credential:deleted", () => {
+        utils.credentials.list.invalidate();
+      });
+
+      // Prompt events
+      socket.on("prompt:created", () => {
+        utils.prompts.list.invalidate();
+      });
+
+      socket.on("prompt:updated", (prompt: { id: string }) => {
+        utils.prompts.list.invalidate();
+        utils.prompts.get.invalidate({ promptId: prompt.id });
+      });
+
+      socket.on("prompt:deleted", () => {
+        utils.prompts.list.invalidate();
+      });
+    };
+
+    connectWithToken();
 
     return () => {
-      socket.disconnect();
+      mounted = false;
+      if (socket) {
+        socket.disconnect();
+      }
       socketRef.current = null;
     };
-  }, [isAuthenticated, utils]);
+  }, [isAuthenticated, getToken, utils]);
 }

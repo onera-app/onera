@@ -25,11 +25,9 @@ export { schema };
 
 // Re-export individual tables for convenient imports in routers
 export const {
-  users,
-  sessions,
-  accounts,
-  verifications,
-  userKeys,
+  keyShares,
+  devices,
+  userKeys, // Legacy, for migration
   folders,
   chats,
   notes,

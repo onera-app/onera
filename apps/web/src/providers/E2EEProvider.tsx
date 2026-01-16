@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useCallback, type ReactNode } from 'react';
-import { useAuth } from '@/providers/AuthProvider';
-import { useUserKeysCheck } from '@/hooks/queries/useUserKeys';
+import { useAuth } from '@/providers/ClerkAuthProvider';
+import { useKeySharesCheck } from '@/hooks/queries/useKeyShares';
 import { useE2EEStore, type E2EEStatus } from '@/stores/e2eeStore';
 import {
   initializeE2EE,
@@ -47,8 +47,8 @@ export function E2EEProvider({ children }: { children: ReactNode }) {
     setError,
   } = useE2EEStore();
 
-  // Check if user has keys
-  const userKeysCheck = useUserKeysCheck();
+  // Check if user has key shares set up (only when authenticated)
+  const keySharesCheck = useKeySharesCheck(isAuthenticated);
 
   // Initialize E2EE and subscribe to state changes
   useEffect(() => {
@@ -80,10 +80,10 @@ export function E2EEProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!isAuthenticated || !ready) return;
 
-    if (userKeysCheck !== undefined) {
-      setNeedsSetup(!userKeysCheck.hasKeys);
+    if (keySharesCheck !== undefined) {
+      setNeedsSetup(!keySharesCheck.hasShares);
     }
-  }, [isAuthenticated, ready, userKeysCheck, setNeedsSetup]);
+  }, [isAuthenticated, ready, keySharesCheck, setNeedsSetup]);
 
   // Extend session on user activity
   useEffect(() => {

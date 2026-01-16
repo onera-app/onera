@@ -5,7 +5,8 @@
   "main": "./src/sodium/index.ts",
   "types": "./src/sodium/index.ts",
   "exports": {
-    ".": "./src/sodium/index.ts"
+    ".": "./src/sodium/index.ts",
+    "./sharding": "./src/sharding/index.ts"
   },
   "scripts": {
     "build": "tsc",

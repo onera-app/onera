@@ -281,6 +281,64 @@ export async function unlockWithRecoveryMnemonic(
 }
 
 // ============================================
+// Direct Key Setting (for sharding flow)
+// ============================================
+
+/**
+ * Set decrypted keys directly (for sharding-based unlock)
+ * Use this when unlocking via key sharding instead of password
+ */
+export function setDecryptedKeys(keys: {
+	masterKey: Uint8Array;
+	privateKey: Uint8Array;
+	publicKey: Uint8Array;
+}): void {
+	if (!isE2EEReady()) {
+		throw new Error('E2EE not initialized');
+	}
+
+	decryptedKeys = {
+		masterKey: keys.masterKey,
+		privateKey: keys.privateKey,
+		publicKey: keys.publicKey
+	};
+
+	updateState({ unlocked: true, status: 'unlocked' });
+	resetSessionTimeout();
+	persistSessionKeys();
+
+	console.log('🔓 E2EE unlocked via key sharding');
+}
+
+/**
+ * Alias for setDecryptedKeys for simpler API
+ */
+export function setMasterKey(masterKey: Uint8Array): void {
+	if (decryptedKeys) {
+		decryptedKeys.masterKey = masterKey;
+	} else {
+		throw new Error('Cannot set master key without key pair. Use setDecryptedKeys instead.');
+	}
+}
+
+/**
+ * Set key pair (for use with sharding)
+ */
+export function setKeyPair(publicKey: Uint8Array, privateKey: Uint8Array): void {
+	if (decryptedKeys) {
+		decryptedKeys.publicKey = publicKey;
+		decryptedKeys.privateKey = privateKey;
+	} else {
+		// Initialize with new keys
+		decryptedKeys = {
+			masterKey: new Uint8Array(32), // Placeholder - should be set with setDecryptedKeys
+			publicKey,
+			privateKey
+		};
+	}
+}
+
+// ============================================
 // Key Access (must be unlocked)
 // ============================================
 

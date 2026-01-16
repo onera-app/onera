@@ -1,1 +1,1 @@
-export { useAuth } from "@/providers/AuthProvider";
+export { useAuth, useSignUpWithE2EE, useSignInWithE2EE } from "@/providers/ClerkAuthProvider";

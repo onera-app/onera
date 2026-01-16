@@ -10,8 +10,8 @@ import { routeTree } from './routeTree.gen';
 if (import.meta.env.DEV) {
   scan({ enabled: true });
 }
+import { ClerkAuthProvider, AuthContextProvider } from './providers/ClerkAuthProvider';
 import { TRPCProvider } from './providers/TRPCProvider';
-import { AuthProvider } from './providers/AuthProvider';
 import { E2EEProvider } from './providers/E2EEProvider';
 import { ThemeProvider } from './providers/ThemeProvider';
 import { useRealtimeUpdates } from './hooks/useRealtimeUpdates';
@@ -38,17 +38,19 @@ function RealtimeUpdatesInitializer({ children }: { children: React.ReactNode })
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <TRPCProvider>
-      <AuthProvider>
-        <ThemeProvider>
-          <E2EEProvider>
-            <RealtimeUpdatesInitializer>
-              <RouterProvider router={router} />
-              <Toaster position="top-right" richColors />
-            </RealtimeUpdatesInitializer>
-          </E2EEProvider>
-        </ThemeProvider>
-      </AuthProvider>
-    </TRPCProvider>
+    <ClerkAuthProvider>
+      <TRPCProvider>
+        <AuthContextProvider>
+          <ThemeProvider>
+            <E2EEProvider>
+              <RealtimeUpdatesInitializer>
+                <RouterProvider router={router} />
+                <Toaster position="top-right" richColors />
+              </RealtimeUpdatesInitializer>
+            </E2EEProvider>
+          </ThemeProvider>
+        </AuthContextProvider>
+      </TRPCProvider>
+    </ClerkAuthProvider>
   </StrictMode>
 );

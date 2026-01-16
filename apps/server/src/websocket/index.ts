@@ -1,6 +1,6 @@
 import { Server as HTTPServer } from "http";
 import { Server, Socket } from "socket.io";
-import { auth } from "../auth";
+import { verifyClerkToken } from "../auth/clerk";
 
 // Track connected users and their sockets
 const userSockets = new Map<string, Set<Socket>>();
@@ -33,27 +33,28 @@ export function initWebSocket(httpServer: HTTPServer) {
     },
   });
 
-  // Authentication middleware
+  // Authentication middleware - Clerk JWT verification
   io.use(async (socket, next) => {
     try {
-      // Get session from cookies
-      const cookies = socket.handshake.headers.cookie;
-      if (!cookies) {
-        return next(new Error("No authentication cookie"));
+      // Get JWT token from query params or auth header
+      const token =
+        socket.handshake.auth?.token ||
+        socket.handshake.query?.token ||
+        extractBearerToken(socket.handshake.headers.authorization);
+
+      if (!token || typeof token !== "string") {
+        return next(new Error("No authentication token"));
       }
 
-      // Parse cookie header into Headers object
-      const headers = new Headers();
-      headers.set("cookie", cookies);
+      // Verify the Clerk JWT token
+      const payload = await verifyClerkToken(token);
 
-      const session = await auth.api.getSession({ headers });
-
-      if (!session?.user) {
-        return next(new Error("Invalid session"));
+      if (!payload || !payload.sub) {
+        return next(new Error("Invalid token"));
       }
 
-      socket.data.userId = session.user.id;
-      socket.data.user = session.user;
+      socket.data.userId = payload.sub;
+      socket.data.email = payload.email;
       next();
     } catch (err) {
       next(new Error("Authentication failed"));
@@ -72,7 +73,9 @@ export function initWebSocket(httpServer: HTTPServer) {
     // Join user-specific room
     socket.join(`user:${userId}`);
 
-    console.log(`User ${userId} connected (${userSockets.get(userId)?.size} connections)`);
+    console.log(
+      `User ${userId} connected (${userSockets.get(userId)?.size} connections)`
+    );
 
     socket.on("disconnect", () => {
       userSockets.get(userId)?.delete(socket);
@@ -84,6 +87,14 @@ export function initWebSocket(httpServer: HTTPServer) {
   });
 
   return io;
+}
+
+// Extract Bearer token from Authorization header
+function extractBearerToken(authHeader: string | undefined): string | null {
+  if (!authHeader?.startsWith("Bearer ")) {
+    return null;
+  }
+  return authHeader.substring(7);
 }
 
 // Broadcast event to all sockets of a specific user

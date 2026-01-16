@@ -5,6 +5,7 @@ import { createRootRoute, createRoute } from '@tanstack/react-router';
 import { RootLayout } from './layouts/RootLayout';
 import { AppLayout } from './layouts/AppLayout';
 import { AuthPage } from './routes/auth';
+import { SSOCallbackPage } from './routes/auth-sso-callback';
 import { HomePage } from './routes/home';
 import { ChatPage } from './routes/chat';
 import { NotesPage } from './routes/notes';
@@ -28,6 +29,13 @@ const authRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/auth',
   component: AuthPage,
+});
+
+// SSO callback route (no app layout)
+const ssoCallbackRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/auth/sso-callback',
+  component: SSOCallbackPage,
 });
 
 // App layout route (authenticated) - all app routes under /app
@@ -69,5 +77,6 @@ const promptsRoute = createRoute({
 export const routeTree = rootRoute.addChildren([
   landingRoute,
   authRoute,
+  ssoCallbackRoute,
   appRoute.addChildren([homeRoute, chatRoute, notesRoute, promptsRoute]),
 ]);

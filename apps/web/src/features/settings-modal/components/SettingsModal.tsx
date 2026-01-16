@@ -19,6 +19,7 @@ import {
   Info,
   Search,
   Wrench,
+  Smartphone,
 } from 'lucide-react';
 
 // Tab components
@@ -29,6 +30,7 @@ import { ToolsTab } from '../tabs/ToolsTab';
 import { AudioTab } from '../tabs/AudioTab';
 import { DataTab } from '../tabs/DataTab';
 import { AccountTab } from '../tabs/AccountTab';
+import { DevicesTab } from '../tabs/DevicesTab';
 import { EncryptionTab } from '../tabs/EncryptionTab';
 import { AboutTab } from '../tabs/AboutTab';
 
@@ -40,6 +42,7 @@ type TabId =
   | 'audio'
   | 'data'
   | 'account'
+  | 'devices'
   | 'encryption'
   | 'about';
 
@@ -100,6 +103,13 @@ const tabs: Tab[] = [
     icon: User,
     keywords: ['profile', 'name', 'email', 'password', 'avatar'],
     component: AccountTab,
+  },
+  {
+    id: 'devices',
+    label: 'Devices',
+    icon: Smartphone,
+    keywords: ['device', 'browser', 'sessions', 'trusted', 'revoke'],
+    component: DevicesTab,
   },
   {
     id: 'encryption',

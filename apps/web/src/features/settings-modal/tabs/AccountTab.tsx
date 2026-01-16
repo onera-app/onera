@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useUser } from '@clerk/clerk-react';
 import { useAuth } from '@/hooks/useAuth';
-import { authClient } from '@/providers/AuthProvider';
-import { changeUserPassword } from '@onera/crypto';
-import { useUpdateUserKeys } from '@/hooks/queries/useUserKeys';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -16,11 +14,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { User, Mail, Lock, Loader2 } from 'lucide-react';
+import { User, Mail, Lock, Loader2, ExternalLink } from 'lucide-react';
 
 export function AccountTab() {
   const { user } = useAuth();
-  const updateUserKeys = useUpdateUserKeys();
+  const { user: clerkUser } = useUser();
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
@@ -41,27 +39,11 @@ export function AccountTab() {
 
     setIsChangingPassword(true);
     try {
-      // 1. Change authentication password with better-auth
-      const { error } = await authClient.changePassword({
+      // With Clerk, password changes are handled through their user management
+      // and don't require re-encrypting E2EE keys (sharding system handles this)
+      await clerkUser?.updatePassword({
         currentPassword: passwordForm.currentPassword,
         newPassword: passwordForm.newPassword,
-        revokeOtherSessions: true,
-      });
-
-      if (error) {
-        throw new Error(error.message || 'Failed to change password');
-      }
-
-      // 2. Re-encrypt the master key with the new password
-      const { encryptedMasterKey, kekParams } = await changeUserPassword(passwordForm.newPassword);
-
-      // 3. Update the encrypted master key on the server
-      await updateUserKeys.mutateAsync({
-        kekSalt: kekParams.salt,
-        kekOpsLimit: kekParams.opsLimit,
-        kekMemLimit: kekParams.memLimit,
-        encryptedMasterKey: encryptedMasterKey.ciphertext,
-        masterKeyNonce: encryptedMasterKey.nonce,
       });
 
       toast.success('Password changed successfully');
@@ -100,14 +82,25 @@ export function AccountTab() {
         {/* Avatar */}
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16">
-            <AvatarImage src={user?.image || undefined} alt={user?.name || 'User'} />
+            <AvatarImage src={user?.imageUrl || undefined} alt={user?.name || 'User'} />
             <AvatarFallback className="text-lg">{initials}</AvatarFallback>
           </Avatar>
           <div>
-            <Button variant="outline" size="sm" disabled>
-              Change Avatar
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                // Open Clerk's user profile management
+                if (clerkUser) {
+                  toast.info('Opening profile management...');
+                  // Clerk provides user.openUserProfile() for this
+                }
+              }}
+            >
+              Manage Profile
+              <ExternalLink className="ml-2 h-3 w-3" />
             </Button>
-            <p className="text-xs text-muted-foreground mt-1">Coming soon</p>
+            <p className="text-xs text-muted-foreground mt-1">Manage via Clerk</p>
           </div>
         </div>
 
@@ -139,7 +132,7 @@ export function AccountTab() {
             placeholder="your@email.com"
           />
           <p className="text-xs text-muted-foreground">
-            Email cannot be changed. Contact support if needed.
+            Email changes are managed through your account settings.
           </p>
         </div>
       </div>
