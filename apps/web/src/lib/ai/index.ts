@@ -53,6 +53,40 @@ export {
   generateFollowUps,
 } from './tasks';
 
+// Structured output
+export {
+  generateStructuredOutput,
+  generateStructuredOutputFromMessages,
+  type GenerateStructuredOutputOptions,
+  type GenerateStructuredOutputResult,
+} from './structuredOutput';
+
+// Schemas
+export {
+  TitleSchema,
+  FollowUpsSchema,
+  ReasoningSchema,
+  CodeGenerationSchema,
+  InstructionsSchema,
+  type TitleOutput,
+  type FollowUpsOutput,
+  type ReasoningOutput,
+  type CodeGenerationOutput,
+  type InstructionsOutput,
+} from './schemas';
+
+// Retry and fallback utilities
+export {
+  withRetry,
+  withFallback,
+  withRetryAndFallback,
+  createRetryable,
+  type RetryConfig,
+  type RetryResult,
+  type FallbackConfig,
+  type FallbackResult,
+} from './retry';
+
 /**
  * Clear all AI-related caches
  * Call on logout, lock, or when credentials change

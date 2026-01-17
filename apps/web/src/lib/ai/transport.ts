@@ -186,29 +186,40 @@ export class DirectBrowserTransport {
 
   /**
    * Convert UI messages to model messages format for streamText
-   * Handles multimodal content (text + images)
+   * Handles multimodal content (text + images/files)
    */
   private convertToModelMessages(messages: UIMessage[]): ModelMessage[] {
     return messages.map((msg) => {
-      // Check if message has multimodal content
-      // Cast to any for type checking since UIMessage parts may include custom image types
-      const hasImages = msg.parts?.some(
-        (part) => (part as any).type === 'image' || (part as any).type === 'image_url'
-      );
+      // Check if message has multimodal content (images or files)
+      // Cast to any for type checking since UIMessage parts may include custom types
+      const hasMultimodal = msg.parts?.some((part) => {
+        const p = part as any;
+        return (
+          p.type === 'image' ||
+          p.type === 'image_url' ||
+          (p.type === 'file' && p.mediaType?.startsWith('image/'))
+        );
+      });
 
-      if (hasImages) {
+      if (hasMultimodal) {
         // Build multimodal content array
         const content: Array<{ type: string; text?: string; image?: string }> = [];
 
         if (msg.parts) {
           for (const part of msg.parts) {
+            const p = part as any;
             if (part.type === 'text') {
               content.push({ type: 'text', text: part.text });
-            } else if ((part as any).type === 'image' || (part as any).type === 'image_url') {
-              // Handle both formats
-              const imageData = (part as any).image || (part as any).image_url?.url;
+            } else if (p.type === 'image' || p.type === 'image_url') {
+              // Handle legacy formats
+              const imageData = p.image || p.image_url?.url;
               if (imageData) {
                 content.push({ type: 'image', image: imageData });
+              }
+            } else if (p.type === 'file' && p.mediaType?.startsWith('image/')) {
+              // Handle AI SDK file format for images
+              if (p.url) {
+                content.push({ type: 'image', image: p.url });
               }
             }
           }

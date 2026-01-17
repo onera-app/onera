@@ -64,11 +64,26 @@ interface UseDirectChatOptions {
   };
 }
 
+/**
+ * Message part for multimodal content
+ */
+export interface MessagePart {
+  type: 'text' | 'file';
+  text?: string;
+  url?: string;
+  mediaType?: string;
+}
+
+/**
+ * Input for sendMessage - either a string or multimodal parts
+ */
+export type SendMessageInput = string | { parts: MessagePart[] };
+
 interface UseDirectChatReturn extends Omit<UseChatHelpers<UIMessage>, 'sendMessage' | 'regenerate'> {
   /**
-   * Send a message to the AI
+   * Send a message to the AI (text or multimodal with parts)
    */
-  sendMessage: (content: string) => Promise<void>;
+  sendMessage: (content: SendMessageInput) => Promise<void>;
 
   /**
    * Regenerate the last assistant message
@@ -209,9 +224,9 @@ export function useDirectChat({
   // Use AI SDK's useChat with our transport
   const chat = useChat(chatOptions);
 
-  // Custom sendMessage that validates state and uses text format
+  // Custom sendMessage that validates state and supports multimodal content
   const sendMessage = useCallback(
-    async (content: string) => {
+    async (content: SendMessageInput) => {
       if (!isReady) {
         const error = new Error(
           !isUnlocked
@@ -224,8 +239,27 @@ export function useDirectChat({
         throw error;
       }
 
-      // Use the chat's sendMessage with text format
-      await chat.sendMessage({ text: content });
+      // Handle string input (text only)
+      if (typeof content === 'string') {
+        await chat.sendMessage({ text: content });
+        return;
+      }
+
+      // Handle multimodal input with parts
+      await chat.sendMessage({
+        role: 'user',
+        parts: content.parts.map(part => {
+          if (part.type === 'text') {
+            return { type: 'text' as const, text: part.text || '' };
+          }
+          // For images/files, use the file part format
+          return {
+            type: 'file' as const,
+            mediaType: part.mediaType || 'image/png',
+            url: part.url || '',
+          };
+        }),
+      });
     },
     [isReady, isUnlocked, selectedModelId, chat.sendMessage]
   );

@@ -503,6 +503,8 @@ export function ChatPage() {
       // Build the message content
       let messageContent: string | MessageContent[] = content;
       const uiParts: Array<{ type: string; text?: string; image?: string }> = [];
+      // Parts for sendMessage in AI SDK format
+      const sendParts: Array<{ type: 'text' | 'file'; text?: string; url?: string; mediaType?: string }> = [];
 
       // Process attachments if provided
       if (options?.attachments && options.attachments.length > 0) {
@@ -528,6 +530,8 @@ export function ChatPage() {
               image_url: { url: dataUrl },
             });
             uiParts.push({ type: 'image', image: dataUrl });
+            // Add to sendParts in AI SDK format
+            sendParts.push({ type: 'file', url: dataUrl, mediaType: attachment.mimeType });
           } else if (attachment.type === 'document' || attachment.type === 'text') {
             // Store the document and add extracted text to context
             await storeAttachment({
@@ -544,6 +548,7 @@ export function ChatPage() {
             if (attachment.metadata?.extractedText) {
               const docContext = `[Document: ${attachment.fileName}]\n${attachment.metadata.extractedText}\n\n`;
               contentParts.push({ type: 'text', text: docContext });
+              sendParts.push({ type: 'text', text: docContext });
             }
           }
         }
@@ -552,6 +557,7 @@ export function ChatPage() {
         if (content) {
           contentParts.push({ type: 'text', text: content });
           uiParts.push({ type: 'text', text: content });
+          sendParts.push({ type: 'text', text: content });
         }
 
         messageContent = contentParts;
@@ -626,12 +632,18 @@ export function ChatPage() {
       };
       pendingUserMessageRef.current = userMessage;
 
-      // Send to AI via the hook - include image parts if any
-      const hasImages = uiParts.some(p => p.type === 'image');
-      if (hasImages) {
-        // For multimodal, we need to update the AI messages directly
-        // This is a workaround since sendMessage only accepts text
-        await sendMessage(finalContent);
+      // Send to AI via the hook - use multimodal parts if we have attachments
+      if (sendParts.length > 0) {
+        // Prepend search context to first text part if present
+        if (searchContext && sendParts.length > 0) {
+          const firstTextIndex = sendParts.findIndex(p => p.type === 'text');
+          if (firstTextIndex >= 0) {
+            sendParts[firstTextIndex].text = searchContext + '\n\n' + (sendParts[firstTextIndex].text || '');
+          } else {
+            sendParts.unshift({ type: 'text', text: searchContext });
+          }
+        }
+        await sendMessage({ parts: sendParts });
       } else {
         await sendMessage(finalContent);
       }
