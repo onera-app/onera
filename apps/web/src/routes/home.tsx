@@ -10,6 +10,7 @@ import { trpc } from '@/lib/trpc';
 import { useCredentials } from '@/hooks/queries/useCredentials';
 import { createEncryptedChat, encryptChatTitle, getChatKey } from '@onera/crypto';
 import type { ChatMessage, ChatHistory } from '@onera/types';
+import { toChatMessage, areMessagesEqual } from '@/lib/chat/messageUtils';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { ModelSelector } from '@/components/chat/ModelSelector';
 import { Messages } from '@/components/chat/Messages';
@@ -19,40 +20,6 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import { Sparkles, Lock, AlertTriangle, Mail, Lightbulb, Code, ArrowRight } from 'lucide-react';
-
-/**
- * Convert UIMessage (AI SDK format) to ChatMessage (storage format)
- */
-function toChatMessage(msg: UIMessage, model?: string): ChatMessage {
-  let content = '';
-  if (msg.parts) {
-    for (const part of msg.parts) {
-      if (part.type === 'text') {
-        content += part.text;
-      }
-    }
-  }
-
-  return {
-    id: msg.id,
-    role: msg.role,
-    content,
-    created_at: Date.now(),
-    model: msg.role === 'assistant' ? model : undefined,
-  };
-}
-
-/**
- * Compare two message arrays for equality to avoid unnecessary re-renders
- */
-function areMessagesEqual(a: ChatMessage[], b: ChatMessage[]): boolean {
-  if (a.length !== b.length) return false;
-  return a.every((msg, i) =>
-    msg.id === b[i].id &&
-    msg.content === b[i].content &&
-    msg.role === b[i].role
-  );
-}
 
 // Suggested prompts for new users
 const SUGGESTIONS = [

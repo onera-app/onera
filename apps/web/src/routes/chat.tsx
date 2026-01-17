@@ -8,6 +8,7 @@ import { useModelStore } from '@/stores/modelStore';
 import { useChat, useUpdateChat, useDeleteChat } from '@/hooks/queries/useChats';
 import { getChatKey, decryptChatTitle, decryptChatContent, encryptChatContent, encryptChatTitle } from '@onera/crypto';
 import type { ChatMessage, MessageContent, ChatHistory } from '@onera/types';
+import { toUIMessage, toChatMessage, areMessagesEqual } from '@/lib/chat/messageUtils';
 import { Messages } from '@/components/chat/Messages';
 import {
   createMessagesList,
@@ -37,55 +38,6 @@ interface DecryptedChat {
   updatedAt: number;
   encryptedChatKey?: string;
   chatKeyNonce?: string;
-}
-
-/**
- * Convert ChatMessage (storage format) to UIMessage (AI SDK format)
- */
-function toUIMessage(msg: ChatMessage): UIMessage {
-  const content = typeof msg.content === 'string'
-    ? msg.content
-    : msg.content.filter(c => c.type === 'text').map(c => c.text).join('\n');
-
-  return {
-    id: msg.id,
-    role: msg.role as 'user' | 'assistant',
-    parts: [{ type: 'text', text: content }],
-  };
-}
-
-/**
- * Convert UIMessage (AI SDK format) to ChatMessage (storage format)
- */
-function toChatMessage(msg: UIMessage, model?: string): ChatMessage {
-  let content = '';
-  if (msg.parts) {
-    for (const part of msg.parts) {
-      if (part.type === 'text') {
-        content += part.text;
-      }
-    }
-  }
-
-  return {
-    id: msg.id,
-    role: msg.role,
-    content,
-    created_at: Date.now(),
-    model: msg.role === 'assistant' ? model : undefined,
-  };
-}
-
-/**
- * Compare two message arrays for equality to avoid unnecessary re-renders
- */
-function areMessagesEqual(a: ChatMessage[], b: ChatMessage[]): boolean {
-  if (a.length !== b.length) return false;
-  return a.every((msg, i) =>
-    msg.id === b[i].id &&
-    msg.content === b[i].content &&
-    msg.role === b[i].role
-  );
 }
 
 export function ChatPage() {
@@ -236,24 +188,19 @@ export function ChatPage() {
     }
   }, [chat, chatId, updateChatMutation]);
 
-  // Ref to track pending user message for persistence
+  // Ref to track pending user message for persistence (ref needed for async callbacks)
   const pendingUserMessageRef = useRef<ChatMessage | null>(null);
-  // Ref to track current messages for persistence
-  const currentMessagesRef = useRef<ChatMessage[]>([]);
-  // Ref to track current history for persistence
+  // Ref to track current history for persistence (required for async callbacks)
   const currentHistoryRef = useRef<ChatHistory>({ currentId: null, messages: {} });
-  // Ref to track previous display messages for stable references
+  // Ref to track previous display messages for stable references (React memo optimization)
   const prevDisplayMessagesRef = useRef<ChatMessage[]>([]);
 
-  // Keep currentMessagesRef and currentHistoryRef in sync with chat
+  // Keep currentHistoryRef in sync with chat
   useEffect(() => {
-    if (chat?.messages) {
-      currentMessagesRef.current = chat.messages;
-    }
     if (chat?.history) {
       currentHistoryRef.current = chat.history;
     }
-  }, [chat?.messages, chat?.history]);
+  }, [chat?.history]);
 
   // Handle message completion - persist user + assistant messages
   const handleFinish = useCallback(async (message: UIMessage) => {
@@ -316,9 +263,8 @@ export function ChatPage() {
     history.messages[assistantMessage.id] = assistantMsgWithTree;
     history.currentId = assistantMessage.id;
 
-    // Update refs for next message
+    // Update history ref for next message
     currentHistoryRef.current = history;
-    currentMessagesRef.current = createMessagesList(history);
 
     // Encrypt and save to server
     try {
@@ -340,7 +286,9 @@ export function ChatPage() {
       // Generate follow-up suggestions asynchronously and persist them
       if (selectedModelId) {
         setIsGeneratingFollowUps(true);
-        generateFollowUps(currentMessagesRef.current, selectedModelId, 3)
+        // Derive messages from history for follow-up generation
+        const messagesForFollowUps = createMessagesList(currentHistoryRef.current);
+        generateFollowUps(messagesForFollowUps, selectedModelId, 3)
           .then(async (suggestions) => {
             setFollowUps(suggestions);
 
@@ -654,9 +602,8 @@ export function ChatPage() {
         newContent
       );
 
-      // Update refs
+      // Update history ref
       currentHistoryRef.current = newHistory;
-      currentMessagesRef.current = createMessagesList(newHistory);
 
       // Encrypt and save to server
       const encrypted = encryptChatContent(
@@ -700,9 +647,8 @@ export function ChatPage() {
       // Switch to the new branch
       const newHistory = switchToBranch(currentHistoryRef.current, messageId);
 
-      // Update refs
+      // Update history ref
       currentHistoryRef.current = newHistory;
-      currentMessagesRef.current = createMessagesList(newHistory);
 
       // Encrypt and save to server
       const encrypted = encryptChatContent(

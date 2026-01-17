@@ -2,6 +2,8 @@ import { useRef, useEffect, memo, useCallback } from 'react';
 import type { ChatMessage, ChatHistory } from '@onera/types';
 import { UserMessage, AssistantMessage, type BranchInfo, type RegenerateOptions } from './Message';
 import { cn } from '@/lib/utils';
+import { getMessageText } from '@/lib/chat/messageUtils';
+import { useScrollToBottom } from '@/hooks/useScrollToBottom';
 import {
   getBranchInfo,
   getSiblings,
@@ -9,6 +11,8 @@ import {
 } from '@/lib/messageTree';
 import type { Source } from './Sources';
 import { SuggestedActions } from './SuggestedActions';
+import { ArrowDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 // AI SDK message part types - compatible with UIMessagePart
 export type ToolInvocationState = 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
@@ -82,19 +86,15 @@ export const Messages = memo(function Messages({
   onSendMessage,
   inputDisabled,
 }: MessagesProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  // Track message count to only animate newly added messages
-  const prevMessageCountRef = useRef(messages.length);
+  // Use observer-based scroll handling instead of useEffect on messages
+  const { containerRef, endRef, isAtBottom, scrollToBottom } = useScrollToBottom();
 
-  // Auto-scroll to bottom on new messages or streaming updates
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  // Track seen message IDs for animation - handles branch switching correctly
+  const seenMessageIdsRef = useRef<Set<string>>(new Set());
 
-  // Update prev count after render
+  // Mark messages as seen after render
   useEffect(() => {
-    prevMessageCountRef.current = messages.length;
+    messages.forEach(m => seenMessageIdsRef.current.add(m.id));
   });
 
   // Get branch info for a message
@@ -162,82 +162,99 @@ export const Messages = memo(function Messages({
     );
   }
 
-  return (
-    <div ref={containerRef} className="h-full overflow-y-auto">
-      {/* Messages container with generous padding */}
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
-        <div className="space-y-8 message-gap">
-          {messages.map((message, index) => {
-            const textContent = getMessageContent(message);
-            const isLastMessage = index === messages.length - 1;
-            const branchInfo = getMessageBranchInfo(message.id);
-            // Only animate messages that are newly added (not already rendered)
-            const isNewMessage = index >= prevMessageCountRef.current;
-            // Check if this is the streaming message (last assistant message while streaming)
-            const isStreamingMessage = isStreaming && isLastMessage && message.role === 'assistant';
+  // Count new messages for staggered animation delays
+  const newMessagesCount = useRef(0);
 
-            if (message.role === 'user') {
+  return (
+    <div className="relative h-full">
+      <div ref={containerRef} className="h-full overflow-y-auto">
+        {/* Messages container with generous padding */}
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+          <div className="space-y-8 message-gap">
+            {messages.map((message, index) => {
+              const textContent = getMessageText(message);
+              const isLastMessage = index === messages.length - 1;
+              const branchInfo = getMessageBranchInfo(message.id);
+              // ID-based tracking: animate only messages we haven't seen before
+              // This handles branch switching correctly (existing messages don't re-animate)
+              const isNewMessage = !seenMessageIdsRef.current.has(message.id);
+              // Check if this is the streaming message (last assistant message while streaming)
+              const isStreamingMessage = isStreaming && isLastMessage && message.role === 'assistant';
+
+              // Track new message index for staggered delays
+              let newMessageIndex = 0;
+              if (isNewMessage) {
+                newMessageIndex = newMessagesCount.current++;
+              }
+
+              if (message.role === 'user') {
+                return (
+                  <div
+                    key={message.id}
+                    className={isNewMessage ? 'message-enter' : undefined}
+                    style={isNewMessage ? { animationDelay: `${newMessageIndex * 50}ms` } : undefined}
+                  >
+                    <UserMessage
+                      content={message.content}
+                      onEdit={onEditMessage ? (newContent) => onEditMessage(message.id, newContent) : undefined}
+                      branchInfo={branchInfo}
+                      onPreviousBranch={() => handlePreviousBranch(message.id)}
+                      onNextBranch={() => handleNextBranch(message.id)}
+                      edited={message.edited}
+                    />
+                  </div>
+                );
+              }
+
               return (
                 <div
                   key={message.id}
-                  className={isNewMessage ? 'message-enter' : undefined}
-                  style={isNewMessage ? { animationDelay: `${(index - prevMessageCountRef.current) * 50}ms` } : undefined}
+                  className={cn(
+                    isNewMessage && 'message-enter',
+                    isStreamingMessage && 'message-streaming'
+                  )}
+                  style={isNewMessage ? { animationDelay: `${newMessageIndex * 50}ms` } : undefined}
                 >
-                  <UserMessage
-                    content={message.content}
-                    onEdit={onEditMessage ? (newContent) => onEditMessage(message.id, newContent) : undefined}
+                  <AssistantMessage
+                    content={textContent}
+                    model={message.model}
+                    // Pass streaming-specific props only to the streaming message
+                    parts={isStreamingMessage ? streamingParts : undefined}
+                    sources={isStreamingMessage ? streamingSources : undefined}
+                    isLoading={isStreamingMessage}
+                    onRegenerate={
+                      isLastMessage && !isStreaming && onRegenerateMessage
+                        ? (options) => onRegenerateMessage(message.id, options)
+                        : undefined
+                    }
                     branchInfo={branchInfo}
                     onPreviousBranch={() => handlePreviousBranch(message.id)}
                     onNextBranch={() => handleNextBranch(message.id)}
-                    edited={message.edited}
                   />
                 </div>
               );
-            }
+            })}
+          </div>
 
-            return (
-              <div
-                key={message.id}
-                className={cn(
-                  isNewMessage && 'message-enter',
-                  isStreamingMessage && 'message-streaming'
-                )}
-                style={isNewMessage ? { animationDelay: `${(index - prevMessageCountRef.current) * 50}ms` } : undefined}
-              >
-                <AssistantMessage
-                  content={textContent}
-                  model={message.model}
-                  // Pass streaming-specific props only to the streaming message
-                  parts={isStreamingMessage ? streamingParts : undefined}
-                  sources={isStreamingMessage ? streamingSources : undefined}
-                  isStreaming={isStreamingMessage}
-                  onRegenerate={
-                    isLastMessage && !isStreaming && onRegenerateMessage
-                      ? (options) => onRegenerateMessage(message.id, options)
-                      : undefined
-                  }
-                  branchInfo={branchInfo}
-                  onPreviousBranch={() => handlePreviousBranch(message.id)}
-                  onNextBranch={() => handleNextBranch(message.id)}
-                />
-              </div>
-            );
-          })}
+          {/* Scroll anchor with padding */}
+          <div ref={endRef} className="h-8" />
         </div>
-
-        {/* Scroll anchor with padding */}
-        <div ref={bottomRef} className="h-8" />
       </div>
+
+      {/* Scroll to bottom button - appears when not at bottom */}
+      {!isAtBottom && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-full shadow-lg bg-background/95 backdrop-blur-sm hover:bg-background"
+            onClick={() => scrollToBottom('smooth')}
+          >
+            <ArrowDown className="h-4 w-4" />
+            <span className="sr-only">Scroll to bottom</span>
+          </Button>
+        </div>
+      )}
     </div>
   );
 });
-
-function getMessageContent(message: ChatMessage): string {
-  if (typeof message.content === 'string') {
-    return message.content;
-  }
-  return message.content
-    .filter((c) => c.type === 'text')
-    .map((c) => c.text || '')
-    .join('\n');
-}

@@ -47,7 +47,8 @@ interface AssistantMessageProps {
   /** External sources (e.g., from web search) */
   sources?: Source[];
   model?: string;
-  isStreaming?: boolean;
+  /** Whether this message is currently loading/streaming (Vercel pattern naming) */
+  isLoading?: boolean;
   onCopy?: () => void;
   onRegenerate?: (options?: RegenerateOptions) => void;
   branchInfo?: BranchInfo | null;
@@ -61,7 +62,7 @@ export const AssistantMessage = memo(function AssistantMessage({
   metadata,
   sources: externalSources,
   model,
-  isStreaming,
+  isLoading,
   onCopy,
   onRegenerate,
   branchInfo,
@@ -73,12 +74,12 @@ export const AssistantMessage = memo(function AssistantMessage({
 
   // Track when streaming starts for duration calculation
   useEffect(() => {
-    if (isStreaming && !streamingStartRef.current) {
+    if (isLoading && !streamingStartRef.current) {
       streamingStartRef.current = Date.now();
-    } else if (!isStreaming) {
+    } else if (!isLoading) {
       streamingStartRef.current = null;
     }
-  }, [isStreaming]);
+  }, [isLoading]);
 
   // Extract all content types from parts
   const { displayContent, thinkingBlocks, isThinking, sources, toolInvocations } = useMemo(() => {
@@ -101,18 +102,18 @@ export const AssistantMessage = memo(function AssistantMessage({
       // Extract thinking/reasoning blocks
       if (reasoningParts.length > 0) {
         blocks = reasoningParts.map((p, i) => {
-          const duration = !isStreaming && streamingStartRef.current
+          const duration = !isLoading && streamingStartRef.current
             ? Math.round((Date.now() - streamingStartRef.current) / 1000)
             : undefined;
           return {
             id: `reasoning-${i}`,
             content: p.text,
-            isComplete: !isStreaming,
+            isComplete: !isLoading,
             duration,
           };
         });
 
-        thinking = !!(isStreaming && reasoningParts.some(p => p.text.length > 0) && textParts.every(p => !p.text));
+        thinking = !!(isLoading && reasoningParts.some(p => p.text.length > 0) && textParts.every(p => !p.text));
       }
 
       // Extract sources
@@ -156,7 +157,7 @@ export const AssistantMessage = memo(function AssistantMessage({
       sources: allSources,
       toolInvocations: extractedTools,
     };
-  }, [content, parts, isStreaming, externalSources]);
+  }, [content, parts, isLoading, externalSources]);
 
   const handleCopy = useCallback(async () => {
     // Copy the display content (without thinking blocks)
@@ -180,7 +181,7 @@ export const AssistantMessage = memo(function AssistantMessage({
       <div className="flex w-full items-start gap-2 md:gap-3 justify-start">
         {/* Avatar with Sparkles icon */}
         <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border">
-          <div className={cn(isStreaming && 'animate-pulse')}>
+          <div className={cn(isLoading && 'animate-pulse')}>
             <SparklesIcon size={14} />
           </div>
         </div>
@@ -200,7 +201,7 @@ export const AssistantMessage = memo(function AssistantMessage({
           {/* Reasoning/Thinking block */}
           {hasReasoning && (
             <MessageReasoning
-              isLoading={Boolean(isStreaming && isThinking)}
+              isLoading={Boolean(isLoading && isThinking)}
               reasoning={reasoningText}
             />
           )}
@@ -212,21 +213,21 @@ export const AssistantMessage = memo(function AssistantMessage({
           {displayContent ? (
             <div className={cn(
               'bg-transparent px-0 py-0 text-left',
-              isStreaming && 'streaming-cursor'
+              isLoading && 'streaming-cursor'
             )}>
               <Streamdown>{displayContent}</Streamdown>
             </div>
-          ) : isStreaming && !hasReasoning ? (
+          ) : isLoading && !hasReasoning ? (
             <ThinkingMessage />
           ) : null}
 
           {/* Sources/Citations */}
-          {!isStreaming && sources.length > 0 && (
+          {!isLoading && sources.length > 0 && (
             <Sources sources={sources} />
           )}
 
           {/* Actions and Metadata */}
-          {!isStreaming && content && (
+          {!isLoading && content && (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1 opacity-0 group-hover/message:opacity-100 transition-opacity duration-200">
                 <MessageActions
