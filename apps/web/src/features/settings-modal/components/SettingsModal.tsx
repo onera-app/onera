@@ -154,16 +154,16 @@ export function SettingsModal({ open, onOpenChange, initialTab = 'general' }: Se
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[85vh] p-0 gap-0 flex flex-col">
-        <DialogHeader className="px-6 py-4 border-b shrink-0">
+      <DialogContent className="max-w-4xl h-[85vh] p-0 gap-0 flex flex-col border-0">
+        <DialogHeader className="px-6 py-4 shrink-0">
           <DialogTitle className="text-xl">Settings</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-1 min-h-0">
           {/* Sidebar navigation */}
-          <div className="w-56 border-r flex flex-col shrink-0">
+          <div className="w-56 flex flex-col shrink-0">
             {/* Search */}
-            <div className="p-3 border-b">
+            <div className="p-3">
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input

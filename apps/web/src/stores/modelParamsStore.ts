@@ -36,6 +36,38 @@ export const DEFAULT_MODEL_PARAMS: ModelParams = {
   streamResponse: true,
 };
 
+/**
+ * Provider-specific settings
+ */
+export type ReasoningSummaryLevel = 'auto' | 'detailed' | 'none';
+export type ReasoningEffort = 'low' | 'medium' | 'high';
+
+export interface OpenAIProviderSettings {
+  // Reasoning model settings
+  reasoningSummary: ReasoningSummaryLevel;
+  reasoningEffort: ReasoningEffort;
+}
+
+export interface AnthropicProviderSettings {
+  // Extended thinking for Claude
+  extendedThinking: boolean;
+}
+
+export interface ProviderSettings {
+  openai: OpenAIProviderSettings;
+  anthropic: AnthropicProviderSettings;
+}
+
+export const DEFAULT_PROVIDER_SETTINGS: ProviderSettings = {
+  openai: {
+    reasoningSummary: 'detailed',
+    reasoningEffort: 'medium',
+  },
+  anthropic: {
+    extendedThinking: true,
+  },
+};
+
 interface ModelParamsState {
   // Global defaults
   globalParams: ModelParams;
@@ -45,6 +77,9 @@ interface ModelParamsState {
 
   // System prompt
   systemPrompt: string;
+
+  // Provider-specific settings
+  providerSettings: ProviderSettings;
 
   // Actions
   setGlobalParam: <K extends keyof ModelParams>(key: K, value: ModelParams[K]) => void;
@@ -56,6 +91,11 @@ interface ModelParamsState {
   getEffectiveParams: (modelId: string) => ModelParams;
 
   setSystemPrompt: (prompt: string) => void;
+
+  // Provider settings actions
+  setOpenAISettings: (settings: Partial<OpenAIProviderSettings>) => void;
+  setAnthropicSettings: (settings: Partial<AnthropicProviderSettings>) => void;
+  getProviderSettings: <K extends keyof ProviderSettings>(provider: K) => ProviderSettings[K];
 }
 
 export const useModelParamsStore = create<ModelParamsState>()(
@@ -118,14 +158,45 @@ export const useModelParamsStore = create<ModelParamsState>()(
       setSystemPrompt: (systemPrompt) => {
         set({ systemPrompt });
       },
+
+      providerSettings: { ...DEFAULT_PROVIDER_SETTINGS },
+
+      setOpenAISettings: (settings) => {
+        set((state) => ({
+          providerSettings: {
+            ...state.providerSettings,
+            openai: {
+              ...state.providerSettings.openai,
+              ...settings,
+            },
+          },
+        }));
+      },
+
+      setAnthropicSettings: (settings) => {
+        set((state) => ({
+          providerSettings: {
+            ...state.providerSettings,
+            anthropic: {
+              ...state.providerSettings.anthropic,
+              ...settings,
+            },
+          },
+        }));
+      },
+
+      getProviderSettings: (provider) => {
+        return get().providerSettings[provider];
+      },
     }),
     {
       name: 'onera-model-params',
-      version: 1,
-      partialize: (state): Pick<ModelParamsState, 'globalParams' | 'modelOverrides' | 'systemPrompt'> => ({
+      version: 2,
+      partialize: (state): Pick<ModelParamsState, 'globalParams' | 'modelOverrides' | 'systemPrompt' | 'providerSettings'> => ({
         globalParams: state.globalParams,
         modelOverrides: state.modelOverrides,
         systemPrompt: state.systemPrompt,
+        providerSettings: state.providerSettings,
       }),
     }
   )

@@ -18,6 +18,7 @@ import {
   type RawCredential,
 } from '@/lib/ai';
 import type { NativeSearchSettings } from '@/stores/toolsStore';
+import { useModelParamsStore } from '@/stores/modelParamsStore';
 
 interface UseDirectChatOptions {
   /**
@@ -118,6 +119,7 @@ export function useDirectChat({
 }: UseDirectChatOptions): UseDirectChatReturn {
   const { isUnlocked } = useE2EE();
   const { selectedModelId, setSelectedModel } = useModelStore();
+  const { providerSettings } = useModelParamsStore();
   const transportRef = useRef<DirectBrowserTransport | null>(null);
 
   // Stable refs for callbacks to avoid recreating chatOptions on every render
@@ -173,6 +175,7 @@ export function useDirectChat({
         maxTokens,
         systemPrompt,
         nativeSearch,
+        providerSettings,
       });
     }
   }, []);
@@ -185,9 +188,10 @@ export function useDirectChat({
         maxTokens,
         systemPrompt,
         nativeSearch,
+        providerSettings,
       });
     }
-  }, [selectedModelId, maxTokens, systemPrompt, nativeSearch]);
+  }, [selectedModelId, maxTokens, systemPrompt, nativeSearch, providerSettings]);
 
   // Create chat options with our transport - ALWAYS provide transport
   // Uses refs for callbacks to avoid recreating on every render
@@ -199,6 +203,7 @@ export function useDirectChat({
         maxTokens,
         systemPrompt,
         nativeSearch,
+        providerSettings,
       });
     }
 
@@ -209,7 +214,7 @@ export function useDirectChat({
       onFinish: ({ message }) => onFinishRef.current?.(message),
       onError: (error) => onErrorRef.current?.(error),
     };
-  }, [chatId, initialMessages, selectedModelId, maxTokens, systemPrompt, nativeSearch]);
+  }, [chatId, initialMessages, selectedModelId, maxTokens, systemPrompt, nativeSearch, providerSettings]);
   // REMOVED: onFinish, onError from dependencies - using refs instead
 
   // Use AI SDK's useChat with our transport

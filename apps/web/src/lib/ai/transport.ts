@@ -16,6 +16,7 @@ import { xai } from '@ai-sdk/xai';
 import { getModelForCredential } from './providers';
 import { getCredentialById, parseModelId } from './credentials';
 import type { NativeSearchSettings, NativeSearchProvider } from '@/stores/toolsStore';
+import type { ProviderSettings } from '@/stores/modelParamsStore';
 
 /**
  * Options for DirectBrowserTransport
@@ -43,6 +44,11 @@ export interface DirectBrowserTransportOptions {
     enabled: boolean;
     settings?: NativeSearchSettings;
   };
+
+  /**
+   * Provider-specific settings (reasoning, extended thinking, etc.)
+   */
+  providerSettings?: ProviderSettings;
 }
 
 /**
@@ -81,7 +87,7 @@ export class DirectBrowserTransport {
     abortSignal: AbortSignal | undefined;
   }): Promise<ReadableStream<UIMessageChunk>> {
     const { messages, abortSignal } = options;
-    const { modelId, maxTokens, systemPrompt, nativeSearch } = this.options;
+    const { modelId, maxTokens, systemPrompt, nativeSearch, providerSettings } = this.options;
 
     // Parse the model ID to get credential and model name
     const { credentialId, modelName } = parseModelId(modelId);
@@ -117,6 +123,14 @@ export class DirectBrowserTransport {
     // Build tools object based on provider and native search settings
     const tools = this.buildNativeSearchTools(credential.provider, nativeSearch);
 
+    // Check if this is an OpenAI reasoning model
+    const isOpenAIReasoningModel = credential.provider === 'openai' &&
+      /\b(o1|o3|o4|gpt-5)(-mini|-preview)?\b/i.test(modelName);
+
+    // Build provider-specific options
+    const openaiSettings = providerSettings?.openai;
+    const anthropicSettings = providerSettings?.anthropic;
+
     // Call streamText directly in the browser
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = streamText({
@@ -126,11 +140,30 @@ export class DirectBrowserTransport {
       maxOutputTokens: maxTokens ?? 4096,
       abortSignal,
       ...(tools && { tools }),
+      // Enable reasoning for OpenAI reasoning models
+      ...(isOpenAIReasoningModel && openaiSettings && {
+        providerOptions: {
+          openai: {
+            reasoningSummary: openaiSettings.reasoningSummary,
+            reasoningEffort: openaiSettings.reasoningEffort,
+          },
+        },
+      }),
+      // Enable extended thinking for Anthropic models
+      ...(credential.provider === 'anthropic' && anthropicSettings?.extendedThinking && {
+        providerOptions: {
+          anthropic: {
+            thinking: { type: 'enabled', budgetTokens: 10000 },
+          },
+        },
+      }),
     });
 
     // Convert to UIMessageStream and return as ReadableStream
-    // toUIMessageStream returns an AsyncIterableStream which extends ReadableStream
-    return result.toUIMessageStream() as unknown as ReadableStream<UIMessageChunk>;
+    // sendReasoning: true forwards reasoning tokens to the client
+    return result.toUIMessageStream({
+      sendReasoning: true,
+    }) as unknown as ReadableStream<UIMessageChunk>;
   }
 
   /**
