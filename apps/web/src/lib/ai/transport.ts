@@ -5,11 +5,11 @@
 
 import {
   streamText,
+  convertToModelMessages,
   wrapLanguageModel,
   extractReasoningMiddleware,
   type UIMessage,
   type UIMessageChunk,
-  type ModelMessage,
 } from 'ai';
 import { google } from '@ai-sdk/google';
 import { xai } from '@ai-sdk/xai';
@@ -25,11 +25,6 @@ export interface DirectBrowserTransportOptions {
    * Selected model ID in format: credentialId:modelName
    */
   modelId: string;
-
-  /**
-   * Optional temperature setting
-   */
-  temperature?: number;
 
   /**
    * Optional max tokens setting
@@ -86,7 +81,7 @@ export class DirectBrowserTransport {
     abortSignal: AbortSignal | undefined;
   }): Promise<ReadableStream<UIMessageChunk>> {
     const { messages, abortSignal } = options;
-    const { modelId, temperature, maxTokens, systemPrompt, nativeSearch } = this.options;
+    const { modelId, maxTokens, systemPrompt, nativeSearch } = this.options;
 
     // Parse the model ID to get credential and model name
     const { credentialId, modelName } = parseModelId(modelId);
@@ -104,18 +99,20 @@ export class DirectBrowserTransport {
     // Get the AI SDK model instance
     const baseModel = getModelForCredential(credential, modelName);
 
-    // Wrap with reasoning middleware to extract <think>/<thinking>/<reason>/<reasoning> tags
-    // This enables proper handling of reasoning models like DeepSeek R1, Claude, etc.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const model = wrapLanguageModel({
-      model: baseModel as any,
-      middleware: extractReasoningMiddleware({
-        tagName: 'think',
-      }),
-    });
+    // Only wrap with reasoning middleware for models that use <think> tags (DeepSeek R1, etc.)
+    // OpenAI reasoning models (o1, o3, gpt-5) use native Responses API which handles reasoning automatically
+    const usesThinkTags = credential.provider === 'deepseek' || modelName.toLowerCase().includes('deepseek');
 
-    // Convert UIMessages to ModelMessages for streamText
-    const modelMessages = this.convertToModelMessages(messages);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const model = usesThinkTags
+      ? wrapLanguageModel({
+          model: baseModel as any,
+          middleware: extractReasoningMiddleware({ tagName: 'think' }),
+        })
+      : baseModel;
+
+    // Convert UIMessages to ModelMessages using AI SDK utility
+    const modelMessages = await convertToModelMessages(messages);
 
     // Build tools object based on provider and native search settings
     const tools = this.buildNativeSearchTools(credential.provider, nativeSearch);
@@ -126,7 +123,6 @@ export class DirectBrowserTransport {
       model: model as any,
       system: systemPrompt,
       messages: modelMessages,
-      temperature: temperature ?? 0.7,
       maxOutputTokens: maxTokens ?? 4096,
       abortSignal,
       ...(tools && { tools }),
@@ -184,70 +180,6 @@ export class DirectBrowserTransport {
     return null;
   }
 
-  /**
-   * Convert UI messages to model messages format for streamText
-   * Handles multimodal content (text + images/files)
-   */
-  private convertToModelMessages(messages: UIMessage[]): ModelMessage[] {
-    return messages.map((msg) => {
-      // Check if message has multimodal content (images or files)
-      // Cast to any for type checking since UIMessage parts may include custom types
-      const hasMultimodal = msg.parts?.some((part) => {
-        const p = part as any;
-        return (
-          p.type === 'image' ||
-          p.type === 'image_url' ||
-          (p.type === 'file' && p.mediaType?.startsWith('image/'))
-        );
-      });
-
-      if (hasMultimodal) {
-        // Build multimodal content array
-        const content: Array<{ type: string; text?: string; image?: string }> = [];
-
-        if (msg.parts) {
-          for (const part of msg.parts) {
-            const p = part as any;
-            if (part.type === 'text') {
-              content.push({ type: 'text', text: part.text });
-            } else if (p.type === 'image' || p.type === 'image_url') {
-              // Handle legacy formats
-              const imageData = p.image || p.image_url?.url;
-              if (imageData) {
-                content.push({ type: 'image', image: imageData });
-              }
-            } else if (p.type === 'file' && p.mediaType?.startsWith('image/')) {
-              // Handle AI SDK file format for images
-              if (p.url) {
-                content.push({ type: 'image', image: p.url });
-              }
-            }
-          }
-        }
-
-        return {
-          role: msg.role as 'user' | 'assistant' | 'system',
-          content,
-        } as ModelMessage;
-      }
-
-      // Text-only message
-      let textContent = '';
-
-      if (msg.parts) {
-        for (const part of msg.parts) {
-          if (part.type === 'text') {
-            textContent += part.text;
-          }
-        }
-      }
-
-      return {
-        role: msg.role as 'user' | 'assistant' | 'system',
-        content: textContent,
-      };
-    });
-  }
 }
 
 /**

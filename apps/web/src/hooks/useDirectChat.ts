@@ -46,11 +46,6 @@ interface UseDirectChatOptions {
   systemPrompt?: string;
 
   /**
-   * Optional temperature (0-2)
-   */
-  temperature?: number;
-
-  /**
    * Optional max tokens
    */
   maxTokens?: number;
@@ -118,7 +113,6 @@ export function useDirectChat({
   onFinish,
   onError,
   systemPrompt,
-  temperature = 0.7,
   maxTokens = 4096,
   nativeSearch,
 }: UseDirectChatOptions): UseDirectChatReturn {
@@ -176,7 +170,6 @@ export function useDirectChat({
     if (!transportRef.current) {
       transportRef.current = new DirectBrowserTransport({
         modelId: selectedModelId || 'placeholder',
-        temperature,
         maxTokens,
         systemPrompt,
         nativeSearch,
@@ -189,13 +182,12 @@ export function useDirectChat({
     if (transportRef.current && selectedModelId) {
       transportRef.current.setOptions({
         modelId: selectedModelId,
-        temperature,
         maxTokens,
         systemPrompt,
         nativeSearch,
       });
     }
-  }, [selectedModelId, temperature, maxTokens, systemPrompt, nativeSearch]);
+  }, [selectedModelId, maxTokens, systemPrompt, nativeSearch]);
 
   // Create chat options with our transport - ALWAYS provide transport
   // Uses refs for callbacks to avoid recreating on every render
@@ -204,7 +196,6 @@ export function useDirectChat({
     if (!transportRef.current) {
       transportRef.current = new DirectBrowserTransport({
         modelId: selectedModelId || 'placeholder',
-        temperature,
         maxTokens,
         systemPrompt,
         nativeSearch,
@@ -218,7 +209,7 @@ export function useDirectChat({
       onFinish: ({ message }) => onFinishRef.current?.(message),
       onError: (error) => onErrorRef.current?.(error),
     };
-  }, [chatId, initialMessages, selectedModelId, temperature, maxTokens, systemPrompt, nativeSearch]);
+  }, [chatId, initialMessages, selectedModelId, maxTokens, systemPrompt, nativeSearch]);
   // REMOVED: onFinish, onError from dependencies - using refs instead
 
   // Use AI SDK's useChat with our transport

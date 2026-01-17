@@ -364,7 +364,7 @@ export function ChatPage() {
         // Use persisted follow-ups
         setFollowUps(lastMessage.followUps);
       } else {
-        // Clear any stale follow-ups
+        // Clear any stale follow-ups (follow-ups will be generated and persisted by home.tsx or handleFinish)
         setFollowUps([]);
       }
     }

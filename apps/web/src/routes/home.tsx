@@ -8,14 +8,14 @@ import { useUIStore } from '@/stores/uiStore';
 import { useCreateChat, useUpdateChat } from '@/hooks/queries/useChats';
 import { trpc } from '@/lib/trpc';
 import { useCredentials } from '@/hooks/queries/useCredentials';
-import { createEncryptedChat, encryptChatTitle, getChatKey } from '@onera/crypto';
+import { createEncryptedChat, encryptChatTitle, encryptChatContent, getChatKey } from '@onera/crypto';
 import type { ChatMessage, ChatHistory } from '@onera/types';
 import { toChatMessage, areMessagesEqual } from '@/lib/chat/messageUtils';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { ModelSelector } from '@/components/chat/ModelSelector';
 import { Messages } from '@/components/chat/Messages';
 import { useDirectChat } from '@/hooks/useDirectChat';
-import { generateChatTitle } from '@/lib/ai';
+import { generateChatTitle, generateFollowUps } from '@/lib/ai';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
@@ -154,19 +154,20 @@ export function HomePage() {
         pendingNavigateRef.current = createdChat.id;
         navigate({ to: '/app/c/$chatId', params: { chatId: createdChat.id } });
 
-        // Generate AI title asynchronously (fire-and-forget)
-        if (selectedModelId) {
+        // Generate AI title and follow-ups asynchronously (fire-and-forget)
+        if (selectedModelId && createdChat.encryptedChatKey && createdChat.chatKeyNonce) {
+          // Ensure chat key is in cache for both operations
+          getChatKey(createdChat.id, createdChat.encryptedChatKey, createdChat.chatKeyNonce);
+
+          // Generate title
           generateChatTitle(finalMessages, selectedModelId)
             .then(async (generatedTitle) => {
-              if (generatedTitle && createdChat.encryptedChatKey && createdChat.chatKeyNonce) {
+              if (generatedTitle) {
                 try {
-                  // Ensure chat key is in cache
-                  getChatKey(createdChat.id, createdChat.encryptedChatKey, createdChat.chatKeyNonce);
-
                   const encrypted = encryptChatTitle(
                     createdChat.id,
-                    createdChat.encryptedChatKey,
-                    createdChat.chatKeyNonce,
+                    createdChat.encryptedChatKey!,
+                    createdChat.chatKeyNonce!,
                     generatedTitle
                   );
 
@@ -178,9 +179,8 @@ export function HomePage() {
                     },
                   });
 
-                  // Invalidate to refresh sidebar and chat page
+                  // Invalidate to refresh sidebar
                   utils.chats.list.invalidate();
-                  utils.chats.get.invalidate({ chatId: createdChat.id });
                 } catch (titleError) {
                   console.warn('Failed to update title:', titleError);
                 }
@@ -188,6 +188,49 @@ export function HomePage() {
             })
             .catch((err) => {
               console.warn('Title generation failed:', err);
+            });
+
+          // Generate follow-ups and persist to assistant message
+          generateFollowUps(finalMessages, selectedModelId, 3)
+            .then(async (suggestions) => {
+              if (suggestions.length > 0) {
+                try {
+                  // Find the last assistant message ID
+                  const lastAssistantMsg = [...finalMessages].reverse().find(m => m.role === 'assistant');
+                  if (!lastAssistantMsg) return;
+
+                  // Update history with follow-ups
+                  const updatedHistory: ChatHistory = { ...history };
+                  updatedHistory.messages[lastAssistantMsg.id] = {
+                    ...updatedHistory.messages[lastAssistantMsg.id],
+                    followUps: suggestions,
+                  };
+
+                  // Re-encrypt and save
+                  const encryptedWithFollowUps = encryptChatContent(
+                    createdChat.id,
+                    createdChat.encryptedChatKey!,
+                    createdChat.chatKeyNonce!,
+                    updatedHistory as unknown as Record<string, unknown>
+                  );
+
+                  await updateChat.mutateAsync({
+                    id: createdChat.id,
+                    data: {
+                      encryptedChat: encryptedWithFollowUps.encryptedChat,
+                      chatNonce: encryptedWithFollowUps.chatNonce,
+                    },
+                  });
+
+                  // Invalidate to refresh chat page with follow-ups
+                  utils.chats.get.invalidate({ chatId: createdChat.id });
+                } catch (followUpError) {
+                  console.warn('Failed to persist follow-ups:', followUpError);
+                }
+              }
+            })
+            .catch((err) => {
+              console.warn('Follow-up generation failed:', err);
             });
         }
       } catch (err) {

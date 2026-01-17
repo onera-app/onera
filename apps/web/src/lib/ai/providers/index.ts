@@ -170,7 +170,7 @@ export function getModelForCredential(
   } else if (['openrouter', 'together', 'fireworks', 'ollama', 'lmstudio', 'custom'].includes(credential.provider)) {
     return (provider as ReturnType<typeof createOpenAICompatible>).chatModel(modelName);
   } else {
-    // OpenAI and fallback
+    // OpenAI - AI SDK 5+ uses Responses API by default and auto-selects correct API
     return (provider as ReturnType<typeof createOpenAI>)(modelName);
   }
 }
