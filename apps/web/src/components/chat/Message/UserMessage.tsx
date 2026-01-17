@@ -33,6 +33,25 @@ function getImages(content: string | MessageContent[]): string[] {
     .map((c) => c.image_url!.url);
 }
 
+// Document info extracted from content
+interface DocumentInfo {
+  url: string;
+  fileName: string;
+  mimeType: string;
+}
+
+// Helper to extract documents from MessageContent[]
+function getDocuments(content: string | MessageContent[]): DocumentInfo[] {
+  if (typeof content === 'string') return [];
+  return content
+    .filter((c) => c.type === 'document_url' && c.document_url?.url)
+    .map((c) => ({
+      url: c.document_url!.url,
+      fileName: c.document_url!.fileName,
+      mimeType: c.document_url!.mimeType,
+    }));
+}
+
 export const UserMessage = memo(function UserMessage({
   content,
   onEdit,
@@ -45,6 +64,7 @@ export const UserMessage = memo(function UserMessage({
   const [isEditing, setIsEditing] = useState(false);
   const textContent = getTextContent(content);
   const images = getImages(content);
+  const documents = getDocuments(content);
   const [editValue, setEditValue] = useState(textContent);
   const [copied, setCopied] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -174,6 +194,39 @@ export const UserMessage = memo(function UserMessage({
                     onClick={() => window.open(src, '_blank')}
                   />
                 </div>
+              ))}
+            </div>
+          )}
+
+          {/* Documents */}
+          {documents.length > 0 && (
+            <div className="flex flex-col items-end gap-2 mb-2">
+              {documents.map((doc, idx) => (
+                <a
+                  key={idx}
+                  href={doc.url}
+                  download={doc.fileName}
+                  className={cn(
+                    'flex items-center gap-2 px-3 py-2 rounded-lg',
+                    'bg-muted/50 hover:bg-muted transition-colors',
+                    'text-sm text-foreground'
+                  )}
+                >
+                  <svg
+                    className="h-4 w-4 text-muted-foreground"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <span className="truncate max-w-[200px]">{doc.fileName}</span>
+                </a>
               ))}
             </div>
           )}

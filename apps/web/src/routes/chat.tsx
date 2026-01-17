@@ -21,7 +21,6 @@ import { ModelSelector } from '@/components/chat/ModelSelector';
 import { FollowUps } from '@/components/chat/FollowUps';
 import { useDirectChat } from '@/hooks/useDirectChat';
 import { generateFollowUps, getProviderFromModelId, supportsNativeSearch } from '@/lib/ai';
-import { storeAttachment } from '@/lib/storage/attachmentStorage';
 import { executeSearch, formatSearchResultsForContext, type SearchResult } from '@/lib/search';
 import type { Source } from '@/components/chat/Sources';
 import { useToolsStore, type NativeSearchProvider } from '@/stores/toolsStore';
@@ -396,7 +395,18 @@ export function ChatPage() {
     // If we have AI messages that include more than stored (user sent new message)
     // Include ALL messages - streaming message stays in array (like Vercel's approach)
     if (aiMessages.length > storedMessages.length) {
-      result = aiMessages.map(m => toChatMessage(m, m.role === 'assistant' ? selectedModelId || undefined : undefined));
+      // Use pendingUserMessageRef for user message to preserve multimodal content (images/docs)
+      // The AI SDK may not preserve file parts in the same format we need
+      const pendingUser = pendingUserMessageRef.current;
+
+      result = aiMessages.map((m, index) => {
+        // If this is the user message we just sent and we have a pending ref, use it
+        // This preserves images/documents that the AI SDK might not keep in parts
+        if (pendingUser && m.role === 'user' && index === aiMessages.length - 2) {
+          return pendingUser;
+        }
+        return toChatMessage(m, m.role === 'assistant' ? selectedModelId || undefined : undefined);
+      });
     } else {
       // Use stored messages
       result = storedMessages;
@@ -447,18 +457,7 @@ export function ChatPage() {
 
         for (const attachment of options.attachments) {
           if (attachment.type === 'image') {
-            // Store the image and add to message
-            await storeAttachment({
-              chatId,
-              type: 'image',
-              mimeType: attachment.mimeType,
-              fileName: attachment.fileName,
-              fileSize: attachment.fileSize,
-              data: attachment.data,
-              metadata: attachment.metadata,
-            });
-
-            // Add image to content parts for LLM
+            // Add image to content parts - stored in E2EE message history
             const dataUrl = `data:${attachment.mimeType};base64,${attachment.data}`;
             contentParts.push({
               type: 'image_url',
@@ -468,21 +467,21 @@ export function ChatPage() {
             // Add to sendParts in AI SDK format
             sendParts.push({ type: 'file', url: dataUrl, mediaType: attachment.mimeType });
           } else if (attachment.type === 'document' || attachment.type === 'text') {
-            // Store the document and add extracted text to context
-            await storeAttachment({
-              chatId,
-              type: attachment.type,
-              mimeType: attachment.mimeType,
-              fileName: attachment.fileName,
-              fileSize: attachment.fileSize,
-              data: attachment.data,
-              metadata: attachment.metadata,
+            // Store original document in E2EE message history
+            const dataUrl = `data:${attachment.mimeType};base64,${attachment.data}`;
+            contentParts.push({
+              type: 'document_url',
+              document_url: {
+                url: dataUrl,
+                fileName: attachment.fileName,
+                mimeType: attachment.mimeType,
+                extractedText: attachment.metadata?.extractedText,
+              },
             });
 
-            // Add document context as text
+            // Send extracted text to the LLM for context
             if (attachment.metadata?.extractedText) {
               const docContext = `[Document: ${attachment.fileName}]\n${attachment.metadata.extractedText}\n\n`;
-              contentParts.push({ type: 'text', text: docContext });
               sendParts.push({ type: 'text', text: docContext });
             }
           }

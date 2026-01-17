@@ -124,11 +124,19 @@ export interface ChatHistory {
 }
 
 export interface MessageContent {
-  type: 'text' | 'image_url' | 'file';
+  type: 'text' | 'image_url' | 'document_url' | 'file';
   text?: string;
   image_url?: {
     url: string;
   };
+  /** Inline document storage with base64 data URL */
+  document_url?: {
+    url: string;
+    fileName: string;
+    mimeType: string;
+    extractedText?: string;
+  };
+  /** Legacy file reference (for external storage) */
   file?: {
     id: string;
     name: string;

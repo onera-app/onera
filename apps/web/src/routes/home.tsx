@@ -270,20 +270,15 @@ export function HomePage() {
 
         {/* Input */}
         <div className="p-4 bg-background">
-          {isStreaming ? (
-            <div className="flex items-center justify-center gap-4 py-2">
-              <span className="text-sm text-muted-foreground">Generating response...</span>
-              <Button onClick={handleStopStreaming}>
-                Stop
-              </Button>
-            </div>
-          ) : (
+          <div className="max-w-3xl mx-auto">
             <MessageInput
               onSend={handleSendMessage}
+              onStop={handleStopStreaming}
+              isStreaming={isStreaming}
               disabled={!isUnlocked || isCreating}
               placeholder="Message Onera..."
             />
-          )}
+          </div>
         </div>
       </div>
     );
