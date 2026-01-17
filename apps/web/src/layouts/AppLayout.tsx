@@ -87,8 +87,8 @@ export function AppLayout() {
         {/* E2EE Setup Modal */}
         {needsSetup && <E2EESetupModal />}
 
-        {/* E2EE Unlock Modal */}
-        {!needsSetup && e2eeStatus === 'locked' && <E2EEUnlockModal />}
+        {/* E2EE Unlock Modal - show when locked or unlocking */}
+        {!needsSetup && (e2eeStatus === 'locked' || e2eeStatus === 'unlocking') && <E2EEUnlockModal />}
 
         {/* Settings Modal */}
         <SettingsModal

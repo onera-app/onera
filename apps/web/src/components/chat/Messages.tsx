@@ -2,14 +2,13 @@ import { useRef, useEffect, memo, useCallback } from 'react';
 import type { ChatMessage, ChatHistory } from '@onera/types';
 import { UserMessage, AssistantMessage, type BranchInfo, type RegenerateOptions } from './Message';
 import { cn } from '@/lib/utils';
-import { MessageSquare } from 'lucide-react';
-import { EmptyState } from '@/components/ui/empty-state';
 import {
   getBranchInfo,
   getSiblings,
   getDeepestChild,
 } from '@/lib/messageTree';
 import type { Source } from './Sources';
+import { SuggestedActions } from './SuggestedActions';
 
 // AI SDK message part types - compatible with UIMessagePart
 export type ToolInvocationState = 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
@@ -65,6 +64,10 @@ interface MessagesProps {
   onEditMessage?: (messageId: string, newContent: string) => void;
   onRegenerateMessage?: (messageId: string, options?: RegenerateOptions) => void;
   onSwitchBranch?: (messageId: string) => void;
+  /** Callback when suggested action is clicked in empty state */
+  onSendMessage?: (content: string) => void;
+  /** Whether message input is disabled (for suggested actions) */
+  inputDisabled?: boolean;
 }
 
 export const Messages = memo(function Messages({
@@ -79,6 +82,8 @@ export const Messages = memo(function Messages({
   onEditMessage,
   onRegenerateMessage,
   onSwitchBranch,
+  onSendMessage,
+  inputDisabled,
 }: MessagesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -129,13 +134,26 @@ export const Messages = memo(function Messages({
 
   if (messages.length === 0 && !streamingMessage) {
     return (
-      <div className="flex items-center justify-center h-full px-4">
-        <EmptyState
-          icon={MessageSquare}
-          size="lg"
-          title="Start a conversation"
-          description="Send a message to begin your encrypted conversation"
-        />
+      <div className="flex flex-col items-center justify-center h-full px-4">
+        {/* Onera branding / empty state */}
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-semibold text-foreground mb-2">
+            How can I help you today?
+          </h1>
+          <p className="text-muted-foreground">
+            Start a conversation or choose a suggestion below
+          </p>
+        </div>
+
+        {/* Suggested actions grid */}
+        {onSendMessage && (
+          <div className="w-full max-w-2xl">
+            <SuggestedActions
+              onSend={onSendMessage}
+              disabled={inputDisabled}
+            />
+          </div>
+        )}
       </div>
     );
   }

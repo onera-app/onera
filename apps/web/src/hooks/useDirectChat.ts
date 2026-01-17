@@ -64,11 +64,17 @@ interface UseDirectChatOptions {
   };
 }
 
-interface UseDirectChatReturn extends Omit<UseChatHelpers<UIMessage>, 'sendMessage'> {
+interface UseDirectChatReturn extends Omit<UseChatHelpers<UIMessage>, 'sendMessage' | 'regenerate'> {
   /**
    * Send a message to the AI
    */
   sendMessage: (content: string) => Promise<void>;
+
+  /**
+   * Regenerate the last assistant message
+   * Optionally with a modifier prompt (e.g., "be more concise")
+   */
+  regenerate: (options?: { modifier?: string }) => Promise<void>;
 
   /**
    * Whether the transport is ready (E2EE unlocked and credentials available)
@@ -224,9 +230,69 @@ export function useDirectChat({
     [isReady, isUnlocked, selectedModelId, chat.sendMessage]
   );
 
+  // Regenerate the last assistant message
+  const regenerate = useCallback(
+    async (options?: { modifier?: string }) => {
+      if (!isReady) {
+        const error = new Error(
+          !isUnlocked
+            ? 'E2EE not unlocked'
+            : !selectedModelId
+              ? 'No model selected'
+              : 'No credentials available'
+        );
+        onErrorRef.current?.(error);
+        throw error;
+      }
+
+      const messages = chat.messages;
+      if (messages.length === 0) {
+        throw new Error('No messages to regenerate');
+      }
+
+      // Find the last user message
+      let lastUserMessageIndex = -1;
+      for (let i = messages.length - 1; i >= 0; i--) {
+        if (messages[i].role === 'user') {
+          lastUserMessageIndex = i;
+          break;
+        }
+      }
+
+      if (lastUserMessageIndex === -1) {
+        throw new Error('No user message found to regenerate from');
+      }
+
+      // Get the content of the last user message
+      const lastUserMessage = messages[lastUserMessageIndex];
+      let userContent = '';
+      if (lastUserMessage.parts) {
+        for (const part of lastUserMessage.parts) {
+          if (part.type === 'text') {
+            userContent += part.text;
+          }
+        }
+      }
+
+      // Apply modifier if provided
+      if (options?.modifier) {
+        userContent = `${userContent}\n\n${options.modifier}`;
+      }
+
+      // Set messages to everything up to (but not including) the last assistant message
+      const messagesToKeep = messages.slice(0, lastUserMessageIndex);
+      chat.setMessages(messagesToKeep);
+
+      // Re-send the user message to get a new response
+      await chat.sendMessage({ text: userContent });
+    },
+    [isReady, isUnlocked, selectedModelId, chat]
+  );
+
   return {
     ...chat,
     sendMessage,
+    regenerate,
     isReady,
     isLoadingCredentials,
     selectedModelId,

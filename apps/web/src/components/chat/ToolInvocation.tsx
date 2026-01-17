@@ -11,8 +11,11 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 export type ToolState =
   | 'input-streaming'
   | 'input-available'
+  | 'approval-requested'
+  | 'approval-responded'
   | 'output-available'
-  | 'output-error';
+  | 'output-error'
+  | 'output-denied';
 
 export interface ToolInvocationData {
   toolCallId: string;
@@ -26,6 +29,8 @@ export interface ToolInvocationData {
 interface ToolInvocationProps {
   tool: ToolInvocationData;
   defaultOpen?: boolean;
+  onApprove?: (toolCallId: string) => void;
+  onDeny?: (toolCallId: string) => void;
 }
 
 function getToolDisplayName(toolName: string): string {
@@ -45,10 +50,16 @@ function getStateIcon(state: ToolState) {
       return <Loader2 className="h-4 w-4 animate-spin text-primary" />;
     case 'input-available':
       return <Loader2 className="h-4 w-4 animate-spin text-primary" />;
+    case 'approval-requested':
+      return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+    case 'approval-responded':
+      return <CheckCircle2 className="h-4 w-4 text-blue-500" />;
     case 'output-available':
       return <CheckCircle2 className="h-4 w-4 text-green-500" />;
     case 'output-error':
       return <XCircle className="h-4 w-4 text-destructive" />;
+    case 'output-denied':
+      return <XCircle className="h-4 w-4 text-orange-500" />;
     default:
       return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
   }
@@ -60,10 +71,16 @@ function getStateLabel(state: ToolState): string {
       return 'Preparing...';
     case 'input-available':
       return 'Running...';
+    case 'approval-requested':
+      return 'Awaiting Approval';
+    case 'approval-responded':
+      return 'Approved';
     case 'output-available':
       return 'Completed';
     case 'output-error':
       return 'Failed';
+    case 'output-denied':
+      return 'Denied';
     default:
       return 'Unknown';
   }
@@ -72,16 +89,23 @@ function getStateLabel(state: ToolState): string {
 export const ToolInvocation = memo(function ToolInvocation({
   tool,
   defaultOpen = false,
+  onApprove,
+  onDeny,
 }: ToolInvocationProps) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [isOpen, setIsOpen] = useState(defaultOpen || tool.state === 'approval-requested');
   const isLoading = tool.state === 'input-streaming' || tool.state === 'input-available';
   const hasError = tool.state === 'output-error';
+  const needsApproval = tool.state === 'approval-requested';
+  const wasDenied = tool.state === 'output-denied';
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <div className={cn(
         'mb-3 rounded-lg border overflow-hidden',
-        hasError ? 'border-destructive/50 bg-destructive/5' : 'border-border/50 bg-muted/30'
+        hasError ? 'border-destructive/50 bg-destructive/5' :
+        wasDenied ? 'border-orange-500/50 bg-orange-500/5' :
+        needsApproval ? 'border-yellow-500/50 bg-yellow-500/5 ring-1 ring-yellow-500/20' :
+        'border-border/50 bg-muted/30'
       )}>
         <CollapsibleTrigger className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-muted/50 transition-colors">
           <ChevronRight
@@ -146,6 +170,33 @@ export const ToolInvocation = memo(function ToolInvocation({
                 <span>Executing tool...</span>
               </div>
             )}
+
+            {/* Denied message */}
+            {wasDenied && (
+              <div className="text-xs text-orange-600 dark:text-orange-400">
+                Tool execution was denied by the user.
+              </div>
+            )}
+
+            {/* Approval buttons */}
+            {needsApproval && onApprove && onDeny && (
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/50 mt-3">
+                <button
+                  className="rounded-md px-3 py-1.5 text-muted-foreground text-sm transition-colors hover:bg-muted hover:text-foreground"
+                  onClick={() => onDeny(tool.toolCallId)}
+                  type="button"
+                >
+                  Deny
+                </button>
+                <button
+                  className="rounded-md bg-primary px-3 py-1.5 text-primary-foreground text-sm transition-colors hover:bg-primary/90"
+                  onClick={() => onApprove(tool.toolCallId)}
+                  type="button"
+                >
+                  Allow
+                </button>
+              </div>
+            )}
           </div>
         </CollapsibleContent>
       </div>
@@ -156,18 +207,28 @@ export const ToolInvocation = memo(function ToolInvocation({
 interface ToolInvocationsProps {
   tools: ToolInvocationData[];
   defaultOpen?: boolean;
+  onApprove?: (toolCallId: string) => void;
+  onDeny?: (toolCallId: string) => void;
 }
 
 export const ToolInvocations = memo(function ToolInvocations({
   tools,
   defaultOpen = false,
+  onApprove,
+  onDeny,
 }: ToolInvocationsProps) {
   if (!tools || tools.length === 0) return null;
 
   return (
     <div className="tool-invocations mb-2">
       {tools.map((tool) => (
-        <ToolInvocation key={tool.toolCallId} tool={tool} defaultOpen={defaultOpen} />
+        <ToolInvocation
+          key={tool.toolCallId}
+          tool={tool}
+          defaultOpen={defaultOpen}
+          onApprove={onApprove}
+          onDeny={onDeny}
+        />
       ))}
     </div>
   );

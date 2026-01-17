@@ -134,62 +134,64 @@ export const UserMessage = memo(function UserMessage({
   }
 
   return (
-    <div className="group flex justify-end gap-3">
-      {/* Actions */}
-      <div className="self-center flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <MessageActions
-          onCopy={handleCopy}
-          onEdit={onEdit ? handleStartEdit : undefined}
-          isUser
-          branchInfo={branchInfo}
-          onPreviousBranch={onPreviousBranch}
-          onNextBranch={onNextBranch}
-        />
-        {copied && (
-          <span className="text-xs text-green-600 dark:text-green-400 animate-in fade-in">Copied!</span>
-        )}
-      </div>
+    <div
+      className="group/message fade-in w-full animate-in duration-200"
+      data-role="user"
+    >
+      <div className="flex w-full items-start gap-2 md:gap-3 justify-end">
+        {/* Actions (show on hover, left of bubble) */}
+        <div className="self-center flex items-center gap-1 opacity-0 group-hover/message:opacity-100 transition-opacity duration-200">
+          <MessageActions
+            onCopy={handleCopy}
+            onEdit={onEdit ? handleStartEdit : undefined}
+            isUser
+            branchInfo={branchInfo}
+            onPreviousBranch={onPreviousBranch}
+            onNextBranch={onNextBranch}
+          />
+          {copied && (
+            <span className="text-xs text-green-600 dark:text-green-400 animate-in fade-in">Copied!</span>
+          )}
+        </div>
 
-      {/* Message bubble */}
-      <div
-        className={cn(
-          'max-w-[85%] rounded-xl px-4 py-3',
-          'bg-primary/10',
-          'text-foreground',
-          'shadow-sm'
-        )}
-      >
-        {/* Display images if any */}
-        {images.length > 0 && (
-          <div className={cn(
-            'flex flex-wrap gap-2 mb-2',
-            images.length === 1 ? 'justify-end' : 'justify-start'
-          )}>
-            {images.map((src, idx) => (
-              <div
-                key={idx}
-                className="relative group/img overflow-hidden rounded-lg"
-              >
-                <img
-                  src={src}
-                  alt={`Attached image ${idx + 1}`}
-                  className={cn(
-                    'max-h-64 max-w-full object-contain rounded-lg',
-                    'cursor-pointer transition-transform hover:scale-[1.02]'
-                  )}
-                  onClick={() => window.open(src, '_blank')}
-                />
-              </div>
-            ))}
-          </div>
-        )}
-        {/* Display text content */}
-        {textContent && (
-          <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed">{textContent}</p>
-        )}
-        {edited && (
-          <span className="text-xs text-muted-foreground mt-1 block">edited</span>
-        )}
+        {/* Message content */}
+        <div className="flex flex-col max-w-[calc(100%-2.5rem)] sm:max-w-[min(fit-content,80%)]">
+          {/* Attachments/Images */}
+          {images.length > 0 && (
+            <div className="flex flex-row justify-end gap-2 mb-2">
+              {images.map((src, idx) => (
+                <div
+                  key={idx}
+                  className="relative overflow-hidden rounded-lg"
+                >
+                  <img
+                    src={src}
+                    alt={`Attached image ${idx + 1}`}
+                    className={cn(
+                      'max-h-64 max-w-full object-contain rounded-lg',
+                      'cursor-pointer transition-transform hover:scale-[1.02]'
+                    )}
+                    onClick={() => window.open(src, '_blank')}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Text bubble - Vercel style blue bubble */}
+          {textContent && (
+            <div
+              className="wrap-break-word w-fit rounded-2xl px-3 py-2 text-right text-white"
+              style={{ backgroundColor: '#006cff' }}
+            >
+              <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed">{textContent}</p>
+            </div>
+          )}
+
+          {edited && (
+            <span className="text-xs text-muted-foreground mt-1 text-right">edited</span>
+          )}
+        </div>
       </div>
     </div>
   );

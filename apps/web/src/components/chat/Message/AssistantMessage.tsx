@@ -1,16 +1,38 @@
 import { useState, useCallback, memo, useMemo, useRef, useEffect } from 'react';
 import { Streamdown } from 'streamdown';
 import { MessageActions } from './MessageActions';
-import { cn, getProviderStyle, formatModelName } from '@/lib/utils';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { ThinkingBlocks, type ThinkingBlock } from '../ThinkingBlock';
+import { cn, formatModelName } from '@/lib/utils';
 import { Sources, type Source } from '../Sources';
 import { ToolInvocations, type ToolInvocationData } from '../ToolInvocation';
 import { MessageMetadata } from '../MessageMetadata';
-import { parseThinkingBlocks, hasThinkingContent } from '@/lib/parseThinkingBlocks';
+import { MessageReasoning } from '../MessageReasoning';
+import { parseThinkingBlocks, hasThinkingContent, type ThinkingBlock } from '@/lib/parseThinkingBlocks';
 import type { BranchInfo } from './BranchNavigation';
 import type { MessagePart, ToolInvocationPart, SourcePart, MessageMetadata as MessageMetadataType } from '../Messages';
+
+// Sparkles icon from Vercel AI Chatbot
+const SparklesIcon = ({ size = 16 }: { size?: number }) => (
+  <svg
+    height={size}
+    strokeLinejoin="round"
+    style={{ color: 'currentcolor' }}
+    viewBox="0 0 16 16"
+    width={size}
+  >
+    <path
+      d="M2.5 0.5V0H3.5V0.5C3.5 1.60457 4.39543 2.5 5.5 2.5H6V3V3.5H5.5C4.39543 3.5 3.5 4.39543 3.5 5.5V6H3H2.5V5.5C2.5 4.39543 1.60457 3.5 0.5 3.5H0V3V2.5H0.5C1.60457 2.5 2.5 1.60457 2.5 0.5Z"
+      fill="currentColor"
+    />
+    <path
+      d="M14.5 4.5V5H13.5V4.5C13.5 3.94772 13.0523 3.5 12.5 3.5H12V3V2.5H12.5C13.0523 2.5 13.5 2.05228 13.5 1.5V1H14H14.5V1.5C14.5 2.05228 14.9477 2.5 15.5 2.5H16V3V3.5H15.5C14.9477 3.5 14.5 3.94772 14.5 4.5Z"
+      fill="currentColor"
+    />
+    <path
+      d="M8.40706 4.92939L8.5 4H9.5L9.59294 4.92939C9.82973 7.29734 11.7027 9.17027 14.0706 9.40706L15 9.5V10.5L14.0706 10.5929C11.7027 10.8297 9.82973 12.7027 9.59294 15.0706L9.5 16H8.5L8.40706 15.0706C8.17027 12.7027 6.29734 10.8297 3.92939 10.5929L3 10.5V9.5L3.92939 9.40706C6.29734 9.17027 8.17027 7.29734 8.40706 4.92939Z"
+      fill="currentColor"
+    />
+  </svg>
+);
 
 export interface RegenerateOptions {
   modifier?: string;
@@ -144,88 +166,105 @@ export const AssistantMessage = memo(function AssistantMessage({
     onCopy?.();
   }, [displayContent, onCopy]);
 
-  const { letter, bgClass, textClass } = getProviderStyle(model);
   const name = formatModelName(model);
 
+  // Combine thinking blocks into a single reasoning string for the new component
+  const reasoningText = thinkingBlocks.map(b => b.content).join('\n\n');
+  const hasReasoning = reasoningText.trim().length > 0;
+
   return (
-    <div className="group">
-      {/* Model indicator */}
-      <div className="flex items-center gap-2.5 mb-3">
-        <Avatar className="h-7 w-7">
-          <AvatarFallback className={cn('text-xs font-semibold', bgClass, textClass)}>
-            {letter}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-foreground">
-            {name}
-          </span>
-          {isStreaming && (
-            <Badge variant="secondary" className="gap-1.5 py-0.5">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-              </span>
-              Thinking
-            </Badge>
-          )}
+    <div
+      className="group/message fade-in w-full animate-in duration-200"
+      data-role="assistant"
+    >
+      <div className="flex w-full items-start gap-2 md:gap-3 justify-start">
+        {/* Avatar with Sparkles icon */}
+        <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border">
+          <div className={cn(isStreaming && 'animate-pulse')}>
+            <SparklesIcon size={14} />
+          </div>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="relative pl-9">
-        {/* Thinking blocks */}
-        <ThinkingBlocks blocks={thinkingBlocks} />
-
-        {/* Tool invocations */}
-        <ToolInvocations tools={toolInvocations} />
-
-        {/* Main content */}
-        {displayContent ? (
-          <div className={cn(isStreaming && 'streaming-cursor')}>
-            <Streamdown>{displayContent}</Streamdown>
-          </div>
-        ) : isStreaming ? (
-          <div className="flex items-center gap-3 py-2">
-            {/* Pulsing skeleton loader - open-webui style */}
-            <span className="relative flex size-3">
-              <span className="absolute inline-flex h-full w-full animate-pulse rounded-full bg-primary opacity-75" />
-              <span className="relative inline-flex size-3 rounded-full bg-primary animate-[pulse-size_1.5s_ease-in-out_infinite]" />
+        {/* Message content */}
+        <div className={cn(
+          'flex flex-col w-full',
+          displayContent || toolInvocations.length > 0 || hasReasoning ? 'gap-2 md:gap-4' : ''
+        )}>
+          {/* Model name indicator */}
+          {name && (
+            <span className="text-xs font-medium text-muted-foreground">
+              {name}
             </span>
-            <span className="text-sm text-muted-foreground">
-              {isThinking ? 'Thinking...' : 'Generating response...'}
-            </span>
-          </div>
-        ) : null}
+          )}
 
-        {/* Sources/Citations */}
-        {!isStreaming && sources.length > 0 && (
-          <Sources sources={sources} />
-        )}
+          {/* Reasoning/Thinking block */}
+          {hasReasoning && (
+            <MessageReasoning
+              isLoading={Boolean(isStreaming && isThinking)}
+              reasoning={reasoningText}
+            />
+          )}
 
-        {/* Actions and Metadata */}
-        {!isStreaming && content && (
-          <div className="mt-4 flex items-center justify-between">
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <MessageActions
-                onCopy={handleCopy}
-                onRegenerate={onRegenerate}
-                isUser={false}
-                branchInfo={branchInfo}
-                onPreviousBranch={onPreviousBranch}
-                onNextBranch={onNextBranch}
-              />
-              {copied && (
-                <span className="text-xs text-green-600 dark:text-green-400 ml-2 animate-in fade-in">Copied!</span>
+          {/* Tool invocations */}
+          <ToolInvocations tools={toolInvocations} />
+
+          {/* Main content */}
+          {displayContent ? (
+            <div className={cn(
+              'bg-transparent px-0 py-0 text-left',
+              isStreaming && 'streaming-cursor'
+            )}>
+              <Streamdown>{displayContent}</Streamdown>
+            </div>
+          ) : isStreaming && !hasReasoning ? (
+            <ThinkingMessage />
+          ) : null}
+
+          {/* Sources/Citations */}
+          {!isStreaming && sources.length > 0 && (
+            <Sources sources={sources} />
+          )}
+
+          {/* Actions and Metadata */}
+          {!isStreaming && content && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1 opacity-0 group-hover/message:opacity-100 transition-opacity duration-200">
+                <MessageActions
+                  onCopy={handleCopy}
+                  onRegenerate={onRegenerate}
+                  isUser={false}
+                  branchInfo={branchInfo}
+                  onPreviousBranch={onPreviousBranch}
+                  onNextBranch={onNextBranch}
+                />
+                {copied && (
+                  <span className="text-xs text-green-600 dark:text-green-400 ml-2 animate-in fade-in">Copied!</span>
+                )}
+              </div>
+              {/* Token usage and metadata */}
+              {metadata && (
+                <MessageMetadata metadata={metadata} className="opacity-0 group-hover/message:opacity-100 transition-opacity duration-200" />
               )}
             </div>
-            {/* Token usage and metadata */}
-            {metadata && (
-              <MessageMetadata metadata={metadata} className="opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-            )}
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
 });
+
+/**
+ * ThinkingMessage - shown while waiting for initial response
+ */
+export const ThinkingMessage = () => {
+  return (
+    <div className="flex items-center gap-1 p-0 text-muted-foreground text-sm">
+      <span className="animate-pulse">Thinking</span>
+      <span className="inline-flex">
+        <span className="animate-bounce [animation-delay:0ms]">.</span>
+        <span className="animate-bounce [animation-delay:150ms]">.</span>
+        <span className="animate-bounce [animation-delay:300ms]">.</span>
+      </span>
+    </div>
+  );
+};

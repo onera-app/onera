@@ -853,6 +853,8 @@ export function ChatPage() {
           onEditMessage={handleEditMessage}
           onRegenerateMessage={handleRegenerateMessage}
           onSwitchBranch={handleSwitchBranch}
+          onSendMessage={handleSendMessage}
+          inputDisabled={!isUnlocked || !selectedModelId}
         />
       </div>
 
