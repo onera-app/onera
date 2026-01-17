@@ -55,12 +55,12 @@ export interface MessageMetadata {
 interface MessagesProps {
   messages: ChatMessage[];
   history?: ChatHistory;
-  streamingMessage?: string;
+  /** Parts for the streaming message (last assistant message when streaming) */
   streamingParts?: MessagePart[];
-  streamingMetadata?: MessageMetadata;
+  /** Sources for the streaming message */
   streamingSources?: Source[];
+  /** Whether currently streaming */
   isStreaming?: boolean;
-  streamingModel?: string;
   onEditMessage?: (messageId: string, newContent: string) => void;
   onRegenerateMessage?: (messageId: string, options?: RegenerateOptions) => void;
   onSwitchBranch?: (messageId: string) => void;
@@ -73,12 +73,9 @@ interface MessagesProps {
 export const Messages = memo(function Messages({
   messages,
   history,
-  streamingMessage,
   streamingParts,
-  streamingMetadata,
   streamingSources,
   isStreaming,
-  streamingModel,
   onEditMessage,
   onRegenerateMessage,
   onSwitchBranch,
@@ -87,11 +84,18 @@ export const Messages = memo(function Messages({
 }: MessagesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  // Track message count to only animate newly added messages
+  const prevMessageCountRef = useRef(messages.length);
 
   // Auto-scroll to bottom on new messages or streaming updates
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, streamingMessage]);
+  }, [messages]);
+
+  // Update prev count after render
+  useEffect(() => {
+    prevMessageCountRef.current = messages.length;
+  });
 
   // Get branch info for a message
   const getMessageBranchInfo = useCallback(
@@ -132,7 +136,7 @@ export const Messages = memo(function Messages({
     [history, onSwitchBranch]
   );
 
-  if (messages.length === 0 && !streamingMessage) {
+  if (messages.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full px-4">
         {/* Onera branding / empty state */}
@@ -167,10 +171,18 @@ export const Messages = memo(function Messages({
             const textContent = getMessageContent(message);
             const isLastMessage = index === messages.length - 1;
             const branchInfo = getMessageBranchInfo(message.id);
+            // Only animate messages that are newly added (not already rendered)
+            const isNewMessage = index >= prevMessageCountRef.current;
+            // Check if this is the streaming message (last assistant message while streaming)
+            const isStreamingMessage = isStreaming && isLastMessage && message.role === 'assistant';
 
             if (message.role === 'user') {
               return (
-                <div key={message.id} className="message-enter" style={{ animationDelay: `${index * 50}ms` }}>
+                <div
+                  key={message.id}
+                  className={isNewMessage ? 'message-enter' : undefined}
+                  style={isNewMessage ? { animationDelay: `${(index - prevMessageCountRef.current) * 50}ms` } : undefined}
+                >
                   <UserMessage
                     content={message.content}
                     onEdit={onEditMessage ? (newContent) => onEditMessage(message.id, newContent) : undefined}
@@ -184,12 +196,23 @@ export const Messages = memo(function Messages({
             }
 
             return (
-              <div key={message.id} className="message-enter" style={{ animationDelay: `${index * 50}ms` }}>
+              <div
+                key={message.id}
+                className={cn(
+                  isNewMessage && 'message-enter',
+                  isStreamingMessage && 'message-streaming'
+                )}
+                style={isNewMessage ? { animationDelay: `${(index - prevMessageCountRef.current) * 50}ms` } : undefined}
+              >
                 <AssistantMessage
                   content={textContent}
                   model={message.model}
+                  // Pass streaming-specific props only to the streaming message
+                  parts={isStreamingMessage ? streamingParts : undefined}
+                  sources={isStreamingMessage ? streamingSources : undefined}
+                  isStreaming={isStreamingMessage}
                   onRegenerate={
-                    isLastMessage && onRegenerateMessage
+                    isLastMessage && !isStreaming && onRegenerateMessage
                       ? (options) => onRegenerateMessage(message.id, options)
                       : undefined
                   }
@@ -200,20 +223,6 @@ export const Messages = memo(function Messages({
               </div>
             );
           })}
-
-          {/* Streaming message */}
-          {streamingMessage !== undefined && (
-            <div className={cn('message-enter', isStreaming && 'message-streaming')}>
-              <AssistantMessage
-                content={streamingMessage}
-                parts={streamingParts}
-                metadata={streamingMetadata}
-                sources={streamingSources}
-                model={streamingModel}
-                isStreaming={isStreaming}
-              />
-            </div>
-          )}
         </div>
 
         {/* Scroll anchor with padding */}

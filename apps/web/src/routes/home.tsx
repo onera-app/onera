@@ -120,25 +120,6 @@ export function HomePage() {
     return result;
   }, [aiMessages, selectedModelId]);
 
-  // Get streaming content from the last message if it's streaming
-  const streamingContent = useMemo(() => {
-    if (!isStreaming) return undefined;
-
-    const lastMessage = aiMessages[aiMessages.length - 1];
-    if (lastMessage?.role === 'assistant') {
-      let content = '';
-      if (lastMessage.parts) {
-        for (const part of lastMessage.parts) {
-          if (part.type === 'text') {
-            content += part.text;
-          }
-        }
-      }
-      return content;
-    }
-    return '';
-  }, [aiMessages, isStreaming]);
-
   // Monitor for completion and create chat
   useEffect(() => {
     const createAndNavigate = async () => {
@@ -315,8 +296,7 @@ export function HomePage() {
         {/* Messages */}
         <div className="flex-1 overflow-hidden">
           <Messages
-            messages={displayMessages.filter(m => m.role === 'user')}
-            streamingMessage={streamingContent}
+            messages={displayMessages}
             isStreaming={isStreaming}
           />
         </div>

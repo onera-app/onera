@@ -439,15 +439,6 @@ export function ChatPage() {
     return [];
   }, [aiMessages, isStreaming]);
 
-  // Extract text content for backward compatibility
-  const streamingContent = useMemo(() => {
-    if (!streamingParts) return undefined;
-    return streamingParts
-      .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
-      .map((part) => part.text)
-      .join('');
-  }, [streamingParts]);
-
   // Get display messages - combine stored messages with streaming state
   // Uses ref comparison to return stable reference when content unchanged
   const displayMessages = useMemo(() => {
@@ -455,13 +446,9 @@ export function ChatPage() {
     let result: ChatMessage[];
 
     // If we have AI messages that include more than stored (user sent new message)
+    // Include ALL messages - streaming message stays in array (like Vercel's approach)
     if (aiMessages.length > storedMessages.length) {
-      // Filter out the streaming assistant message (it's shown separately)
-      const messagesToShow = isStreaming
-        ? aiMessages.filter((m, i) => !(m.role === 'assistant' && i === aiMessages.length - 1))
-        : aiMessages;
-
-      result = messagesToShow.map(m => toChatMessage(m, m.role === 'assistant' ? selectedModelId || undefined : undefined));
+      result = aiMessages.map(m => toChatMessage(m, m.role === 'assistant' ? selectedModelId || undefined : undefined));
     } else {
       // Use stored messages
       result = storedMessages;
@@ -473,7 +460,7 @@ export function ChatPage() {
     }
     prevDisplayMessagesRef.current = result;
     return result;
-  }, [chat?.messages, aiMessages, isStreaming, selectedModelId]);
+  }, [chat?.messages, aiMessages, selectedModelId]);
 
   // Handle sending a message with optional attachments and search
   const handleSendMessage = useCallback(async (content: string, options?: MessageInputOptions) => {
@@ -857,10 +844,8 @@ export function ChatPage() {
         <Messages
           messages={displayMessages}
           history={chat.history}
-          streamingMessage={streamingContent}
           streamingParts={streamingParts}
           streamingSources={searchSources}
-          streamingModel={selectedModelId || undefined}
           isStreaming={isStreaming}
           onEditMessage={handleEditMessage}
           onRegenerateMessage={handleRegenerateMessage}
