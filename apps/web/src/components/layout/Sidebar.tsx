@@ -478,7 +478,7 @@ export function Sidebar() {
                 {Array.from(groupedChats.entries()).map(([group, groupChats]) => (
                   <div key={group} className="mb-2">
                     <div className="flex items-center gap-2 px-2 py-2">
-                      <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      <span className="text-caption font-medium text-muted-foreground uppercase tracking-wider">
                         {DATE_GROUP_LABELS[group as DateGroup]}
                       </span>
                       <div className="flex-1 h-px bg-sidebar-border/40" />
@@ -520,8 +520,8 @@ export function Sidebar() {
                       className={cn(
                         'absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-sidebar-background transition-colors',
                         isUnlocked
-                          ? 'bg-emerald-500'
-                          : 'bg-amber-500 animate-pulse'
+                          ? 'bg-status-success'
+                          : 'bg-status-warning animate-pulse'
                       )}
                     />
                   </div>
@@ -531,11 +531,11 @@ export function Sidebar() {
                     </p>
                     <div className="flex items-center gap-1.5">
                       {isUnlocked ? (
-                        <Shield className="w-3 h-3 text-emerald-500" />
+                        <Shield className="w-3 h-3 text-status-success-text" />
                       ) : (
-                        <ShieldOff className="w-3 h-3 text-amber-500" />
+                        <ShieldOff className="w-3 h-3 text-status-warning-text" />
                       )}
-                      <span className="text-[11px] text-muted-foreground">
+                      <span className="text-caption text-muted-foreground">
                         {isUnlocked ? 'Encrypted' : 'Locked'}
                       </span>
                     </div>

@@ -69,7 +69,7 @@ export function CodeBlock({
           className={cn(
             'h-7 px-2 text-xs',
             copied
-              ? 'text-green-400 hover:text-green-400'
+              ? 'text-status-success-text hover:text-status-success-text'
               : 'text-slate-400 hover:text-white hover:bg-slate-700'
           )}
         >

@@ -129,7 +129,7 @@ export const UserMessage = memo(function UserMessage({
               className={cn(
                 'w-full px-4 py-3.5 rounded-xl resize-none',
                 'border-2 border-ring',
-                'text-[15px] leading-relaxed'
+                'text-body leading-relaxed'
               )}
               rows={1}
             />
@@ -170,7 +170,7 @@ export const UserMessage = memo(function UserMessage({
             onNextBranch={onNextBranch}
           />
           {copied && (
-            <span className="text-xs text-green-600 dark:text-green-400 animate-in fade-in">Copied!</span>
+            <span className="text-xs text-status-success-text animate-in fade-in">Copied!</span>
           )}
         </div>
 
@@ -237,7 +237,7 @@ export const UserMessage = memo(function UserMessage({
               className="wrap-break-word w-fit rounded-2xl px-3 py-2 text-right text-white"
               style={{ backgroundColor: '#006cff' }}
             >
-              <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed">{textContent}</p>
+              <p className="whitespace-pre-wrap break-words text-body leading-relaxed">{textContent}</p>
             </div>
           )}
 

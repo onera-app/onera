@@ -25,7 +25,7 @@ export function Hero() {
         variant="outline" 
         className="mb-8 px-4 py-1.5 text-sm font-normal bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm border-neutral-200/60 dark:border-neutral-700/60 shadow-sm"
       >
-        <ShieldCheck className="size-4 mr-1.5 text-emerald-600 dark:text-emerald-500" />
+        <ShieldCheck className="size-4 mr-1.5 text-status-success-text" />
         End-to-end encrypted
       </Badge>
 
@@ -71,15 +71,15 @@ export function Hero() {
       {/* Trust Badges */}
       <div className="mt-8 flex flex-wrap justify-center items-center gap-6 text-sm text-muted-foreground">
         <span className="flex items-center gap-2">
-          <span className="size-2 rounded-full bg-emerald-500" />
+          <span className="size-2 rounded-full bg-status-success" />
           No data shared. Ever.
         </span>
         <span className="flex items-center gap-2">
-          <span className="size-2 rounded-full bg-emerald-500" />
+          <span className="size-2 rounded-full bg-status-success" />
           No credit card required
         </span>
         <span className="flex items-center gap-2">
-          <span className="size-2 rounded-full bg-emerald-500" />
+          <span className="size-2 rounded-full bg-status-success" />
           Use your own API keys
         </span>
       </div>

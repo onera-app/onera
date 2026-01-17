@@ -55,7 +55,7 @@ function getStateIcon(state: ToolState) {
     case 'approval-responded':
       return <CheckCircle2 className="h-4 w-4 text-blue-500" />;
     case 'output-available':
-      return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+      return <CheckCircle2 className="h-4 w-4 text-status-success-text" />;
     case 'output-error':
       return <XCircle className="h-4 w-4 text-destructive" />;
     case 'output-denied':
@@ -173,7 +173,7 @@ export const ToolInvocation = memo(function ToolInvocation({
 
             {/* Denied message */}
             {wasDenied && (
-              <div className="text-xs text-orange-600 dark:text-orange-400">
+              <div className="text-xs text-status-warning-text">
                 Tool execution was denied by the user.
               </div>
             )}

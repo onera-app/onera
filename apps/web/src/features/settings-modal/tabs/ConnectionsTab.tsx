@@ -128,7 +128,7 @@ export function ConnectionsTab() {
       {credentials.length > 0 && (
         <div className="space-y-3">
           <h4 className="text-sm font-medium flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            <CheckCircle2 className="w-4 h-4 text-status-success-text" />
             Connected ({credentials.length})
           </h4>
           <div className="grid gap-2">
@@ -145,7 +145,7 @@ export function ConnectionsTab() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <h4 className="font-medium truncate text-sm">{credential.name}</h4>
-                        <Badge variant="success" className="text-[10px] px-1.5 py-0">
+                        <Badge variant="success" className="text-micro px-1.5 py-0">
                           Connected
                         </Badge>
                       </div>
@@ -206,7 +206,7 @@ export function ConnectionsTab() {
                   className={cn(
                     'cursor-pointer transition-all hover:shadow-md',
                     isConnected
-                      ? 'border-emerald-500/30 bg-emerald-500/5'
+                      ? 'border-status-success/30 bg-status-success/5'
                       : 'hover:border-primary/50'
                   )}
                   onClick={() => handleAddConnection(provider.id)}
@@ -218,7 +218,7 @@ export function ConnectionsTab() {
                         <div className="flex items-center gap-1.5">
                           <span className="font-medium text-sm truncate">{provider.name}</span>
                           {isConnected && (
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                            <CheckCircle2 className="w-3.5 h-3.5 text-status-success-text flex-shrink-0" />
                           )}
                         </div>
                         <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
@@ -230,7 +230,7 @@ export function ConnectionsTab() {
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-1 text-[10px] text-primary hover:underline mt-1.5"
+                            className="inline-flex items-center gap-1 text-micro text-primary hover:underline mt-1.5"
                           >
                             Get API Key <ExternalLink className="w-2.5 h-2.5" />
                           </a>

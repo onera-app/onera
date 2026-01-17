@@ -70,6 +70,12 @@
 
   /* Radius */
   --radius: 0.625rem;
+
+  /* Typography Scale */
+  --font-size-2xs: 0.625rem;   /* 10px - kbd, tiny hints */
+  --font-size-xs: 0.6875rem;   /* 11px - reasoning, date labels */
+  --font-size-sm: 0.8125rem;   /* 13px - sidebar items, secondary text */
+  --font-size-base: 0.9375rem; /* 15px - body text, message content */
 }
 
 /* Dark mode theme */
@@ -513,6 +519,12 @@ body {
 .chat-density-compact .message-gap { gap: 1rem; }
 .chat-density-normal .message-gap { gap: 1.75rem; }
 .chat-density-comfortable .message-gap { gap: 2.5rem; }
+
+/* Typography utilities */
+.text-body { font-size: var(--font-size-base); }
+.text-secondary { font-size: var(--font-size-sm); }
+.text-caption { font-size: var(--font-size-xs); }
+.text-micro { font-size: var(--font-size-2xs); }
 
 /* TipTap Rich Text Editor styles */
 .ProseMirror {

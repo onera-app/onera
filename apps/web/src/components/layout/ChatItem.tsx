@@ -133,7 +133,7 @@ export function ChatItem({
           to="/app/c/$chatId"
           params={{ chatId: id }}
           className={cn(
-            'flex items-center w-full py-2.5 px-3 rounded-xl text-[13px] transition-all duration-150',
+            'flex items-center w-full py-2.5 px-3 rounded-xl text-secondary transition-all duration-150',
             isActive
               ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm'
               : 'text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
@@ -176,12 +176,12 @@ export function ChatItem({
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-44">
-                <DropdownMenuItem onClick={handleStartEdit} className="gap-2 text-[13px]">
+                <DropdownMenuItem onClick={handleStartEdit} className="gap-2 text-secondary">
                   <Pencil className="h-3.5 w-3.5" />
                   Rename
                 </DropdownMenuItem>
                 {onRemoveFromFolder && (
-                  <DropdownMenuItem onClick={onRemoveFromFolder} className="gap-2 text-[13px]">
+                  <DropdownMenuItem onClick={onRemoveFromFolder} className="gap-2 text-secondary">
                     <FolderMinus className="h-3.5 w-3.5" />
                     Remove from folder
                   </DropdownMenuItem>
@@ -189,7 +189,7 @@ export function ChatItem({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => setShowDeleteDialog(true)}
-                  className="gap-2 text-[13px] text-destructive focus:text-destructive"
+                  className="gap-2 text-secondary text-destructive focus:text-destructive"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                   Delete
@@ -204,15 +204,15 @@ export function ChatItem({
         <AlertDialogContent className="max-w-sm">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete conversation?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[13px]">
+            <AlertDialogDescription className="text-secondary">
               This will permanently delete this conversation and all its messages.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="text-[13px]">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="text-secondary">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-[13px]"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-secondary"
             >
               Delete
             </AlertDialogAction>

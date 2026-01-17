@@ -168,7 +168,7 @@ export function ToolsTab() {
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-sm">{provider.name}</span>
                       {nativeSearchSettings[provider.id]?.enabled && (
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                        <Badge variant="secondary" className="text-micro px-1.5 py-0">
                           Enabled
                         </Badge>
                       )}
@@ -180,7 +180,7 @@ export function ToolsTab() {
                       {provider.features.map((feature) => (
                         <span
                           key={feature}
-                          className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground"
+                          className="text-micro px-1.5 py-0.5 rounded bg-muted text-muted-foreground"
                         >
                           {feature}
                         </span>
@@ -287,14 +287,14 @@ function ProviderCard({
   }, []);
 
   return (
-    <Card className={isConfigured ? 'border-emerald-500/30 bg-emerald-500/5' : ''}>
+    <Card className={isConfigured ? 'border-status-success/30 bg-status-success/5' : ''}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="font-medium text-sm">{provider.name}</span>
               {isConfigured && (
-                <Badge variant="success" className="text-[10px] px-1.5 py-0">
+                <Badge variant="success" className="text-micro px-1.5 py-0">
                   <Check className="h-3 w-3 mr-0.5" />
                   Connected
                 </Badge>
@@ -307,7 +307,7 @@ function ProviderCard({
               href={provider.docsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[10px] text-primary hover:underline mt-1.5"
+              className="inline-flex items-center gap-1 text-micro text-primary hover:underline mt-1.5"
             >
               Get API key
               <ExternalLink className="h-2.5 w-2.5" />

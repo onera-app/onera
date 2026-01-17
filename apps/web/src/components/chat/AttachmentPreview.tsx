@@ -122,7 +122,7 @@ function AttachmentItem({ attachment, onRemove }: AttachmentItemProps) {
               {fileName}
             </span>
             {processed?.metadata?.pageCount && (
-              <span className="text-[10px] text-muted-foreground">
+              <span className="text-micro text-muted-foreground">
                 {processed.metadata.pageCount} pages
               </span>
             )}

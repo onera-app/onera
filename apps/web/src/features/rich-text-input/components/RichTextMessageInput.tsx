@@ -460,7 +460,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
             <EditorContent
               editor={editor}
               className={cn(
-                'text-[15px] leading-relaxed',
+                'text-body leading-relaxed',
                 disabled && 'cursor-not-allowed'
               )}
             />
@@ -514,23 +514,23 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
       </div>
 
       {/* Keyboard hints */}
-      <div className="flex items-center justify-center mt-2.5 gap-3 text-[11px] text-muted-foreground">
+      <div className="flex items-center justify-center mt-2.5 gap-3 text-caption text-muted-foreground">
         <div className="flex items-center gap-1.5">
-          <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-[10px]">
+          <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-micro">
             Enter
           </kbd>
           <span>send</span>
         </div>
         <span className="text-border">/</span>
         <div className="flex items-center gap-1.5">
-          <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-[10px]">
+          <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-micro">
             @
           </kbd>
           <span>mention model</span>
         </div>
         <span className="text-border">/</span>
         <div className="flex items-center gap-1.5">
-          <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-[10px]">
+          <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-micro">
             Shift+Enter
           </kbd>
           <span>new line</span>

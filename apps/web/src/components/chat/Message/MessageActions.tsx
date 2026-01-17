@@ -47,9 +47,9 @@ export function MessageActions({
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
-              size="icon"
+              size="icon-sm"
               onClick={onCopy}
-              className="h-7 w-7 text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground"
             >
               <Copy className="h-4 w-4" />
             </Button>
@@ -63,9 +63,9 @@ export function MessageActions({
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
-              size="icon"
+              size="icon-sm"
               onClick={onEdit}
-              className="h-7 w-7 text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground"
             >
               <Pencil className="h-4 w-4" />
             </Button>
@@ -90,9 +90,9 @@ export function MessageActions({
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
-              size="icon"
+              size="icon-sm"
               onClick={onDelete}
-              className="h-7 w-7 text-muted-foreground hover:text-destructive"
+              className="text-muted-foreground hover:text-destructive"
             >
               <Trash2 className="h-4 w-4" />
             </Button>

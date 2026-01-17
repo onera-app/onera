@@ -33,7 +33,7 @@ export function Header() {
             {/* Logo */}
             <Link 
               to="/"
-              className="flex items-center gap-2.5 font-medium text-[15px] tracking-tight group"
+              className="flex items-center gap-2.5 font-medium text-body tracking-tight group"
             >
               <div className="size-8 rounded-xl bg-neutral-900 dark:bg-white flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
                 <ShieldCheck className="size-4 text-white dark:text-neutral-900" />
@@ -48,7 +48,7 @@ export function Header() {
                   <button
                     key={link.label}
                     onClick={() => scrollToSection(link.href)}
-                    className="px-4 py-1.5 text-[13px] font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-white dark:hover:bg-neutral-700 rounded-lg transition-all duration-200"
+                    className="px-4 py-1.5 text-secondary font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-white dark:hover:bg-neutral-700 rounded-lg transition-all duration-200"
                   >
                     {link.label}
                   </button>
@@ -63,14 +63,14 @@ export function Header() {
               {!isAuthenticated ? (
                 <>
                   <Link to="/auth">
-                    <button className="text-[13px] font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors hidden sm:block">
+                    <button className="text-secondary font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors hidden sm:block">
                       Sign In
                     </button>
                   </Link>
                   <Link to="/auth">
                     <Button 
                       size="sm" 
-                      className="h-8 px-4 text-[13px] font-medium rounded-xl bg-neutral-900 dark:bg-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
+                      className="h-8 px-4 text-secondary font-medium rounded-xl bg-neutral-900 dark:bg-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
                     >
                       Get Started
                       <ArrowRight className="ml-1.5 size-3.5" />
@@ -81,7 +81,7 @@ export function Header() {
                 <Link to="/app">
                   <Button 
                     size="sm" 
-                    className="h-8 px-4 text-[13px] font-medium rounded-xl bg-neutral-900 dark:bg-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                    className="h-8 px-4 text-secondary font-medium rounded-xl bg-neutral-900 dark:bg-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
                   >
                     Dashboard
                     <ArrowRight className="ml-1.5 size-3.5" />
@@ -107,7 +107,7 @@ export function Header() {
                   <button
                     key={link.label}
                     onClick={() => scrollToSection(link.href)}
-                    className="px-3 py-2 text-[13px] font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors text-left"
+                    className="px-3 py-2 text-secondary font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors text-left"
                   >
                     {link.label}
                   </button>

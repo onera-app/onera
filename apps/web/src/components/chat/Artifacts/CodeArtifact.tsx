@@ -144,8 +144,7 @@ export const CodeArtifact = memo(function CodeArtifact({
             <div className="flex items-center gap-1 mr-2">
               <Button
                 variant="ghost"
-                size="icon"
-                className="h-7 w-7"
+                size="icon-sm"
                 onClick={handlePrevVersion}
                 disabled={currentVersionIndex === 0}
               >
@@ -156,8 +155,7 @@ export const CodeArtifact = memo(function CodeArtifact({
               </span>
               <Button
                 variant="ghost"
-                size="icon"
-                className="h-7 w-7"
+                size="icon-sm"
                 onClick={handleNextVersion}
                 disabled={currentVersionIndex === versions.length - 1}
               >
@@ -185,16 +183,16 @@ export const CodeArtifact = memo(function CodeArtifact({
           )}
 
           {/* Copy button */}
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleCopy}>
+          <Button variant="ghost" size="icon-sm" onClick={handleCopy}>
             {copied ? (
-              <Check className="h-4 w-4 text-green-500" />
+              <Check className="h-4 w-4 text-status-success-text" />
             ) : (
               <Copy className="h-4 w-4" />
             )}
           </Button>
 
           {/* Download button */}
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleDownload}>
+          <Button variant="ghost" size="icon-sm" onClick={handleDownload}>
             <Download className="h-4 w-4" />
           </Button>
         </div>

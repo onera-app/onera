@@ -170,8 +170,8 @@ export function FolderItem({
                     <Folder className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   )}
                 </div>
-                <span className="flex-1 text-[13px] font-medium truncate">{name}</span>
-                <span className="text-[11px] text-muted-foreground/70 tabular-nums px-1.5 py-0.5 rounded-md bg-sidebar-accent/50">
+                <span className="flex-1 text-secondary font-medium truncate">{name}</span>
+                <span className="text-caption text-muted-foreground/70 tabular-nums px-1.5 py-0.5 rounded-md bg-sidebar-accent/50">
                   {chatCount}
                 </span>
               </button>
@@ -191,14 +191,14 @@ export function FolderItem({
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-40">
-                  <DropdownMenuItem onClick={handleStartEdit} className="gap-2 text-[13px]">
+                  <DropdownMenuItem onClick={handleStartEdit} className="gap-2 text-secondary">
                     <Pencil className="h-3.5 w-3.5" />
                     Rename
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => setShowDeleteDialog(true)}
-                    className="gap-2 text-[13px] text-destructive focus:text-destructive"
+                    className="gap-2 text-secondary text-destructive focus:text-destructive"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     Delete
@@ -224,15 +224,15 @@ export function FolderItem({
         <AlertDialogContent className="max-w-sm">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete folder?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[13px]">
+            <AlertDialogDescription className="text-secondary">
               This will delete "{name}". Conversations inside will be moved to your main list.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="text-[13px]">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="text-secondary">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-[13px]"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-secondary"
             >
               Delete
             </AlertDialogAction>

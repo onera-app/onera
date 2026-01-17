@@ -54,7 +54,7 @@ export const FilterChips = memo(function FilterChips({
         >
           {FILTER_LABELS[filter] || filter}
           {filter === 'pinned' && pinnedCount > 0 && (
-            <span className="ml-1 text-[10px] opacity-70">({pinnedCount})</span>
+            <span className="ml-1 text-micro opacity-70">({pinnedCount})</span>
           )}
         </Button>
       ))}

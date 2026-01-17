@@ -239,7 +239,7 @@ export const AssistantMessage = memo(function AssistantMessage({
                   onNextBranch={onNextBranch}
                 />
                 {copied && (
-                  <span className="text-xs text-green-600 dark:text-green-400 ml-2 animate-in fade-in">Copied!</span>
+                  <span className="text-xs text-status-success-text ml-2 animate-in fade-in">Copied!</span>
                 )}
               </div>
               {/* Token usage and metadata */}

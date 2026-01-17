@@ -335,9 +335,9 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
             {/* Footer hint */}
             <div className="border-t border-border px-3 py-2 flex items-center justify-between">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">↑↓</kbd>
+                <kbd className="px-1.5 py-0.5 bg-muted rounded text-micro">↑↓</kbd>
                 <span>navigate</span>
-                <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">↵</kbd>
+                <kbd className="px-1.5 py-0.5 bg-muted rounded text-micro">↵</kbd>
                 <span>select</span>
               </div>
               <button
