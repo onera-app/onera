@@ -105,10 +105,10 @@ export function E2EEProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const handleLock = useCallback(() => {
+  const handleLock = useCallback(async () => {
     // Clear AI caches to remove decrypted credentials from memory
     clearAllAICaches();
-    lock();
+    await lock();
     setStatus('locked');
   }, [setStatus]);
 

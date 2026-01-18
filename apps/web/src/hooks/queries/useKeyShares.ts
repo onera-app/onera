@@ -12,7 +12,8 @@ export function useKeySharesCheck(enabled = true) {
 }
 
 /**
- * Get user's key shares
+ * Get user's key shares (Privy-style server-protected)
+ * The auth share is returned as plaintext - security comes from Clerk authentication
  */
 export function useKeyShares() {
   const query = trpc.keyShares.get.useQuery(undefined, {
@@ -37,7 +38,7 @@ export function useCreateKeyShares() {
 }
 
 /**
- * Update auth share
+ * Update auth share (for share rotation)
  */
 export function useUpdateAuthShare() {
   const utils = trpc.useUtils();
@@ -58,6 +59,70 @@ export function useUpdateRecoveryShare() {
   const mutation = trpc.keyShares.updateRecoveryShare.useMutation({
     onSuccess: () => {
       utils.keyShares.get.invalidate();
+    },
+  });
+
+  return mutation;
+}
+
+/**
+ * Register a device and get its secret
+ * The device secret is used as server-side entropy for device share encryption
+ */
+export function useRegisterDevice() {
+  const utils = trpc.useUtils();
+  const mutation = trpc.devices.register.useMutation({
+    onSuccess: () => {
+      utils.devices.list.invalidate();
+    },
+  });
+
+  return mutation;
+}
+
+/**
+ * Get device secret for the current device
+ */
+export function useDeviceSecret(deviceId: string | null, enabled = true) {
+  const query = trpc.devices.getDeviceSecret.useQuery(
+    { deviceId: deviceId || "" },
+    {
+      enabled: enabled && !!deviceId,
+      retry: false,
+    }
+  );
+  return query.data;
+}
+
+/**
+ * List all registered devices
+ */
+export function useDevicesList() {
+  return trpc.devices.list.useQuery();
+}
+
+/**
+ * Revoke a device (mark as untrusted)
+ */
+export function useRevokeDevice() {
+  const utils = trpc.useUtils();
+  const mutation = trpc.devices.revoke.useMutation({
+    onSuccess: () => {
+      utils.devices.list.invalidate();
+    },
+  });
+
+  return mutation;
+}
+
+/**
+ * Delete a device
+ */
+export function useDeleteDevice() {
+  const utils = trpc.useUtils();
+  const mutation = trpc.devices.delete.useMutation({
+    onSuccess: () => {
+      utils.devices.list.invalidate();
     },
   });
 

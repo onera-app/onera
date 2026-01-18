@@ -8,7 +8,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, ShieldCheck, AlertTriangle } from 'lucide-react';
 import {
   setupUserKeysWithSharding,
-  unlockWithLoginKey,
   getOrCreateDeviceId,
   setDecryptedKeys,
   type RecoveryKeyInfo,
@@ -135,7 +134,7 @@ export function SSOCallbackPage() {
       }
     }
 
-    async function handleE2EE(userId: string, _presumedNewUser: boolean) {
+    async function handleE2EE(_userId: string, _presumedNewUser: boolean) {
       // Check if user has existing key shares
       let keyShares = null;
       try {
@@ -146,55 +145,51 @@ export function SSOCallbackPage() {
       }
 
       if (keyShares) {
-        // Existing user - unlock with login key
-        console.log('Unlocking existing user keys...');
-        const decryptedKeys = unlockWithLoginKey(userId, {
-          encryptedMasterKeyForLogin: keyShares.encryptedMasterKeyForLogin,
-          masterKeyForLoginNonce: keyShares.masterKeyForLoginNonce,
-          encryptedPrivateKey: keyShares.encryptedPrivateKey,
-          privateKeyNonce: keyShares.privateKeyNonce,
-          publicKey: keyShares.publicKey,
-        });
-
-        setDecryptedKeys({
-          masterKey: decryptedKeys.masterKey,
-          publicKey: decryptedKeys.publicKey,
-          privateKey: decryptedKeys.privateKey,
-        });
+        // Existing user - redirect to home, E2EEUnlockModal will prompt for recovery phrase
+        // SECURITY: We no longer auto-unlock with user ID (was a vulnerability)
+        console.log('Existing user - redirecting to app for recovery phrase unlock');
 
         // Update device last seen
         const deviceId = getOrCreateDeviceId();
-        await updateLastSeenMutation.mutateAsync({ deviceId });
-
-        toast.success('Welcome back!');
-        navigate({ to: '/' });
-      } else {
-        // New user - setup E2EE keys
-        console.log('Setting up new user keys...');
-        const keyBundle = await setupUserKeysWithSharding(userId);
-
-        await createKeySharesMutation.mutateAsync({
-          encryptedAuthShare: keyBundle.storableKeys.encryptedAuthShare,
-          authShareNonce: keyBundle.storableKeys.authShareNonce,
-          encryptedRecoveryShare: keyBundle.storableKeys.encryptedRecoveryShare,
-          recoveryShareNonce: keyBundle.storableKeys.recoveryShareNonce,
-          publicKey: keyBundle.storableKeys.publicKey,
-          encryptedPrivateKey: keyBundle.storableKeys.encryptedPrivateKey,
-          privateKeyNonce: keyBundle.storableKeys.privateKeyNonce,
-          masterKeyRecovery: keyBundle.storableKeys.masterKeyRecovery,
-          masterKeyRecoveryNonce: keyBundle.storableKeys.masterKeyRecoveryNonce,
-          encryptedRecoveryKey: keyBundle.storableKeys.encryptedRecoveryKey,
-          recoveryKeyNonce: keyBundle.storableKeys.recoveryKeyNonce,
-          encryptedMasterKeyForLogin: keyBundle.storableKeys.encryptedMasterKeyForLogin,
-          masterKeyForLoginNonce: keyBundle.storableKeys.masterKeyForLoginNonce,
+        await updateLastSeenMutation.mutateAsync({ deviceId }).catch(() => {
+          // Device may not be registered yet, that's okay
         });
 
-        // Register device
+        toast.info('Please enter your recovery phrase to unlock your data.');
+        navigate({ to: '/' });
+      } else {
+        // New user - register device first to get deviceSecret, then setup E2EE keys
+        console.log('Setting up new user keys...');
+
+        // Step 1: Register device to get server-generated deviceSecret
         const deviceId = getOrCreateDeviceId();
-        await registerDeviceMutation.mutateAsync({
+        const deviceResult = await registerDeviceMutation.mutateAsync({
           deviceId,
           deviceName: getDeviceName(),
           userAgent: navigator.userAgent,
+        });
+
+        // Step 2: Setup keys using deviceSecret (not userId)
+        // SECURITY: deviceSecret adds server-side entropy to device share encryption
+        const keyBundle = await setupUserKeysWithSharding(deviceResult.deviceSecret);
+
+        // Step 3: Store key shares on server
+        await createKeySharesMutation.mutateAsync({
+          // Auth share is now stored plaintext (protected by Clerk authentication)
+          authShare: keyBundle.storableKeys.authShare,
+          // Recovery share remains encrypted with recovery key
+          encryptedRecoveryShare: keyBundle.storableKeys.encryptedRecoveryShare,
+          recoveryShareNonce: keyBundle.storableKeys.recoveryShareNonce,
+          // Asymmetric key pair
+          publicKey: keyBundle.storableKeys.publicKey,
+          encryptedPrivateKey: keyBundle.storableKeys.encryptedPrivateKey,
+          privateKeyNonce: keyBundle.storableKeys.privateKeyNonce,
+          // Recovery method: master key encrypted with recovery key
+          masterKeyRecovery: keyBundle.storableKeys.masterKeyRecovery,
+          masterKeyRecoveryNonce: keyBundle.storableKeys.masterKeyRecoveryNonce,
+          // Recovery key encrypted with master key (for display)
+          encryptedRecoveryKey: keyBundle.storableKeys.encryptedRecoveryKey,
+          recoveryKeyNonce: keyBundle.storableKeys.recoveryKeyNonce,
         });
 
         setDecryptedKeys({

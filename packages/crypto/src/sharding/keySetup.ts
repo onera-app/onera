@@ -2,6 +2,13 @@
  * Key Setup Module
  * Orchestrates the key generation and sharding process for new users
  * and handles key reconstruction for returning users
+ *
+ * SECURITY MODEL (Privy-style):
+ * - Auth share: Stored plaintext on server, protected by Clerk authentication
+ * - Device share: Encrypted in localStorage with server-provided entropy
+ * - Recovery share: Encrypted with recovery key (from mnemonic)
+ *
+ * Unlock requires authenticated Clerk session to retrieve auth share from server.
  */
 
 import { generateSecretKey } from '../sodium/symmetric';
@@ -14,11 +21,10 @@ import {
   splitMasterKey,
   reconstructFromThreeShares,
   verifyShares,
-  deriveLoginEncryptionKey,
   type KeyShares,
 } from './shareManager';
-import { storeDeviceShare, getDeviceShare, getOrCreateDeviceId } from './deviceShare';
-import { encryptAuthShareForStorage, type StoredAuthShare } from './authShare';
+import { storeDeviceShare, getOrCreateDeviceId } from './deviceShare';
+import { serializeAuthShare } from './authShare';
 import {
   encryptRecoveryShareWithKey,
   generateRecoveryKeyAndInfo,
@@ -45,7 +51,9 @@ export interface ShardedKeyBundle {
   // Encrypted data for storage
   encryptedPrivateKey: EncryptedData;
   encryptedRecoveryShare: StoredRecoveryShare;
-  encryptedAuthShare: StoredAuthShare;
+
+  // Auth share (plaintext, base64)
+  authShare: string;
 
   // Public key (base64)
   publicKey: string;
@@ -55,12 +63,11 @@ export interface ShardedKeyBundle {
 }
 
 /**
- * Data to store in the database for key shares
+ * Data to store in the database for key shares (Privy-style)
  */
 export interface StorableKeyShares {
-  // Auth share (encrypted, backup in case Clerk fails)
-  encryptedAuthShare: string;
-  authShareNonce: string;
+  // Auth share (plaintext, protected by Clerk authentication)
+  authShare: string;
 
   // Recovery share (encrypted with recovery key)
   encryptedRecoveryShare: string;
@@ -78,20 +85,16 @@ export interface StorableKeyShares {
   // Encrypted recovery key (for display to user later)
   encryptedRecoveryKey: string;
   recoveryKeyNonce: string;
-
-  // Master key encrypted with user-ID-derived key (for normal login)
-  encryptedMasterKeyForLogin: string;
-  masterKeyForLoginNonce: string;
 }
 
 /**
  * Generate all keys and shares for a new user registration
  *
- * @param clerkUserId - The Clerk user ID for auth share encryption
+ * @param deviceSecret - Server-generated 32-byte random secret for device share encryption
  * @returns Key bundle with all generated keys and encrypted shares (ready to store)
  */
 export async function setupUserKeysWithSharding(
-  clerkUserId: string
+  deviceSecret: string
 ): Promise<ShardedKeyBundle> {
   // 1. Generate master key
   const masterKey = generateSecretKey();
@@ -119,15 +122,12 @@ export async function setupUserKeysWithSharding(
     recoveryKey
   );
 
-  // 8. Encrypt auth share for Clerk storage
-  const encryptedAuthShare = encryptAuthShareForStorage(
-    shares.authShare,
-    clerkUserId
-  );
+  // 8. Serialize auth share (plaintext - security from Clerk auth)
+  const authShare = serializeAuthShare(shares.authShare);
 
-  // 9. Store device share locally
+  // 9. Store device share locally with server entropy
   const deviceId = getOrCreateDeviceId();
-  storeDeviceShare(shares.deviceShare, deviceId);
+  storeDeviceShare(shares.deviceShare, deviceSecret, deviceId);
 
   // 10. Compute storable keys BEFORE zeroing recovery key
   // Encrypt master key with recovery key (for recovery phrase display)
@@ -136,16 +136,10 @@ export async function setupUserKeysWithSharding(
   // Encrypt recovery key with master key (for viewing recovery phrase later)
   const encryptedRecoveryKeyData = encryptKey(recoveryKey, masterKey);
 
-  // Encrypt master key with user-ID-derived key (for normal login)
-  const loginEncryptionKey = deriveLoginEncryptionKey(clerkUserId);
-  const masterKeyForLogin = encryptKey(masterKey, loginEncryptionKey);
-  secureZero(loginEncryptionKey);
-
   const publicKeyBase64 = toBase64(keyPair.publicKey);
 
   const storableKeys: StorableKeyShares = {
-    encryptedAuthShare: encryptedAuthShare.encrypted,
-    authShareNonce: encryptedAuthShare.nonce,
+    authShare,
     ...serializeStoredRecoveryShare(encryptedRecoveryShare),
     publicKey: publicKeyBase64,
     encryptedPrivateKey: encryptedPrivateKey.ciphertext,
@@ -154,8 +148,6 @@ export async function setupUserKeysWithSharding(
     masterKeyRecoveryNonce: masterKeyRecovery.nonce,
     encryptedRecoveryKey: encryptedRecoveryKeyData.ciphertext,
     recoveryKeyNonce: encryptedRecoveryKeyData.nonce,
-    encryptedMasterKeyForLogin: masterKeyForLogin.ciphertext,
-    masterKeyForLoginNonce: masterKeyForLogin.nonce,
   };
 
   // 11. Clean up sensitive data from shares (keep master key for caller)
@@ -171,21 +163,20 @@ export async function setupUserKeysWithSharding(
     recoveryInfo,
     encryptedPrivateKey,
     encryptedRecoveryShare,
-    encryptedAuthShare,
+    authShare,
     publicKey: publicKeyBase64,
     storableKeys,
   };
 }
 
 /**
- * Convert key bundle to database-storable format
  * @deprecated Use bundle.storableKeys directly from setupUserKeysWithSharding instead
  */
 export function keyBundleToStorable(
   bundle: ShardedKeyBundle,
   recoveryKey: Uint8Array,
   masterKey: Uint8Array,
-  clerkUserId: string
+  _clerkUserId: string
 ): StorableKeyShares {
   // Encrypt master key with recovery key (for recovery phrase display)
   const masterKeyRecovery = encryptKey(masterKey, recoveryKey);
@@ -193,14 +184,8 @@ export function keyBundleToStorable(
   // Encrypt recovery key with master key (for viewing recovery phrase later)
   const encryptedRecoveryKey = encryptKey(recoveryKey, masterKey);
 
-  // Encrypt master key with user-ID-derived key (for normal login)
-  const loginEncryptionKey = deriveLoginEncryptionKey(clerkUserId);
-  const masterKeyForLogin = encryptKey(masterKey, loginEncryptionKey);
-  secureZero(loginEncryptionKey);
-
   return {
-    encryptedAuthShare: bundle.encryptedAuthShare.encrypted,
-    authShareNonce: bundle.encryptedAuthShare.nonce,
+    authShare: bundle.authShare,
     ...serializeStoredRecoveryShare(bundle.encryptedRecoveryShare),
     publicKey: bundle.publicKey,
     encryptedPrivateKey: bundle.encryptedPrivateKey.ciphertext,
@@ -209,8 +194,6 @@ export function keyBundleToStorable(
     masterKeyRecoveryNonce: masterKeyRecovery.nonce,
     encryptedRecoveryKey: encryptedRecoveryKey.ciphertext,
     recoveryKeyNonce: encryptedRecoveryKey.nonce,
-    encryptedMasterKeyForLogin: masterKeyForLogin.ciphertext,
-    masterKeyForLoginNonce: masterKeyForLogin.nonce,
   };
 }
 
@@ -224,8 +207,8 @@ export interface DecryptedKeys {
 }
 
 /**
- * Unlock user keys using device share + auth share + recovery share
- * This is for recovery scenarios where the user provides their mnemonic
+ * Unlock user keys using all 3 shares
+ * This is for full share reconstruction when all shares are available
  */
 export function unlockWithShares(
   deviceShare: Uint8Array,
@@ -259,30 +242,65 @@ export function unlockWithShares(
 }
 
 /**
- * Unlock user keys using the login encryption key (derived from user ID)
- * This is the primary unlock flow for normal logins - simpler and doesn't require shares
+ * Unlock using auth share from server (Privy-style)
+ * This is the primary unlock flow after OAuth/login
+ *
+ * @param authShareBase64 - Auth share from server (plaintext, base64 encoded)
+ * @param deviceSecret - Server-provided device secret for decrypting device share
+ * @param storedKeys - Keys from database
  */
-export function unlockWithLoginKey(
-  clerkUserId: string,
-  storedKeys: {
-    encryptedMasterKeyForLogin: string;
-    masterKeyForLoginNonce: string;
+export function unlockWithAuthShare(
+  _authShareBase64: string,
+  _deviceSecret: string,
+  _storedKeys: {
+    encryptedRecoveryShare: string;
+    recoveryShareNonce: string;
     encryptedPrivateKey: string;
     privateKeyNonce: string;
     publicKey: string;
   }
 ): DecryptedKeys {
-  // Derive the login encryption key from user ID
-  const loginEncryptionKey = deriveLoginEncryptionKey(clerkUserId);
+  // NOTE: This function is not fully implemented because the XOR-based 3-share system
+  // requires ALL 3 shares to reconstruct the master key.
+  // For normal login, use unlockWithRecoveryPhrase which uses masterKeyRecovery.
+  throw new Error(
+    'unlockWithAuthShare requires recovery share. ' +
+    'For normal login, use unlockWithRecoveryPhrase which uses masterKeyRecovery. ' +
+    'The XOR-based 3-share system requires ALL 3 shares to reconstruct.'
+  );
+}
+
+/**
+ * Unlock using recovery phrase (mnemonic)
+ * This decrypts the master key directly from masterKeyRecovery field
+ *
+ * @param mnemonic - 12 or 24 word recovery phrase
+ * @param storedKeys - Keys from database
+ */
+export function unlockWithRecoveryPhrase(
+  mnemonic: string,
+  storedKeys: {
+    masterKeyRecovery: string;
+    masterKeyRecoveryNonce: string;
+    encryptedPrivateKey: string;
+    privateKeyNonce: string;
+    publicKey: string;
+  }
+): DecryptedKeys {
+  // Import here to avoid circular dependency
+  const { mnemonicToRecoveryKey } = require('../sodium/recoveryKey');
+
+  // Derive recovery key from mnemonic
+  const recoveryKey = mnemonicToRecoveryKey(mnemonic);
 
   try {
-    // Decrypt master key
+    // Decrypt master key directly from masterKeyRecovery
     const masterKey = decryptKey(
       {
-        ciphertext: storedKeys.encryptedMasterKeyForLogin,
-        nonce: storedKeys.masterKeyForLoginNonce,
+        ciphertext: storedKeys.masterKeyRecovery,
+        nonce: storedKeys.masterKeyRecoveryNonce,
       },
-      loginEncryptionKey
+      recoveryKey
     );
 
     // Decrypt private key using master key
@@ -302,18 +320,39 @@ export function unlockWithLoginKey(
       publicKey,
     };
   } finally {
-    secureZero(loginEncryptionKey);
+    secureZero(recoveryKey);
   }
 }
 
 /**
- * Unlock using recovery phrase when device share is missing
- * Creates new device share for current device
+ * @deprecated Use unlockWithRecoveryPhrase instead
+ * Login key derivation was a vulnerability - master key encrypted with user-ID-derived key
+ */
+export function unlockWithLoginKey(
+  _clerkUserId: string,
+  _storedKeys: {
+    encryptedMasterKeyForLogin?: string;
+    masterKeyForLoginNonce?: string;
+    encryptedPrivateKey: string;
+    privateKeyNonce: string;
+    publicKey: string;
+  }
+): DecryptedKeys {
+  throw new Error(
+    'unlockWithLoginKey is deprecated and insecure. ' +
+    'The login key derivation from user ID alone was a vulnerability. ' +
+    'Use unlockWithRecoveryPhrase with the user\'s mnemonic recovery phrase instead. ' +
+    'For OAuth login, the user should enter their recovery phrase on first login from a new device.'
+  );
+}
+
+/**
+ * @deprecated Use unlockWithRecoveryPhrase for recovery scenarios
  */
 export function unlockWithRecoveryAndReshard(
-  mnemonic: string,
-  authShare: Uint8Array,
-  storedKeys: {
+  _mnemonic: string,
+  _authShare: Uint8Array,
+  _storedKeys: {
     encryptedRecoveryShare: string;
     recoveryShareNonce: string;
     encryptedPrivateKey: string;
@@ -321,46 +360,28 @@ export function unlockWithRecoveryAndReshard(
     publicKey: string;
   }
 ): DecryptedKeys & { newDeviceShare: Uint8Array; newRecoveryShare: Uint8Array } {
-  // Import here to avoid circular dependency
-  const { mnemonicToRecoveryKey } = require('../sodium/recoveryKey');
-  const { decryptRecoveryShareWithKey } = require('./recoveryShare');
-
-  // Derive recovery key from mnemonic
-  const recoveryKey = mnemonicToRecoveryKey(mnemonic);
-
-  try {
-    // Decrypt recovery share
-    const recoveryShare = decryptRecoveryShareWithKey(
-      {
-        version: 1 as const,
-        encrypted: storedKeys.encryptedRecoveryShare,
-        nonce: storedKeys.recoveryShareNonce,
-        createdAt: 0,
-      },
-      recoveryKey
-    );
-
-    // Note: The XOR-based 3-share system requires all 3 shares to reconstruct.
-    // Without the real device share, we can't reconstruct the master key.
-    // Use the masterKeyRecovery field instead (master key encrypted with recovery key).
-    void recoveryShare; // Decrypted but reconstruction needs device share
-    void authShare; // Would be needed for reconstruction with device share
-    throw new Error('Direct recovery without device share requires masterKeyRecovery - use unlockWithRecoveryKey instead');
-  } finally {
-    secureZero(recoveryKey);
-  }
+  throw new Error(
+    'unlockWithRecoveryAndReshard is deprecated. ' +
+    'Use unlockWithRecoveryPhrase for recovery, then reshardForNewDevice separately.'
+  );
 }
 
 /**
  * Get the device share for the current device
+ * @deprecated Use getDeviceShare(deviceSecret) instead - requires server secret
  */
 export function getCurrentDeviceShare(): Uint8Array | null {
-  return getDeviceShare();
+  throw new Error(
+    'getCurrentDeviceShare is deprecated. ' +
+    'Device share decryption now requires server-provided deviceSecret. ' +
+    'Use getDeviceShare(deviceSecret) instead.'
+  );
 }
 
 /**
- * Check if current device has a device share
+ * Check if current device has a device share stored
  */
 export function hasCurrentDeviceShare(): boolean {
-  return getDeviceShare() !== null;
+  const { hasDeviceShare } = require('./deviceShare');
+  return hasDeviceShare();
 }

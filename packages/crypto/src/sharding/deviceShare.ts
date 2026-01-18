@@ -2,8 +2,15 @@
  * Device Share Storage Module
  * Manages the device share stored in localStorage
  *
- * The device share is encrypted before storage using a device-specific key
- * derived from the device fingerprint.
+ * SECURITY MODEL:
+ * The device share is encrypted with a key derived from:
+ * 1. Device ID (random UUID stored in localStorage)
+ * 2. Browser fingerprint (screen, timezone, etc.)
+ * 3. Device secret (server-generated random 32 bytes)
+ *
+ * The server-provided device secret prevents attackers with just
+ * localStorage access from decrypting the device share.
+ * They would also need to compromise the server to get the secret.
  */
 
 import { secureZero, type EncryptedData } from '../sodium/utils';
@@ -16,6 +23,18 @@ const DEVICE_ID_KEY = 'onera_device_id';
  * Stored device share format
  */
 interface StoredDeviceShare {
+  version: 2; // Bumped version for new security model
+  encrypted: string;
+  nonce: string;
+  deviceId: string;
+  createdAt: number;
+  lastUsedAt: number;
+}
+
+/**
+ * Legacy format (version 1) for migration
+ */
+interface LegacyStoredDeviceShare {
   version: 1;
   encrypted: string;
   nonce: string;
@@ -54,7 +73,7 @@ export function getDeviceId(): string | null {
 
 /**
  * Generate a browser fingerprint for additional entropy
- * This is mixed with the device ID for key derivation
+ * This is mixed with the device ID and server secret for key derivation
  */
 function getBrowserFingerprint(): string {
   if (typeof navigator === 'undefined') {
@@ -74,17 +93,15 @@ function getBrowserFingerprint(): string {
 }
 
 /**
- * Create a full device identifier by combining device ID with fingerprint
- */
-function getFullDeviceIdentifier(deviceId: string): string {
-  return `${deviceId}:${getBrowserFingerprint()}`;
-}
-
-/**
  * Store the device share encrypted in localStorage
+ *
+ * @param deviceShare - The device share to store
+ * @param deviceSecret - Server-generated 32-byte random secret (base64)
+ * @param deviceId - Optional device ID (will be created if not provided)
  */
 export function storeDeviceShare(
   deviceShare: Uint8Array,
+  deviceSecret: string,
   deviceId?: string
 ): void {
   if (typeof localStorage === 'undefined') {
@@ -92,10 +109,10 @@ export function storeDeviceShare(
   }
 
   const id = deviceId || getOrCreateDeviceId();
-  const fullId = getFullDeviceIdentifier(id);
+  const fingerprint = getBrowserFingerprint();
 
-  // Derive encryption key from device identifier
-  const encryptionKey = deriveDeviceShareKey(fullId);
+  // Derive encryption key from device ID + fingerprint + server secret
+  const encryptionKey = deriveDeviceShareKey(id, fingerprint, deviceSecret);
 
   // Encrypt the share
   const encrypted = encryptShare(deviceShare, encryptionKey);
@@ -105,7 +122,7 @@ export function storeDeviceShare(
 
   // Store in localStorage
   const stored: StoredDeviceShare = {
-    version: 1,
+    version: 2,
     encrypted: encrypted.ciphertext,
     nonce: encrypted.nonce,
     deviceId: id,
@@ -121,8 +138,14 @@ export function storeDeviceShare(
 
 /**
  * Retrieve and decrypt the device share from localStorage
+ *
+ * @param deviceSecret - Server-generated secret required for decryption
+ * @param deviceId - Optional device ID to retrieve (uses current device if not provided)
  */
-export function getDeviceShare(deviceId?: string): Uint8Array | null {
+export function getDeviceShare(
+  deviceSecret: string,
+  deviceId?: string
+): Uint8Array | null {
   if (typeof localStorage === 'undefined') {
     return null;
   }
@@ -138,15 +161,23 @@ export function getDeviceShare(deviceId?: string): Uint8Array | null {
   }
 
   try {
-    const data: StoredDeviceShare = JSON.parse(stored);
+    const data = JSON.parse(stored) as StoredDeviceShare | LegacyStoredDeviceShare;
 
-    if (data.version !== 1) {
-      console.warn('Unknown device share version:', data.version);
+    // Check version - version 1 used old derivation without server secret
+    if (data.version === 1) {
+      // Cannot decrypt v1 shares without migration
+      console.warn('Legacy device share format detected. Re-registration required.');
       return null;
     }
 
-    const fullId = getFullDeviceIdentifier(id);
-    const encryptionKey = deriveDeviceShareKey(fullId);
+    // Handle unknown versions (defensive check for malformed data)
+    if ((data as { version: number }).version !== 2) {
+      console.warn('Unknown device share version:', (data as { version: number }).version);
+      return null;
+    }
+
+    const fingerprint = getBrowserFingerprint();
+    const encryptionKey = deriveDeviceShareKey(id, fingerprint, deviceSecret);
 
     const encrypted: EncryptedData = {
       ciphertext: data.encrypted,
@@ -231,7 +262,7 @@ export function clearAllDeviceData(): void {
  */
 export function getDeviceShareInfo(
   deviceId?: string
-): { deviceId: string; createdAt: number; lastUsedAt: number } | null {
+): { deviceId: string; createdAt: number; lastUsedAt: number; version: number } | null {
   if (typeof localStorage === 'undefined') {
     return null;
   }
@@ -247,11 +278,12 @@ export function getDeviceShareInfo(
   }
 
   try {
-    const data: StoredDeviceShare = JSON.parse(stored);
+    const data: StoredDeviceShare | LegacyStoredDeviceShare = JSON.parse(stored);
     return {
       deviceId: data.deviceId,
       createdAt: data.createdAt,
       lastUsedAt: data.lastUsedAt,
+      version: data.version,
     };
   } catch {
     return null;
@@ -277,4 +309,30 @@ export function listStoredDeviceIds(): string[] {
   }
 
   return deviceIds;
+}
+
+/**
+ * Check if device share needs migration (is version 1)
+ */
+export function needsDeviceShareMigration(deviceId?: string): boolean {
+  if (typeof localStorage === 'undefined') {
+    return false;
+  }
+
+  const id = deviceId || getDeviceId();
+  if (!id) {
+    return false;
+  }
+
+  const stored = localStorage.getItem(`${STORAGE_KEY_PREFIX}${id}`);
+  if (!stored) {
+    return false;
+  }
+
+  try {
+    const data = JSON.parse(stored);
+    return data.version === 1;
+  } catch {
+    return false;
+  }
 }

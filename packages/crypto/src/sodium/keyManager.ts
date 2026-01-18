@@ -3,8 +3,8 @@
  * Manages in-memory storage of decrypted keys and session state
  */
 
-import { initSodium, isSodiumReady, getSodium } from './init';
-import { secureZero, toBase64, fromBase64, type EncryptedData } from './utils';
+import { initSodium, isSodiumReady } from './init';
+import { secureZero, fromBase64, type EncryptedData } from './utils';
 import {
 	generateUserKeyBundle,
 	keyBundleToStorable,
@@ -21,9 +21,15 @@ import {
 	type RecoveryKeyInfo
 } from './recoveryKey';
 import { deriveKEKWithParams } from './keyEncryption';
-import { decryptSecretBox, encryptSecretBox } from './symmetric';
+import { decryptSecretBox } from './symmetric';
 import { clearChatKeyCache } from './chatEncryption';
 import { clearCredentialsKeyCache } from './credentialsEncryption';
+import {
+	createSecureSession,
+	restoreSecureSession,
+	clearSecureSession,
+	hasValidSecureSession,
+} from '../session';
 
 // ============================================
 // Types
@@ -204,7 +210,7 @@ export async function setupUserKeys(
 			storedKeys: storable
 		});
 		resetSessionTimeout();
-		persistSessionKeys();
+		persistSessionKeys().catch(() => {}); // Best effort persistence
 
 		const recoveryInfo = createRecoveryKeyInfo(keyBundle.recoveryKey);
 		secureZero(keyBundle.recoveryKey);
@@ -239,9 +245,7 @@ export async function unlockWithPasswordFlow(
 
 		updateState({ unlocked: true, status: 'unlocked' });
 		resetSessionTimeout();
-		persistSessionKeys();
-
-		console.log('🔓 E2EE unlocked successfully');
+		persistSessionKeys().catch(() => {}); // Best effort persistence
 	} catch (error) {
 		updateState({
 			status: 'error',
@@ -268,9 +272,7 @@ export async function unlockWithRecoveryMnemonic(
 
 		updateState({ storedKeys: keys, unlocked: true, status: 'unlocked' });
 		resetSessionTimeout();
-		persistSessionKeys();
-
-		console.log('🔓 E2EE unlocked via recovery key');
+		persistSessionKeys().catch(() => {}); // Best effort persistence
 	} catch (error) {
 		updateState({
 			status: 'error',
@@ -305,9 +307,7 @@ export function setDecryptedKeys(keys: {
 
 	updateState({ unlocked: true, status: 'unlocked' });
 	resetSessionTimeout();
-	persistSessionKeys();
-
-	console.log('🔓 E2EE unlocked via key sharding');
+	persistSessionKeys().catch(() => {}); // Best effort persistence
 }
 
 /**
@@ -441,7 +441,7 @@ export async function getRecoveryMnemonic(
 // Lock / Session Management
 // ============================================
 
-export function lock(clearPersisted: boolean = true): void {
+export async function lock(clearPersisted: boolean = true): Promise<void> {
 	if (decryptedKeys) {
 		secureZero(decryptedKeys.masterKey);
 		secureZero(decryptedKeys.privateKey);
@@ -452,24 +452,21 @@ export function lock(clearPersisted: boolean = true): void {
 	clearCredentialsKeyCache();
 
 	if (clearPersisted) {
-		clearPersistedSession();
+		await clearPersistedSession();
 	}
 
 	updateState({ unlocked: false, status: 'locked' });
 	clearSessionTimeout();
-
-	console.log('🔒 E2EE locked' + (clearPersisted ? ' (session cleared)' : ' (session preserved)'));
 }
 
-export function lockE2EE(): void {
-	lock(true);
+export async function lockE2EE(): Promise<void> {
+	await lock(true);
 }
 
 function resetSessionTimeout(): void {
 	clearSessionTimeout();
-	sessionTimeoutId = setTimeout(() => {
-		console.log('⏰ E2EE session timed out, locking...');
-		lock();
+	sessionTimeoutId = setTimeout(async () => {
+		await lock();
 	}, securitySettings.sessionTimeoutMs);
 }
 
@@ -487,80 +484,120 @@ export function extendSession(): void {
 }
 
 // ============================================
-// Session Persistence (localStorage + sessionStorage)
+// Session Persistence (Secure IndexedDB with non-extractable keys)
 // ============================================
 
-const LOCAL_STORAGE_KEYS = {
+// Legacy localStorage keys for migration (will be removed in future)
+const LEGACY_LOCAL_STORAGE_KEYS = {
 	encryptedMasterKey: 'e2ee_session_master_key',
 	masterKeyNonce: 'e2ee_session_master_key_nonce',
 	encryptedPrivateKey: 'e2ee_session_private_key',
 	privateKeyNonce: 'e2ee_session_private_key_nonce',
 	publicKey: 'e2ee_session_public_key'
 };
+const LEGACY_SESSION_KEY_STORAGE = 'e2ee_session_key';
 
-const SESSION_KEY_STORAGE = 'e2ee_session_key';
-
-function persistSessionKeys(): void {
-	if (typeof localStorage === 'undefined' || typeof sessionStorage === 'undefined') {
-		return;
-	}
-
+/**
+ * Persist session keys using non-extractable Web Crypto keys in IndexedDB
+ * This is more secure than localStorage as keys cannot be extracted via XSS
+ */
+async function persistSessionKeys(): Promise<void> {
 	if (!decryptedKeys) {
 		return;
 	}
 
 	try {
-		const sodium = getSodium();
-
-		const sessionKey = sodium.crypto_secretbox_keygen();
-		const encryptedMaster = encryptSecretBox(decryptedKeys.masterKey, sessionKey);
-		localStorage.setItem(LOCAL_STORAGE_KEYS.encryptedMasterKey, encryptedMaster.ciphertext);
-		localStorage.setItem(LOCAL_STORAGE_KEYS.masterKeyNonce, encryptedMaster.nonce);
-
-		const encryptedPrivate = encryptSecretBox(decryptedKeys.privateKey, sessionKey);
-		localStorage.setItem(LOCAL_STORAGE_KEYS.encryptedPrivateKey, encryptedPrivate.ciphertext);
-		localStorage.setItem(LOCAL_STORAGE_KEYS.privateKeyNonce, encryptedPrivate.nonce);
-
-		localStorage.setItem(LOCAL_STORAGE_KEYS.publicKey, toBase64(decryptedKeys.publicKey));
-		sessionStorage.setItem(SESSION_KEY_STORAGE, toBase64(sessionKey));
-
-		secureZero(sessionKey);
-		console.log('🔐 Session keys persisted');
+		// Use the new secure session with non-extractable keys
+		await createSecureSession(
+			decryptedKeys.masterKey,
+			decryptedKeys.privateKey,
+			decryptedKeys.publicKey,
+			securitySettings.sessionTimeoutMs
+		);
 	} catch (error) {
 		console.error('Failed to persist session keys:', error);
 	}
 }
 
-function clearPersistedSession(): void {
+/**
+ * Clear persisted session data
+ */
+async function clearPersistedSession(): Promise<void> {
+	try {
+		await clearSecureSession();
+	} catch (error) {
+		console.error('Failed to clear secure session:', error);
+	}
+
+	// Also clear legacy storage for migration
 	if (typeof localStorage !== 'undefined') {
-		Object.values(LOCAL_STORAGE_KEYS).forEach((key) => {
+		Object.values(LEGACY_LOCAL_STORAGE_KEYS).forEach((key) => {
 			localStorage.removeItem(key);
 		});
 	}
 	if (typeof sessionStorage !== 'undefined') {
-		sessionStorage.removeItem(SESSION_KEY_STORAGE);
+		sessionStorage.removeItem(LEGACY_SESSION_KEY_STORAGE);
 	}
 }
 
+/**
+ * Try to restore session from secure IndexedDB storage
+ */
 export async function tryRestoreSession(): Promise<boolean> {
+	try {
+		// First try the new secure session
+		const hasSecure = await hasValidSecureSession();
+		if (hasSecure) {
+			const restored = await restoreSecureSession();
+			if (restored) {
+				if (!isSodiumReady()) {
+					await initSodium();
+				}
+
+				decryptedKeys = {
+					masterKey: restored.masterKey,
+					privateKey: restored.privateKey,
+					publicKey: restored.publicKey
+				};
+				updateState({ unlocked: true, status: 'unlocked' });
+				resetSessionTimeout();
+
+				return true;
+			}
+		}
+
+		// Fall back to legacy localStorage/sessionStorage for migration
+		return await tryRestoreLegacySession();
+	} catch (error) {
+		console.error('Failed to restore session:', error);
+		await clearPersistedSession();
+		return false;
+	}
+}
+
+/**
+ * Try to restore from legacy localStorage/sessionStorage
+ * This is for backwards compatibility during migration
+ */
+async function tryRestoreLegacySession(): Promise<boolean> {
 	if (typeof localStorage === 'undefined' || typeof sessionStorage === 'undefined') {
 		return false;
 	}
 
 	try {
-		const sessionKeyBase64 = sessionStorage.getItem(SESSION_KEY_STORAGE);
+		const sessionKeyBase64 = sessionStorage.getItem(LEGACY_SESSION_KEY_STORAGE);
 		if (!sessionKeyBase64) {
 			return false;
 		}
 
-		const encryptedMasterKey = localStorage.getItem(LOCAL_STORAGE_KEYS.encryptedMasterKey);
-		const masterKeyNonce = localStorage.getItem(LOCAL_STORAGE_KEYS.masterKeyNonce);
-		const encryptedPrivateKey = localStorage.getItem(LOCAL_STORAGE_KEYS.encryptedPrivateKey);
-		const privateKeyNonce = localStorage.getItem(LOCAL_STORAGE_KEYS.privateKeyNonce);
-		const publicKeyBase64 = localStorage.getItem(LOCAL_STORAGE_KEYS.publicKey);
+		const encryptedMasterKey = localStorage.getItem(LEGACY_LOCAL_STORAGE_KEYS.encryptedMasterKey);
+		const masterKeyNonce = localStorage.getItem(LEGACY_LOCAL_STORAGE_KEYS.masterKeyNonce);
+		const encryptedPrivateKey = localStorage.getItem(LEGACY_LOCAL_STORAGE_KEYS.encryptedPrivateKey);
+		const privateKeyNonce = localStorage.getItem(LEGACY_LOCAL_STORAGE_KEYS.privateKeyNonce);
+		const publicKeyBase64 = localStorage.getItem(LEGACY_LOCAL_STORAGE_KEYS.publicKey);
 
 		if (!encryptedMasterKey || !masterKeyNonce || !encryptedPrivateKey || !privateKeyNonce || !publicKeyBase64) {
-			clearPersistedSession();
+			clearLegacySession();
 			return false;
 		}
 
@@ -579,26 +616,63 @@ export async function tryRestoreSession(): Promise<boolean> {
 		updateState({ unlocked: true, status: 'unlocked' });
 		resetSessionTimeout();
 
-		console.log('🔓 E2EE session restored');
+		// Migrate to new secure session
+		await persistSessionKeys();
+
+		// Clear legacy storage after successful migration
+		clearLegacySession();
+
 		return true;
 	} catch (error) {
-		console.error('Failed to restore session:', error);
-		clearPersistedSession();
+		console.error('Failed to restore legacy session:', error);
+		clearLegacySession();
 		return false;
 	}
 }
 
-export function hasActiveSession(): boolean {
-	if (typeof sessionStorage !== 'undefined' && typeof localStorage !== 'undefined') {
-		const hasSessionKey = sessionStorage.getItem(SESSION_KEY_STORAGE) !== null;
-		const hasEncryptedData = localStorage.getItem(LOCAL_STORAGE_KEYS.encryptedMasterKey) !== null;
-		return hasSessionKey && hasEncryptedData;
+/**
+ * Clear legacy session storage
+ */
+function clearLegacySession(): void {
+	if (typeof localStorage !== 'undefined') {
+		Object.values(LEGACY_LOCAL_STORAGE_KEYS).forEach((key) => {
+			localStorage.removeItem(key);
+		});
 	}
-	return false;
+	if (typeof sessionStorage !== 'undefined') {
+		sessionStorage.removeItem(LEGACY_SESSION_KEY_STORAGE);
+	}
 }
 
-export function clearSession(): void {
-	lock(true);
+export function hasActiveSession(): boolean {
+	// Check for legacy session storage first (for backwards compatibility)
+	if (typeof sessionStorage !== 'undefined' && typeof localStorage !== 'undefined') {
+		const hasLegacySessionKey = sessionStorage.getItem(LEGACY_SESSION_KEY_STORAGE) !== null;
+		const hasLegacyEncryptedData = localStorage.getItem(LEGACY_LOCAL_STORAGE_KEYS.encryptedMasterKey) !== null;
+		if (hasLegacySessionKey && hasLegacyEncryptedData) {
+			return true;
+		}
+	}
+
+	// Check in-memory state (secure session check is async, so we can't use it here)
+	return decryptedKeys !== null;
+}
+
+/**
+ * Check if there's a valid secure session (async version)
+ */
+export async function hasActiveSecureSession(): Promise<boolean> {
+	// Check in-memory first
+	if (decryptedKeys !== null) {
+		return true;
+	}
+
+	// Check IndexedDB secure session
+	return hasValidSecureSession();
+}
+
+export async function clearSession(): Promise<void> {
+	await lock(true);
 }
 
 // ============================================
@@ -607,10 +681,20 @@ export function clearSession(): void {
 
 if (typeof window !== 'undefined') {
 	window.addEventListener('pagehide', () => {
+		// Use non-async version for pagehide (can't await in event handler)
+		if (decryptedKeys) {
+			secureZero(decryptedKeys.masterKey);
+			secureZero(decryptedKeys.privateKey);
+			decryptedKeys = null;
+		}
+		clearChatKeyCache();
+		clearCredentialsKeyCache();
+		updateState({ unlocked: false, status: 'locked' });
+		clearSessionTimeout();
+
+		// Clear persisted session async (best effort)
 		if (securitySettings.strictSessionLocking) {
-			lock(true);
-		} else {
-			lock(false);
+			clearPersistedSession().catch(() => {});
 		}
 	});
 

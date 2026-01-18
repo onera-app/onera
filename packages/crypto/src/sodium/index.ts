@@ -105,6 +105,7 @@ export {
 	lockE2EE,
 	extendSession,
 	hasActiveSession,
+	hasActiveSecureSession,
 	tryRestoreSession,
 	clearSession,
 	getRecoveryMnemonic,
@@ -120,6 +121,9 @@ export {
 	type E2EEState,
 	type E2EEStatusType
 } from './keyManager';
+
+// Secure Session (non-extractable keys)
+export * from '../session';
 
 // Chat encryption
 export {

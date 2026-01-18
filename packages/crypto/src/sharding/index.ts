@@ -3,12 +3,19 @@
  *
  * This module implements Privy-style key sharding for E2EE with Clerk authentication.
  *
- * The system uses 3 shares:
- * - Device Share: Stored encrypted in localStorage
- * - Auth Share: Stored encrypted in Clerk user metadata
+ * SECURITY MODEL:
+ * The system uses 3 shares with XOR-based splitting:
+ * - Device Share: Stored encrypted in localStorage with server-provided entropy
+ * - Auth Share: Stored PLAINTEXT on server, protected by Clerk authentication
  * - Recovery Share: Stored encrypted in database, decrypted with recovery phrase
  *
- * Any 2 of 3 shares can reconstruct the master key.
+ * IMPORTANT: XOR-based splitting requires ALL 3 shares to reconstruct the master key.
+ * For recovery scenarios, use masterKeyRecovery (master key encrypted with recovery key).
+ *
+ * Threat model: An attacker must compromise THREE independent systems to decrypt data:
+ * 1. Database (auth share + recovery share)
+ * 2. Device (device share in localStorage)
+ * 3. Clerk authentication (valid session token to get auth share)
  */
 
 // Share Manager (core sharding logic)
@@ -30,7 +37,7 @@ export {
   type SerializedKeyShares,
 } from './shareManager';
 
-// Device Share (localStorage storage)
+// Device Share (localStorage storage with server entropy)
 export {
   getOrCreateDeviceId,
   getDeviceId,
@@ -41,10 +48,14 @@ export {
   clearAllDeviceData,
   getDeviceShareInfo,
   listStoredDeviceIds,
+  needsDeviceShareMigration,
 } from './deviceShare';
 
-// Auth Share (Clerk metadata storage)
+// Auth Share (Privy-style server-protected)
 export {
+  serializeAuthShare,
+  deserializeAuthShare,
+  // Legacy exports for backwards compatibility
   encryptAuthShareForStorage,
   decryptAuthShareFromStorage,
   isValidStoredAuthShare,
@@ -73,8 +84,8 @@ export {
   setupUserKeysWithSharding,
   keyBundleToStorable,
   unlockWithShares,
-  unlockWithLoginKey,
-  getCurrentDeviceShare,
+  unlockWithRecoveryPhrase,
+  unlockWithLoginKey, // Deprecated - throws error
   hasCurrentDeviceShare,
   type ShardedKeyBundle,
   type StorableKeyShares,

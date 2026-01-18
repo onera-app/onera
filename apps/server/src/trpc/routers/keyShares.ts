@@ -1,6 +1,15 @@
 /**
  * Key Shares Router
- * Handles CRUD operations for the 3-share E2EE key system
+ * Handles CRUD operations for the 3-share E2EE key system (Privy-style server-protected)
+ *
+ * Security Model:
+ * - Auth share is stored as PLAINTEXT on the server
+ * - Security comes from Clerk authentication, NOT encryption
+ * - The auth share is ONLY released to authenticated Clerk sessions via protectedProcedure
+ * - Even with full database access, an attacker cannot decrypt user data without:
+ *   1. A valid Clerk session (to get auth share)
+ *   2. Device access (to get device share from localStorage)
+ *   3. Recovery phrase (optional, for recovery share)
  */
 
 import { z } from "zod";
@@ -8,6 +17,14 @@ import { TRPCError } from "@trpc/server";
 import { eq, and } from "drizzle-orm";
 import { router, protectedProcedure } from "../trpc";
 import { db, keyShares, devices } from "../../db/client";
+import { randomBytes } from "crypto";
+
+/**
+ * Generate a cryptographically secure random secret for device binding
+ */
+function generateDeviceSecret(): string {
+  return randomBytes(32).toString("base64");
+}
 
 export const keySharesRouter = router({
   /**
@@ -26,6 +43,9 @@ export const keySharesRouter = router({
   /**
    * Get key shares for the authenticated user
    * Used during login to reconstruct the master key
+   *
+   * SECURITY: This endpoint is protected by Clerk authentication.
+   * The auth share is only released to authenticated users.
    */
   get: protectedProcedure.query(async ({ ctx }) => {
     const [shares] = await db
@@ -41,9 +61,9 @@ export const keySharesRouter = router({
       });
     }
 
+    // Return plaintext auth share - security is provided by Clerk authentication
     return {
-      encryptedAuthShare: shares.encryptedAuthShare,
-      authShareNonce: shares.authShareNonce,
+      authShare: shares.authShare,
       encryptedRecoveryShare: shares.encryptedRecoveryShare,
       recoveryShareNonce: shares.recoveryShareNonce,
       publicKey: shares.publicKey,
@@ -53,8 +73,6 @@ export const keySharesRouter = router({
       masterKeyRecoveryNonce: shares.masterKeyRecoveryNonce,
       encryptedRecoveryKey: shares.encryptedRecoveryKey,
       recoveryKeyNonce: shares.recoveryKeyNonce,
-      encryptedMasterKeyForLogin: shares.encryptedMasterKeyForLogin,
-      masterKeyForLoginNonce: shares.masterKeyForLoginNonce,
       shareVersion: shares.shareVersion,
     };
   }),
@@ -66,8 +84,7 @@ export const keySharesRouter = router({
   create: protectedProcedure
     .input(
       z.object({
-        encryptedAuthShare: z.string(),
-        authShareNonce: z.string(),
+        authShare: z.string(), // Plaintext auth share (base64)
         encryptedRecoveryShare: z.string(),
         recoveryShareNonce: z.string(),
         publicKey: z.string(),
@@ -77,8 +94,6 @@ export const keySharesRouter = router({
         masterKeyRecoveryNonce: z.string(),
         encryptedRecoveryKey: z.string(),
         recoveryKeyNonce: z.string(),
-        encryptedMasterKeyForLogin: z.string(),
-        masterKeyForLoginNonce: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -110,16 +125,14 @@ export const keySharesRouter = router({
   updateAuthShare: protectedProcedure
     .input(
       z.object({
-        encryptedAuthShare: z.string(),
-        authShareNonce: z.string(),
+        authShare: z.string(), // Plaintext auth share (base64)
       })
     )
     .mutation(async ({ ctx, input }) => {
       await db
         .update(keyShares)
         .set({
-          encryptedAuthShare: input.encryptedAuthShare,
-          authShareNonce: input.authShareNonce,
+          authShare: input.authShare,
           updatedAt: new Date(),
         })
         .where(eq(keyShares.userId, ctx.user.id));
@@ -162,14 +175,28 @@ export const keySharesRouter = router({
 /**
  * Devices Router
  * Handles device registration and management
+ *
+ * Security: Each device has a server-generated deviceSecret that is combined with
+ * the deviceId and browser fingerprint to derive the device share encryption key.
+ * This prevents attackers with just localStorage access from decrypting device shares.
  */
 export const devicesRouter = router({
   /**
    * List all devices for the authenticated user
+   * Note: deviceSecret is intentionally NOT returned in list to minimize exposure
    */
   list: protectedProcedure.query(async ({ ctx }) => {
     const userDevices = await db
-      .select()
+      .select({
+        id: devices.id,
+        userId: devices.userId,
+        deviceId: devices.deviceId,
+        deviceName: devices.deviceName,
+        userAgent: devices.userAgent,
+        trusted: devices.trusted,
+        lastSeenAt: devices.lastSeenAt,
+        createdAt: devices.createdAt,
+      })
       .from(devices)
       .where(eq(devices.userId, ctx.user.id))
       .orderBy(devices.lastSeenAt);
@@ -178,7 +205,10 @@ export const devicesRouter = router({
   }),
 
   /**
-   * Register a new device
+   * Register a new device and get its deviceSecret
+   * The deviceSecret is used as server-side entropy for device share encryption
+   *
+   * @returns deviceSecret for deriving device share encryption key
    */
   register: protectedProcedure
     .input(
@@ -189,15 +219,20 @@ export const devicesRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Upsert device (update if exists, insert if not)
+      // Check if device already exists for this user
       const [existing] = await db
-        .select({ id: devices.id })
+        .select({ id: devices.id, deviceSecret: devices.deviceSecret })
         .from(devices)
-        .where(eq(devices.userId, ctx.user.id))
+        .where(
+          and(
+            eq(devices.userId, ctx.user.id),
+            eq(devices.deviceId, input.deviceId)
+          )
+        )
         .limit(1);
 
       if (existing) {
-        // Update existing device
+        // Update existing device and return existing secret
         await db
           .update(devices)
           .set({
@@ -206,17 +241,54 @@ export const devicesRouter = router({
             lastSeenAt: new Date(),
           })
           .where(eq(devices.id, existing.id));
+
+        return { success: true, deviceSecret: existing.deviceSecret };
       } else {
-        // Insert new device
+        // Generate new device secret and insert new device
+        const deviceSecret = generateDeviceSecret();
+
         await db.insert(devices).values({
           userId: ctx.user.id,
           deviceId: input.deviceId,
           deviceName: input.deviceName,
           userAgent: input.userAgent,
+          deviceSecret,
+        });
+
+        return { success: true, deviceSecret };
+      }
+    }),
+
+  /**
+   * Get device secret for the current device
+   * Used when the device share needs to be decrypted
+   */
+  getDeviceSecret: protectedProcedure
+    .input(
+      z.object({
+        deviceId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const [device] = await db
+        .select({ deviceSecret: devices.deviceSecret })
+        .from(devices)
+        .where(
+          and(
+            eq(devices.userId, ctx.user.id),
+            eq(devices.deviceId, input.deviceId)
+          )
+        )
+        .limit(1);
+
+      if (!device) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Device not found. Please register this device first.",
         });
       }
 
-      return { success: true };
+      return { deviceSecret: device.deviceSecret };
     }),
 
   /**

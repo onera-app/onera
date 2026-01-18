@@ -1,6 +1,11 @@
 /**
  * Chat Encryption Module
  * Handles per-chat key generation and encryption/decryption
+ *
+ * Uses LRU cache for chat keys to:
+ * 1. Limit memory usage (max 100 cached keys)
+ * 2. Automatically expire old entries (10 minute TTL)
+ * 3. Prevent unbounded memory growth
  */
 
 import { v4 as uuid } from 'uuid';
@@ -36,7 +41,88 @@ export interface DecryptedChatData {
 	chat: Record<string, unknown>;
 }
 
-const chatKeyCache = new Map<string, Uint8Array>();
+/**
+ * Simple LRU Cache with TTL and secure disposal
+ * Inline implementation to avoid lru-cache version compatibility issues
+ */
+class SecureLRUCache<K, V> {
+	private cache = new Map<K, { value: V; timestamp: number }>();
+	private readonly maxSize: number;
+	private readonly ttl: number;
+	private readonly dispose: (value: V) => void;
+
+	constructor(options: { max: number; ttl: number; dispose: (value: V) => void }) {
+		this.maxSize = options.max;
+		this.ttl = options.ttl;
+		this.dispose = options.dispose;
+	}
+
+	get(key: K): V | undefined {
+		const entry = this.cache.get(key);
+		if (!entry) return undefined;
+
+		// Check TTL
+		if (Date.now() - entry.timestamp > this.ttl) {
+			this.dispose(entry.value);
+			this.cache.delete(key);
+			return undefined;
+		}
+
+		// Update timestamp on access (refresh TTL)
+		entry.timestamp = Date.now();
+
+		// Move to end to mark as recently used
+		this.cache.delete(key);
+		this.cache.set(key, entry);
+
+		return entry.value;
+	}
+
+	set(key: K, value: V): void {
+		// If key exists, dispose old value
+		const existing = this.cache.get(key);
+		if (existing) {
+			this.dispose(existing.value);
+			this.cache.delete(key);
+		}
+
+		// Evict oldest entries if at max size
+		while (this.cache.size >= this.maxSize) {
+			const oldestKey = this.cache.keys().next().value;
+			if (oldestKey !== undefined) {
+				const oldEntry = this.cache.get(oldestKey);
+				if (oldEntry) {
+					this.dispose(oldEntry.value);
+				}
+				this.cache.delete(oldestKey);
+			}
+		}
+
+		this.cache.set(key, { value, timestamp: Date.now() });
+	}
+
+	clear(): void {
+		for (const entry of this.cache.values()) {
+			this.dispose(entry.value);
+		}
+		this.cache.clear();
+	}
+}
+
+/**
+ * LRU cache for chat keys
+ * - Max 100 entries to limit memory usage
+ * - 10 minute TTL to prevent stale keys
+ * - Securely zeros keys on eviction
+ */
+const chatKeyCache = new SecureLRUCache<string, Uint8Array>({
+	max: 100,
+	ttl: 10 * 60 * 1000, // 10 minutes
+	dispose: (value: Uint8Array) => {
+		// Securely zero the key when evicted from cache
+		secureZero(value);
+	},
+});
 
 /**
  * Create a new encrypted chat
@@ -217,11 +303,9 @@ export function decryptChatContent(
 
 /**
  * Clear chat key cache (call on lock)
+ * The LRU cache dispose function will securely zero each key
  */
 export function clearChatKeyCache(): void {
-	for (const key of chatKeyCache.values()) {
-		secureZero(key);
-	}
 	chatKeyCache.clear();
 }
 

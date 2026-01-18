@@ -1,11 +1,21 @@
 /**
  * Key Share Manager Module
- * Implements Shamir Secret Sharing-inspired key sharding
+ * Implements XOR-based key sharding for E2EE
+ *
+ * IMPORTANT: This is NOT Shamir Secret Sharing.
+ * This uses XOR-based splitting which requires ALL 3 shares to reconstruct.
  *
  * Key sharding approach:
- * - Master key is split into 3 shares using XOR-based splitting
- * - Any 2 of 3 shares can reconstruct the master key
- * - Shares: device (localStorage), auth (Clerk), recovery (DB)
+ * - Master key M is split: A, B, C where C = M XOR A XOR B
+ * - Reconstruction: M = A XOR B XOR C (requires all 3 shares)
+ *
+ * Shares:
+ * - Device share (A): Stored encrypted in localStorage with server-provided entropy
+ * - Auth share (B): Stored plaintext on server, protected by Clerk authentication
+ * - Recovery share (C): Stored encrypted with recovery key derived from mnemonic
+ *
+ * For "2-of-3" style recovery, the masterKeyRecovery field is used instead
+ * (master key encrypted directly with recovery key).
  */
 
 import { getSodium } from '../sodium/init';
@@ -39,10 +49,8 @@ export interface SerializedKeyShares {
  * 1. Generate 2 random shares (deviceShare, authShare)
  * 2. recoveryShare = masterKey XOR deviceShare XOR authShare
  *
- * This ensures:
- * - Any 2 shares can reconstruct the master key via XOR
- * - Individual shares reveal nothing about the master key
- * - Constant-time operations (no polynomial math)
+ * IMPORTANT: This requires ALL 3 shares to reconstruct the master key.
+ * This is NOT 2-of-3 Shamir Secret Sharing.
  */
 export function splitMasterKey(masterKey: Uint8Array): KeyShares {
   if (masterKey.length !== MASTER_KEY_LENGTH) {
@@ -67,32 +75,15 @@ export function splitMasterKey(masterKey: Uint8Array): KeyShares {
 }
 
 /**
- * Reconstruct master key from any 2 of 3 shares
+ * Reconstruct master key from all 3 shares
  *
- * The XOR property means:
- * - device + auth + recovery = masterKey
- * - If we have 2 shares and the 3rd "missing", we can compute:
- *   - For missing recovery: device + auth = computes what recoveryShare would contribute
- *   - Actually: masterKey = deviceShare XOR authShare XOR recoveryShare
- *
- * But wait - with XOR-based 3-share, we actually need all 3 to reconstruct.
- * To enable 2-of-3 reconstruction, we need a different approach:
- *
- * Solution: Store recovery share encrypted, and use parity share
- * Master key M, shares A, B, C where:
- * - A = random
- * - B = random
- * - C = M XOR A XOR B (parity)
- *
- * Reconstruction:
- * - With A, B, C: M = A XOR B XOR C
- * - With A, B only: Need C which is encrypted, use recovery phrase to decrypt C
- * - With A, C only: B is auth share from Clerk
- * - With B, C only: A is device share, unlikely scenario (lost device but have auth + recovery)
+ * IMPORTANT: XOR-based 3-share system requires ALL 3 shares.
+ * For recovery scenarios without device share, use masterKeyRecovery
+ * (master key encrypted with recovery key) instead.
  */
 export function reconstructFromShares(shares: Uint8Array[]): Uint8Array {
-  if (shares.length < 2) {
-    throw new Error('Need at least 2 shares to reconstruct master key');
+  if (shares.length !== 3) {
+    throw new Error('XOR-based reconstruction requires exactly 3 shares. For recovery without device share, use masterKeyRecovery field.');
   }
 
   // Validate all shares are correct length
@@ -102,25 +93,17 @@ export function reconstructFromShares(shares: Uint8Array[]): Uint8Array {
     }
   }
 
-  // For 3-share XOR system with 2-of-3 reconstruction,
-  // we need all 3 shares. But we can compute the 3rd if missing.
-  if (shares.length === 3) {
-    // All 3 shares: M = A XOR B XOR C
-    const result = new Uint8Array(MASTER_KEY_LENGTH);
-    for (let i = 0; i < MASTER_KEY_LENGTH; i++) {
-      result[i] = shares[0][i] ^ shares[1][i] ^ shares[2][i];
-    }
-    return result;
+  // M = A XOR B XOR C
+  const result = new Uint8Array(MASTER_KEY_LENGTH);
+  for (let i = 0; i < MASTER_KEY_LENGTH; i++) {
+    result[i] = shares[0][i] ^ shares[1][i] ^ shares[2][i];
   }
-
-  // If only 2 shares provided, we assume they're device + auth
-  // and the caller should separately handle getting the encrypted recovery share
-  throw new Error('Need 3 shares for XOR reconstruction. Use reconstructWithRecovery for 2-share scenarios.');
+  return result;
 }
 
 /**
- * Reconstruct master key from device + auth shares plus encrypted recovery share
- * This is the primary unlock flow for normal logins
+ * Reconstruct master key from device + auth + recovery shares
+ * This is the unlock flow when all 3 shares are available
  */
 export function reconstructFromThreeShares(
   deviceShare: Uint8Array,
@@ -154,7 +137,7 @@ export function deserializeShares(serialized: SerializedKeyShares): KeyShares {
 
 /**
  * Encrypt a share for storage
- * Used for encrypting auth share (with auth-derived key) and recovery share (with recovery key)
+ * Used for encrypting device share (with device-derived key) and recovery share (with recovery key)
  */
 export function encryptShare(share: Uint8Array, encryptionKey: Uint8Array): EncryptedData {
   return encryptSecretBox(share, encryptionKey);
@@ -232,23 +215,52 @@ export function deriveShareEncryptionKey(
 }
 
 /**
- * Derive auth share encryption key from Clerk user ID
+ * @deprecated Auth share is no longer encrypted - security comes from Clerk authentication
+ * Kept for backwards compatibility during migration
  */
 export function deriveAuthShareKey(clerkUserId: string): Uint8Array {
   return deriveShareEncryptionKey(clerkUserId, 'onera.authshare.v1');
 }
 
 /**
- * Derive device share encryption key from device fingerprint
+ * Derive device share encryption key from device fingerprint and server-provided secret
+ *
+ * @param deviceId - Browser-generated UUID
+ * @param fingerprint - Browser fingerprint components
+ * @param deviceSecret - Server-generated 32-byte random secret (base64)
  */
-export function deriveDeviceShareKey(deviceId: string): Uint8Array {
-  return deriveShareEncryptionKey(deviceId, 'onera.deviceshare.v1');
+export function deriveDeviceShareKey(
+  deviceId: string,
+  fingerprint?: string,
+  deviceSecret?: string
+): Uint8Array {
+  // Combine all entropy sources
+  const components = [deviceId];
+  if (fingerprint) {
+    components.push(fingerprint);
+  }
+  if (deviceSecret) {
+    components.push(deviceSecret);
+  }
+
+  const identifier = components.join(':');
+  return deriveShareEncryptionKey(identifier, 'onera.deviceshare.v2');
 }
 
 /**
- * Derive key for encrypting master key for login
- * This allows direct login without needing the recovery phrase
+ * @deprecated Login key derivation removed - this was a vulnerability
+ *
+ * Previously, the master key was encrypted with a key derived solely from
+ * the Clerk user ID. This allowed anyone with database access to derive
+ * the encryption key and decrypt user data.
+ *
+ * The new Privy-style model protects auth shares via Clerk authentication,
+ * not encryption. Use unlockWithAuthShare instead.
  */
-export function deriveLoginEncryptionKey(clerkUserId: string): Uint8Array {
-  return deriveShareEncryptionKey(clerkUserId, 'onera.login.v1');
+export function deriveLoginEncryptionKey(_clerkUserId: string): Uint8Array {
+  throw new Error(
+    'deriveLoginEncryptionKey is deprecated and insecure. ' +
+    'Use Privy-style server-protected auth shares instead. ' +
+    'The auth share is released only to authenticated Clerk sessions.'
+  );
 }

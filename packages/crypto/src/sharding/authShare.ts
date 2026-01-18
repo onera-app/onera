@@ -1,16 +1,36 @@
 /**
  * Auth Share Module
- * Manages the auth share stored in Clerk user metadata
+ * Manages the auth share for Privy-style server-protected E2EE
  *
- * The auth share is encrypted using a key derived from the Clerk user ID
- * and stored in Clerk's unsafeMetadata field.
+ * SECURITY MODEL:
+ * The auth share is stored as PLAINTEXT on the server.
+ * Security comes from Clerk authentication, NOT encryption.
+ * The server only releases the auth share to authenticated Clerk sessions.
+ *
+ * This follows Privy's embedded wallet model where key shares are
+ * protected by authentication rather than encryption.
  */
 
-import { secureZero, type EncryptedData } from '../sodium/utils';
-import { encryptShare, decryptShare, deriveAuthShareKey } from './shareManager';
+import { toBase64, fromBase64 } from '../sodium/utils';
 
 /**
- * Stored auth share format in Clerk metadata
+ * Serialize auth share for transmission to server
+ * No encryption - security is provided by Clerk authentication
+ */
+export function serializeAuthShare(authShare: Uint8Array): string {
+  return toBase64(authShare);
+}
+
+/**
+ * Deserialize auth share from server response
+ */
+export function deserializeAuthShare(serialized: string): Uint8Array {
+  return fromBase64(serialized);
+}
+
+/**
+ * Legacy interface for backwards compatibility during migration
+ * @deprecated Use serializeAuthShare/deserializeAuthShare instead
  */
 export interface StoredAuthShare {
   version: 1;
@@ -21,59 +41,36 @@ export interface StoredAuthShare {
 }
 
 /**
- * Encrypt the auth share for storage in Clerk
+ * @deprecated Legacy function - auth share encryption removed for Privy-style security
+ * Just serializes the share for storage (no actual encryption)
  */
 export function encryptAuthShareForStorage(
   authShare: Uint8Array,
-  clerkUserId: string
+  _clerkUserId: string
 ): StoredAuthShare {
-  // Derive encryption key from Clerk user ID
-  const encryptionKey = deriveAuthShareKey(clerkUserId);
-
-  // Encrypt the share
-  const encrypted = encryptShare(authShare, encryptionKey);
-
-  // Securely clear the encryption key
-  secureZero(encryptionKey);
-
+  // No longer encrypting - just serialize for backwards compatibility
   return {
     version: 1,
-    encrypted: encrypted.ciphertext,
-    nonce: encrypted.nonce,
+    encrypted: toBase64(authShare),
+    nonce: '', // No longer needed
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
 }
 
 /**
- * Decrypt the auth share from Clerk metadata
+ * @deprecated Legacy function - auth share encryption removed for Privy-style security
+ * Just deserializes the share from storage
  */
 export function decryptAuthShareFromStorage(
   stored: StoredAuthShare,
-  clerkUserId: string
+  _clerkUserId: string
 ): Uint8Array {
-  if (stored.version !== 1) {
-    throw new Error(`Unknown auth share version: ${stored.version}`);
-  }
-
-  // Derive encryption key from Clerk user ID
-  const encryptionKey = deriveAuthShareKey(clerkUserId);
-
-  const encrypted: EncryptedData = {
-    ciphertext: stored.encrypted,
-    nonce: stored.nonce,
-  };
-
-  try {
-    const authShare = decryptShare(encrypted, encryptionKey);
-    return authShare;
-  } finally {
-    secureZero(encryptionKey);
-  }
+  return fromBase64(stored.encrypted);
 }
 
 /**
- * Validate that stored auth share data is well-formed
+ * @deprecated Legacy validation - kept for backwards compatibility
  */
 export function isValidStoredAuthShare(data: unknown): data is StoredAuthShare {
   if (!data || typeof data !== 'object') {
@@ -84,15 +81,12 @@ export function isValidStoredAuthShare(data: unknown): data is StoredAuthShare {
 
   return (
     obj.version === 1 &&
-    typeof obj.encrypted === 'string' &&
-    typeof obj.nonce === 'string' &&
-    typeof obj.createdAt === 'number'
+    typeof obj.encrypted === 'string'
   );
 }
 
 /**
- * Extract auth share from Clerk user metadata
- * Returns null if not found or invalid
+ * @deprecated Legacy function - auth shares are now stored on server only
  */
 export function extractAuthShareFromMetadata(
   unsafeMetadata: Record<string, unknown> | null | undefined
@@ -111,7 +105,7 @@ export function extractAuthShareFromMetadata(
 }
 
 /**
- * Create metadata object with auth share for updating Clerk
+ * @deprecated Legacy function - auth shares are now stored on server only
  */
 export function createAuthShareMetadata(
   authShare: Uint8Array,
@@ -127,7 +121,7 @@ export function createAuthShareMetadata(
 }
 
 /**
- * Remove auth share from metadata (for account deletion)
+ * @deprecated Legacy function - auth shares are now stored on server only
  */
 export function removeAuthShareFromMetadata(
   existingMetadata: Record<string, unknown>
@@ -137,7 +131,7 @@ export function removeAuthShareFromMetadata(
 }
 
 /**
- * Update the auth share in metadata (for share rotation)
+ * @deprecated Legacy function - auth shares are now stored on server only
  */
 export function updateAuthShareInMetadata(
   existingMetadata: Record<string, unknown>,

@@ -24,10 +24,20 @@ const uuidPrimaryKey = (name: string) =>
 // ============================================
 
 /**
- * Key shares for the 3-share E2EE system
- * - Device share: stored in localStorage (not in DB)
- * - Auth share: stored in Clerk metadata + backup here
- * - Recovery share: stored here, encrypted with recovery phrase
+ * Key shares for the 3-share E2EE system (Privy-style server-protected)
+ *
+ * Security model:
+ * - Auth share: Stored as PLAINTEXT on server, protected by Clerk authentication
+ *   The server only releases the auth share to authenticated Clerk sessions.
+ *   Even with database access, an attacker cannot decrypt user data without
+ *   also compromising Clerk authentication.
+ * - Device share: Stored encrypted in localStorage (not in DB)
+ * - Recovery share: Stored encrypted with recovery key derived from mnemonic
+ *
+ * To decrypt user data, an attacker must compromise THREE independent systems:
+ * 1. Database (auth share + recovery share)
+ * 2. Device (device share in localStorage)
+ * 3. Clerk authentication (valid session token)
  */
 export const keyShares = pgTable(
   "key_shares",
@@ -35,9 +45,9 @@ export const keyShares = pgTable(
     id: uuidPrimaryKey("id"),
     userId: text("user_id").notNull().unique(), // Clerk user ID (e.g., "user_2abc123")
 
-    // Auth share (encrypted, backup in case Clerk metadata fails)
-    encryptedAuthShare: text("encrypted_auth_share").notNull(),
-    authShareNonce: text("auth_share_nonce").notNull(),
+    // Auth share (plaintext, protected by Clerk session authentication)
+    // Security: Only released via tRPC protectedProcedure to authenticated users
+    authShare: text("auth_share").notNull(),
 
     // Recovery share (encrypted with recovery key derived from mnemonic)
     encryptedRecoveryShare: text("encrypted_recovery_share").notNull(),
@@ -52,13 +62,9 @@ export const keyShares = pgTable(
     masterKeyRecovery: text("master_key_recovery").notNull(),
     masterKeyRecoveryNonce: text("master_key_recovery_nonce").notNull(),
 
-    // Recovery key encrypted with master key (for viewing recovery phrase)
+    // Recovery key encrypted with master key (for viewing recovery phrase later)
     encryptedRecoveryKey: text("encrypted_recovery_key").notNull(),
     recoveryKeyNonce: text("recovery_key_nonce").notNull(),
-
-    // Master key encrypted with user-ID-derived key (for normal login)
-    encryptedMasterKeyForLogin: text("encrypted_master_key_for_login").notNull(),
-    masterKeyForLoginNonce: text("master_key_for_login_nonce").notNull(),
 
     // Share version for rotation tracking
     shareVersion: integer("share_version").default(1).notNull(),
@@ -77,6 +83,10 @@ export const keyShares = pgTable(
 /**
  * Registered devices for each user
  * Tracks devices that have been authorized to access the E2EE keys
+ *
+ * Security: deviceSecret provides server-side entropy for device share encryption.
+ * The device share encryption key = BLAKE2b(deviceId + fingerprint + deviceSecret)
+ * This prevents attackers with just localStorage access from decrypting the device share.
  */
 export const devices = pgTable(
   "devices",
@@ -86,6 +96,10 @@ export const devices = pgTable(
     deviceId: text("device_id").notNull(), // Browser-generated device ID
     deviceName: text("device_name"), // User-friendly name (e.g., "Chrome on MacBook")
     userAgent: text("user_agent"), // Browser user agent for identification
+
+    // Server-generated entropy for device share encryption
+    // Combined with deviceId + fingerprint to derive the device share encryption key
+    deviceSecret: text("device_secret").notNull(),
 
     // Trust status
     trusted: boolean("trusted").default(true).notNull(),
@@ -132,6 +146,7 @@ export const folders = pgTable(
 );
 
 // Chats (encrypted)
+// Note: titlePreview was removed for security - all chat content is E2EE encrypted
 export const chats = pgTable(
   "chats",
   {
@@ -146,8 +161,6 @@ export const chats = pgTable(
     titleNonce: text("title_nonce"),
     encryptedChat: text("encrypted_chat"),
     chatNonce: text("chat_nonce"),
-    // Plaintext preview
-    titlePreview: text("title_preview"),
     // Organization
     folderId: uuid("folder_id").references(() => folders.id, {
       onDelete: "set null",

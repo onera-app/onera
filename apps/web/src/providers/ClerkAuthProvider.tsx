@@ -1,6 +1,11 @@
 /**
  * Clerk Authentication Provider
- * Handles Clerk authentication and integrates with the 3-share E2EE key system
+ * Handles Clerk authentication and integrates with the Privy-style E2EE key system
+ *
+ * SECURITY MODEL:
+ * - Auth share is stored plaintext on server, protected by Clerk authentication
+ * - Device share requires server-provided entropy (deviceSecret)
+ * - New device login requires recovery phrase (no vulnerable login key shortcut)
  */
 
 import {
@@ -20,7 +25,7 @@ import {
 } from "react";
 import {
   setupUserKeysWithSharding,
-  unlockWithLoginKey,
+  unlockWithRecoveryPhrase,
   getOrCreateDeviceId,
   setDecryptedKeys,
   clearSession as clearCryptoSession,
@@ -92,10 +97,7 @@ function ClerkAuthContextProvider({ children }: { children: ReactNode }) {
 
   // Clear all E2EE state
   const clearE2EEState = useCallback(async () => {
-    clearCryptoSession();
-    localStorage.removeItem("e2ee_session_master_key");
-    localStorage.removeItem("e2ee_session_private_key");
-    sessionStorage.removeItem("e2ee_session_key");
+    await clearCryptoSession();
     e2eeStore.reset();
     await trpcUtils.invalidate();
   }, [e2eeStore, trpcUtils]);
@@ -210,20 +212,20 @@ export function useSignUpWithE2EE() {
           await setActive({ session: result.createdSessionId });
         }
 
-        // Get the user ID from the SignUpResource
-        // The userId is available on the SignUpResource itself
-        const userId = (result as unknown as { id?: string }).id;
-        if (!userId) {
-          throw new Error("User ID not available after signup");
-        }
+        // 3. Register device and get device secret FIRST
+        const deviceId = getOrCreateDeviceId();
+        const deviceResult = await registerDeviceMutation.mutateAsync({
+          deviceId,
+          deviceName: getDeviceName(),
+          userAgent: navigator.userAgent,
+        });
 
-        // 3. Setup E2EE keys with sharding (storableKeys computed internally)
-        const keyBundle = await setupUserKeysWithSharding(userId);
+        // 4. Setup E2EE keys with sharding (using device secret from server)
+        const keyBundle = await setupUserKeysWithSharding(deviceResult.deviceSecret);
 
-        // 4. Store key shares in database (using pre-computed storableKeys)
+        // 5. Store key shares in database (using Privy-style plaintext auth share)
         await createKeySharesMutation.mutateAsync({
-          encryptedAuthShare: keyBundle.storableKeys.encryptedAuthShare,
-          authShareNonce: keyBundle.storableKeys.authShareNonce,
+          authShare: keyBundle.storableKeys.authShare,
           encryptedRecoveryShare: keyBundle.storableKeys.encryptedRecoveryShare,
           recoveryShareNonce: keyBundle.storableKeys.recoveryShareNonce,
           publicKey: keyBundle.storableKeys.publicKey,
@@ -233,23 +235,9 @@ export function useSignUpWithE2EE() {
           masterKeyRecoveryNonce: keyBundle.storableKeys.masterKeyRecoveryNonce,
           encryptedRecoveryKey: keyBundle.storableKeys.encryptedRecoveryKey,
           recoveryKeyNonce: keyBundle.storableKeys.recoveryKeyNonce,
-          encryptedMasterKeyForLogin: keyBundle.storableKeys.encryptedMasterKeyForLogin,
-          masterKeyForLoginNonce: keyBundle.storableKeys.masterKeyForLoginNonce,
         });
 
-        // 5. Register device
-        const deviceId = getOrCreateDeviceId();
-        await registerDeviceMutation.mutateAsync({
-          deviceId,
-          deviceName: getDeviceName(),
-          userAgent: navigator.userAgent,
-        });
-
-        // 7. Store auth share in Clerk user metadata
-        // This happens via the update user metadata endpoint
-        // For now, we rely on the database backup
-
-        // 8. Set master key and key pair in crypto session
+        // 6. Set master key and key pair in crypto session
         setDecryptedKeys({
           masterKey: keyBundle.masterKey,
           publicKey: keyBundle.keyPair.publicKey,
@@ -295,18 +283,19 @@ export function useSignUpWithE2EE() {
           await setActive({ session: result.createdSessionId });
         }
 
-        // Now setup E2EE keys
-        // Get user ID from SignUpResource
-        const userId = (result as unknown as { id?: string }).id;
-        if (!userId) {
-          throw new Error("User ID not available");
-        }
+        // Register device and get device secret FIRST
+        const deviceId = getOrCreateDeviceId();
+        const deviceResult = await registerDeviceMutation.mutateAsync({
+          deviceId,
+          deviceName: getDeviceName(),
+          userAgent: navigator.userAgent,
+        });
 
-        const keyBundle = await setupUserKeysWithSharding(userId);
+        // Setup E2EE keys with device secret
+        const keyBundle = await setupUserKeysWithSharding(deviceResult.deviceSecret);
 
         await createKeySharesMutation.mutateAsync({
-          encryptedAuthShare: keyBundle.storableKeys.encryptedAuthShare,
-          authShareNonce: keyBundle.storableKeys.authShareNonce,
+          authShare: keyBundle.storableKeys.authShare,
           encryptedRecoveryShare: keyBundle.storableKeys.encryptedRecoveryShare,
           recoveryShareNonce: keyBundle.storableKeys.recoveryShareNonce,
           publicKey: keyBundle.storableKeys.publicKey,
@@ -316,15 +305,6 @@ export function useSignUpWithE2EE() {
           masterKeyRecoveryNonce: keyBundle.storableKeys.masterKeyRecoveryNonce,
           encryptedRecoveryKey: keyBundle.storableKeys.encryptedRecoveryKey,
           recoveryKeyNonce: keyBundle.storableKeys.recoveryKeyNonce,
-          encryptedMasterKeyForLogin: keyBundle.storableKeys.encryptedMasterKeyForLogin,
-          masterKeyForLoginNonce: keyBundle.storableKeys.masterKeyForLoginNonce,
-        });
-
-        const deviceId = getOrCreateDeviceId();
-        await registerDeviceMutation.mutateAsync({
-          deviceId,
-          deviceName: getDeviceName(),
-          userAgent: navigator.userAgent,
         });
 
         setDecryptedKeys({
@@ -359,12 +339,24 @@ export function useSignUpWithE2EE() {
 
 /**
  * Hook for sign-in flow with E2EE key unlock
+ *
+ * SECURITY: New device login requires recovery phrase.
+ * The old "login key" shortcut (user-ID-derived encryption) was removed as a security vulnerability.
  */
 export function useSignInWithE2EE() {
   const { isLoaded: signInLoaded, signIn, setActive } = useSignIn();
   const { isLoaded: signUpLoaded, signUp } = useSignUp();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [requiresRecoveryPhrase, setRequiresRecoveryPhrase] = useState(false);
+  const [pendingKeyShares, setPendingKeyShares] = useState<{
+    masterKeyRecovery: string;
+    masterKeyRecoveryNonce: string;
+    encryptedPrivateKey: string;
+    privateKeyNonce: string;
+    publicKey: string;
+  } | null>(null);
+
   const keySharesQuery = trpc.keyShares.get.useQuery(undefined, {
     enabled: false,
   });
@@ -403,14 +395,20 @@ export function useSignInWithE2EE() {
     [isLoaded, signUp]
   );
 
+  /**
+   * Sign in with email/password
+   * Returns true if sign-in successful and E2EE unlocked
+   * Sets requiresRecoveryPhrase=true if user needs to enter recovery phrase
+   */
   const signInWithEmail = useCallback(
-    async (email: string, password: string): Promise<void> => {
+    async (email: string, password: string): Promise<{ requiresRecoveryPhrase: boolean }> => {
       if (!isLoaded || !signIn) {
         throw new Error("Clerk is not loaded");
       }
 
       setIsLoading(true);
       setError(null);
+      setRequiresRecoveryPhrase(false);
 
       try {
         // 1. Sign in with Clerk
@@ -437,51 +435,80 @@ export function useSignInWithE2EE() {
 
         const keyShares = keysResult.data;
 
-        // 4. Get user ID from Clerk SignInResource
-        // For SignInResource, use the identifier which is the user ID
-        const userId = (result as unknown as { identifier?: string }).identifier ||
-                       (result as unknown as { id?: string }).id;
-        if (!userId) {
-          throw new Error("User ID not available after signin");
-        }
-
-        // 5. Unlock using login key (derived from user ID)
-        // This bypasses the complex share system for normal logins
-        const decryptedKeys = unlockWithLoginKey(userId, {
-          encryptedMasterKeyForLogin: keyShares.encryptedMasterKeyForLogin,
-          masterKeyForLoginNonce: keyShares.masterKeyForLoginNonce,
+        // 4. Store key shares for recovery phrase unlock
+        setPendingKeyShares({
+          masterKeyRecovery: keyShares.masterKeyRecovery,
+          masterKeyRecoveryNonce: keyShares.masterKeyRecoveryNonce,
           encryptedPrivateKey: keyShares.encryptedPrivateKey,
           privateKeyNonce: keyShares.privateKeyNonce,
           publicKey: keyShares.publicKey,
         });
 
-        // 6. Set keys in crypto session
+        // 5. Require recovery phrase for unlock
+        // (The old login key shortcut was a security vulnerability)
+        setRequiresRecoveryPhrase(true);
+        setIsLoading(false);
+
+        return { requiresRecoveryPhrase: true };
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Sign in failed";
+        setError(message);
+        setIsLoading(false);
+        throw err;
+      }
+    },
+    [isLoaded, signIn, setActive, keySharesQuery]
+  );
+
+  /**
+   * Complete sign-in by unlocking with recovery phrase
+   */
+  const unlockWithMnemonic = useCallback(
+    async (mnemonic: string): Promise<void> => {
+      if (!pendingKeyShares) {
+        throw new Error("No pending sign-in. Please sign in first.");
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        // Unlock using recovery phrase
+        const decryptedKeys = unlockWithRecoveryPhrase(mnemonic, pendingKeyShares);
+
+        // Set keys in crypto session
         setDecryptedKeys({
           masterKey: decryptedKeys.masterKey,
           publicKey: decryptedKeys.publicKey,
           privateKey: decryptedKeys.privateKey,
         });
 
-        // 7. Update device last seen
+        // Update device last seen
         const deviceId = getOrCreateDeviceId();
         await updateLastSeenMutation.mutateAsync({ deviceId });
+
+        // Clear pending state
+        setPendingKeyShares(null);
+        setRequiresRecoveryPhrase(false);
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Sign in failed";
+        const message = err instanceof Error ? err.message : "Invalid recovery phrase";
         setError(message);
         throw err;
       } finally {
         setIsLoading(false);
       }
     },
-    [isLoaded, signIn, setActive, keySharesQuery, updateLastSeenMutation]
+    [pendingKeyShares, updateLastSeenMutation]
   );
 
   return {
     isLoaded,
     isLoading,
     error,
+    requiresRecoveryPhrase,
     signInWithEmail,
     signInWithOAuth,
+    unlockWithMnemonic,
   };
 }
 
@@ -493,6 +520,14 @@ export function useSSOCallback() {
   const { isSignedIn, isLoaded: isAuthLoaded } = useClerkAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [requiresRecoveryPhrase, setRequiresRecoveryPhrase] = useState(false);
+  const [pendingKeyShares, setPendingKeyShares] = useState<{
+    masterKeyRecovery: string;
+    masterKeyRecoveryNonce: string;
+    encryptedPrivateKey: string;
+    privateKeyNonce: string;
+    publicKey: string;
+  } | null>(null);
 
   const keySharesQuery = trpc.keyShares.get.useQuery(undefined, {
     enabled: false,
@@ -501,7 +536,11 @@ export function useSSOCallback() {
   const registerDeviceMutation = trpc.devices.register.useMutation();
   const updateLastSeenMutation = trpc.devices.updateLastSeen.useMutation();
 
-  const processCallback = useCallback(async (): Promise<{ isNewUser: boolean; recoveryInfo?: RecoveryKeyInfo }> => {
+  const processCallback = useCallback(async (): Promise<{
+    isNewUser: boolean;
+    recoveryInfo?: RecoveryKeyInfo;
+    requiresRecoveryPhrase?: boolean;
+  }> => {
     if (!isUserLoaded || !clerkUser || !isSignedIn) {
       throw new Error("Not authenticated");
     }
@@ -510,48 +549,44 @@ export function useSSOCallback() {
     setError(null);
 
     try {
-      const userId = clerkUser.id;
-
       // Check if user already has key shares (existing user)
       // The query throws NOT_FOUND for new users, so we catch that
       let keyShares = null;
       try {
         const keysResult = await keySharesQuery.refetch();
         keyShares = keysResult.data;
-      } catch (err) {
+      } catch (_err) {
         // NOT_FOUND error means new user - this is expected
-        console.log("No existing key shares found - setting up new user");
       }
 
       if (keyShares) {
-        // Existing user - unlock with login key
-
-        const decryptedKeys = unlockWithLoginKey(userId, {
-          encryptedMasterKeyForLogin: keyShares.encryptedMasterKeyForLogin,
-          masterKeyForLoginNonce: keyShares.masterKeyForLoginNonce,
+        // Existing user - need recovery phrase to unlock
+        setPendingKeyShares({
+          masterKeyRecovery: keyShares.masterKeyRecovery,
+          masterKeyRecoveryNonce: keyShares.masterKeyRecoveryNonce,
           encryptedPrivateKey: keyShares.encryptedPrivateKey,
           privateKeyNonce: keyShares.privateKeyNonce,
           publicKey: keyShares.publicKey,
         });
+        setRequiresRecoveryPhrase(true);
 
-        setDecryptedKeys({
-          masterKey: decryptedKeys.masterKey,
-          publicKey: decryptedKeys.publicKey,
-          privateKey: decryptedKeys.privateKey,
-        });
-
-        // Update device last seen
-        const deviceId = getOrCreateDeviceId();
-        await updateLastSeenMutation.mutateAsync({ deviceId });
-
-        return { isNewUser: false };
+        return { isNewUser: false, requiresRecoveryPhrase: true };
       } else {
         // New user - setup E2EE keys
-        const keyBundle = await setupUserKeysWithSharding(userId);
+
+        // Register device and get device secret FIRST
+        const deviceId = getOrCreateDeviceId();
+        const deviceResult = await registerDeviceMutation.mutateAsync({
+          deviceId,
+          deviceName: getDeviceName(),
+          userAgent: navigator.userAgent,
+        });
+
+        // Setup keys with device secret
+        const keyBundle = await setupUserKeysWithSharding(deviceResult.deviceSecret);
 
         await createKeySharesMutation.mutateAsync({
-          encryptedAuthShare: keyBundle.storableKeys.encryptedAuthShare,
-          authShareNonce: keyBundle.storableKeys.authShareNonce,
+          authShare: keyBundle.storableKeys.authShare,
           encryptedRecoveryShare: keyBundle.storableKeys.encryptedRecoveryShare,
           recoveryShareNonce: keyBundle.storableKeys.recoveryShareNonce,
           publicKey: keyBundle.storableKeys.publicKey,
@@ -561,16 +596,6 @@ export function useSSOCallback() {
           masterKeyRecoveryNonce: keyBundle.storableKeys.masterKeyRecoveryNonce,
           encryptedRecoveryKey: keyBundle.storableKeys.encryptedRecoveryKey,
           recoveryKeyNonce: keyBundle.storableKeys.recoveryKeyNonce,
-          encryptedMasterKeyForLogin: keyBundle.storableKeys.encryptedMasterKeyForLogin,
-          masterKeyForLoginNonce: keyBundle.storableKeys.masterKeyForLoginNonce,
-        });
-
-        // Register device
-        const deviceId = getOrCreateDeviceId();
-        await registerDeviceMutation.mutateAsync({
-          deviceId,
-          deviceName: getDeviceName(),
-          userAgent: navigator.userAgent,
         });
 
         setDecryptedKeys({
@@ -595,14 +620,56 @@ export function useSSOCallback() {
     keySharesQuery,
     createKeySharesMutation,
     registerDeviceMutation,
-    updateLastSeenMutation,
   ]);
+
+  /**
+   * Complete SSO login by unlocking with recovery phrase
+   */
+  const unlockWithMnemonic = useCallback(
+    async (mnemonic: string): Promise<void> => {
+      if (!pendingKeyShares) {
+        throw new Error("No pending sign-in. Please sign in first.");
+      }
+
+      setIsProcessing(true);
+      setError(null);
+
+      try {
+        // Unlock using recovery phrase
+        const decryptedKeys = unlockWithRecoveryPhrase(mnemonic, pendingKeyShares);
+
+        // Set keys in crypto session
+        setDecryptedKeys({
+          masterKey: decryptedKeys.masterKey,
+          publicKey: decryptedKeys.publicKey,
+          privateKey: decryptedKeys.privateKey,
+        });
+
+        // Update device last seen
+        const deviceId = getOrCreateDeviceId();
+        await updateLastSeenMutation.mutateAsync({ deviceId });
+
+        // Clear pending state
+        setPendingKeyShares(null);
+        setRequiresRecoveryPhrase(false);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Invalid recovery phrase";
+        setError(message);
+        throw err;
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [pendingKeyShares, updateLastSeenMutation]
+  );
 
   return {
     isReady: isUserLoaded && isAuthLoaded && !!clerkUser && !!isSignedIn,
     isProcessing,
     error,
+    requiresRecoveryPhrase,
     processCallback,
+    unlockWithMnemonic,
   };
 }
 

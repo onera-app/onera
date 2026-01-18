@@ -59,13 +59,14 @@ export function Hero() {
             </Button>
           </Link>
         )}
-        <button 
+        <Button
+          variant="outline"
+          size="lg"
+          className="px-8 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm hover:bg-white dark:hover:bg-neutral-800 transition-all"
           onClick={() => document.querySelector("#how-it-works")?.scrollIntoView({ behavior: "smooth" })}
         >
-          <Button variant="outline" size="lg" className="px-8 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm hover:bg-white dark:hover:bg-neutral-800 transition-all">
-            See How It Works
-          </Button>
-        </button>
+          See How It Works
+        </Button>
       </div>
 
       {/* Trust Badges */}

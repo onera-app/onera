@@ -1,12 +1,13 @@
 {
   "name": "@onera/crypto",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "main": "./src/sodium/index.ts",
   "types": "./src/sodium/index.ts",
   "exports": {
     ".": "./src/sodium/index.ts",
-    "./sharding": "./src/sharding/index.ts"
+    "./sharding": "./src/sharding/index.ts",
+    "./session": "./src/session/index.ts"
   },
   "scripts": {
     "build": "tsc",
