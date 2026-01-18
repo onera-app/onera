@@ -21,10 +21,12 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@clerk/backend": "^1.25.0",
     "@hono/node-server": "^1.13.8",
     "@hono/trpc-server": "0.4.2",
+    "@simplewebauthn/server": "13.2.2",
+    "@simplewebauthn/types": "12.0.0",
     "@trpc/server": "^11.0.0-rc.730",
-    "@clerk/backend": "^1.25.0",
     "drizzle-orm": "^0.38.4",
     "hono": "^4.7.4",
     "pg": "^8.13.1",

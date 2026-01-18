@@ -170,6 +170,100 @@ export const keySharesRouter = router({
     await db.delete(keyShares).where(eq(keyShares.userId, ctx.user.id));
     return { success: true };
   }),
+
+  /**
+   * Check if user has password-based encryption set up
+   */
+  hasPasswordEncryption: protectedProcedure.query(async ({ ctx }) => {
+    const [shares] = await db
+      .select({ encryptedMasterKeyWithPassword: keyShares.encryptedMasterKeyWithPassword })
+      .from(keyShares)
+      .where(eq(keyShares.userId, ctx.user.id))
+      .limit(1);
+
+    return { hasPassword: !!shares?.encryptedMasterKeyWithPassword };
+  }),
+
+  /**
+   * Set up password-based encryption for master key
+   * This allows unlocking with a password instead of passkey or recovery phrase
+   */
+  setPasswordEncryption: protectedProcedure
+    .input(
+      z.object({
+        encryptedMasterKey: z.string(),
+        nonce: z.string(),
+        salt: z.string(),
+        opsLimit: z.number(),
+        memLimit: z.number(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await db
+        .update(keyShares)
+        .set({
+          encryptedMasterKeyWithPassword: input.encryptedMasterKey,
+          masterKeyPasswordNonce: input.nonce,
+          passwordKekSalt: input.salt,
+          passwordKekOpsLimit: input.opsLimit,
+          passwordKekMemLimit: input.memLimit,
+          updatedAt: new Date(),
+        })
+        .where(eq(keyShares.userId, ctx.user.id));
+
+      return { success: true };
+    }),
+
+  /**
+   * Get password-encrypted master key for unlock
+   */
+  getPasswordEncryption: protectedProcedure.query(async ({ ctx }) => {
+    const [shares] = await db
+      .select({
+        encryptedMasterKeyWithPassword: keyShares.encryptedMasterKeyWithPassword,
+        masterKeyPasswordNonce: keyShares.masterKeyPasswordNonce,
+        passwordKekSalt: keyShares.passwordKekSalt,
+        passwordKekOpsLimit: keyShares.passwordKekOpsLimit,
+        passwordKekMemLimit: keyShares.passwordKekMemLimit,
+      })
+      .from(keyShares)
+      .where(eq(keyShares.userId, ctx.user.id))
+      .limit(1);
+
+    if (!shares?.encryptedMasterKeyWithPassword) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Password encryption not set up for this user",
+      });
+    }
+
+    return {
+      encryptedMasterKey: shares.encryptedMasterKeyWithPassword,
+      nonce: shares.masterKeyPasswordNonce!,
+      salt: shares.passwordKekSalt!,
+      opsLimit: shares.passwordKekOpsLimit!,
+      memLimit: shares.passwordKekMemLimit!,
+    };
+  }),
+
+  /**
+   * Remove password-based encryption
+   */
+  removePasswordEncryption: protectedProcedure.mutation(async ({ ctx }) => {
+    await db
+      .update(keyShares)
+      .set({
+        encryptedMasterKeyWithPassword: null,
+        masterKeyPasswordNonce: null,
+        passwordKekSalt: null,
+        passwordKekOpsLimit: null,
+        passwordKekMemLimit: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(keyShares.userId, ctx.user.id));
+
+    return { success: true };
+  }),
 });
 
 /**

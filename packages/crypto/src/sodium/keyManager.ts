@@ -350,6 +350,18 @@ export function getMasterKey(): Uint8Array {
 	return decryptedKeys.masterKey;
 }
 
+/**
+ * Get the decrypted master key if available, or null if locked
+ * Use this for optional access (e.g., checking if we can register a passkey)
+ */
+export function getDecryptedMasterKey(): Uint8Array | null {
+	if (!decryptedKeys) {
+		return null;
+	}
+	resetSessionTimeout();
+	return decryptedKeys.masterKey;
+}
+
 export function getPrivateKey(): Uint8Array {
 	if (!decryptedKeys) {
 		throw new Error('E2EE locked. Please unlock first.');

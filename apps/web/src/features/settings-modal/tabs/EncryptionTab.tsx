@@ -14,12 +14,17 @@ import {
 } from '@/components/ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { ShieldCheck, Lock, Unlock, Key, AlertTriangle, Eye, EyeOff, Copy } from 'lucide-react';
+import { ShieldCheck, Lock, Unlock, Key, AlertTriangle, Eye, EyeOff, Copy, Fingerprint, Plus } from 'lucide-react';
+import { PasskeyList, PasskeyRegistrationModal } from '@/components/e2ee';
+import { usePasskeySupport } from '@/hooks/useWebAuthnSupport';
 
 export function EncryptionTab() {
   const { isUnlocked, lock } = useE2EE();
   const [showRecoveryDialog, setShowRecoveryDialog] = useState(false);
   const [showPhrase, setShowPhrase] = useState(false);
+  const [showPasskeyRegistration, setShowPasskeyRegistration] = useState(false);
+
+  const { isSupported: passkeySupported, isLoading: isCheckingPasskeySupport } = usePasskeySupport();
 
   const handleCopyRecoveryPhrase = () => {
     // Recovery phrase should be stored securely and only shown once during setup
@@ -84,6 +89,42 @@ export function EncryptionTab() {
           be permanently inaccessible. Keep your recovery phrase safe.
         </AlertDescription>
       </Alert>
+
+      {/* Passkeys Section */}
+      {isUnlocked && (
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Fingerprint className="h-5 w-5 text-primary" />
+                <CardTitle className="text-base">Passkeys</CardTitle>
+              </div>
+              {passkeySupported && !isCheckingPasskeySupport && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowPasskeyRegistration(true)}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add Passkey
+                </Button>
+              )}
+            </div>
+            <CardDescription>
+              Use Face ID, Touch ID, or Windows Hello to unlock your encryption faster
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {!passkeySupported && !isCheckingPasskeySupport ? (
+              <p className="text-sm text-muted-foreground">
+                Passkeys are not supported on this device or browser. Use your recovery phrase to unlock.
+              </p>
+            ) : (
+              <PasskeyList />
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Actions */}
       <div className="space-y-4">
@@ -183,6 +224,14 @@ export function EncryptionTab() {
         </DialogContent>
       </Dialog>
 
+      {/* Passkey Registration Modal */}
+      <PasskeyRegistrationModal
+        open={showPasskeyRegistration}
+        onOpenChange={setShowPasskeyRegistration}
+        onSuccess={() => {
+          // Passkey list will auto-refresh via query invalidation
+        }}
+      />
     </div>
   );
 }

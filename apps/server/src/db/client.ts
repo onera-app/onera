@@ -27,6 +27,7 @@ export { schema };
 export const {
   keyShares,
   devices,
+  webauthnCredentials,
   userKeys, // Legacy, for migration
   folders,
   chats,

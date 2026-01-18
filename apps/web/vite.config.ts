@@ -70,6 +70,11 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // Map @onera/crypto subpaths to their source locations
+      '@onera/crypto/webauthn': path.resolve(__dirname, '../../packages/crypto/src/webauthn'),
+      '@onera/crypto/sharding': path.resolve(__dirname, '../../packages/crypto/src/sharding'),
+      '@onera/crypto/session': path.resolve(__dirname, '../../packages/crypto/src/session'),
+      '@onera/crypto/password': path.resolve(__dirname, '../../packages/crypto/src/password'),
       '@onera/crypto': path.resolve(__dirname, '../../packages/crypto/src/sodium'),
       '@onera/types': path.resolve(__dirname, '../../packages/types/src'),
     },

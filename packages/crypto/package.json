@@ -7,7 +7,9 @@
   "exports": {
     ".": "./src/sodium/index.ts",
     "./sharding": "./src/sharding/index.ts",
-    "./session": "./src/session/index.ts"
+    "./session": "./src/session/index.ts",
+    "./webauthn": "./src/webauthn/index.ts",
+    "./password": "./src/password/index.ts"
   },
   "scripts": {
     "build": "tsc",
@@ -20,8 +22,9 @@
     "uuid": "^11.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.7.0",
+    "@simplewebauthn/types": "12.0.0",
     "@types/libsodium-wrappers-sumo": "^0.7.8",
-    "@types/uuid": "^10.0.0"
+    "@types/uuid": "^10.0.0",
+    "typescript": "^5.7.0"
   }
 }

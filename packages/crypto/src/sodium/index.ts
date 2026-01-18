@@ -97,6 +97,7 @@ export {
 	unlockWithPasswordFlow,
 	unlockWithRecoveryMnemonic,
 	getMasterKey,
+	getDecryptedMasterKey,
 	getPrivateKey,
 	getPublicKey,
 	isUnlocked,

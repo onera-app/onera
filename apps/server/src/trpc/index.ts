@@ -5,6 +5,7 @@ import { router } from "./trpc";
 import { usersRouter } from "./routers/users";
 import { userKeysRouter } from "./routers/userKeys"; // Legacy, for migration
 import { keySharesRouter, devicesRouter } from "./routers/keyShares"; // New Clerk-based
+import { webauthnRouter } from "./routers/webauthn"; // Passkey-based E2EE unlock
 import { foldersRouter } from "./routers/folders";
 import { chatsRouter } from "./routers/chats";
 import { notesRouter } from "./routers/notes";
@@ -17,6 +18,7 @@ export const appRouter = router({
   userKeys: userKeysRouter, // Legacy, for migration
   keyShares: keySharesRouter, // New key sharding system
   devices: devicesRouter, // Device management
+  webauthn: webauthnRouter, // Passkey-based E2EE unlock
   folders: foldersRouter,
   chats: chatsRouter,
   notes: notesRouter,

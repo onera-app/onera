@@ -69,6 +69,13 @@ export const keyShares = pgTable(
     // Share version for rotation tracking
     shareVersion: integer("share_version").default(1).notNull(),
 
+    // Optional: Master key encrypted with password (Argon2id KEK) for SSO users without PRF
+    encryptedMasterKeyWithPassword: text("encrypted_master_key_password"),
+    masterKeyPasswordNonce: text("master_key_password_nonce"),
+    passwordKekSalt: text("password_kek_salt"),
+    passwordKekOpsLimit: integer("password_kek_ops_limit"),
+    passwordKekMemLimit: integer("password_kek_mem_limit"),
+
     // Timestamps
     createdAt: timestamp("created_at", { mode: "date" })
       .default(sql`now()`)
@@ -115,6 +122,52 @@ export const devices = pgTable(
   (table) => [
     index("idx_devices_user_id").on(table.userId),
     uniqueIndex("idx_devices_user_device").on(table.userId, table.deviceId),
+  ]
+);
+
+/**
+ * WebAuthn credentials for passkey-based E2EE unlock
+ *
+ * Security model:
+ * - PRF (Pseudo-Random Function) extension provides device-bound secret
+ * - PRF output → HKDF → KEK (Key Encryption Key)
+ * - KEK encrypts the master key (stored per-credential)
+ * - Even with database access, attacker cannot decrypt without passkey+biometrics
+ *
+ * Each passkey stores its own encrypted copy of the master key because:
+ * 1. PRF output is unique per credential
+ * 2. Allows independent revocation without affecting other passkeys
+ * 3. Cross-device passkeys (iCloud/Google) sync the credential, not the PRF output
+ */
+export const webauthnCredentials = pgTable(
+  "webauthn_credentials",
+  {
+    id: uuidPrimaryKey("id"),
+    userId: text("user_id").notNull(), // Clerk user ID
+
+    // WebAuthn credential data
+    credentialId: text("credential_id").notNull(), // Base64URL encoded
+    credentialPublicKey: text("credential_public_key").notNull(), // Base64URL encoded
+    counter: integer("counter").notNull().default(0),
+    credentialDeviceType: text("credential_device_type").notNull(), // "singleDevice" | "multiDevice"
+    credentialBackedUp: boolean("credential_backed_up").default(false),
+    transports: text("transports").array(), // ["internal", "hybrid", etc.]
+
+    // PRF-encrypted master key (unique per credential due to unique PRF output)
+    encryptedMasterKey: text("encrypted_master_key").notNull(), // Base64 encoded
+    masterKeyNonce: text("master_key_nonce").notNull(), // Base64 encoded
+    prfSalt: text("prf_salt").notNull(), // Base64 encoded, used in HKDF
+
+    // User-friendly metadata
+    name: text("name"), // e.g., "MacBook Pro Touch ID"
+    lastUsedAt: timestamp("last_used_at", { mode: "date" }),
+    createdAt: timestamp("created_at", { mode: "date" })
+      .default(sql`now()`)
+      .notNull(),
+  },
+  (table) => [
+    index("idx_webauthn_user_id").on(table.userId),
+    uniqueIndex("idx_webauthn_credential_id").on(table.credentialId),
   ]
 );
 
@@ -299,6 +352,8 @@ export type KeyShare = typeof keyShares.$inferSelect;
 export type NewKeyShare = typeof keyShares.$inferInsert;
 export type Device = typeof devices.$inferSelect;
 export type NewDevice = typeof devices.$inferInsert;
+export type WebauthnCredential = typeof webauthnCredentials.$inferSelect;
+export type NewWebauthnCredential = typeof webauthnCredentials.$inferInsert;
 export type Folder = typeof folders.$inferSelect;
 export type NewFolder = typeof folders.$inferInsert;
 export type Chat = typeof chats.$inferSelect;
