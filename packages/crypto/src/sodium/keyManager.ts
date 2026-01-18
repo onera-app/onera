@@ -343,11 +343,17 @@ export function setKeyPair(publicKey: Uint8Array, privateKey: Uint8Array): void 
 // ============================================
 
 export function getMasterKey(): Uint8Array {
+	// Clear timeout BEFORE the check to prevent race condition
+	clearSessionTimeout();
+
 	if (!decryptedKeys) {
 		throw new Error('E2EE locked. Please unlock first.');
 	}
+
+	// Capture key reference before resetting timeout
+	const key = decryptedKeys.masterKey;
 	resetSessionTimeout();
-	return decryptedKeys.masterKey;
+	return key;
 }
 
 /**
@@ -363,19 +369,31 @@ export function getDecryptedMasterKey(): Uint8Array | null {
 }
 
 export function getPrivateKey(): Uint8Array {
+	// Clear timeout BEFORE the check to prevent race condition
+	clearSessionTimeout();
+
 	if (!decryptedKeys) {
 		throw new Error('E2EE locked. Please unlock first.');
 	}
+
+	// Capture key reference before resetting timeout
+	const key = decryptedKeys.privateKey;
 	resetSessionTimeout();
-	return decryptedKeys.privateKey;
+	return key;
 }
 
 export function getPublicKey(): Uint8Array {
+	// Clear timeout BEFORE the check to prevent race condition
+	clearSessionTimeout();
+
 	if (!decryptedKeys) {
 		throw new Error('E2EE locked. Please unlock first.');
 	}
+
+	// Capture key reference before resetting timeout
+	const key = decryptedKeys.publicKey;
 	resetSessionTimeout();
-	return decryptedKeys.publicKey;
+	return key;
 }
 
 export function isUnlocked(): boolean {
@@ -457,6 +475,7 @@ export async function lock(clearPersisted: boolean = true): Promise<void> {
 	if (decryptedKeys) {
 		secureZero(decryptedKeys.masterKey);
 		secureZero(decryptedKeys.privateKey);
+		secureZero(decryptedKeys.publicKey);
 		decryptedKeys = null;
 	}
 

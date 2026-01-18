@@ -26,8 +26,8 @@ export function initWebSocket(httpServer: HTTPServer) {
           callback(null, true);
           return;
         }
-        // In production, allow same-origin requests
-        callback(null, true);
+        // Reject unknown origins - prevents CSRF attacks
+        callback(new Error("Origin not allowed"), false);
       },
       credentials: true,
     },

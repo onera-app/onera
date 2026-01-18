@@ -66,30 +66,10 @@ export function SSOCallbackPage() {
   const registerDeviceMutation = trpc.devices.register.useMutation();
   const updateLastSeenMutation = trpc.devices.updateLastSeen.useMutation();
 
-  // Debug logging
-  useEffect(() => {
-    console.log('SSO Callback state:', {
-      step,
-      error,
-      hasProcessed: processingRef.current,
-      clerkLoaded: clerk.loaded,
-      signUpStatus: signUp?.status,
-      signInStatus: signIn?.status,
-      clerkUser: clerk.user?.id
-    });
-  }, [step, error, clerk.loaded, clerk.user?.id, signUp?.status, signIn?.status]);
-
   // Main OAuth handling effect - handles both OAuth completion AND E2EE setup
   useEffect(() => {
     async function handleOAuthAndE2EE() {
       if (processingRef.current || !clerk.loaded) return;
-
-      console.log('Handling OAuth callback:', {
-        signUpStatus: signUp?.status,
-        signInStatus: signIn?.status,
-        externalAccountError: signUp?.verifications?.externalAccount?.error?.code,
-        hasUser: !!clerk.user
-      });
 
       let userId: string | null = null;
       let isNewUser = false;
@@ -97,7 +77,6 @@ export function SSOCallbackPage() {
       // Check if the external account already exists (existing user via OAuth)
       const externalAccountError = signUp?.verifications?.externalAccount?.error;
       if (externalAccountError?.code === 'external_account_exists') {
-        console.log('External account exists, transferring to sign-in...');
         processingRef.current = true;
 
         try {
@@ -111,20 +90,17 @@ export function SSOCallbackPage() {
             isNewUser = false;
           }
         } catch (err) {
-          console.error('Transfer failed:', err);
           setError(err instanceof Error ? err.message : 'Sign in failed');
           setStep('error');
           return;
         }
       } else if (signUp?.status === 'complete' && signUp.createdSessionId && setSignUpActive) {
-        console.log('SignUp complete, setting active session...');
         processingRef.current = true;
         await setSignUpActive({ session: signUp.createdSessionId });
         await new Promise(resolve => setTimeout(resolve, 100));
         userId = clerk.user?.id || null;
         isNewUser = true;
       } else if (signIn?.status === 'complete' && signIn.createdSessionId && setSignInActive) {
-        console.log('SignIn complete, setting active session...');
         processingRef.current = true;
         await setSignInActive({ session: signIn.createdSessionId });
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -139,11 +115,9 @@ export function SSOCallbackPage() {
 
       // If we have a userId, handle E2EE
       if (userId) {
-        console.log('Processing E2EE for user:', userId, 'isNewUser:', isNewUser);
         try {
           await handleE2EE(userId, isNewUser);
         } catch (err) {
-          console.error('E2EE setup failed:', err);
           setError(err instanceof Error ? err.message : 'E2EE setup failed');
           setStep('error');
         }
@@ -156,14 +130,13 @@ export function SSOCallbackPage() {
       try {
         const result = await keySharesQuery.refetch();
         keyShares = result.data;
-      } catch (err) {
-        console.log('No existing key shares found');
+      } catch {
+        // No existing key shares found - new user
       }
 
       if (keyShares) {
         // Existing user - redirect to home, E2EEUnlockModal will prompt for recovery phrase
         // SECURITY: We no longer auto-unlock with user ID (was a vulnerability)
-        console.log('Existing user - redirecting to app for recovery phrase unlock');
 
         // Update device last seen
         const deviceId = getOrCreateDeviceId();
@@ -175,8 +148,6 @@ export function SSOCallbackPage() {
         navigate({ to: '/' });
       } else {
         // New user - register device first to get deviceSecret, then setup E2EE keys
-        console.log('Setting up new user keys...');
-
         // Step 1: Register device to get server-generated deviceSecret
         const deviceId = getOrCreateDeviceId();
         const deviceResult = await registerDeviceMutation.mutateAsync({
@@ -261,7 +232,6 @@ export function SSOCallbackPage() {
       toast.success('Encryption password set! Setup complete.');
       navigate({ to: '/' });
     } catch (err) {
-      console.error('Password setup failed:', err);
       setPasswordError(err instanceof Error ? err.message : 'Failed to set up password');
     }
   };
@@ -277,7 +247,6 @@ export function SSOCallbackPage() {
       toast.success('Passkey registered! Setup complete.');
       navigate({ to: '/' });
     } catch (err) {
-      console.error('Passkey registration failed:', err);
       const error = err instanceof Error ? err : new Error('Registration failed');
       // Don't show error for user cancellation
       if (error.name === 'NotAllowedError' || error.message.includes('cancel')) {

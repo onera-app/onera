@@ -195,23 +195,42 @@ export function verifyShares(shares: KeyShares, expectedMasterKey: Uint8Array): 
 
 /**
  * Derive a key from an identifier (for share encryption)
- * Uses BLAKE2b for key derivation
+ * Uses BLAKE2b for initial hashing, then crypto_kdf for proper key derivation
+ *
+ * @param identifier - The input identifier (e.g., device ID + fingerprint + secret)
+ * @param context - Context string for domain separation (max 16 chars used)
+ * @param salt - Optional additional salt for extra entropy
  */
 export function deriveShareEncryptionKey(
   identifier: string,
-  context: string
+  context: string,
+  salt?: Uint8Array
 ): Uint8Array {
   const sodium = getSodium();
   const identifierBytes = new TextEncoder().encode(identifier);
-  const contextBytes = new TextEncoder().encode(context);
 
-  // Concatenate context and identifier
-  const input = new Uint8Array(contextBytes.length + identifierBytes.length);
-  input.set(contextBytes);
-  input.set(identifierBytes, contextBytes.length);
+  // Use 16-byte context for KDF (padded or truncated as needed)
+  // libsodium crypto_kdf requires exactly 16-byte context
+  const kdfContext = context.padEnd(16, '\0').slice(0, 16);
 
-  // BLAKE2b-256 for key derivation
-  return sodium.crypto_generichash(MASTER_KEY_LENGTH, input);
+  // Derive master key material from identifier (and optional salt)
+  // This combines all entropy sources into a uniform 32-byte key
+  const masterKey = salt
+    ? sodium.crypto_generichash(MASTER_KEY_LENGTH, new Uint8Array([...salt, ...identifierBytes]))
+    : sodium.crypto_generichash(MASTER_KEY_LENGTH, identifierBytes);
+
+  // Use proper KDF to derive the final key with context separation
+  const derivedKey = sodium.crypto_kdf_derive_from_key(
+    MASTER_KEY_LENGTH,
+    1, // subkey_id
+    kdfContext,
+    masterKey
+  );
+
+  // Zero the intermediate master key
+  secureZero(masterKey);
+
+  return derivedKey;
 }
 
 /**

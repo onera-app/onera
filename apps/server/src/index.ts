@@ -24,8 +24,8 @@ app.use(
       if (!origin) return allowedOrigins[0];
       // Allow if origin is in the allowed list
       if (allowedOrigins.includes(origin)) return origin;
-      // In production, allow any origin that matches the request (same-origin)
-      return origin;
+      // Reject unknown origins - prevents CSRF attacks
+      return null;
     },
     credentials: true,
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],

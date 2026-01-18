@@ -1,6 +1,9 @@
 /**
  * Recovery Key Module
  * BIP39 mnemonic encoding for recovery keys
+ *
+ * IMPORTANT: Recovery key is directly encoded as BIP39 mnemonic (no hashing).
+ * This allows the mnemonic to be converted back to the original key.
  */
 
 import * as bip39 from 'bip39';
@@ -9,11 +12,18 @@ import { toHex, fromHex } from './utils';
 
 /**
  * Convert a recovery key to a BIP39 mnemonic phrase (24 words)
+ *
+ * NOTE: The recovery key is directly converted to mnemonic without hashing.
+ * This is required for the mnemonic to be reversible back to the original key.
+ * Previous versions incorrectly hashed the key, making recovery impossible.
  */
 export function recoveryKeyToMnemonic(recoveryKey: Uint8Array): string {
-	const sodium = getSodium();
-	const hash = sodium.crypto_hash_sha256(recoveryKey);
-	const entropy = toHex(hash);
+	// Recovery key must be exactly 32 bytes for 24-word mnemonic
+	if (recoveryKey.length !== 32) {
+		throw new Error('Recovery key must be 32 bytes');
+	}
+	// Direct conversion - no hashing (hashing would make it one-way!)
+	const entropy = toHex(recoveryKey);
 	return bip39.entropyToMnemonic(entropy);
 }
 

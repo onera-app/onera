@@ -10,8 +10,10 @@ const CRYPTO_PWHASH_SALTBYTES = 16;
 const CRYPTO_SECRETBOX_KEYBYTES = 32;
 const CRYPTO_PWHASH_ALG_ARGON2ID13 = 2;
 
-const CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE = 2;
-const CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE = 67108864; // 64MB
+// Use MODERATE parameters for better security
+// INTERACTIVE (2 ops, 64MB) is too weak for password protection
+const CRYPTO_PWHASH_OPSLIMIT_MODERATE = 3;
+const CRYPTO_PWHASH_MEMLIMIT_MODERATE = 268435456; // 256MB
 
 /**
  * Argon2id parameters
@@ -24,18 +26,22 @@ export interface Argon2Params {
 
 /**
  * Default Argon2id parameters
+ * Uses MODERATE settings (3 ops, 256MB) for better security
  */
 export function getDefaultArgon2Params(): { opsLimit: number; memLimit: number } {
 	return {
-		opsLimit: CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE,
-		memLimit: CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE
+		opsLimit: CRYPTO_PWHASH_OPSLIMIT_MODERATE,
+		memLimit: CRYPTO_PWHASH_MEMLIMIT_MODERATE
 	};
 }
 
+// Fallback chain for devices with limited memory
+// Starts with MODERATE, falls back to progressively lower settings
 const MEMORY_FALLBACKS = [
-	{ memLimit: 67108864, opsLimit: 2 },
-	{ memLimit: 33554432, opsLimit: 3 },
-	{ memLimit: 16777216, opsLimit: 4 },
+	{ memLimit: 268435456, opsLimit: 3 }, // 256MB - MODERATE
+	{ memLimit: 67108864, opsLimit: 3 },  // 64MB
+	{ memLimit: 33554432, opsLimit: 4 },  // 32MB
+	{ memLimit: 16777216, opsLimit: 5 },  // 16MB
 ];
 
 /**

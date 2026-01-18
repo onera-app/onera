@@ -72,8 +72,22 @@ export function getDeviceId(): string | null {
 }
 
 /**
- * Generate a browser fingerprint for additional entropy
- * This is mixed with the device ID and server secret for key derivation
+ * Generate a browser fingerprint for additional entropy.
+ * This is mixed with the device ID and server secret for key derivation.
+ *
+ * SECURITY NOTE: This fingerprint provides anti-tampering, NOT strong security.
+ * The real security comes from the server-provided deviceSecret.
+ * Fingerprint components may change on browser/OS/display updates.
+ *
+ * Components:
+ * - userAgent: Browser/OS identifier (can change on browser updates)
+ * - language: User's language setting
+ * - timezone: User's timezone
+ * - screen dimensions: May change with display configuration changes
+ * - colorDepth: Display color depth
+ *
+ * If fingerprint changes, the user will need to re-register the device
+ * or use an alternative unlock method (passkey, password, recovery phrase).
  */
 function getBrowserFingerprint(): string {
   if (typeof navigator === 'undefined') {
