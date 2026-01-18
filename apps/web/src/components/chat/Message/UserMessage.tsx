@@ -9,6 +9,7 @@ import type { MessageContent } from '@onera/types';
 interface UserMessageProps {
   content: string | MessageContent[];
   onEdit?: (newContent: string) => void;
+  onDelete?: () => void;
   onCopy?: () => void;
   branchInfo?: BranchInfo | null;
   onPreviousBranch?: () => void;
@@ -55,6 +56,7 @@ function getDocuments(content: string | MessageContent[]): DocumentInfo[] {
 export const UserMessage = memo(function UserMessage({
   content,
   onEdit,
+  onDelete,
   onCopy,
   branchInfo,
   onPreviousBranch,
@@ -159,11 +161,12 @@ export const UserMessage = memo(function UserMessage({
       data-role="user"
     >
       <div className="flex w-full items-start gap-2 md:gap-3 justify-end">
-        {/* Actions (show on hover, left of bubble) */}
-        <div className="self-center flex items-center gap-1 opacity-0 group-hover/message:opacity-100 transition-opacity duration-200">
+        {/* Actions (visible with subtle opacity, full on hover) */}
+        <div className="self-center flex items-center gap-1 opacity-50 group-hover/message:opacity-100 transition-opacity duration-200">
           <MessageActions
             onCopy={handleCopy}
             onEdit={onEdit ? handleStartEdit : undefined}
+            onDelete={onDelete}
             isUser
             branchInfo={branchInfo}
             onPreviousBranch={onPreviousBranch}

@@ -14,6 +14,7 @@ import {
   createMessagesList,
   createBranchFromEdit,
   switchToBranch,
+  deleteMessage,
 } from '@/lib/messageTree';
 import { MessageInput, type MessageInputOptions } from '@/components/chat/MessageInput';
 import { ChatNavbar } from '@/components/chat/ChatNavbar';
@@ -787,6 +788,50 @@ export function ChatPage() {
     }
   }, [chat, chatId, selectedModelId, isReady, displayMessages, setMessages, sendMessage]);
 
+  // Handle message deletion
+  const handleDeleteMessage = useCallback(async (messageId: string) => {
+    if (!chat || !chatId || !chat.encryptedChatKey || !chat.chatKeyNonce) return;
+
+    try {
+      // Delete the message and its children from history
+      const newHistory = deleteMessage(currentHistoryRef.current, messageId, true);
+
+      // Update history ref
+      currentHistoryRef.current = newHistory;
+
+      // Encrypt and save to server
+      const encrypted = encryptChatContent(
+        chatId,
+        chat.encryptedChatKey,
+        chat.chatKeyNonce,
+        newHistory as unknown as Record<string, unknown>
+      );
+
+      await updateChatMutation.mutateAsync({
+        id: chatId,
+        data: {
+          encryptedChat: encrypted.encryptedChat,
+          chatNonce: encrypted.chatNonce,
+        },
+      });
+
+      // Update AI messages to reflect the deletion
+      const newMessages = createMessagesList(newHistory);
+      const uiMessages = newMessages.map(toUIMessage);
+      setMessages(uiMessages);
+
+      // Clear follow-ups if we deleted the last message
+      if (newMessages.length === 0 || newMessages[newMessages.length - 1]?.role !== 'assistant') {
+        setFollowUps([]);
+      }
+
+      toast.success('Message deleted');
+    } catch (error) {
+      console.error('Failed to delete message:', error);
+      toast.error('Failed to delete message');
+    }
+  }, [chat, chatId, updateChatMutation, setMessages]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full bg-background">
@@ -845,6 +890,7 @@ export function ChatPage() {
           isStreaming={isStreaming}
           onEditMessage={handleEditMessage}
           onRegenerateMessage={handleRegenerateMessage}
+          onDeleteMessage={handleDeleteMessage}
           onSwitchBranch={handleSwitchBranch}
           onSendMessage={handleSendMessage}
           inputDisabled={!isUnlocked || !selectedModelId}

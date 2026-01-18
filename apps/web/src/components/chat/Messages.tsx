@@ -67,6 +67,7 @@ interface MessagesProps {
   isStreaming?: boolean;
   onEditMessage?: (messageId: string, newContent: string) => void;
   onRegenerateMessage?: (messageId: string, options?: RegenerateOptions) => void;
+  onDeleteMessage?: (messageId: string) => void;
   onSwitchBranch?: (messageId: string) => void;
   /** Callback when suggested action is clicked in empty state */
   onSendMessage?: (content: string) => void;
@@ -82,6 +83,7 @@ export const Messages = memo(function Messages({
   isStreaming,
   onEditMessage,
   onRegenerateMessage,
+  onDeleteMessage,
   onSwitchBranch,
   onSendMessage,
   inputDisabled,
@@ -197,6 +199,7 @@ export const Messages = memo(function Messages({
                     <UserMessage
                       content={message.content}
                       onEdit={onEditMessage ? (newContent) => onEditMessage(message.id, newContent) : undefined}
+                      onDelete={onDeleteMessage ? () => onDeleteMessage(message.id) : undefined}
                       branchInfo={branchInfo}
                       onPreviousBranch={() => handlePreviousBranch(message.id)}
                       onNextBranch={() => handleNextBranch(message.id)}
@@ -227,6 +230,7 @@ export const Messages = memo(function Messages({
                         ? (options) => onRegenerateMessage(message.id, options)
                         : undefined
                     }
+                    onDelete={onDeleteMessage ? () => onDeleteMessage(message.id) : undefined}
                     branchInfo={branchInfo}
                     onPreviousBranch={() => handlePreviousBranch(message.id)}
                     onNextBranch={() => handleNextBranch(message.id)}

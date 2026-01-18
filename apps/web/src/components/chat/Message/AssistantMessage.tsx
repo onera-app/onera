@@ -51,6 +51,7 @@ interface AssistantMessageProps {
   isLoading?: boolean;
   onCopy?: () => void;
   onRegenerate?: (options?: RegenerateOptions) => void;
+  onDelete?: () => void;
   branchInfo?: BranchInfo | null;
   onPreviousBranch?: () => void;
   onNextBranch?: () => void;
@@ -65,6 +66,7 @@ export const AssistantMessage = memo(function AssistantMessage({
   isLoading,
   onCopy,
   onRegenerate,
+  onDelete,
   branchInfo,
   onPreviousBranch,
   onNextBranch,
@@ -229,10 +231,11 @@ export const AssistantMessage = memo(function AssistantMessage({
           {/* Actions and Metadata */}
           {!isLoading && content && (
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1 opacity-0 group-hover/message:opacity-100 transition-opacity duration-200">
+              <div className="flex items-center gap-1 opacity-50 group-hover/message:opacity-100 transition-opacity duration-200">
                 <MessageActions
                   onCopy={handleCopy}
                   onRegenerate={onRegenerate}
+                  onDelete={onDelete}
                   isUser={false}
                   branchInfo={branchInfo}
                   onPreviousBranch={onPreviousBranch}
