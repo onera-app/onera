@@ -60,9 +60,18 @@ export function SSOCallbackPage() {
   const { registerPasskey, isRegistering: isRegisteringPasskey } = usePasskeyRegistration();
   const { setupPasswordEncryption, isSettingUp: isSettingUpPassword } = usePasswordSetup();
 
+  // tRPC utils for cache invalidation
+  const trpcUtils = trpc.useUtils();
+
   // tRPC mutations for E2EE
   const keySharesQuery = trpc.keyShares.get.useQuery(undefined, { enabled: false });
-  const createKeySharesMutation = trpc.keyShares.create.useMutation();
+  const createKeySharesMutation = trpc.keyShares.create.useMutation({
+    onSuccess: () => {
+      // Invalidate the keyShares.check query so AppLayout doesn't show "Encryption Setup Required"
+      trpcUtils.keyShares.check.invalidate();
+      trpcUtils.keyShares.get.invalidate();
+    },
+  });
   const registerDeviceMutation = trpc.devices.register.useMutation();
   const updateLastSeenMutation = trpc.devices.updateLastSeen.useMutation();
 
@@ -145,7 +154,7 @@ export function SSOCallbackPage() {
         });
 
         toast.info('Please enter your recovery phrase to unlock your data.');
-        navigate({ to: '/' });
+        navigate({ to: '/app' });
       } else {
         // New user - register device first to get deviceSecret, then setup E2EE keys
         // Step 1: Register device to get server-generated deviceSecret
@@ -230,7 +239,7 @@ export function SSOCallbackPage() {
       }
       await setupPasswordEncryption(password, masterKey);
       toast.success('Encryption password set! Setup complete.');
-      navigate({ to: '/' });
+      navigate({ to: '/app' });
     } catch (err) {
       setPasswordError(err instanceof Error ? err.message : 'Failed to set up password');
     }
@@ -245,7 +254,7 @@ export function SSOCallbackPage() {
       }
       await registerPasskey(masterKey, getDeviceName());
       toast.success('Passkey registered! Setup complete.');
-      navigate({ to: '/' });
+      navigate({ to: '/app' });
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Registration failed');
       // Don't show error for user cancellation
@@ -258,7 +267,7 @@ export function SSOCallbackPage() {
 
   const handleSkipPasskey = () => {
     toast.success('Setup complete! Welcome to Onera.');
-    navigate({ to: '/' });
+    navigate({ to: '/app' });
   };
 
   // Processing step

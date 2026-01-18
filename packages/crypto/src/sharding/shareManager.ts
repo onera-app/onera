@@ -198,7 +198,7 @@ export function verifyShares(shares: KeyShares, expectedMasterKey: Uint8Array): 
  * Uses BLAKE2b for initial hashing, then crypto_kdf for proper key derivation
  *
  * @param identifier - The input identifier (e.g., device ID + fingerprint + secret)
- * @param context - Context string for domain separation (max 16 chars used)
+ * @param context - Context string for domain separation (exactly 8 chars used for KDF)
  * @param salt - Optional additional salt for extra entropy
  */
 export function deriveShareEncryptionKey(
@@ -209,9 +209,9 @@ export function deriveShareEncryptionKey(
   const sodium = getSodium();
   const identifierBytes = new TextEncoder().encode(identifier);
 
-  // Use 16-byte context for KDF (padded or truncated as needed)
-  // libsodium crypto_kdf requires exactly 16-byte context
-  const kdfContext = context.padEnd(16, '\0').slice(0, 16);
+  // Use 8-byte context for KDF (padded or truncated as needed)
+  // libsodium crypto_kdf requires exactly 8-byte (crypto_kdf_CONTEXTBYTES) context
+  const kdfContext = context.padEnd(8, '\0').slice(0, 8);
 
   // Derive master key material from identifier (and optional salt)
   // This combines all entropy sources into a uniform 32-byte key
