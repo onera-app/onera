@@ -15,7 +15,7 @@ import { generateSecretKey } from '../sodium/symmetric';
 import { generateKeyPair, type KeyPair } from '../sodium/asymmetric';
 import { encryptKey, decryptKey } from '../sodium/symmetric';
 import { toBase64, fromBase64, secureZero, type EncryptedData } from '../sodium/utils';
-import { type RecoveryKeyInfo } from '../sodium/recoveryKey';
+import { type RecoveryKeyInfo, mnemonicToRecoveryKey } from '../sodium/recoveryKey';
 
 import {
   splitMasterKey,
@@ -23,7 +23,7 @@ import {
   verifyShares,
   type KeyShares,
 } from './shareManager';
-import { storeDeviceShare, getOrCreateDeviceId } from './deviceShare';
+import { storeDeviceShare, getOrCreateDeviceId, hasDeviceShare } from './deviceShare';
 import { serializeAuthShare } from './authShare';
 import {
   encryptRecoveryShareWithKey,
@@ -287,9 +287,6 @@ export function unlockWithRecoveryPhrase(
     publicKey: string;
   }
 ): DecryptedKeys {
-  // Import here to avoid circular dependency
-  const { mnemonicToRecoveryKey } = require('../sodium/recoveryKey');
-
   // Derive recovery key from mnemonic
   const recoveryKey = mnemonicToRecoveryKey(mnemonic);
 
@@ -382,6 +379,5 @@ export function getCurrentDeviceShare(): Uint8Array | null {
  * Check if current device has a device share stored
  */
 export function hasCurrentDeviceShare(): boolean {
-  const { hasDeviceShare } = require('./deviceShare');
   return hasDeviceShare();
 }
