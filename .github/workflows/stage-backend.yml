@@ -37,6 +37,7 @@ jobs:
         working-directory: apps/server
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_STAGE }}
+          WEBAUTHN_RP_ID: staging.onera.app
         run: bun run db:migrate
 
       - name: Prepare deployment package

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, ShieldCheck, AlertTriangle, Fingerprint, ArrowRight, KeyRound, Eye, EyeOff } from 'lucide-react';
+import { Loader2, ShieldCheck, AlertTriangle, Fingerprint, ArrowRight, KeyRound, Eye, EyeOff, Lock } from 'lucide-react';
 import {
   setupUserKeysWithSharding,
   getOrCreateDeviceId,
@@ -19,6 +19,7 @@ import { trpc } from '@/lib/trpc';
 import { usePasskeySupport } from '@/hooks/useWebAuthnSupport';
 import { usePasskeyRegistration } from '@/hooks/useWebAuthn';
 import { usePasswordSetup } from '@/hooks/usePasswordUnlock';
+import { RecoveryPhraseDisplay } from '@/components/e2ee/RecoveryPhraseDisplay';
 
 type CallbackStep = 'processing' | 'recovery' | 'confirm' | 'unlock-method' | 'passkey' | 'password' | 'error';
 
@@ -310,45 +311,33 @@ export function SSOCallbackPage() {
   if (step === 'recovery' && recoveryInfo) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-        <div className="w-full max-w-md">
-          <Card>
-            <CardHeader className="text-center space-y-4">
-              <div className="mx-auto w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <ShieldCheck className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <CardTitle className="text-2xl">Save Your Recovery Phrase</CardTitle>
-                <CardDescription>
-                  Write these words down and store them safely
-                </CardDescription>
-              </div>
-            </CardHeader>
+        {/* Decorative background elements */}
+        <div className="pointer-events-none fixed inset-0 overflow-hidden">
+          <div className="absolute -left-1/4 -top-1/4 h-1/2 w-1/2 rounded-full bg-gradient-to-br from-amber-500/5 to-transparent blur-3xl" />
+          <div className="absolute -bottom-1/4 -right-1/4 h-1/2 w-1/2 rounded-full bg-gradient-to-tl from-orange-500/5 to-transparent blur-3xl" />
+        </div>
 
-            <CardContent className="space-y-4">
-              <Alert className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20">
-                <AlertTriangle className="h-4 w-4 text-amber-600" />
-                <AlertDescription className="text-amber-800 dark:text-amber-200">
-                  Write down these {recoveryInfo.wordCount} words and store them safely. You'll need them
-                  to recover your account on new devices or if you lose access.
-                </AlertDescription>
-              </Alert>
+        <div className="relative w-full max-w-lg">
+          {/* Header */}
+          <div className="mb-6 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/20 via-orange-500/20 to-red-500/10 ring-1 ring-amber-500/20">
+              <Lock className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+            </div>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Save Your Recovery Phrase
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              This phrase is the master key to your encrypted data
+            </p>
+          </div>
 
-              <div className="p-4 bg-muted rounded-lg font-mono text-sm space-y-2">
-                {recoveryInfo.formattedGroups.map((group, idx) => (
-                  <div key={idx} className="flex gap-4">
-                    {group.map((word, wordIdx) => (
-                      <span key={wordIdx} className="flex-1">
-                        <span className="text-muted-foreground mr-1">{idx * 4 + wordIdx + 1}.</span>
-                        {word}
-                      </span>
-                    ))}
-                  </div>
-                ))}
-              </div>
-
-              <Button onClick={() => setStep('confirm')} className="w-full">
-                I've saved my recovery phrase
-              </Button>
+          {/* Recovery Phrase Card */}
+          <Card className="border-border/50 shadow-xl shadow-black/5">
+            <CardContent className="p-6">
+              <RecoveryPhraseDisplay
+                recoveryInfo={recoveryInfo}
+                onContinue={() => setStep('confirm')}
+              />
             </CardContent>
           </Card>
         </div>
