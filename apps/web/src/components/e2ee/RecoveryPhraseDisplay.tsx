@@ -108,12 +108,12 @@ Delete this file after storing the phrase safely.
 
         <div className="rounded-xl border bg-gradient-to-b from-muted/30 to-muted/60 p-1">
           <div className="rounded-lg bg-background/80 p-4 backdrop-blur-sm">
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {words.map((word, index) => (
                 <div
                   key={index}
                   className={cn(
-                    "group relative flex items-center gap-2 rounded-lg border border-border/50 bg-muted/30 px-3 py-2.5 transition-all duration-200",
+                    "group relative flex items-center gap-2 rounded-lg border border-border/50 bg-muted/30 px-2.5 py-2 transition-all duration-200 overflow-hidden",
                     "hover:border-primary/30 hover:bg-muted/50",
                     "animate-in fade-in-up"
                   )}
@@ -122,7 +122,7 @@ Delete this file after storing the phrase safely.
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-primary/10 text-[10px] font-semibold tabular-nums text-primary">
                     {index + 1}
                   </span>
-                  <span className="font-mono text-sm font-medium tracking-tight">
+                  <span className="font-mono text-xs font-medium tracking-tight truncate">
                     {word}
                   </span>
                 </div>
