@@ -80,7 +80,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['libsodium-wrappers-sumo'],
+    exclude: ['libsodium-wrappers-sumo', 'libsodium-sumo'],
     esbuildOptions: {
       target: 'esnext',
       define: {
