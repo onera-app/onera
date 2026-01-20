@@ -43,25 +43,29 @@ export const MessageInput = memo(function MessageInput({
   // Use rich text input if enabled
   if (useRichTextInput) {
     return (
-      <RichTextMessageInput
+      <div className="w-full max-w-3xl mx-auto px-4 pb-4">
+        <RichTextMessageInput
+          onSend={onSend}
+          disabled={disabled}
+          placeholder={placeholder}
+          onStop={onStop}
+          isStreaming={isStreaming}
+        />
+      </div>
+    );
+  }
+
+  // Fallback to simple textarea input
+  return (
+    <div className="w-full max-w-3xl mx-auto px-4 pb-4">
+      <SimpleMessageInput
         onSend={onSend}
         disabled={disabled}
         placeholder={placeholder}
         onStop={onStop}
         isStreaming={isStreaming}
       />
-    );
-  }
-
-  // Fallback to simple textarea input
-  return (
-    <SimpleMessageInput
-      onSend={onSend}
-      disabled={disabled}
-      placeholder={placeholder}
-      onStop={onStop}
-      isStreaming={isStreaming}
-    />
+    </div>
   );
 });
 
@@ -81,6 +85,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
   const [searchEnabled, setSearchEnabled] = useState(false);
   const [searchProvider, setSearchProvider] = useState<SearchProvider | undefined>();
   const [isSearching] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -288,17 +293,15 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
   const canSend = (value.trim().length > 0 || readyAttachments.length > 0) && !disabled;
 
   return (
-    <div className="relative w-full max-w-3xl mx-auto">
+    <div className="relative w-full">
       {/* Main input container */}
       <div
         ref={containerRef}
         className={cn(
-          'relative rounded-xl overflow-hidden',
-          'bg-background',
-          'border border-input',
-          'shadow-sm',
-          'transition-all duration-200',
-          'focus-within:ring-1 focus-within:ring-ring',
+          'relative rounded-[26px] overflow-hidden transition-all duration-200 ease-in-out',
+          'bg-secondary/40 backdrop-blur-sm',
+          'border border-transparent',
+          isFocused ? 'bg-background shadow-lg ring-1 ring-ring/50' : 'hover:bg-secondary/60',
           disabled && 'opacity-60'
         )}
         onDragEnter={handleDragEnter}
@@ -311,7 +314,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
 
         {/* Attachment previews */}
         {attachments.length > 0 && (
-          <div className="px-4 pt-3">
+          <div className="px-4 pt-3 pb-1">
             <AttachmentPreview
               attachments={attachments}
               onRemove={handleRemoveAttachment}
@@ -320,7 +323,15 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
         )}
 
         {/* Textarea row */}
-        <div className="flex items-end">
+        <div className="flex items-end pl-3 pr-2 py-2 gap-2">
+          {/* Attach file button */}
+          <div className="pb-0.5">
+            <AttachmentButton
+              onFilesSelected={handleFilesSelected}
+              disabled={disabled || isStreaming}
+            />
+          </div>
+
           {/* Textarea */}
           <Textarea
             ref={textareaRef}
@@ -329,27 +340,24 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
             onKeyDown={handleKeyDown}
             onInput={handleInput}
             onPaste={handlePaste}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             placeholder={placeholder}
             disabled={disabled || isStreaming}
             rows={1}
             className={cn(
               'flex-1 w-full bg-transparent resize-none border-0 shadow-none',
-              'px-4 py-4',
+              'px-0 py-2.5',
               'focus-visible:ring-0',
               'disabled:cursor-not-allowed',
-              'max-h-[200px] min-h-[56px]',
-              'text-body leading-relaxed'
+              'max-h-[200px] min-h-[44px]',
+              'text-base leading-relaxed',
+              'placeholder:text-muted-foreground/70'
             )}
           />
 
           {/* Right side actions */}
-          <div className="flex items-center gap-1 pr-3 pb-3">
-            {/* Attach file button */}
-            <AttachmentButton
-              onFilesSelected={handleFilesSelected}
-              disabled={disabled || isStreaming}
-            />
-
+          <div className="flex items-center gap-2 pb-1">
             {/* Search toggle */}
             <SearchToggle
               enabled={searchEnabled}
@@ -367,9 +375,9 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
                   <Button
                     onClick={onStop}
                     size="icon"
-                    className="h-9 w-9"
+                    className="h-8 w-8 rounded-full bg-foreground text-background hover:bg-foreground/90 transition-all duration-200"
                   >
-                    <Square className="h-4 w-4 fill-current" />
+                    <Square className="h-3 w-3 fill-current" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Stop generating</TooltipContent>
@@ -381,9 +389,14 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
                     onClick={handleSubmit}
                     disabled={!canSend}
                     size="icon"
-                    className="h-9 w-9"
+                    className={cn(
+                      "h-8 w-8 rounded-full transition-all duration-200",
+                      canSend
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                        : "bg-muted text-muted-foreground opacity-50 cursor-not-allowed"
+                    )}
                   >
-                    <ArrowUp className="h-5 w-5" />
+                    <ArrowUp className="h-4 w-4" strokeWidth={2.5} />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Send message</TooltipContent>
@@ -394,21 +407,12 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
       </div>
 
       {/* Keyboard hints */}
-      <div className="flex items-center justify-center mt-2.5 gap-3 text-caption text-muted-foreground">
-        <div className="flex items-center gap-1.5">
-          <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-micro">
-            Enter
-          </kbd>
-          <span>send</span>
-        </div>
-        <span className="text-border">/</span>
-        <div className="flex items-center gap-1.5">
-          <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-micro">
-            Shift+Enter
-          </kbd>
-          <span>new line</span>
+      <div className="mt-2 text-center">
+        <div className="inline-flex items-center gap-3 text-[10px] text-muted-foreground/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100 peer-focus-within:opacity-100">
+          <span>Use <kbd className="font-sans">Shift + Return</kbd> for new line</span>
         </div>
       </div>
     </div>
   );
 });
+

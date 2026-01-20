@@ -234,15 +234,15 @@ export const UserMessage = memo(function UserMessage({
             </div>
           )}
 
-          {/* Text bubble - Vercel style blue bubble */}
+          {/* Text bubble - Vercel style blue bubble equivalent using theme */}
           {textContent && (
             <div
-              className="wrap-break-word w-fit rounded-2xl px-3 py-2 text-right text-white"
-              style={{ backgroundColor: '#006cff' }}
+              className="wrap-break-word w-fit rounded-[20px] px-4 py-2.5 text-right bg-primary text-primary-foreground shadow-sm"
             >
               <p className="whitespace-pre-wrap break-words text-body leading-relaxed">{textContent}</p>
             </div>
           )}
+
 
           {edited && (
             <span className="text-xs text-muted-foreground mt-1 text-right">edited</span>

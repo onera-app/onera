@@ -89,22 +89,22 @@ export function ChatPage() {
 
         const title = rawChat.encryptedTitle && rawChat.titleNonce
           ? decryptChatTitle(
-              rawChat.id,
-              rawChat.encryptedChatKey,
-              rawChat.chatKeyNonce,
-              rawChat.encryptedTitle,
-              rawChat.titleNonce
-            )
+            rawChat.id,
+            rawChat.encryptedChatKey,
+            rawChat.chatKeyNonce,
+            rawChat.encryptedTitle,
+            rawChat.titleNonce
+          )
           : 'Untitled';
 
         const history: ChatHistory = rawChat.encryptedChat && rawChat.chatNonce
           ? decryptChatContent(
-              rawChat.id,
-              rawChat.encryptedChatKey,
-              rawChat.chatKeyNonce,
-              rawChat.encryptedChat,
-              rawChat.chatNonce
-            ) as unknown as ChatHistory
+            rawChat.id,
+            rawChat.encryptedChatKey,
+            rawChat.chatKeyNonce,
+            rawChat.encryptedChat,
+            rawChat.chatNonce
+          ) as unknown as ChatHistory
           : { currentId: null, messages: {} };
 
         // Get linear messages from history for display
@@ -420,7 +420,7 @@ export function ChatPage() {
         setFollowUps([]);
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chat?.id]); // Only depend on chat.id to avoid re-running on every message update
 
   // Derive streaming state from AI SDK status
@@ -770,8 +770,8 @@ export function ChatPage() {
         userContent = `${userContent}\n\n${options.modifier}`;
       }
 
-      // Set up messages for regeneration (all messages up to the user message)
-      const uiMessages = messagesToKeep.map(toUIMessage);
+      // Set up messages for regeneration (exclude the user message as sendMessage will add it back)
+      const uiMessages = messagesToKeep.slice(0, -1).map(toUIMessage);
       setMessages(uiMessages);
 
       // Store the pending user message for persistence (without modifier in stored content)
@@ -866,22 +866,29 @@ export function ChatPage() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-background">
-      {/* Chat header */}
-      <header className="flex items-center justify-between px-4 py-3 border-b border-border">
-        <ChatNavbar
-          title={chat?.title || 'Chat'}
-          chatId={chatId || ''}
-          onTitleChange={isUnlocked ? handleTitleChange : undefined}
-          onDelete={handleDelete}
-        />
-        <div className="flex-shrink-0">
+    <div className="relative flex flex-col h-full w-full bg-background overflow-hidden">
+      {/* Background pattern (optional, adds texture) */}
+      <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02] pointer-events-none" />
+
+      {/* Chat header - Absolute overlay */}
+      <ChatNavbar
+        title={chat?.title || 'Chat'}
+        chatId={chatId || ''}
+        onTitleChange={isUnlocked ? handleTitleChange : undefined}
+        onDelete={handleDelete}
+      >
+        <div className="hidden md:block">
           <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />
         </div>
-      </header>
+      </ChatNavbar>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-hidden">
+      {/* Mobile Model Selector - visible only on small screens below navbar */}
+      <div className="md:hidden absolute top-16 left-0 right-0 z-20 px-4 py-2 bg-background/80 backdrop-blur border-b border-border/50">
+        <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />
+      </div>
+
+      {/* Messages - Takes full space */}
+      <div className="relative flex-1 w-full h-full">
         <Messages
           messages={displayMessages}
           history={chat.history}
@@ -897,8 +904,8 @@ export function ChatPage() {
         />
       </div>
 
-      {/* Input area */}
-      <div className="p-4 bg-background">
+      {/* Input area - Floating at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 p-4 bg-gradient-to-t from-background via-background/80 to-transparent pb-6 pt-10">
         <div className="max-w-3xl mx-auto">
           {/* Follow-up suggestions */}
           {!isStreaming && followUps.length > 0 && (
@@ -911,7 +918,7 @@ export function ChatPage() {
 
           {/* Loading follow-ups indicator */}
           {isGeneratingFollowUps && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3 px-2">
               <Loader2 className="h-3 w-3 animate-spin" />
               <span>Generating suggestions...</span>
             </div>
@@ -926,8 +933,8 @@ export function ChatPage() {
               !isUnlocked
                 ? 'Unlock E2EE to send messages'
                 : !selectedModelId
-                ? 'Select a model to continue'
-                : 'Message Onera...'
+                  ? 'Select a model to continue'
+                  : 'Message Onera...'
             }
           />
         </div>

@@ -1,5 +1,5 @@
 import { useRef, useEffect, memo, useCallback } from 'react';
-import type { ChatMessage, ChatHistory } from '@onera/types';
+import { type ChatMessage, type ChatHistory } from '@onera/types';
 import { UserMessage, AssistantMessage, type BranchInfo, type RegenerateOptions } from './Message';
 import { cn } from '@/lib/utils';
 import { getMessageText } from '@/lib/chat/messageUtils';
@@ -44,7 +44,7 @@ export type MessagePart =
   | SourcePart
   | { type: 'file'; data: string; mediaType: string; url?: string; filename?: string }
   // Catch-all for other AI SDK part types
-  | { type: string; [key: string]: unknown };
+  | { type: string;[key: string]: unknown };
 
 // Message metadata for token usage, timing, etc.
 export interface MessageMetadata {
@@ -142,18 +142,18 @@ export const Messages = memo(function Messages({
     return (
       <div className="flex flex-col items-center justify-center h-full px-4">
         {/* Onera branding / empty state */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold text-foreground mb-2">
-            How can I help you today?
+        <div className="text-center mb-10 max-w-lg mx-auto">
+          <h1 className="text-4xl font-bold tracking-tight mb-4 text-foreground/90">
+            How can I help you?
           </h1>
-          <p className="text-muted-foreground">
-            Start a conversation or choose a suggestion below
+          <p className="text-lg text-muted-foreground/80 font-light leading-relaxed">
+            I'm here to assist with coding, analysis, writing, and more.
           </p>
         </div>
 
         {/* Suggested actions grid */}
         {onSendMessage && (
-          <div className="w-full max-w-2xl">
+          <div className="w-full max-w-2xl px-4">
             <SuggestedActions
               onSend={onSendMessage}
               disabled={inputDisabled}
@@ -169,10 +169,10 @@ export const Messages = memo(function Messages({
 
   return (
     <div className="relative h-full">
-      <div ref={containerRef} className="h-full overflow-y-auto">
+      <div ref={containerRef} className="h-full overflow-y-auto scroll-smooth">
         {/* Messages container with generous padding */}
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
-          <div className="space-y-8 message-gap">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-24 pb-96">
+          <div className="space-y-10 message-gap">
             {messages.map((message, index) => {
               const textContent = getMessageText(message);
               const isLastMessage = index === messages.length - 1;
@@ -241,17 +241,17 @@ export const Messages = memo(function Messages({
           </div>
 
           {/* Scroll anchor with padding */}
-          <div ref={endRef} className="h-8" />
+          <div ref={endRef} className="h-12" />
         </div>
       </div>
 
       {/* Scroll to bottom button - appears when not at bottom */}
       {!isAtBottom && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
           <Button
             variant="outline"
             size="icon"
-            className="rounded-full shadow-lg bg-background/95 backdrop-blur-sm hover:bg-background"
+            className="h-8 w-8 rounded-full shadow-md bg-background/80 backdrop-blur-sm border-border/50 hover:bg-background transition-all duration-200"
             onClick={() => scrollToBottom('smooth')}
           >
             <ArrowDown className="h-4 w-4" />
@@ -262,3 +262,4 @@ export const Messages = memo(function Messages({
     </div>
   );
 });
+
