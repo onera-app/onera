@@ -65,8 +65,15 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
   const [searchProvider, setSearchProvider] = useState<SearchProvider | undefined>();
   const [isSearching] = useState(false);
   const [models, setModels] = useState<ModelOption[]>([]);
+  const [editorHasContent, setEditorHasContent] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const placeholderRef = useRef(placeholder);
+
+  // Keep placeholder ref in sync
+  useEffect(() => {
+    placeholderRef.current = placeholder;
+  }, [placeholder]);
 
   // E2EE and credentials for model mentions
   const { isUnlocked } = useE2EE();
@@ -121,7 +128,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
         },
       }),
       Placeholder.configure({
-        placeholder,
+        placeholder: () => placeholderRef.current,
         emptyEditorClass: 'is-editor-empty',
       }),
       Mention.configure({
@@ -216,6 +223,10 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
         return false;
       },
     },
+    // Track content changes to update canSend state
+    onUpdate: ({ editor }) => {
+      setEditorHasContent(!editor.isEmpty);
+    },
   });
 
   // Focus editor on mount
@@ -225,17 +236,11 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
     }
   }, [editor]);
 
-  // Update placeholder when prop changes
+  // Force editor to re-render when placeholder changes (ref is already updated above)
   useEffect(() => {
-    if (editor) {
-      const placeholderExtension = editor.extensionManager.extensions.find(
-        (ext) => ext.name === 'placeholder'
-      );
-      if (placeholderExtension) {
-        placeholderExtension.options.placeholder = placeholder;
-        // Force re-render to update the placeholder display
-        editor.view.dispatch(editor.state.tr);
-      }
+    if (editor && editor.view) {
+      // Dispatch empty transaction to force placeholder decoration to re-render
+      editor.view.dispatch(editor.state.tr);
     }
   }, [editor, placeholder]);
 
@@ -414,11 +419,11 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
     // Reset state
     editor.commands.clearContent();
     setAttachments([]);
+    setEditorHasContent(false);
   }, [editor, attachments, disabled, searchEnabled, searchProvider, onSend, extractMentionedModels]);
 
   const readyAttachments = attachments.filter((a) => a.status === 'ready');
-  const canSend =
-    (editor && !editor.isEmpty) || readyAttachments.length > 0;
+  const canSend = editorHasContent || readyAttachments.length > 0;
 
   return (
     <div className="relative w-full max-w-3xl mx-auto">
