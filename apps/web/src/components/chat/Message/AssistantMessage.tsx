@@ -232,15 +232,15 @@ export const AssistantMessage = memo(function AssistantMessage({
 
 /**
  * ThinkingMessage - shown while waiting for initial response
+ * Displays animated dots as a typing indicator, aligned with text content
  */
 export const ThinkingMessage = () => {
   return (
-    <div className="flex items-center gap-1 p-0 text-muted-foreground text-sm">
-      <span className="animate-pulse">Thinking</span>
-      <span className="inline-flex">
-        <span className="animate-bounce [animation-delay:0ms]">.</span>
-        <span className="animate-bounce [animation-delay:150ms]">.</span>
-        <span className="animate-bounce [animation-delay:300ms]">.</span>
+    <div className="flex items-center h-6 mt-2 text-muted-foreground/60">
+      <span className="inline-flex items-center gap-1">
+        <span className="w-1.5 h-1.5 bg-current rounded-full animate-bounce [animation-delay:0ms]" />
+        <span className="w-1.5 h-1.5 bg-current rounded-full animate-bounce [animation-delay:150ms]" />
+        <span className="w-1.5 h-1.5 bg-current rounded-full animate-bounce [animation-delay:300ms]" />
       </span>
     </div>
   );

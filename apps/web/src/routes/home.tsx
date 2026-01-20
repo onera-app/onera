@@ -1,21 +1,17 @@
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
-import type { UIMessage } from 'ai';
+import { v4 as uuidv4 } from 'uuid';
 import { useE2EE } from '@/providers/E2EEProvider';
 import { useModelStore } from '@/stores/modelStore';
 import { useUIStore } from '@/stores/uiStore';
-import { useCreateChat, useUpdateChat } from '@/hooks/queries/useChats';
+import { useCreateChat } from '@/hooks/queries/useChats';
 import { trpc } from '@/lib/trpc';
 import { useCredentials } from '@/hooks/queries/useCredentials';
-import { createEncryptedChat, encryptChatTitle, getChatKey } from '@onera/crypto';
+import { createEncryptedChat } from '@onera/crypto';
 import type { ChatMessage, ChatHistory } from '@onera/types';
-import { toChatMessage, areMessagesEqual } from '@/lib/chat/messageUtils';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { ModelSelector } from '@/components/chat/ModelSelector';
-import { Messages } from '@/components/chat/Messages';
-import { useDirectChat } from '@/hooks/useDirectChat';
-import { generateChatTitle } from '@/lib/ai';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
@@ -35,178 +31,14 @@ export function HomePage() {
   const { openSettingsModal } = useUIStore();
   const { selectedModelId, setSelectedModel } = useModelStore();
   const createChat = useCreateChat();
-  const updateChat = useUpdateChat();
   const utils = trpc.useUtils();
 
   const [isCreating, setIsCreating] = useState(false);
-  const pendingNavigateRef = useRef<string | null>(null);
-  const prevDisplayMessagesRef = useRef<ChatMessage[]>([]);
 
   // Check if user has connections
   const credentials = useCredentials();
   const hasAnyConnections = credentials && credentials.length > 0;
-
-  // Handle message completion
-  const handleFinish = useCallback(async (_message: UIMessage) => {
-    // Chat creation handled in useEffect to access full messages array
-  }, []);
-
-  // Use the direct chat hook with a temporary ID for new chats
-  const {
-    messages: aiMessages,
-    sendMessage,
-    status,
-    stop,
-    isReady,
-    isLoadingCredentials,
-    setMessages,
-  } = useDirectChat({
-    chatId: 'new-chat',
-    onFinish: handleFinish,
-    onError: (error) => {
-      if (error.name !== 'AbortError') {
-        toast.error(error.message || 'Failed to get response');
-      }
-      setIsCreating(false);
-    },
-  });
-
-  // Derive streaming state from AI SDK status
-  const isStreaming = status === 'streaming' || status === 'submitted';
-
-  // Convert AI SDK messages to ChatMessage format for display
-  // Uses ref comparison to return stable reference when content unchanged
-  const displayMessages = useMemo(() => {
-    const result = aiMessages.map(msg => toChatMessage(msg, selectedModelId || undefined));
-
-    // Return same reference if content unchanged to prevent re-renders
-    if (areMessagesEqual(prevDisplayMessagesRef.current, result)) {
-      return prevDisplayMessagesRef.current;
-    }
-    prevDisplayMessagesRef.current = result;
-    return result;
-  }, [aiMessages, selectedModelId]);
-
-  // Monitor for completion and create chat
-  useEffect(() => {
-    const createAndNavigate = async () => {
-      if (isStreaming || aiMessages.length < 2 || !isCreating) {
-        return;
-      }
-
-      const hasUser = aiMessages.some(m => m.role === 'user');
-      const hasAssistant = aiMessages.some(m => m.role === 'assistant');
-
-      if (!hasUser || !hasAssistant || pendingNavigateRef.current) {
-        return;
-      }
-
-      // Set immediately to prevent duplicate calls from concurrent renders
-      pendingNavigateRef.current = 'creating';
-
-      const finalMessages = aiMessages.map(msg => toChatMessage(msg, selectedModelId || undefined));
-      const firstUserMsg = finalMessages.find(m => m.role === 'user');
-      const content = firstUserMsg?.content || 'New Chat';
-      const initialTitle = (typeof content === 'string' ? content : 'New Chat').slice(0, 50) +
-        ((typeof content === 'string' ? content : '').length > 50 ? '...' : '');
-
-      // Build proper ChatHistory tree structure
-      const history: ChatHistory = { currentId: null, messages: {} };
-      let parentId: string | null = null;
-
-      for (const msg of finalMessages) {
-        const msgWithTree: ChatMessage = {
-          ...msg,
-          parentId,
-          childrenIds: [],
-        };
-
-        // Update parent's childrenIds if it exists
-        if (parentId && history.messages[parentId]) {
-          history.messages[parentId] = {
-            ...history.messages[parentId],
-            childrenIds: [...(history.messages[parentId].childrenIds || []), msg.id],
-          };
-        }
-
-        history.messages[msg.id] = msgWithTree;
-        parentId = msg.id;
-      }
-
-      // Set currentId to the last message
-      history.currentId = parentId;
-
-      try {
-        const { data: encryptedData } = await createEncryptedChat(initialTitle, history as unknown as Record<string, unknown>);
-
-        const createdChat = await createChat.mutateAsync({
-          encryptedChatKey: encryptedData.encryptedChatKey,
-          chatKeyNonce: encryptedData.chatKeyNonce,
-          encryptedTitle: encryptedData.encryptedTitle,
-          titleNonce: encryptedData.titleNonce,
-          encryptedChat: encryptedData.encryptedChat,
-          chatNonce: encryptedData.chatNonce,
-        });
-
-        // Pre-populate the cache to avoid loading state on chat page
-        utils.chats.get.setData({ chatId: createdChat.id }, createdChat);
-
-        pendingNavigateRef.current = createdChat.id;
-        navigate({ to: '/app/c/$chatId', params: { chatId: createdChat.id } });
-
-        // Generate AI title asynchronously (fire-and-forget)
-        // Follow-ups are generated by chat.tsx when it loads
-        if (selectedModelId && createdChat.encryptedChatKey && createdChat.chatKeyNonce) {
-          // Ensure chat key is in cache
-          getChatKey(createdChat.id, createdChat.encryptedChatKey, createdChat.chatKeyNonce);
-
-          // Generate title
-          generateChatTitle(finalMessages, selectedModelId)
-            .then(async (generatedTitle) => {
-              if (generatedTitle) {
-                try {
-                  const encrypted = encryptChatTitle(
-                    createdChat.id,
-                    createdChat.encryptedChatKey!,
-                    createdChat.chatKeyNonce!,
-                    generatedTitle
-                  );
-
-                  await updateChat.mutateAsync({
-                    id: createdChat.id,
-                    data: {
-                      encryptedTitle: encrypted.encryptedTitle,
-                      titleNonce: encrypted.titleNonce,
-                    },
-                  });
-
-                  // Invalidate to refresh sidebar
-                  utils.chats.list.invalidate();
-                } catch (titleError) {
-                  console.warn('Failed to update title:', titleError);
-                }
-              }
-            })
-            .catch((err) => {
-              console.warn('Title generation failed:', err);
-            });
-        }
-      } catch (err) {
-        pendingNavigateRef.current = null;
-        toast.error(err instanceof Error ? err.message : 'Failed to create chat');
-        setIsCreating(false);
-      }
-    };
-
-    createAndNavigate();
-  }, [aiMessages, isStreaming, isCreating, selectedModelId, navigate, createChat, updateChat, utils]);
-
-  // Reset state when needed
-  useEffect(() => {
-    return () => {
-      pendingNavigateRef.current = null;
-    };
-  }, []);
+  const isLoadingCredentials = credentials === undefined;
 
   const handleSendMessage = useCallback(async (content: string) => {
     if (!isUnlocked) {
@@ -224,66 +56,65 @@ export function HomePage() {
       return;
     }
 
-    if (!isReady) {
-      if (isLoadingCredentials) {
-        toast.error('Loading credentials...');
-      } else {
-        toast.error('Please add a connection first');
-      }
+    if (isLoadingCredentials) {
+      toast.error('Loading credentials...');
       return;
     }
 
     setIsCreating(true);
-    pendingNavigateRef.current = null;
-    setMessages([]);
 
     try {
-      await sendMessage(content);
+      // Create user message
+      const userMessageId = uuidv4();
+      const userMessage: ChatMessage = {
+        id: userMessageId,
+        role: 'user',
+        content: content,
+        created_at: Date.now(),
+        parentId: null,
+        childrenIds: [],
+      };
+
+      // Build ChatHistory with just the user message
+      const history: ChatHistory = {
+        currentId: userMessageId,
+        messages: {
+          [userMessageId]: userMessage,
+        },
+      };
+
+      // Generate initial title from user message
+      const initialTitle = content.slice(0, 50) + (content.length > 50 ? '...' : '');
+
+      // Encrypt and create chat
+      const { data: encryptedData } = await createEncryptedChat(
+        initialTitle,
+        history as unknown as Record<string, unknown>
+      );
+
+      const createdChat = await createChat.mutateAsync({
+        encryptedChatKey: encryptedData.encryptedChatKey,
+        chatKeyNonce: encryptedData.chatKeyNonce,
+        encryptedTitle: encryptedData.encryptedTitle,
+        titleNonce: encryptedData.titleNonce,
+        encryptedChat: encryptedData.encryptedChat,
+        chatNonce: encryptedData.chatNonce,
+      });
+
+      // Pre-populate the cache to avoid loading state on chat page
+      utils.chats.get.setData({ chatId: createdChat.id }, createdChat);
+
+      // Navigate to chat page with pending flag to trigger AI response
+      navigate({
+        to: '/app/c/$chatId',
+        params: { chatId: createdChat.id },
+        search: { pending: true },
+      });
     } catch (err) {
-      if ((err as Error).name !== 'AbortError') {
-        toast.error(err instanceof Error ? err.message : 'Failed to send message');
-        setIsCreating(false);
-      }
+      toast.error(err instanceof Error ? err.message : 'Failed to create chat');
+      setIsCreating(false);
     }
-  }, [hasAnyConnections, isLoadingCredentials, isReady, isUnlocked, selectedModelId, sendMessage, setMessages]);
-
-  const handleStopStreaming = useCallback(() => {
-    stop();
-    setIsCreating(false);
-  }, [stop]);
-
-  // Show streaming UI if we have messages
-  if (displayMessages.length > 0 || isStreaming) {
-    return (
-      <div className="flex flex-col h-full bg-[#0a0a0a]">
-        {/* Header */}
-        <header className="flex items-center justify-center p-4 border-b border-white/5">
-          <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />
-        </header>
-
-        {/* Messages */}
-        <div className="flex-1 overflow-hidden">
-          <Messages
-            messages={displayMessages}
-            isStreaming={isStreaming}
-          />
-        </div>
-
-        {/* Input */}
-        <div className="p-4 bg-[#0a0a0a]">
-          <div className="max-w-3xl mx-auto">
-            <MessageInput
-              onSend={handleSendMessage}
-              onStop={handleStopStreaming}
-              isStreaming={isStreaming}
-              disabled={!isUnlocked || isCreating}
-              placeholder="Message..."
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  }, [hasAnyConnections, isLoadingCredentials, isUnlocked, selectedModelId, createChat, navigate, utils]);
 
   // Show welcome screen
   return (
@@ -342,7 +173,7 @@ export function HomePage() {
           </div>
 
           {/* Suggestion chips */}
-          {hasAnyConnections && selectedModelId && isUnlocked && (
+          {hasAnyConnections && selectedModelId && isUnlocked && !isCreating && (
             <div className="flex flex-wrap justify-center gap-2">
               {SUGGESTIONS.map((suggestion, index) => {
                 const Icon = suggestion.icon;
@@ -351,6 +182,7 @@ export function HomePage() {
                     key={index}
                     variant="outline"
                     onClick={() => handleSendMessage(suggestion.text)}
+                    disabled={isCreating}
                     className={cn(
                       'bg-transparent border-neutral-800 text-neutral-300 hover:bg-white/5 hover:text-white hover:border-neutral-700',
                       'animate-in fade-in-up',

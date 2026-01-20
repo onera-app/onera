@@ -54,7 +54,7 @@ export const ChatNavbar = memo(function ChatNavbar({
 
   return (
     <header className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 h-14 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5">
-      <div className="flex items-center gap-3 overflow-hidden">
+      <div className="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
         {/* Menu button (shown when sidebar is closed) */}
         {!sidebarOpen && (
           <Button
@@ -62,47 +62,45 @@ export const ChatNavbar = memo(function ChatNavbar({
             size="icon"
             onClick={toggleSidebar}
             title="Open sidebar"
-            className="text-neutral-300 hover:text-white hover:bg-white/5 h-8 w-8"
+            className="text-neutral-300 hover:text-white hover:bg-white/5 h-8 w-8 flex-shrink-0"
           >
             <Menu className="h-5 w-5" />
           </Button>
         )}
 
         {/* Title Section */}
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <div className="flex-1 min-w-0">
-            {isEditing ? (
-              <Input
-                ref={inputRef}
-                type="text"
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleSaveTitle();
-                  if (e.key === 'Escape') {
-                    setEditValue(title);
-                    setIsEditing(false);
-                  }
-                }}
-                onBlur={handleSaveTitle}
-                className="h-8 text-sm font-medium border-transparent bg-white/5 focus-visible:ring-1 focus-visible:ring-white/20 px-2 text-white"
-              />
-            ) : (
-              <button
-                onClick={() => onTitleChange && setIsEditing(true)}
-                className={cn(
-                  'text-sm font-medium truncate text-left max-w-full px-2 py-1 -ml-2 rounded-md transition-colors text-white',
-                  onTitleChange
-                    ? 'hover:bg-white/5 cursor-text'
-                    : 'cursor-default'
-                )}
-                title={onTitleChange ? 'Click to edit title' : title}
-                disabled={!onTitleChange}
-              >
-                {title}
-              </button>
-            )}
-          </div>
+        <div className="flex-1 min-w-0">
+          {isEditing ? (
+            <Input
+              ref={inputRef}
+              type="text"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleSaveTitle();
+                if (e.key === 'Escape') {
+                  setEditValue(title);
+                  setIsEditing(false);
+                }
+              }}
+              onBlur={handleSaveTitle}
+              className="h-8 text-sm font-medium border-transparent bg-white/5 focus-visible:ring-1 focus-visible:ring-white/20 px-2 text-white max-w-md"
+            />
+          ) : (
+            <button
+              onClick={() => onTitleChange && setIsEditing(true)}
+              className={cn(
+                'text-sm font-medium truncate text-left block w-full max-w-lg px-2 py-1 -ml-2 rounded-md transition-colors text-white',
+                onTitleChange
+                  ? 'hover:bg-white/5 cursor-text'
+                  : 'cursor-default'
+              )}
+              title={onTitleChange ? 'Click to edit title' : title}
+              disabled={!onTitleChange}
+            >
+              {title}
+            </button>
+          )}
         </div>
       </div>
 

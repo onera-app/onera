@@ -66,6 +66,8 @@ interface MessagesProps {
   streamingSources?: Source[];
   /** Whether currently streaming */
   isStreaming?: boolean;
+  /** Current model ID - used to show typing indicator with correct model icon */
+  currentModelId?: string;
   onEditMessage?: (messageId: string, newContent: string) => void;
   onRegenerateMessage?: (messageId: string, options?: RegenerateOptions) => void;
   onDeleteMessage?: (messageId: string) => void;
@@ -88,6 +90,7 @@ export const Messages = memo(function Messages({
   streamingParts,
   streamingSources,
   isStreaming,
+  currentModelId,
   onEditMessage,
   onRegenerateMessage,
   onDeleteMessage,
@@ -181,8 +184,8 @@ export const Messages = memo(function Messages({
   return (
     <div className="relative h-full">
       <div ref={containerRef} className="h-full overflow-y-auto scroll-smooth">
-        {/* Messages container with generous padding */}
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-24 pb-96">
+        {/* Messages container */}
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-20 pb-36">
           <div className="space-y-10 message-gap">
             {messages.map((message, index) => {
               const textContent = getMessageText(message);
@@ -247,9 +250,9 @@ export const Messages = memo(function Messages({
                     onNextBranch={() => handleNextBranch(message.id)}
                   />
                   
-                  {/* Follow-ups attached to last assistant message */}
+                  {/* Follow-ups attached to last assistant message - aligned with text content */}
                   {isLastMessage && message.role === 'assistant' && !isStreaming && onFollowUpSelect && (
-                    <div className="mt-4 pl-0">
+                    <div className="mt-4 pl-10 md:pl-11">
                       {isGeneratingFollowUps ? (
                         <div className="flex items-center gap-2 text-xs text-neutral-400">
                           <Loader2 className="h-3 w-3 animate-spin" />
@@ -266,6 +269,17 @@ export const Messages = memo(function Messages({
                 </div>
               );
             })}
+
+            {/* Typing indicator placeholder - shown when streaming but no assistant message yet */}
+            {isStreaming && messages.length > 0 && messages[messages.length - 1].role === 'user' && (
+              <div className="message-enter">
+                <AssistantMessage
+                  content=""
+                  model={currentModelId}
+                  isLoading={true}
+                />
+              </div>
+            )}
           </div>
 
           {/* Scroll anchor with padding */}

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useParams, useNavigate } from '@tanstack/react-router';
+import { useParams, useNavigate, useSearch } from '@tanstack/react-router';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import type { UIMessage } from 'ai';
@@ -20,7 +20,7 @@ import { MessageInput, type MessageInputOptions } from '@/components/chat/Messag
 import { ChatNavbar } from '@/components/chat/ChatNavbar';
 import { ModelSelector } from '@/components/chat/ModelSelector';
 import { useDirectChat } from '@/hooks/useDirectChat';
-import { generateFollowUps, getProviderFromModelId, supportsNativeSearch } from '@/lib/ai';
+import { generateFollowUps, generateChatTitle, getProviderFromModelId, supportsNativeSearch } from '@/lib/ai';
 import { executeSearch, formatSearchResultsForContext, type SearchResult } from '@/lib/search';
 import type { Source } from '@/components/chat/Sources';
 import { useToolsStore, type NativeSearchProvider } from '@/stores/toolsStore';
@@ -41,10 +41,19 @@ interface DecryptedChat {
 
 export function ChatPage() {
   const { chatId } = useParams({ strict: false });
+  const { pending } = useSearch({ strict: false }) as { pending?: boolean };
   const navigate = useNavigate();
   const { isUnlocked } = useE2EE();
   const { selectedModelId, setSelectedModel } = useModelStore();
   const { nativeSearchSettings, getNativeSearchSettings } = useToolsStore();
+
+  // Track if we've triggered the pending response (prevents duplicate calls)
+  const pendingTriggeredRef = useRef(false);
+  // Track if we should skip message sync (for pending chats)
+  // This is managed by effects, not the initializer, to handle navigation between chats
+  const skipSyncRef = useRef(false);
+  // Track the last processed chatId to detect chat changes
+  const lastChatIdRef = useRef<string | undefined>(undefined);
 
   // Follow-up suggestions state
   const [followUps, setFollowUps] = useState<string[]>([]);
@@ -228,27 +237,32 @@ export function ChatPage() {
 
     // Add pending user message to history
     if (pendingUserMessage) {
-      // Check if this user message already exists (regeneration case)
+      // Check if this user message already exists (e.g., pending from home.tsx navigation)
       const existingUserMessage = history.messages[pendingUserMessage.id];
       
-      // Add parentId and childrenIds to user message
-      // Preserve existing childrenIds for regeneration to maintain branches
-      const userMsgWithTree: ChatMessage = {
-        ...pendingUserMessage,
-        parentId,
-        childrenIds: existingUserMessage?.childrenIds || [],
-      };
-
-      // Only update parent's childrenIds if this is a NEW message (not regeneration)
-      if (!existingUserMessage && parentId && history.messages[parentId]) {
-        history.messages[parentId] = {
-          ...history.messages[parentId],
-          childrenIds: [...(history.messages[parentId].childrenIds || []), pendingUserMessage.id],
+      if (existingUserMessage) {
+        // User message already in history - just use it as parent for assistant
+        parentId = pendingUserMessage.id;
+      } else {
+        // New user message - add to history with tree structure
+        const userMsgWithTree: ChatMessage = {
+          ...pendingUserMessage,
+          parentId,
+          childrenIds: [],
         };
-      }
 
-      history.messages[pendingUserMessage.id] = userMsgWithTree;
-      parentId = pendingUserMessage.id;
+        // Update parent's childrenIds
+        if (parentId && history.messages[parentId]) {
+          history.messages[parentId] = {
+            ...history.messages[parentId],
+            childrenIds: [...(history.messages[parentId].childrenIds || []), pendingUserMessage.id],
+          };
+        }
+
+        history.messages[pendingUserMessage.id] = userMsgWithTree;
+        parentId = pendingUserMessage.id;
+      }
+      
       pendingUserMessageRef.current = null; // Clear pending
     }
 
@@ -334,6 +348,37 @@ export function ChatPage() {
           .finally(() => {
             setIsGeneratingFollowUps(false);
           });
+
+        // Generate AI title for new chats (first exchange only)
+        const messageCount = Object.keys(currentHistoryRef.current.messages).length;
+        if (messageCount === 2) {
+          generateChatTitle(messagesForFollowUps, selectedModelId)
+            .then(async (generatedTitle) => {
+              if (generatedTitle) {
+                try {
+                  const encryptedTitle = encryptChatTitle(
+                    chatId,
+                    encryptedChatKey,
+                    chatKeyNonce,
+                    generatedTitle
+                  );
+
+                  await updateChatMutation.mutateAsync({
+                    id: chatId,
+                    data: {
+                      encryptedTitle: encryptedTitle.encryptedTitle,
+                      titleNonce: encryptedTitle.titleNonce,
+                    },
+                  });
+                } catch (titleSaveError) {
+                  console.warn('Failed to save generated title:', titleSaveError);
+                }
+              }
+            })
+            .catch((err) => {
+              console.warn('Failed to generate title:', err);
+            });
+        }
       }
     } catch (saveError) {
       console.error('Failed to save chat:', saveError);
@@ -362,7 +407,21 @@ export function ChatPage() {
   });
 
   // Sync decrypted messages to AI SDK state when chat loads
+  // Skip syncing if this is a pending chat - we'll let the AI SDK handle messages naturally
   useEffect(() => {
+    // Detect if this is a new chat navigation
+    const isNewChat = lastChatIdRef.current !== chatId;
+    if (isNewChat) {
+      lastChatIdRef.current = chatId;
+      // Reset refs for the new chat
+      pendingTriggeredRef.current = false;
+      // Skip sync only if this new chat has pending=true
+      skipSyncRef.current = pending === true;
+    }
+
+    // Skip if this is a pending chat - the pending handler will trigger sendMessage
+    if (skipSyncRef.current) return;
+
     if (chat?.messages && chat.messages.length > 0) {
       const uiMessages = chat.messages.map(toUIMessage);
       setMessages(uiMessages);
@@ -429,7 +488,62 @@ export function ChatPage() {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chat?.id]); // Only depend on chat.id to avoid re-running on every message update
+  }, [chat?.id, chatId, pending]); // Depend on chatId and pending to handle navigation
+
+  // Handle pending response from home.tsx navigation
+  // When navigated with ?pending=true, trigger AI response for the user message
+  useEffect(() => {
+    const triggerPendingResponse = async () => {
+      // Only trigger once per chat
+      if (!pending || pendingTriggeredRef.current || !chat || !isReady || !selectedModelId) {
+        return;
+      }
+
+      // Mark as triggered to prevent duplicate calls
+      pendingTriggeredRef.current = true;
+
+      // Clear the pending param from URL without triggering navigation
+      navigate({
+        to: '/app/c/$chatId',
+        params: { chatId: chatId! },
+        search: {},
+        replace: true,
+      });
+
+      // Get the user message from the chat
+      const messages = chat.messages;
+      if (messages.length === 0) return;
+
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role !== 'user') return;
+
+      // Extract user message content
+      const userContent = typeof lastMessage.content === 'string'
+        ? lastMessage.content
+        : lastMessage.content
+            .filter(c => c.type === 'text')
+            .map(c => c.text)
+            .join('\n');
+
+      if (!userContent) return;
+
+      // Set the pending user message so displayMessages uses the stored message
+      // This ensures consistent message IDs between stored history and display
+      pendingUserMessageRef.current = lastMessage;
+
+      try {
+        // Send the message to trigger AI response
+        await sendMessage(userContent);
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          toast.error(err instanceof Error ? err.message : 'Failed to get response');
+        }
+      }
+    };
+
+    triggerPendingResponse();
+  }, [pending, chat, isReady, selectedModelId, chatId, navigate, sendMessage]);
+
 
   // Derive streaming state from AI SDK status
   const isStreaming = status === 'streaming' || status === 'submitted';
@@ -909,6 +1023,7 @@ export function ChatPage() {
           streamingParts={streamingParts}
           streamingSources={searchSources}
           isStreaming={isStreaming}
+          currentModelId={selectedModelId || undefined}
           onEditMessage={handleEditMessage}
           onRegenerateMessage={handleRegenerateMessage}
           onDeleteMessage={handleDeleteMessage}

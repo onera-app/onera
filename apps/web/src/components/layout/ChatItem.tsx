@@ -143,10 +143,10 @@ export function ChatItem({
           to="/app/c/$chatId"
           params={{ chatId: id }}
           className={cn(
-            'flex items-center w-full h-9 px-3 rounded-xl text-sm transition-all duration-150 overflow-hidden',
+            'relative flex items-center w-full h-9 px-3 rounded-xl text-sm transition-all duration-150 overflow-hidden',
             isActive
               ? 'bg-neutral-800 text-white'
-              : 'text-neutral-300 hover:text-white hover:bg-white/5'
+              : 'text-neutral-300 hover:text-white hover:bg-white/[0.06]'
           )}
         >
           {/* Lock indicator */}
@@ -154,66 +154,82 @@ export function ChatItem({
             <Lock className="w-3.5 h-3.5 mr-2 flex-shrink-0 text-neutral-400" />
           )}
 
-          {/* Title */}
-          <span className="flex-1 truncate text-left min-w-0" dir="auto">
-            {title}
-          </span>
-
-          {/* Menu trigger - shows on hover or when active */}
-          <div
-            className={cn(
-              'flex-shrink-0 ml-2 flex items-center gap-0.5',
-              isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
-              'transition-opacity duration-150'
-            )}
-          >
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className="p-1 rounded-md text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-44">
-                {onTogglePin && (
-                  <DropdownMenuItem onClick={handleTogglePin} className="gap-2">
-                    {isPinned ? (
-                      <>
-                        <PinOff className="h-3.5 w-3.5" />
-                        Unpin
-                      </>
-                    ) : (
-                      <>
-                        <Pin className="h-3.5 w-3.5" />
-                        Pin to top
-                      </>
-                    )}
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem onClick={handleStartEdit} className="gap-2">
-                  <Pencil className="h-3.5 w-3.5" />
-                  Rename
-                </DropdownMenuItem>
-                {onRemoveFromFolder && (
-                  <DropdownMenuItem onClick={onRemoveFromFolder} className="gap-2">
-                    <FolderMinus className="h-3.5 w-3.5" />
-                    Remove from folder
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="gap-2 text-red-400 focus:text-red-400 focus:bg-red-500/10"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          {/* Title container with fade effect */}
+          <div className="flex-1 min-w-0 relative overflow-hidden pr-6">
+            <span className="block whitespace-nowrap text-left" dir="auto">
+              {title}
+            </span>
+            {/* Fade overlay - subtle fade at the end */}
+            <div 
+              className={cn(
+                'absolute right-0 top-0 bottom-0 w-8 pointer-events-none bg-gradient-to-l to-transparent transition-colors duration-150',
+                isActive 
+                  ? 'from-neutral-800' 
+                  : 'from-[#0a0a0a] group-hover:from-[#111111]'
+              )}
+            />
           </div>
         </Link>
+
+        {/* Menu trigger - overlays on fade area, shows on hover or when active */}
+        <div
+          className={cn(
+            'absolute right-1 top-1/2 -translate-y-1/2 flex items-center',
+            isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+            'transition-opacity duration-150'
+          )}
+        >
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className={cn(
+                  'p-1 rounded-md transition-colors',
+                  isActive 
+                    ? 'text-neutral-300 hover:text-white hover:bg-white/10' 
+                    : 'text-neutral-400 hover:text-white hover:bg-white/10'
+                )}
+                onClick={(e) => e.preventDefault()}
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              {onTogglePin && (
+                <DropdownMenuItem onClick={handleTogglePin} className="gap-2">
+                  {isPinned ? (
+                    <>
+                      <PinOff className="h-3.5 w-3.5" />
+                      Unpin
+                    </>
+                  ) : (
+                    <>
+                      <Pin className="h-3.5 w-3.5" />
+                      Pin to top
+                    </>
+                  )}
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem onClick={handleStartEdit} className="gap-2">
+                <Pencil className="h-3.5 w-3.5" />
+                Rename
+              </DropdownMenuItem>
+              {onRemoveFromFolder && (
+                <DropdownMenuItem onClick={onRemoveFromFolder} className="gap-2">
+                  <FolderMinus className="h-3.5 w-3.5" />
+                  Remove from folder
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => setShowDeleteDialog(true)}
+                className="gap-2 text-red-400 focus:text-red-400 focus:bg-red-500/10"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
