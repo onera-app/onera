@@ -149,19 +149,19 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             {/* Search Input */}
             <div className="p-4">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-500" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
                 <input
                   ref={inputRef}
                   type="text"
                   placeholder="Search conversations..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-12 pl-12 pr-12 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-[15px] placeholder:text-neutral-500 focus:outline-none focus:border-neutral-700 focus:ring-1 focus:ring-neutral-700 transition-all"
+                  className="w-full h-12 pl-12 pr-12 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-[15px] placeholder:text-neutral-400 focus:outline-none focus:border-neutral-700 focus:ring-1 focus:ring-neutral-700 transition-all"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-lg text-neutral-500 hover:text-white hover:bg-white/10 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -173,7 +173,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             {!searchQuery && (
               <div className="px-4 pb-4">
                 <div className="p-3 rounded-xl bg-neutral-900/50 border border-neutral-800/50">
-                  <div className="text-xs font-medium text-neutral-400 mb-2">Quick filters</div>
+                  <div className="text-xs font-medium text-neutral-300 mb-2">Quick filters</div>
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => setSearchQuery('pinned:')}
@@ -201,14 +201,14 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             {/* Results List */}
             <div className="flex-1 overflow-y-auto px-3">
               {filteredChats.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-neutral-500 pb-20">
+                <div className="flex flex-col items-center justify-center h-full text-neutral-400 pb-20">
                   <div className="w-16 h-16 rounded-2xl bg-neutral-900 flex items-center justify-center mb-4">
-                    <MessageSquare className="h-8 w-8 text-neutral-600" />
+                    <MessageSquare className="h-8 w-8 text-neutral-500" />
                   </div>
-                  <p className="text-sm font-medium text-neutral-400 mb-1">
+                  <p className="text-sm font-medium text-neutral-300 mb-1">
                     {searchQuery ? 'No results found' : 'No conversations yet'}
                   </p>
-                  <p className="text-xs text-neutral-600">
+                  <p className="text-xs text-neutral-400">
                     {searchQuery ? `Try a different search term` : 'Start a new chat to begin'}
                   </p>
                 </div>
@@ -216,7 +216,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                 <div className="py-1 space-y-4">
                   {Array.from(groupedChats.entries()).map(([group, groupChats]) => (
                     <div key={group}>
-                      <div className="px-3 py-2 text-xs font-medium text-neutral-500">
+                      <div className="px-3 py-2 text-xs font-medium text-neutral-400">
                         {DATE_GROUP_LABELS[group as DateGroup]}
                       </div>
                       <div className="space-y-0.5">
@@ -229,7 +229,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                               'w-full flex items-center gap-3 px-3 h-10 rounded-xl text-left transition-all duration-150',
                               selectedChatId === chat.id
                                 ? 'bg-neutral-800 text-white'
-                                : 'text-neutral-400 hover:bg-white/5 hover:text-white'
+                                : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                             )}
                           >
                             <span className="flex-1 truncate text-sm">{chat.decryptedTitle}</span>
@@ -244,7 +244,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
 
             {/* Footer hint */}
             <div className="px-4 py-3 border-t border-neutral-800/50">
-              <div className="flex items-center gap-4 text-xs text-neutral-500">
+              <div className="flex items-center gap-4 text-xs text-neutral-400">
                 <div className="flex items-center gap-1.5">
                   <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono text-[10px]">↵</kbd>
                   <span>open</span>
@@ -291,9 +291,9 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
                 <div className="w-16 h-16 rounded-2xl bg-neutral-800/50 flex items-center justify-center mb-4">
-                  <Search className="h-7 w-7 text-neutral-600" />
+                  <Search className="h-7 w-7 text-neutral-400" />
                 </div>
-                <p className="text-sm text-neutral-500">
+                <p className="text-sm text-neutral-400">
                   Select a conversation to preview
                 </p>
               </div>

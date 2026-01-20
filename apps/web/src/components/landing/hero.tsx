@@ -44,7 +44,7 @@ export function Hero() {
           className="text-6xl md:text-8xl font-bold tracking-tight max-w-5xl text-foreground drop-shadow-2xl"
         >
           Your private AI workspace. <br className="hidden md:block" />
-          <span className="text-white/50">
+          <span className="text-white/75">
             Uncompromisingly secure.
           </span>
         </motion.h1>
@@ -54,7 +54,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
-          className="mt-8 text-xl text-white/60 max-w-2xl leading-relaxed"
+          className="mt-8 text-xl text-white/80 max-w-2xl leading-relaxed"
         >
           Experience the power of advanced LLMs with the peace of mind that your data never leaves your device unencrypted. A sanctuary for your thoughts.
         </motion.p>
@@ -107,7 +107,7 @@ export function Hero() {
                   <div className="size-3 rounded-full bg-amber-500/80" />
                   <div className="size-3 rounded-full bg-emerald-500/80" />
                 </div>
-                <div className="flex items-center gap-2 text-xs text-white/40 font-mono bg-black/40 px-3 py-1 rounded-full border border-white/5">
+                <div className="flex items-center gap-2 text-xs text-white/70 font-mono bg-black/40 px-3 py-1 rounded-full border border-white/10">
                   <Lock className="size-3" />
                   onera.enc
                 </div>
@@ -159,7 +159,7 @@ export function Hero() {
                     <Sparkles className="size-10 text-primary" />
                   </div>
                   <h3 className="text-3xl font-bold text-white mb-2 tracking-tight">Secure Intelligence</h3>
-                  <p className="text-white/50 text-base">Your data staying exactly where it belongs.</p>
+                  <p className="text-white/75 text-base">Your data staying exactly where it belongs.</p>
                 </div>
               </div>
             </div>

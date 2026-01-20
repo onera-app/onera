@@ -76,10 +76,10 @@ export function ToolsTab() {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
         <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
-          <Lock className="w-8 h-8 text-muted-foreground/50" />
+          <Lock className="w-8 h-8 text-muted-foreground" />
         </div>
         <p className="text-muted-foreground font-medium">Encryption locked</p>
-        <p className="text-sm text-muted-foreground/70 mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Unlock E2EE to configure tool integrations
         </p>
       </div>

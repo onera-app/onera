@@ -62,7 +62,7 @@ export const ChatNavbar = memo(function ChatNavbar({
             size="icon"
             onClick={toggleSidebar}
             title="Open sidebar"
-            className="text-neutral-400 hover:text-white hover:bg-white/5 h-8 w-8"
+            className="text-neutral-300 hover:text-white hover:bg-white/5 h-8 w-8"
           >
             <Menu className="h-5 w-5" />
           </Button>
@@ -116,7 +116,7 @@ export const ChatNavbar = memo(function ChatNavbar({
           size="sm"
           onClick={() => navigate({ to: '/app' })}
           title="New chat"
-          className="text-neutral-400 hover:text-white hover:bg-white/5 hidden sm:flex h-8"
+          className="text-neutral-300 hover:text-white hover:bg-white/5 hidden sm:flex h-8"
         >
           <Plus className="h-4 w-4 mr-1.5" />
           New
@@ -127,7 +127,7 @@ export const ChatNavbar = memo(function ChatNavbar({
           size="icon"
           onClick={() => navigate({ to: '/app' })}
           title="New chat"
-          className="text-neutral-400 hover:text-white hover:bg-white/5 sm:hidden h-8 w-8"
+          className="text-neutral-300 hover:text-white hover:bg-white/5 sm:hidden h-8 w-8"
         >
           <Plus className="h-5 w-5" />
         </Button>
@@ -139,7 +139,7 @@ export const ChatNavbar = memo(function ChatNavbar({
               variant="ghost"
               size="icon"
               title="More options"
-              className="text-neutral-400 hover:text-white hover:bg-white/5 h-8 w-8"
+              className="text-neutral-300 hover:text-white hover:bg-white/5 h-8 w-8"
             >
               <MoreHorizontal className="h-4 w-4" />
             </Button>
@@ -173,7 +173,7 @@ export const ChatNavbar = memo(function ChatNavbar({
         <AlertDialogContent className="bg-neutral-900 border-neutral-800">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Delete chat?</AlertDialogTitle>
-            <AlertDialogDescription className="text-neutral-400">
+            <AlertDialogDescription className="text-neutral-300">
               This action cannot be undone. This will permanently delete this conversation and all its messages.
             </AlertDialogDescription>
           </AlertDialogHeader>

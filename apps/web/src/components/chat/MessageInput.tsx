@@ -352,7 +352,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
               'disabled:cursor-not-allowed',
               'max-h-[200px] min-h-[44px]',
               'text-base leading-relaxed',
-              'placeholder:text-white/30 text-white'
+              'placeholder:text-white/50 text-white'
             )}
           />
 
@@ -393,7 +393,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
                       "h-8 w-8 rounded-full transition-all duration-200 shadow-lg",
                       canSend
                         ? "bg-white text-black hover:scale-105"
-                        : "bg-white/10 text-white/20 cursor-not-allowed"
+                        : "bg-white/10 text-white/40 cursor-not-allowed"
                     )}
                   >
                     <ArrowUp className="h-4 w-4" strokeWidth={2.5} />

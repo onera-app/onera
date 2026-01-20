@@ -86,7 +86,7 @@ export function Header() {
               <button
                 key={link.label}
                 onClick={() => scrollToSection(link.href)}
-                className="px-4 py-2 text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all"
+                className="px-4 py-2 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-all"
               >
                 {link.label}
               </button>
@@ -100,7 +100,7 @@ export function Header() {
             {!isAuthenticated ? (
               <>
                 <Link to="/auth" className="hidden sm:block">
-                  <Button variant="ghost" size="sm" className="rounded-full text-white/70 hover:text-white hover:bg-white/10">
+                  <Button variant="ghost" size="sm" className="rounded-full text-white/80 hover:text-white hover:bg-white/10">
                     Sign In
                   </Button>
                 </Link>
@@ -172,10 +172,10 @@ export function Header() {
                   <button
                     key={link.label}
                     onClick={() => scrollToSection(link.href)}
-                    className="flex items-center justify-between w-full p-3 text-lg font-medium text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                    className="flex items-center justify-between w-full p-3 text-lg font-medium text-white/80 hover:text-white hover:bg-white/5 rounded-xl transition-all"
                   >
                     {link.label}
-                    <ArrowRight className="size-4 opacity-50" />
+                    <ArrowRight className="size-4 opacity-70" />
                   </button>
                 ))}
               </div>

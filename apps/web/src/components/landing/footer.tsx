@@ -14,13 +14,13 @@ export function Footer() {
             </div>
             <span className="font-bold text-xl text-neutral-900 dark:text-white">Onera</span>
           </Link>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400 max-w-xs text-center md:text-left">
+          <p className="text-sm text-neutral-600 dark:text-neutral-300 max-w-xs text-center md:text-left">
             The private AI workspace for professionals who value security and ownership.
           </p>
         </div>
 
         {/* Links */}
-        <div className="flex items-center gap-8 text-sm font-medium text-neutral-600 dark:text-neutral-400">
+        <div className="flex items-center gap-8 text-sm font-medium text-neutral-600 dark:text-neutral-300">
           <Link to="/" className="hover:text-neutral-900 dark:hover:text-white transition-colors">Terms</Link>
           <Link to="/" className="hover:text-neutral-900 dark:hover:text-white transition-colors">Privacy</Link>
           <a href="https://github.com/onera-org/onera" target="_blank" rel="noopener noreferrer" className="hover:text-neutral-900 dark:hover:text-white transition-colors">
@@ -33,7 +33,7 @@ export function Footer() {
       </div>
 
       <div className="max-w-6xl mx-auto mt-12 pt-8 border-t border-neutral-100 dark:border-neutral-800 text-center md:text-left">
-        <p className="text-xs text-neutral-400">
+        <p className="text-xs text-neutral-500 dark:text-neutral-400">
           © {new Date().getFullYear()} Onera. Open source and privacy-first.
         </p>
       </div>

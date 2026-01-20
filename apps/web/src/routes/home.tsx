@@ -301,7 +301,7 @@ export function HomePage() {
             <h1 className="text-3xl font-semibold tracking-tight mb-3 text-white">
               What can I help with?
             </h1>
-            <p className="text-neutral-400 text-base">
+            <p className="text-neutral-300 text-base">
               Your conversations are end-to-end encrypted
             </p>
           </div>
@@ -311,7 +311,7 @@ export function HomePage() {
             <Alert className="mb-6 bg-neutral-900 border-neutral-800">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
               <AlertTitle className="text-white">No API Keys Connected</AlertTitle>
-              <AlertDescription className="flex items-center justify-between text-neutral-400">
+              <AlertDescription className="flex items-center justify-between text-neutral-300">
                 <span>Add an API key to start chatting with AI models.</span>
                 <Button
                   variant="link"
@@ -360,7 +360,7 @@ export function HomePage() {
                       index === 3 && 'stagger-4'
                     )}
                   >
-                    <Icon className="h-4 w-4 mr-2 text-neutral-500" />
+                    <Icon className="h-4 w-4 mr-2 text-neutral-400" />
                     {suggestion.text}
                   </Button>
                 );
@@ -372,7 +372,7 @@ export function HomePage() {
 
       {/* Footer - minimal */}
       <footer className="p-4 text-center">
-        <p className="text-xs text-neutral-500 flex items-center justify-center gap-1.5">
+        <p className="text-xs text-neutral-400 flex items-center justify-center gap-1.5">
           <Lock className="h-3.5 w-3.5" />
           End-to-end encrypted
         </p>

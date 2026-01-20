@@ -17,7 +17,6 @@ import {
   User,
   Lock,
   Info,
-  Search,
   Wrench,
   Smartphone,
 } from 'lucide-react';
@@ -164,15 +163,12 @@ export function SettingsModal({ open, onOpenChange, initialTab = 'general' }: Se
           <div className="w-56 flex flex-col shrink-0">
             {/* Search */}
             <div className="p-3">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search settings..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8 h-9"
-                />
-              </div>
+              <Input
+                placeholder="Search settings..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-9"
+              />
             </div>
 
             {/* Tab list */}

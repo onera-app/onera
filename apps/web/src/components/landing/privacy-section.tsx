@@ -24,10 +24,10 @@ export function PrivacySection() {
 
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">
               We can't see your data. <br />
-              <span className="text-neutral-400">Even if we wanted to.</span>
+              <span className="text-neutral-500 dark:text-neutral-400">Even if we wanted to.</span>
             </h2>
 
-            <p className="text-lg text-neutral-600 dark:text-neutral-400 mb-8 leading-relaxed">
+            <p className="text-lg text-neutral-600 dark:text-neutral-300 mb-8 leading-relaxed">
               Onera uses client-side encryption. Your chats are encrypted on your device before they ever touch our sync servers. The encryption keys never leave your custody.
             </p>
 
@@ -102,7 +102,7 @@ export function PrivacySection() {
                   {/* Server (Encrypted Blob) */}
                   <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 flex flex-col items-center gap-2">
                     <div className="size-16 rounded-2xl bg-neutral-800 border border-neutral-700 flex items-center justify-center shadow-lg">
-                      <span className="font-mono text-neutral-500 text-xs text-center p-1 break-all leading-none opacity-50">
+                      <span className="font-mono text-neutral-400 text-xs text-center p-1 break-all leading-none">
                         0x83F...
                         9A2B1...
                       </span>
@@ -124,7 +124,7 @@ export function PrivacySection() {
               </div>
               <div className="text-sm">
                 <div className="font-semibold text-neutral-900 dark:text-white">AES-256-GCM</div>
-                <div className="text-neutral-500 dark:text-neutral-400">Military-grade encryption</div>
+                <div className="text-neutral-600 dark:text-neutral-300">Military-grade encryption</div>
               </div>
             </motion.div>
           </motion.div>

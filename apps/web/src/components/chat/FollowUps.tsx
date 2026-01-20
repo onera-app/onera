@@ -26,7 +26,7 @@ export const FollowUps = memo(function FollowUps({ followUps, onSelect, classNam
             'transition-all duration-150'
           )}
         >
-          <ArrowRight className="h-4 w-4 text-neutral-500 group-hover:text-neutral-300 shrink-0 transition-colors" />
+          <ArrowRight className="h-4 w-4 text-neutral-400 group-hover:text-neutral-200 shrink-0 transition-colors" />
           <span className="line-clamp-2">{followUp}</span>
         </button>
       ))}

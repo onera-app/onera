@@ -36,8 +36,8 @@
   --color-secondary-foreground: oklch(0.98 0 0);
 
   --color-muted: oklch(0.15 0 0);
-  --color-muted-foreground: oklch(0.60 0 0);
-  /* Mid Grey */
+  --color-muted-foreground: oklch(0.72 0 0);
+  /* Accessible Mid Grey - passes WCAG AA */
 
   --color-accent: oklch(0.20 0 0);
   /* Subtle interaction state */
@@ -102,7 +102,8 @@
   --color-secondary-foreground: oklch(0.20 0 0);
 
   --color-muted: oklch(0.96 0 0);
-  --color-muted-foreground: oklch(0.50 0 0);
+  --color-muted-foreground: oklch(0.40 0 0);
+  /* Accessible for light mode - passes WCAG AA */
 
   --color-accent: oklch(0.96 0 0);
   --color-accent-foreground: oklch(0.10 0 0);
@@ -115,7 +116,8 @@
   --color-ring: oklch(0.10 0 0 / 0.2);
 
   --color-sidebar-background: oklch(0.98 0 0 / 0.9);
-  --color-sidebar-foreground: oklch(0.30 0 0);
+  --color-sidebar-foreground: oklch(0.25 0 0);
+  /* Darker for better contrast on light sidebar */
   --color-sidebar-primary: oklch(0.10 0 0);
   --color-sidebar-primary-foreground: oklch(0.98 0 0);
   --color-sidebar-accent: oklch(0.95 0 0);

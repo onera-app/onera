@@ -59,9 +59,9 @@ export function FeaturesSection() {
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-white">
-              Powerful features, <span className="text-white/40">zero compromise.</span>
+              Powerful features, <span className="text-white/70">zero compromise.</span>
             </h2>
-            <p className="text-xl text-white/60 max-w-2xl mx-auto">
+            <p className="text-xl text-white/80 max-w-2xl mx-auto">
               Onera combines the modernized chat interface you love with the security of an offline vault.
             </p>
           </motion.div>
@@ -98,7 +98,7 @@ export function FeaturesSection() {
                 <h3 className="text-2xl font-semibold mb-3 text-white">
                   {feature.title}
                 </h3>
-                <p className="text-white/60 leading-relaxed text-base">
+                <p className="text-white/80 leading-relaxed text-base">
                   {feature.description}
                 </p>
               </div>

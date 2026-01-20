@@ -148,6 +148,10 @@ export const Messages = memo(function Messages({
     [history, onSwitchBranch]
   );
 
+  // Count new messages for staggered animation delays
+  // NOTE: Must be defined before any early returns to comply with Rules of Hooks
+  const newMessagesCount = useRef(0);
+
   if (messages.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full px-4">
@@ -156,7 +160,7 @@ export const Messages = memo(function Messages({
           <h1 className="text-3xl font-semibold tracking-tight mb-3 text-white">
             How can I help you today?
           </h1>
-          <p className="text-base text-neutral-400">
+          <p className="text-base text-neutral-300">
             Start a conversation or try one of the suggestions below.
           </p>
         </div>
@@ -173,9 +177,6 @@ export const Messages = memo(function Messages({
       </div>
     );
   }
-
-  // Count new messages for staggered animation delays
-  const newMessagesCount = useRef(0);
 
   return (
     <div className="relative h-full">
@@ -250,7 +251,7 @@ export const Messages = memo(function Messages({
                   {isLastMessage && message.role === 'assistant' && !isStreaming && onFollowUpSelect && (
                     <div className="mt-4 pl-0">
                       {isGeneratingFollowUps ? (
-                        <div className="flex items-center gap-2 text-xs text-neutral-500">
+                        <div className="flex items-center gap-2 text-xs text-neutral-400">
                           <Loader2 className="h-3 w-3 animate-spin" />
                           <span>Generating suggestions...</span>
                         </div>

@@ -156,7 +156,7 @@ export function FolderItem({
               >
                 <ChevronRight
                   className={cn(
-                    'h-3.5 w-3.5 text-neutral-500 transition-transform duration-200 flex-shrink-0',
+                    'h-3.5 w-3.5 text-neutral-400 transition-transform duration-200 flex-shrink-0',
                     isExpanded && 'rotate-90'
                   )}
                 />
@@ -171,7 +171,7 @@ export function FolderItem({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="p-1 rounded text-neutral-500 hover:text-white hover:bg-white/10 transition-colors"
+                    className="p-1 rounded text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <MoreHorizontal className="h-4 w-4" />
@@ -205,7 +205,7 @@ export function FolderItem({
         <AlertDialogContent className="max-w-sm bg-neutral-900 border-neutral-800">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Delete folder?</AlertDialogTitle>
-            <AlertDialogDescription className="text-neutral-400">
+            <AlertDialogDescription className="text-neutral-300">
               This will delete "{name}". Conversations inside will be moved to your main list.
             </AlertDialogDescription>
           </AlertDialogHeader>

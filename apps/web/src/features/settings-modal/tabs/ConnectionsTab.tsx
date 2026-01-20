@@ -91,10 +91,10 @@ export function ConnectionsTab() {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
         <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
-          <Lock className="w-8 h-8 text-muted-foreground/50" />
+          <Lock className="w-8 h-8 text-muted-foreground" />
         </div>
         <p className="text-muted-foreground font-medium">Encryption locked</p>
-        <p className="text-sm text-muted-foreground/70 mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Unlock E2EE to manage your connections
         </p>
       </div>
@@ -230,7 +230,7 @@ export function ConnectionsTab() {
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground/70 hover:text-primary hover:underline mt-1"
+                            className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground hover:text-primary hover:underline mt-1"
                           >
                             Get API Key <ExternalLink className="w-2 h-2" />
                           </a>
@@ -249,10 +249,10 @@ export function ConnectionsTab() {
       {credentials.length === 0 && (
         <div className="flex flex-col items-center justify-center py-6 text-center border-2 border-dashed rounded-xl bg-muted/20">
           <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center mb-3">
-            <Plus className="w-6 h-6 text-muted-foreground/50" />
+            <Plus className="w-6 h-6 text-muted-foreground" />
           </div>
           <p className="text-sm font-medium text-muted-foreground">No connections yet</p>
-          <p className="text-xs text-muted-foreground/70 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             Select a provider above to get started
           </p>
         </div>

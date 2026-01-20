@@ -146,12 +146,12 @@ export function ChatItem({
             'flex items-center w-full h-9 px-3 rounded-xl text-sm transition-all duration-150 overflow-hidden',
             isActive
               ? 'bg-neutral-800 text-white'
-              : 'text-neutral-400 hover:text-white hover:bg-white/5'
+              : 'text-neutral-300 hover:text-white hover:bg-white/5'
           )}
         >
           {/* Lock indicator */}
           {isLocked && (
-            <Lock className="w-3.5 h-3.5 mr-2 flex-shrink-0 text-neutral-500" />
+            <Lock className="w-3.5 h-3.5 mr-2 flex-shrink-0 text-neutral-400" />
           )}
 
           {/* Title */}
@@ -170,7 +170,7 @@ export function ChatItem({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className="p-1 rounded-md text-neutral-500 hover:text-white hover:bg-white/10 transition-colors"
+                  className="p-1 rounded-md text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
                   onClick={(e) => e.preventDefault()}
                 >
                   <MoreHorizontal className="h-4 w-4" />

@@ -303,7 +303,7 @@ export function Sidebar() {
               <TooltipTrigger asChild>
                 <button
                   onClick={toggleSidebar}
-                  className="p-1.5 rounded-lg text-neutral-500 hover:text-white hover:bg-white/5 transition-colors"
+                  className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/5 transition-colors"
                 >
                   <PanelLeftClose className="h-5 w-5" />
                 </button>
@@ -319,7 +319,7 @@ export function Sidebar() {
               onClick={handleNewChat}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors text-white/90 group"
             >
-              <Pencil className="h-[18px] w-[18px] text-neutral-400 group-hover:text-white transition-colors" />
+              <Pencil className="h-[18px] w-[18px] text-neutral-300 group-hover:text-white transition-colors" />
               <span className="text-[14px]">New Chat</span>
             </button>
 
@@ -328,7 +328,7 @@ export function Sidebar() {
               onClick={() => setSearchModalOpen(true)}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors text-white/90 group"
             >
-              <Search className="h-[18px] w-[18px] text-neutral-400 group-hover:text-white transition-colors" />
+              <Search className="h-[18px] w-[18px] text-neutral-300 group-hover:text-white transition-colors" />
               <span className="text-[14px]">Search</span>
             </button>
 
@@ -337,7 +337,7 @@ export function Sidebar() {
               to="/app/notes"
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors text-white/90 group"
             >
-              <FileText className="h-[18px] w-[18px] text-neutral-400 group-hover:text-white transition-colors" />
+              <FileText className="h-[18px] w-[18px] text-neutral-300 group-hover:text-white transition-colors" />
               <span className="text-[14px]">Notes</span>
             </Link>
           </div>
@@ -351,13 +351,13 @@ export function Sidebar() {
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-16 gap-3">
                   <div className="w-8 h-8 rounded-full border-2 border-neutral-700 border-t-white animate-spin" />
-                  <span className="text-xs text-neutral-500">Loading chats...</span>
+                  <span className="text-xs text-neutral-400">Loading chats...</span>
                 </div>
               ) : chats.length === 0 && foldersWithState.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
                   <MessageSquare className="w-10 h-10 text-neutral-600 mb-3" />
                   <p className="text-sm text-white mb-1">No conversations yet</p>
-                  <p className="text-xs text-neutral-500">
+                  <p className="text-xs text-neutral-400">
                     Start a new chat to begin
                   </p>
                 </div>
@@ -366,7 +366,7 @@ export function Sidebar() {
                   {/* Folders Section - Always show header */}
                   <Collapsible open={foldersExpanded} onOpenChange={setFoldersExpanded}>
                     <div className="flex items-center justify-between pr-1">
-                      <CollapsibleTrigger className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-neutral-500 hover:text-neutral-300 transition-colors">
+                      <CollapsibleTrigger className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-neutral-400 hover:text-neutral-200 transition-colors">
                         <ChevronRight className={cn(
                           "h-3.5 w-3.5 transition-transform duration-200",
                           foldersExpanded && "rotate-90"
@@ -377,7 +377,7 @@ export function Sidebar() {
                         <TooltipTrigger asChild>
                           <button
                             onClick={handleNewFolder}
-                            className="p-1 rounded text-neutral-500 hover:text-white hover:bg-white/5 transition-colors"
+                            className="p-1 rounded text-neutral-400 hover:text-white hover:bg-white/5 transition-colors"
                           >
                             <Plus className="h-3.5 w-3.5" />
                           </button>
@@ -389,7 +389,7 @@ export function Sidebar() {
                     <CollapsibleContent className="space-y-0.5 mt-0.5">
                       {foldersWithState.length === 0 ? (
                         <div className="py-2 px-3 ml-5">
-                          <p className="text-[11px] text-neutral-600">No folders yet</p>
+                          <p className="text-[11px] text-neutral-400">No folders yet</p>
                         </div>
                       ) : (
                         foldersWithState.map((folder) => {
@@ -411,7 +411,7 @@ export function Sidebar() {
                             >
                               {folderChats.length === 0 ? (
                                 <div className="py-1.5 px-3 ml-5">
-                                  <p className="text-[11px] text-neutral-600 italic">Empty</p>
+                                  <p className="text-[11px] text-neutral-400 italic">Empty</p>
                                 </div>
                               ) : (
                                 <div className="ml-5 space-y-0.5 mt-0.5">
@@ -439,7 +439,7 @@ export function Sidebar() {
 
                   {/* Chats Section */}
                   <Collapsible open={chatsExpanded} onOpenChange={setChatsExpanded}>
-                    <CollapsibleTrigger className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-neutral-500 hover:text-neutral-300 transition-colors w-full">
+                    <CollapsibleTrigger className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-neutral-400 hover:text-neutral-200 transition-colors w-full">
                       <ChevronRight className={cn(
                         "h-3.5 w-3.5 transition-transform duration-200",
                         chatsExpanded && "rotate-90"
@@ -451,7 +451,7 @@ export function Sidebar() {
                       {/* Pinned Section */}
                       {pinnedChats.length > 0 && (
                         <div className="mb-2">
-                          <div className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-neutral-500">
+                          <div className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-neutral-400">
                             <Pin className="h-3 w-3" />
                             <span>Pinned</span>
                           </div>
@@ -475,7 +475,7 @@ export function Sidebar() {
                       {/* Date Groups */}
                       {Array.from(groupedChats.entries()).map(([group, groupChats]) => (
                         <div key={group} className="mt-2">
-                          <div className="px-2 py-1.5 text-xs font-medium text-neutral-500">
+                          <div className="px-2 py-1.5 text-xs font-medium text-neutral-400">
                             {DATE_GROUP_LABELS[group as DateGroup]}
                           </div>
                           <div className="space-y-0.5">
@@ -498,7 +498,7 @@ export function Sidebar() {
                       {/* Empty state */}
                       {pinnedChats.length === 0 && groupedChats.size === 0 && (
                         <div className="py-2 px-3 ml-5">
-                          <p className="text-[11px] text-neutral-600">No chats yet</p>
+                          <p className="text-[11px] text-neutral-400">No chats yet</p>
                         </div>
                       )}
                     </CollapsibleContent>
@@ -536,7 +536,7 @@ export function Sidebar() {
                     <TooltipTrigger asChild>
                       <button
                         onClick={() => openSettingsModal()}
-                        className="p-1.5 rounded-lg text-neutral-500 hover:text-white hover:bg-white/10 transition-colors"
+                        className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
                       >
                         <Settings className="h-4 w-4" />
                       </button>
@@ -547,7 +547,7 @@ export function Sidebar() {
                     <TooltipTrigger asChild>
                       <button
                         onClick={() => signOut()}
-                        className="p-1.5 rounded-lg text-neutral-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                        className="p-1.5 rounded-lg text-neutral-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
                       >
                         <LogOut className="h-4 w-4" />
                       </button>

@@ -55,10 +55,10 @@ export function CodeBlock({
           {filename && (
             <>
               <span className="text-xs text-slate-400">{filename}</span>
-              <span className="text-slate-600">|</span>
+              <span className="text-slate-500">|</span>
             </>
           )}
-          <span className="text-xs text-slate-500 font-mono">{languageLabel}</span>
+          <span className="text-xs text-slate-400 font-mono">{languageLabel}</span>
         </div>
 
         {/* Copy button */}
@@ -91,7 +91,7 @@ export function CodeBlock({
       <div className="overflow-x-auto">
         <pre className={cn('p-4 text-sm', showLineNumbers && 'pl-12 relative')}>
           {showLineNumbers && (
-            <div className="absolute left-0 top-0 pt-4 pb-4 px-3 text-right text-slate-600 select-none border-r border-slate-700 bg-slate-900/50">
+            <div className="absolute left-0 top-0 pt-4 pb-4 px-3 text-right text-slate-500 select-none border-r border-slate-700 bg-slate-900/50">
               {code.split('\n').map((_, i) => (
                 <div key={i} className="leading-6">
                   {i + 1}
