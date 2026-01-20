@@ -26,7 +26,7 @@ import type { Source } from '@/components/chat/Sources';
 import { useToolsStore, type NativeSearchProvider } from '@/stores/toolsStore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle, Loader2 } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 
 interface DecryptedChat {
   id: string;
@@ -506,7 +506,7 @@ export function ChatPage() {
       navigate({
         to: '/app/c/$chatId',
         params: { chatId: chatId! },
-        search: {},
+        search: { pending: false },
         replace: true,
       });
 

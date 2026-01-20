@@ -142,6 +142,7 @@ export function ChatItem({
         <Link
           to="/app/c/$chatId"
           params={{ chatId: id }}
+          search={{ pending: false }}
           className={cn(
             'relative flex items-center w-full h-9 px-3 rounded-xl text-sm transition-all duration-150 overflow-hidden',
             isActive

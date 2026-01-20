@@ -120,7 +120,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   };
 
   const handleOpenChat = (chatId: string) => {
-    navigate({ to: '/app/c/$chatId', params: { chatId } });
+    navigate({ to: '/app/c/$chatId', params: { chatId }, search: { pending: false } });
     onOpenChange(false);
   };
 
