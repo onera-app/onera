@@ -15,55 +15,54 @@ const features = [
     description: "Connect directly to OpenAI, Anthropic, or DeepSeek using your own API keys. No middleman markup.",
     icon: Key,
     className: "md:col-span-2",
-    gradient: "from-blue-500/20 to-cyan-500/20",
-    textGradient: "text-blue-500"
+    gradient: "from-white/10 to-transparent",
+    textGradient: "text-white"
   },
   {
     title: "Local-First Storage",
     description: "All your conversations and embeddings are stored locally in your browser (IndexedDB).",
     icon: Database,
     className: "md:col-span-1",
-    gradient: "from-emerald-500/20 to-teal-500/20",
-    textGradient: "text-emerald-500"
+    gradient: "from-white/10 to-transparent",
+    textGradient: "text-white"
   },
   {
     title: "End-to-End Encryption",
     description: "Sync between devices securely. Your data is encrypted before it ever leaves your device.",
     icon: Lock,
     className: "md:col-span-1",
-    gradient: "from-orange-500/20 to-amber-500/20",
-    textGradient: "text-orange-500"
+    gradient: "from-white/10 to-transparent",
+    textGradient: "text-white"
   },
   {
     title: "Multi-LLM Support",
     description: "Switch seamlessly between GPT-4o, Claude 3.5 Sonnet, and DeepSeek V3 in the same chat.",
     icon: Layers,
     className: "md:col-span-2",
-    gradient: "from-purple-500/20 to-pink-500/20",
-    textGradient: "text-purple-500"
+    gradient: "from-white/10 to-transparent",
+    textGradient: "text-white"
   },
 ];
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-24 px-4 bg-neutral-50 dark:bg-neutral-900/50 relative overflow-hidden">
+    <section id="features" className="py-32 px-4 relative overflow-hidden">
       {/* Background Decor */}
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent" />
-      <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent" />
+      <div className="absolute inset-0 bg-transparent" />
 
       <div className="max-w-6xl mx-auto relative z-10">
-        <div className="text-center mb-16">
+        <div className="text-center mb-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
-              Powerful features, <span className="text-neutral-400">zero compromise.</span>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-white">
+              Powerful features, <span className="text-white/40">zero compromise.</span>
             </h2>
-            <p className="text-lg text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
-              Onera combines the convenience of a modernized chat interface with the security of a vault.
+            <p className="text-xl text-white/60 max-w-2xl mx-auto">
+              Onera combines the modernized chat interface you love with the security of an offline vault.
             </p>
           </motion.div>
         </div>
@@ -72,13 +71,13 @@ export function FeaturesSection() {
           {features.map((feature, i) => (
             <motion.div
               key={feature.title}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
               whileHover={{ y: -5 }}
               className={cn(
-                "group relative overflow-hidden rounded-3xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-8 flex flex-col transition-all duration-300 hover:shadow-2xl hover:shadow-neutral-200/50 dark:hover:shadow-neutral-900/50",
+                "group relative overflow-hidden rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 p-8 flex flex-col transition-all duration-300 hover:bg-white/10 hover:shadow-2xl hover:border-white/20",
                 feature.className
               )}
             >
@@ -90,16 +89,16 @@ export function FeaturesSection() {
 
               <div className="relative z-10">
                 <div className={cn(
-                  "size-12 rounded-xl flex items-center justify-center mb-6 bg-neutral-100 dark:bg-neutral-900 group-hover:scale-110 transition-transform duration-300",
+                  "size-14 rounded-2xl flex items-center justify-center mb-6 bg-black/40 border border-white/5 group-hover:scale-110 transition-transform duration-300 shadow-lg",
                   feature.textGradient
                 )}>
-                  <feature.icon className="size-6" />
+                  <feature.icon className="size-7" />
                 </div>
 
-                <h3 className="text-xl font-semibold mb-3 text-neutral-900 dark:text-white">
+                <h3 className="text-2xl font-semibold mb-3 text-white">
                   {feature.title}
                 </h3>
-                <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed">
+                <p className="text-white/60 leading-relaxed text-base">
                   {feature.description}
                 </p>
               </div>

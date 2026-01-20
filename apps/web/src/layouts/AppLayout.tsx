@@ -58,10 +58,16 @@ export function AppLayout() {
     <TooltipProvider>
       <div
         className={cn(
-          'flex h-screen bg-background',
+          'flex h-screen bg-background relative overflow-hidden',
           `chat-density-${chatDensity}`
         )}
       >
+        {/* Ambient Background Effects */}
+        <div className="absolute inset-0 pointer-events-none z-0">
+          <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary/5 blur-[120px]" />
+          <div className="absolute top-[40%] -right-[10%] w-[40%] h-[40%] rounded-full bg-blue-500/5 blur-[100px]" />
+          <div className="absolute -bottom-[20%] left-[20%] w-[40%] h-[40%] rounded-full bg-purple-500/5 blur-[100px]" />
+        </div>
         {/* Sidebar */}
         <Sidebar />
 

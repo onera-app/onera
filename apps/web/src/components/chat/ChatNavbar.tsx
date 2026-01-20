@@ -54,7 +54,7 @@ export const ChatNavbar = memo(function ChatNavbar({
   };
 
   return (
-    <header className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 h-16 bg-background/50 backdrop-blur-md border-b border-border/50">
+    <header className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 h-16 bg-white/5 backdrop-blur-xl border-b border-white/5 shadow-sm">
       <div className="flex items-center gap-2 overflow-hidden">
         {/* Menu button (shown when sidebar is closed) */}
         {!sidebarOpen && (

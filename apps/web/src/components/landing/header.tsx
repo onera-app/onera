@@ -61,7 +61,7 @@ export function Header() {
           className={cn(
             "w-full max-w-5xl transition-all duration-300 rounded-full border px-2 py-2 flex items-center justify-between",
             scrolled
-              ? "bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl border-neutral-200 dark:border-neutral-800 shadow-md"
+              ? "bg-black/60 backdrop-blur-xl border-white/10 shadow-lg"
               : "bg-transparent border-transparent"
           )}
         >
@@ -70,12 +70,11 @@ export function Header() {
             to="/"
             className="flex items-center gap-2.5 font-medium tracking-tight group ml-2"
           >
-            <div className="size-9 rounded-full bg-neutral-900 dark:bg-white flex items-center justify-center transition-transform duration-200 group-hover:scale-105 shadow-sm">
-              <ShieldCheck className="size-4 text-white dark:text-neutral-900" />
+            <div className="size-9 rounded-full bg-white flex items-center justify-center transition-transform duration-200 group-hover:scale-105 shadow-sm">
+              <ShieldCheck className="size-4 text-black" />
             </div>
             <span className={cn(
-              "font-bold transition-colors",
-              scrolled ? "text-neutral-900 dark:text-white" : "text-neutral-900 dark:text-white"
+              "font-bold transition-colors text-white"
             )}>
               Onera
             </span>
@@ -87,7 +86,7 @@ export function Header() {
               <button
                 key={link.label}
                 onClick={() => scrollToSection(link.href)}
-                className="px-4 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-all"
+                className="px-4 py-2 text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all"
               >
                 {link.label}
               </button>
@@ -101,14 +100,14 @@ export function Header() {
             {!isAuthenticated ? (
               <>
                 <Link to="/auth" className="hidden sm:block">
-                  <Button variant="ghost" size="sm" className="rounded-full text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white">
+                  <Button variant="ghost" size="sm" className="rounded-full text-white/70 hover:text-white hover:bg-white/10">
                     Sign In
                   </Button>
                 </Link>
                 <Link to="/auth">
                   <Button
                     size="sm"
-                    className="rounded-full px-5 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors shadow-sm"
+                    className="rounded-full px-5 bg-white text-black hover:bg-white/90 transition-colors shadow-lg shadow-white/10 font-medium"
                   >
                     Get Started
                   </Button>
@@ -118,7 +117,7 @@ export function Header() {
               <Link to="/app">
                 <Button
                   size="sm"
-                  className="rounded-full px-5 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors shadow-sm"
+                  className="rounded-full px-5 bg-white text-black hover:bg-white/90 transition-colors shadow-lg shadow-white/10 font-medium"
                 >
                   Dashboard
                   <ArrowRight className="ml-1.5 size-3.5" />
@@ -129,7 +128,7 @@ export function Header() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="md:hidden p-2 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors"
+              className="md:hidden p-2 text-white hover:bg-white/10 rounded-full transition-colors"
             >
               <Menu className="size-5" />
             </button>
@@ -144,7 +143,7 @@ export function Header() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-neutral-950/20 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm md:hidden"
             onClick={() => setMobileMenuOpen(false)}
           >
             <motion.div
@@ -152,17 +151,17 @@ export function Header() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="absolute right-0 top-0 bottom-0 w-[80%] max-w-sm bg-white dark:bg-neutral-950 border-l border-neutral-200 dark:border-neutral-800 p-6 flex flex-col shadow-2xl"
+              className="absolute right-0 top-0 bottom-0 w-[80%] max-w-sm bg-neutral-950 border-l border-white/10 p-6 flex flex-col shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-8">
-                <span className="font-bold text-xl text-neutral-900 dark:text-white flex items-center gap-2">
+                <span className="font-bold text-xl text-white flex items-center gap-2">
                   <ShieldCheck className="size-6" />
                   Onera
                 </span>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                  className="p-2 rounded-full hover:bg-white/10 transition-colors text-white"
                 >
                   <X className="size-5" />
                 </button>
@@ -173,7 +172,7 @@ export function Header() {
                   <button
                     key={link.label}
                     onClick={() => scrollToSection(link.href)}
-                    className="flex items-center justify-between w-full p-3 text-lg font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-neutral-900 rounded-xl transition-all"
+                    className="flex items-center justify-between w-full p-3 text-lg font-medium text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all"
                   >
                     {link.label}
                     <ArrowRight className="size-4 opacity-50" />
@@ -181,23 +180,23 @@ export function Header() {
                 ))}
               </div>
 
-              <div className="mt-auto pt-8 border-t border-neutral-100 dark:border-neutral-800 flex flex-col gap-3">
+              <div className="mt-auto pt-8 border-t border-white/10 flex flex-col gap-3">
                 {!isAuthenticated ? (
                   <>
                     <Link to="/auth" className="w-full">
-                      <Button variant="outline" className="w-full justify-center rounded-xl h-11 text-base">
+                      <Button variant="outline" className="w-full justify-center rounded-xl h-11 text-base border-white/10 text-white hover:bg-white/10">
                         Sign In
                       </Button>
                     </Link>
                     <Link to="/auth" className="w-full">
-                      <Button className="w-full justify-center rounded-xl h-11 text-base bg-neutral-900 dark:bg-white text-white dark:text-neutral-900">
+                      <Button className="w-full justify-center rounded-xl h-11 text-base bg-white text-black hover:bg-white/90">
                         Get Started
                       </Button>
                     </Link>
                   </>
                 ) : (
                   <Link to="/app" className="w-full">
-                    <Button className="w-full justify-center rounded-xl h-11 text-base bg-neutral-900 dark:bg-white text-white dark:text-neutral-900">
+                    <Button className="w-full justify-center rounded-xl h-11 text-base bg-white text-black hover:bg-white/90">
                       Go to Dashboard
                     </Button>
                   </Link>

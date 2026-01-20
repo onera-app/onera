@@ -182,9 +182,9 @@ export const AssistantMessage = memo(function AssistantMessage({
     >
       <div className="flex w-full items-start gap-2 md:gap-3 justify-start">
         {/* Avatar with Sparkles icon */}
-        <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border">
-          <div className={cn(isLoading && 'animate-pulse')}>
-            <SparklesIcon size={14} />
+        <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10 shadow-sm">
+          <div className={cn(isLoading && 'animate-pulse', "text-white/80")}>
+            <SparklesIcon size={16} />
           </div>
         </div>
 

@@ -298,10 +298,10 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
       <div
         ref={containerRef}
         className={cn(
-          'relative rounded-[26px] overflow-hidden transition-all duration-200 ease-in-out',
-          'bg-secondary/40 backdrop-blur-sm',
-          'border border-transparent',
-          isFocused ? 'bg-background shadow-lg ring-1 ring-ring/50' : 'hover:bg-secondary/60',
+          'relative rounded-3xl overflow-hidden transition-all duration-300 ease-out',
+          'bg-black/40 backdrop-blur-xl',
+          'border border-white/10 shadow-lg',
+          isFocused ? 'ring-1 ring-white/20 shadow-xl scale-[1.01]' : 'hover:bg-black/50',
           disabled && 'opacity-60'
         )}
         onDragEnter={handleDragEnter}
@@ -352,7 +352,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
               'disabled:cursor-not-allowed',
               'max-h-[200px] min-h-[44px]',
               'text-base leading-relaxed',
-              'placeholder:text-muted-foreground/70'
+              'placeholder:text-white/30 text-white'
             )}
           />
 
@@ -390,10 +390,10 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
                     disabled={!canSend}
                     size="icon"
                     className={cn(
-                      "h-8 w-8 rounded-full transition-all duration-200",
+                      "h-8 w-8 rounded-full transition-all duration-200 shadow-lg",
                       canSend
-                        ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
-                        : "bg-muted text-muted-foreground opacity-50 cursor-not-allowed"
+                        ? "bg-white text-black hover:scale-105"
+                        : "bg-white/10 text-white/20 cursor-not-allowed"
                     )}
                   >
                     <ArrowUp className="h-4 w-4" strokeWidth={2.5} />

@@ -272,303 +272,313 @@ export function Sidebar() {
 
   return (
     <TooltipProvider delayDuration={300}>
+
       <nav
         id="sidebar"
         className={cn(
-          'relative flex flex-col h-full bg-sidebar-background transition-all duration-300 ease-out flex-shrink-0',
-          sidebarOpen ? 'border-r border-sidebar-border/60' : 'w-0 min-w-0 overflow-hidden'
+          'relative flex flex-col h-full transition-all duration-300 ease-out flex-shrink-0 z-20',
+          sidebarOpen ? 'w-[280px] min-w-[280px]' : 'w-0 min-w-0 overflow-hidden'
         )}
         style={{
           width: sidebarOpen ? `${sidebarWidth}px` : 0,
           minWidth: sidebarOpen ? `${sidebarWidth}px` : 0,
         }}
       >
-        {/* Subtle gradient overlay for depth */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-sidebar-accent/20 pointer-events-none" />
+        {/* Glass Background Layer */}
+        <div className="absolute inset-0 bg-sidebar-background/60 backdrop-blur-xl border-r border-white/5 shadow-2xl z-0" />
 
-        {/* Header */}
-        <header className="relative flex items-center justify-between px-3 py-3 h-14">
-          <Link
-            to="/app"
-            className="flex items-center gap-2.5 group"
-          >
-            <div className="relative w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm transition-transform duration-200 group-hover:scale-105">
-              <span className="text-sm font-bold text-primary-foreground tracking-tight">O</span>
-            </div>
-            <span className="font-semibold text-[15px] text-sidebar-foreground tracking-tight">
-              Onera
-            </span>
-          </Link>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={toggleSidebar}
-                className="p-2 rounded-lg text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/80 transition-all duration-200"
-              >
-                <PanelLeftClose className="h-[18px] w-[18px]" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right" className="text-xs">Close sidebar</TooltipContent>
-          </Tooltip>
-        </header>
-
-        {/* New Chat Button */}
-        <div className="px-3 pb-2">
-          <button
-            onClick={handleNewChat}
-            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-sidebar-accent/60 hover:bg-sidebar-accent text-sidebar-foreground transition-all duration-200 group"
-          >
-            <div className="p-1 rounded-lg bg-sidebar-background/80 group-hover:bg-sidebar-background transition-colors">
-              <Plus className="h-4 w-4" />
-            </div>
-            <span className="text-sm font-medium">New Chat</span>
-          </button>
-        </div>
-
-        {/* Action Bar */}
-        <div className="px-3 pb-3">
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-sidebar-accent/40">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={handleSearchToggle}
-                  className={cn(
-                    "flex-1 flex items-center justify-center p-2 rounded-lg transition-all duration-200",
-                    showSearch
-                      ? "bg-sidebar-background text-sidebar-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/60"
-                  )}
-                >
-                  <Search className="h-4 w-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent className="text-xs">Search</TooltipContent>
-            </Tooltip>
+        {/* Content Layer */}
+        <div className="relative z-10 flex flex-col h-full">
+          {/* Header */}
+          <header className="flex items-center justify-between px-4 py-4 h-16">
+            <Link
+              to="/app"
+              className="flex items-center gap-3 group"
+            >
+              <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center shadow-lg shadow-primary/20 ring-1 ring-white/10 transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3">
+                <span className="text-base font-bold text-white tracking-tighter">O</span>
+              </div>
+              <span className="font-bold text-lg text-sidebar-foreground tracking-tight group-hover:text-primary transition-colors">
+                Onera
+              </span>
+            </Link>
 
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
-                  onClick={handleNewFolder}
-                  className="flex-1 flex items-center justify-center p-2 rounded-lg text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-all duration-200"
+                  onClick={toggleSidebar}
+                  className="p-2 rounded-lg text-muted-foreground/70 hover:text-sidebar-foreground hover:bg-white/5 transition-all duration-200"
                 >
-                  <FolderPlus className="h-4 w-4" />
+                  <PanelLeftClose className="h-5 w-5" />
                 </button>
               </TooltipTrigger>
-              <TooltipContent className="text-xs">New Folder</TooltipContent>
+              <TooltipContent side="right" className="text-xs font-medium">Close sidebar</TooltipContent>
             </Tooltip>
+          </header>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  to="/app/notes"
-                  className="flex-1 flex items-center justify-center p-2 rounded-lg text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-all duration-200"
-                >
-                  <FileText className="h-4 w-4" />
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent className="text-xs">Notes</TooltipContent>
-            </Tooltip>
+          {/* New Chat Button */}
+          <div className="px-4 pb-4">
+            <button
+              onClick={handleNewChat}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10 border border-primary/10 hover:border-primary/20 text-sidebar-foreground transition-all duration-300 group shadow-sm hover:shadow-md hover:shadow-primary/5"
+            >
+              <div className="p-1.5 rounded-lg bg-primary/20 text-primary group-hover:scale-110 transition-transform duration-300">
+                <Plus className="h-4 w-4 stroke-[3]" />
+              </div>
+              <span className="text-sm font-semibold tracking-wide">New Chat</span>
+            </button>
           </div>
 
-          {/* Search Input */}
-          {showSearch && (
-            <div className="relative mt-2 animate-in fade-in slide-down duration-200">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search conversations..."
-                value={sidebarSearchQuery}
-                onChange={(e) => setSidebarSearchQuery(e.target.value)}
-                autoFocus
-                className="w-full h-10 pl-9 pr-9 rounded-xl bg-sidebar-accent/60 border-0 text-sm text-sidebar-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sidebar-ring/50 focus:bg-sidebar-accent transition-all"
-              />
-              {sidebarSearchQuery && (
-                <button
-                  onClick={() => setSidebarSearchQuery('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-background/50 transition-colors"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              )}
+          {/* Action Bar */}
+          <div className="px-4 pb-4">
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-black/20 border border-white/5 backdrop-blur-sm">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleSearchToggle}
+                    className={cn(
+                      "flex-1 flex items-center justify-center p-2 rounded-lg transition-all duration-200",
+                      showSearch
+                        ? "bg-white/10 text-sidebar-foreground shadow-sm ring-1 ring-white/5"
+                        : "text-muted-foreground hover:text-sidebar-foreground hover:bg-white/5"
+                    )}
+                  >
+                    <Search className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs">Search</TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleNewFolder}
+                    className="flex-1 flex items-center justify-center p-2 rounded-lg text-muted-foreground hover:text-sidebar-foreground hover:bg-white/5 transition-all duration-200"
+                  >
+                    <FolderPlus className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs">New Folder</TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    to="/app/notes"
+                    className="flex-1 flex items-center justify-center p-2 rounded-lg text-muted-foreground hover:text-sidebar-foreground hover:bg-white/5 transition-all duration-200"
+                  >
+                    <FileText className="h-4 w-4" />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs">Notes</TooltipContent>
+              </Tooltip>
             </div>
-          )}
-        </div>
 
-        {/* Divider */}
-        <div className="mx-3 h-px bg-gradient-to-r from-transparent via-sidebar-border/60 to-transparent" />
-
-        {/* Chat List */}
-        <ScrollArea className="flex-1 px-2">
-          <div className="py-2">
-            {isLoading ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <div className="relative">
-                  <div className="w-8 h-8 rounded-full border-2 border-sidebar-accent" />
-                  <div className="absolute inset-0 w-8 h-8 rounded-full border-2 border-transparent border-t-sidebar-foreground animate-spin" />
-                </div>
-                <span className="text-xs text-muted-foreground">Loading...</span>
-              </div>
-            ) : filteredChats.length === 0 && foldersWithState.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-                {sidebarSearchQuery ? (
-                  <>
-                    <div className="w-12 h-12 rounded-2xl bg-sidebar-accent/60 flex items-center justify-center mb-3">
-                      <Search className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                    <p className="text-sm font-medium text-sidebar-foreground mb-1">No results</p>
-                    <p className="text-xs text-muted-foreground">Try a different search term</p>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-12 h-12 rounded-2xl bg-sidebar-accent/60 flex items-center justify-center mb-3">
-                      <MessageSquare className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                    <p className="text-sm font-medium text-sidebar-foreground mb-1">No conversations</p>
-                    <p className="text-xs text-muted-foreground">Start a new chat to begin</p>
-                  </>
+            {/* Search Input */}
+            {showSearch && (
+              <div className="relative mt-3 animate-in fade-in slide-down duration-300">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search conversations..."
+                  value={sidebarSearchQuery}
+                  onChange={(e) => setSidebarSearchQuery(e.target.value)}
+                  autoFocus
+                  className="w-full h-10 pl-9 pr-9 rounded-xl bg-black/20 border border-white/10 text-sm text-sidebar-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/30 transition-all"
+                />
+                {sidebarSearchQuery && (
+                  <button
+                    onClick={() => setSidebarSearchQuery('')}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md text-muted-foreground hover:text-sidebar-foreground hover:bg-white/10 transition-colors"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
                 )}
-              </div>
-            ) : (
-              <div className="space-y-1">
-                {/* Folders */}
-                {foldersWithState.length > 0 && (
-                  <div className="mb-3">
-                    {foldersWithState.map((folder) => {
-                      const folderChats = chatsByFolder.get(folder.id) || [];
-                      const isExpanded = expandedFolders.has(folder.id);
-
-                      return (
-                        <FolderItem
-                          key={folder.id}
-                          id={folder.id}
-                          name={folder.name}
-                          chatCount={folderChats.length}
-                          isExpanded={isExpanded}
-                          isNew={folder.isNew}
-                          onToggle={() => toggleFolder(folder.id)}
-                          onRename={handleRenameFolder}
-                          onDelete={handleDeleteFolder}
-                          onDrop={handleMoveChatToFolder}
-                        >
-                          {folderChats.length === 0 ? (
-                            <div className="py-3 px-2 text-center">
-                              <p className="text-xs text-muted-foreground">Drop chats here</p>
-                            </div>
-                          ) : (
-                            folderChats.map((chat) => (
-                              <ChatItem
-                                key={chat.id}
-                                id={chat.id}
-                                title={chat.decryptedTitle}
-                                updatedAt={chat.updatedAt}
-                                isLocked={chat.isLocked}
-                                onDelete={handleDeleteChat}
-                                onRemoveFromFolder={() => handleRemoveChatFromFolder(chat.id)}
-                              />
-                            ))
-                          )}
-                        </FolderItem>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* Date-grouped Chats */}
-                {Array.from(groupedChats.entries()).map(([group, groupChats]) => (
-                  <div key={group} className="mb-2">
-                    <div className="flex items-center gap-2 px-2 py-2">
-                      <span className="text-caption font-medium text-muted-foreground uppercase tracking-wider">
-                        {DATE_GROUP_LABELS[group as DateGroup]}
-                      </span>
-                      <div className="flex-1 h-px bg-sidebar-border/40" />
-                    </div>
-                    <div className="space-y-0.5">
-                      {groupChats.map((chat) => (
-                        <ChatItem
-                          key={chat.id}
-                          id={chat.id}
-                          title={chat.decryptedTitle}
-                          updatedAt={chat.updatedAt}
-                          isLocked={chat.isLocked}
-                          onDelete={handleDeleteChat}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
               </div>
             )}
           </div>
-        </ScrollArea>
 
-        {/* User Section */}
-        <div className="relative mt-auto">
-          <div className="mx-3 h-px bg-gradient-to-r from-transparent via-sidebar-border/60 to-transparent" />
+          {/* Divider */}
+          <div className="mx-4 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-          <div className="flex items-center gap-1 p-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-3 flex-1 p-2 rounded-xl hover:bg-sidebar-accent/50 transition-colors text-left group">
+          {/* Chat List */}
+          <ScrollArea className="flex-1 px-3">
+            <div className="py-3">
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center py-16 gap-4">
                   <div className="relative">
-                    <Avatar className="h-9 w-9 ring-2 ring-sidebar-accent/80 ring-offset-1 ring-offset-sidebar-background">
-                      <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-sm font-medium">
-                        {user?.name?.charAt(0).toUpperCase() || '?'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div
-                      className={cn(
-                        'absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-sidebar-background transition-colors',
-                        isUnlocked
-                          ? 'bg-status-success'
-                          : 'bg-status-warning animate-pulse'
-                      )}
-                    />
+                    <div className="w-10 h-10 rounded-full border-2 border-primary/20" />
+                    <div className="absolute inset-0 w-10 h-10 rounded-full border-2 border-transparent border-t-primary animate-spin" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-sidebar-foreground truncate">
-                      {user?.name || 'User'}
-                    </p>
-                    <div className="flex items-center gap-1.5">
-                      {isUnlocked ? (
-                        <Shield className="w-3 h-3 text-status-success-text" />
-                      ) : (
-                        <ShieldOff className="w-3 h-3 text-status-warning-text" />
-                      )}
-                      <span className="text-caption text-muted-foreground">
-                        {isUnlocked ? 'Encrypted' : 'Locked'}
-                      </span>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" side="top" className="w-56 mb-2">
-                {isUnlocked && (
-                  <DropdownMenuItem onClick={lock} className="gap-2">
-                    <Lock className="h-4 w-4" />
-                    <span>Lock encryption</span>
-                  </DropdownMenuItem>
-                )}
-                {isUnlocked && <DropdownMenuSeparator />}
-                <DropdownMenuItem onClick={handleLogout} className="gap-2 text-destructive focus:text-destructive">
-                  <LogOut className="h-4 w-4" />
-                  <span>Sign out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <span className="text-xs font-medium text-muted-foreground">Loading chats...</span>
+                </div>
+              ) : filteredChats.length === 0 && foldersWithState.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+                  {sidebarSearchQuery ? (
+                    <>
+                      <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center mb-4 ring-1 ring-white/10">
+                        <Search className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                      <p className="text-sm font-semibold text-sidebar-foreground mb-1">No results found</p>
+                      <p className="text-xs text-muted-foreground max-w-[12rem] mx-auto leading-relaxed">
+                        We couldn't find any chats matching "{sidebarSearchQuery}"
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/10 to-purple-500/10 flex items-center justify-center mb-4 ring-1 ring-white/10">
+                        <MessageSquare className="w-6 h-6 text-primary/80" />
+                      </div>
+                      <p className="text-sm font-semibold text-sidebar-foreground mb-1">No conversations yet</p>
+                      <p className="text-xs text-muted-foreground max-w-[12rem] mx-auto leading-relaxed">
+                        Start a new chat to begin your journey with Onera
+                      </p>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  {/* Folders */}
+                  {foldersWithState.length > 0 && (
+                    <div className="mb-4 space-y-1">
+                      {foldersWithState.map((folder) => {
+                        const folderChats = chatsByFolder.get(folder.id) || [];
+                        const isExpanded = expandedFolders.has(folder.id);
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => openSettingsModal()}
-                  className="p-2.5 rounded-xl text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-all duration-200"
-                >
-                  <Settings className="h-5 w-5" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="text-xs">Settings</TooltipContent>
-            </Tooltip>
+                        return (
+                          <FolderItem
+                            key={folder.id}
+                            id={folder.id}
+                            name={folder.name}
+                            chatCount={folderChats.length}
+                            isExpanded={isExpanded}
+                            isNew={folder.isNew}
+                            onToggle={() => toggleFolder(folder.id)}
+                            onRename={handleRenameFolder}
+                            onDelete={handleDeleteFolder}
+                            onDrop={handleMoveChatToFolder}
+                          >
+                            {folderChats.length === 0 ? (
+                              <div className="py-4 px-2 text-center border-l border-white/5 ml-3">
+                                <p className="text-xs font-medium text-muted-foreground/60 italic">Drop chats here...</p>
+                              </div>
+                            ) : (
+                              <div className="space-y-0.5 border-l border-white/5 ml-3 pl-1 my-1">
+                                {folderChats.map((chat) => (
+                                  <ChatItem
+                                    key={chat.id}
+                                    id={chat.id}
+                                    title={chat.decryptedTitle}
+                                    updatedAt={chat.updatedAt}
+                                    isLocked={chat.isLocked}
+                                    onDelete={handleDeleteChat}
+                                    onRemoveFromFolder={() => handleRemoveChatFromFolder(chat.id)}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                          </FolderItem>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Date-grouped Chats */}
+                  {Array.from(groupedChats.entries()).map(([group, groupChats]) => (
+                    <div key={group} className="mb-4 last:mb-0">
+                      <div className="flex items-center gap-3 px-3 py-2 sticky top-0 bg-sidebar-background/40 backdrop-blur-md z-10 -mx-1 rounded-lg mb-1">
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
+                          {DATE_GROUP_LABELS[group as DateGroup]}
+                        </span>
+                        <div className="flex-1 h-px bg-white/5" />
+                      </div>
+                      <div className="space-y-0.5">
+                        {groupChats.map((chat) => (
+                          <ChatItem
+                            key={chat.id}
+                            id={chat.id}
+                            title={chat.decryptedTitle}
+                            updatedAt={chat.updatedAt}
+                            isLocked={chat.isLocked}
+                            onDelete={handleDeleteChat}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+
+          {/* User Section */}
+          <div className="relative mt-auto">
+            <div className="mx-4 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+            <div className="flex items-center gap-1.5 p-3">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-3 flex-1 p-2.5 rounded-xl hover:bg-white/5 transition-all duration-200 text-left group outline-none focus-visible:ring-2 focus-visible:ring-primary/50">
+                    <div className="relative">
+                      <Avatar className="h-9 w-9 ring-2 ring-white/10 transition-all group-hover:ring-primary/40">
+                        <AvatarFallback className="bg-gradient-to-br from-primary to-indigo-600 text-white text-sm font-bold">
+                          {user?.name?.charAt(0).toUpperCase() || '?'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div
+                        className={cn(
+                          'absolute -bottom-0.5 -right-0.5 w-[11px] h-[11px] rounded-full border-2 border-[#121212] transition-colors shadow-sm',
+                          isUnlocked
+                            ? 'bg-emerald-500'
+                            : 'bg-amber-500 animate-pulse'
+                        )}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-sidebar-foreground truncate group-hover:text-primary transition-colors">
+                        {user?.name || 'User'}
+                      </p>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        {isUnlocked ? (
+                          <Shield className="w-3 h-3 text-emerald-500/80" />
+                        ) : (
+                          <ShieldOff className="w-3 h-3 text-amber-500/80" />
+                        )}
+                        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                          {isUnlocked ? 'Encrypted' : 'Locked'}
+                        </span>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-0.5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" side="top" className="w-60 mb-2 p-1.5 bg-[#1a1a1a]/95 backdrop-blur-xl border-white/10 shadow-2xl rounded-xl">
+                  {isUnlocked && (
+                    <DropdownMenuItem onClick={lock} className="gap-2.5 p-2.5 rounded-lg focus:bg-white/10 cursor-pointer">
+                      <Lock className="h-4 w-4 text-amber-500" />
+                      <span className="font-medium">Lock encryption</span>
+                    </DropdownMenuItem>
+                  )}
+                  {isUnlocked && <DropdownMenuSeparator className="bg-white/5 my-1" />}
+                  <DropdownMenuItem onClick={handleLogout} className="gap-2.5 p-2.5 rounded-lg focus:bg-red-500/10 text-red-400 focus:text-red-400 cursor-pointer">
+                    <LogOut className="h-4 w-4" />
+                    <span className="font-medium">Sign out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => openSettingsModal()}
+                    className="p-2.5 rounded-xl text-muted-foreground/70 hover:text-sidebar-foreground hover:bg-white/5 transition-all duration-200"
+                  >
+                    <Settings className="h-5 w-5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-xs">Settings</TooltipContent>
+              </Tooltip>
+            </div>
           </div>
         </div>
       </nav>
