@@ -37,7 +37,6 @@ jobs:
         working-directory: apps/server
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_STAGE }}
-          WEBAUTHN_RP_ID: staging.onera.app
         run: bun run db:migrate
 
       - name: Prepare deployment package
@@ -74,6 +73,10 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    env:
+      WEBAUTHN_RP_ID: staging.onera.app
+      WEBAUTHN_ORIGIN: https://staging.onera.app
+      WEBAUTHN_RP_NAME: Onera
 
     steps:
       - name: Download artifact from build job
@@ -101,3 +104,13 @@ jobs:
             --name onera-backend-stage \
             --resource-group onera \
             --startup-file "startup.sh"
+
+      - name: Configure WebAuthn settings
+        run: |
+          az webapp config appsettings set \
+            --name onera-backend-stage \
+            --resource-group onera \
+            --settings \
+              WEBAUTHN_RP_ID="${{ env.WEBAUTHN_RP_ID }}" \
+              WEBAUTHN_ORIGIN="${{ env.WEBAUTHN_ORIGIN }}" \
+              WEBAUTHN_RP_NAME="${{ env.WEBAUTHN_RP_NAME }}"

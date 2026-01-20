@@ -15,7 +15,12 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     permissions:
+      id-token: write
       contents: read
+    env:
+      WEBAUTHN_RP_ID: onera.app
+      WEBAUTHN_ORIGIN: https://onera.app
+      WEBAUTHN_RP_NAME: Onera
 
     steps:
       - uses: actions/checkout@v4
@@ -58,10 +63,26 @@ jobs:
           cd deploy
           bun install --production
         
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'onera-backend'
           slot-name: 'Production'
           package: deploy
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_303C3F9E87D747E3A6A48DC0BDF2369D }}
+
+      - name: Configure WebAuthn settings
+        run: |
+          az webapp config appsettings set \
+            --name onera-backend \
+            --resource-group onera \
+            --settings \
+              WEBAUTHN_RP_ID="${{ env.WEBAUTHN_RP_ID }}" \
+              WEBAUTHN_ORIGIN="${{ env.WEBAUTHN_ORIGIN }}" \
+              WEBAUTHN_RP_NAME="${{ env.WEBAUTHN_RP_NAME }}"

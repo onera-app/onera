@@ -22,6 +22,7 @@ import {
   toBase64,
   fromBase64,
   randomBytes,
+  secureZero,
   type EncryptedData,
 } from "../sodium/utils";
 
@@ -122,15 +123,20 @@ export async function encryptMasterKeyWithPRF(
   // Derive KEK from PRF output
   const kek = await derivePRFKEK(prfOutput, prfSalt);
 
-  // Encrypt master key with KEK using XSalsa20-Poly1305
-  const nonce = randomBytes(24);
-  const ciphertext = sodium.crypto_secretbox_easy(masterKey, nonce, kek);
+  try {
+    // Encrypt master key with KEK using XSalsa20-Poly1305
+    const nonce = randomBytes(24);
+    const ciphertext = sodium.crypto_secretbox_easy(masterKey, nonce, kek);
 
-  return {
-    ciphertext: toBase64(ciphertext),
-    nonce: toBase64(nonce),
-    prfSalt,
-  };
+    return {
+      ciphertext: toBase64(ciphertext),
+      nonce: toBase64(nonce),
+      prfSalt,
+    };
+  } finally {
+    // Securely zero the KEK to prevent memory disclosure attacks
+    secureZero(kek);
+  }
 }
 
 /**
@@ -150,28 +156,39 @@ export async function decryptMasterKeyWithPRF(
   // Derive KEK from PRF output
   const kek = await derivePRFKEK(prfOutput, encrypted.prfSalt);
 
-  // Decrypt master key
-  const ciphertext = fromBase64(encrypted.ciphertext);
-  const nonce = fromBase64(encrypted.nonce);
+  try {
+    // Decrypt master key
+    const ciphertext = fromBase64(encrypted.ciphertext);
+    const nonce = fromBase64(encrypted.nonce);
 
-  const masterKey = sodium.crypto_secretbox_open_easy(ciphertext, nonce, kek);
+    const masterKey = sodium.crypto_secretbox_open_easy(ciphertext, nonce, kek);
 
-  if (!masterKey) {
-    throw new Error(
-      "Failed to decrypt master key: invalid PRF output or tampered data"
-    );
+    if (!masterKey) {
+      throw new Error(
+        "Failed to decrypt master key: invalid PRF output or tampered data"
+      );
+    }
+
+    return masterKey;
+  } finally {
+    // Securely zero the KEK to prevent memory disclosure attacks
+    secureZero(kek);
   }
-
-  return masterKey;
 }
 
 /**
  * Check if WebAuthn and PRF extension are supported
  *
- * Note: This is a basic check. Full PRF support requires the authenticator
- * to support the prf extension, which can only be confirmed during registration.
+ * IMPORTANT: This provides a preliminary check only. Full PRF support can only
+ * be confirmed during passkey registration when the authenticator reports
+ * `clientExtensionResults.prf.enabled = true`.
  *
- * @returns Object indicating support levels
+ * The check uses multiple heuristics:
+ * 1. WebAuthn API availability
+ * 2. Platform authenticator availability
+ * 3. Modern browser features (conditional mediation) as a proxy
+ *
+ * @returns Object indicating support levels (prfAvailable is a best-guess estimate)
  */
 export async function checkWebAuthnPRFSupport(): Promise<PRFSupportResult> {
   const result: PRFSupportResult = {
@@ -201,28 +218,73 @@ export async function checkWebAuthnPRFSupport(): Promise<PRFSupportResult> {
     result.platformAuthenticatorAvailable = false;
   }
 
-  // Check PRF extension support
-  // This is a heuristic - full support can only be confirmed during registration
-  // PRF is supported in Chrome 116+, Safari 18+, and modern Edge
+  // PRF extension support detection
+  // 
+  // LIMITATION: There is no direct API to check PRF support before registration.
+  // PRF support depends on both the browser AND the authenticator.
+  // 
+  // Heuristics used:
+  // - Conditional mediation support correlates with modern WebAuthn implementations
+  // - Platform authenticator presence suggests hardware that likely supports PRF
+  // 
+  // Known PRF support:
+  // - Chrome 116+ with compatible authenticators
+  // - Safari 18+ (macOS Sequoia / iOS 18)
+  // - Edge 116+ with Windows Hello
+  // - Firefox: Limited/no PRF support as of 2024
+  //
+  // The actual PRF support MUST be verified during registration by checking
+  // clientExtensionResults.prf.enabled in the registration response.
+  
   try {
-    // Check if the browser supports conditional UI (a proxy for modern WebAuthn support)
+    // Check for conditional mediation as a proxy for modern WebAuthn
     if ("isConditionalMediationAvailable" in PublicKeyCredential) {
       const conditionalAvailable =
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (PublicKeyCredential as any).isConditionalMediationAvailable();
-      // Browsers that support conditional mediation generally support PRF
-      result.prfAvailable = conditionalAvailable;
+      
+      // Conditional mediation + platform authenticator = likely PRF support
+      // This is still a heuristic and may have false positives/negatives
+      result.prfAvailable = conditionalAvailable && result.platformAuthenticatorAvailable;
     } else {
-      // Fallback: assume PRF is available if platform authenticator is available
-      // and we're on a modern browser (checked by WebAuthn availability)
+      // Older browser without conditional mediation - PRF support unlikely
+      // but we allow attempting if platform authenticator exists
       result.prfAvailable = result.platformAuthenticatorAvailable;
     }
   } catch {
-    // Conservative fallback
+    // Conservative fallback - allow attempt if platform authenticator exists
+    // Registration will fail gracefully if PRF is not actually supported
     result.prfAvailable = result.platformAuthenticatorAvailable;
   }
 
   return result;
+}
+
+/**
+ * Validate that a PRF result contains valid output
+ * 
+ * @param prfResults - The prf.results from WebAuthn extension output
+ * @returns true if PRF output is valid and usable
+ */
+export function validatePRFResults(prfResults: {
+  first?: ArrayBuffer;
+  second?: ArrayBuffer;
+} | undefined | null): boolean {
+  if (!prfResults) {
+    return false;
+  }
+
+  const output = prfResults.first;
+  if (!output) {
+    return false;
+  }
+
+  // PRF output must be exactly 32 bytes
+  if (output.byteLength !== 32) {
+    return false;
+  }
+
+  return true;
 }
 
 /**

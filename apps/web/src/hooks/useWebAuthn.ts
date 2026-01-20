@@ -19,6 +19,7 @@ import {
   decryptMasterKeyWithPRF,
   extractPRFOutput,
   createPRFExtensionInputs,
+  validatePRFResults,
   type PRFEncryptedMasterKey,
 } from "@onera/crypto/webauthn";
 import { fromBase64 } from "@onera/crypto";
@@ -115,9 +116,11 @@ export function usePasskeyRegistration() {
     const authExtResults = authResponse.clientExtensionResults as any;
     const prfResults = authExtResults?.prf?.results;
 
-    if (!prfResults?.first) {
+    // Validate PRF results before extraction
+    if (!validatePRFResults(prfResults)) {
       throw new Error(
-        "Failed to get PRF output from authenticator. The passkey may not support PRF extension."
+        "Failed to get PRF output from authenticator. This passkey may not support the PRF extension. " +
+        "Please try a different passkey or use an alternative unlock method."
       );
     }
 
@@ -127,8 +130,10 @@ export function usePasskeyRegistration() {
     const encrypted = await encryptMasterKeyWithPRF(masterKey, prfOutput, prfSalt);
 
     // Step 5: Complete registration with encrypted master key
+    // Note: Type assertion needed because @simplewebauthn types don't have index signature
+    // that matches the Zod schema inference for clientExtensionResults
     await verifyRegistration.mutateAsync({
-      response: registrationResponse,
+      response: registrationResponse as unknown as Parameters<typeof verifyRegistration.mutateAsync>[0]['response'],
       prfSalt,
       encryptedMasterKey: encrypted.ciphertext,
       masterKeyNonce: encrypted.nonce,
@@ -207,17 +212,21 @@ export function usePasskeyAuthentication() {
     const extensionResults = authResponse.clientExtensionResults as any;
     const prfResults = extensionResults?.prf?.results;
 
-    if (!prfResults?.first) {
+    // Validate PRF results before extraction
+    if (!validatePRFResults(prfResults)) {
       throw new Error(
-        "Failed to get PRF output. The passkey may not support PRF extension."
+        "Failed to get PRF output from passkey. The passkey may not support the PRF extension, " +
+        "or there was an error during authentication. Please try again or use an alternative unlock method."
       );
     }
 
     const prfOutput = extractPRFOutput(prfResults);
 
     // Step 5: Verify authentication and get encrypted master key
+    // Note: Type assertion needed because @simplewebauthn types don't have index signature
+    // that matches the Zod schema inference for clientExtensionResults
     const result = await verifyAuth.mutateAsync({
-      response: authResponse,
+      response: authResponse as unknown as Parameters<typeof verifyAuth.mutateAsync>[0]['response'],
     });
 
     // Step 6: Decrypt master key using PRF output

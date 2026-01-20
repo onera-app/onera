@@ -31,12 +31,105 @@ import type {
 } from "@simplewebauthn/types";
 import { randomBytes } from "crypto";
 
-// Environment variables for WebAuthn configuration
+// =============================================================================
+// Zod Schemas for WebAuthn Response Validation
+// =============================================================================
+
+/**
+ * Schema for authenticator transports
+ */
+const authenticatorTransportSchema = z.enum([
+  "ble",
+  "cable",
+  "hybrid",
+  "internal",
+  "nfc",
+  "smart-card",
+  "usb",
+]);
+
+/**
+ * Schema for RegistrationResponseJSON from @simplewebauthn/types
+ * Validates the structure before passing to verifyRegistrationResponse
+ * 
+ * Note: We use a permissive schema for clientExtensionResults since the
+ * WebAuthn spec allows arbitrary extensions and the types from @simplewebauthn
+ * don't have an index signature.
+ */
+const registrationResponseSchema = z.object({
+  id: z.string().min(1),
+  rawId: z.string().min(1),
+  type: z.literal("public-key"),
+  response: z.object({
+    clientDataJSON: z.string().min(1),
+    attestationObject: z.string().min(1),
+    transports: z.array(authenticatorTransportSchema).optional(),
+    publicKeyAlgorithm: z.number().optional(),
+    publicKey: z.string().optional(),
+    authenticatorData: z.string().optional(),
+  }),
+  // Use record for clientExtensionResults to allow any extension properties
+  clientExtensionResults: z.record(z.unknown()).optional(),
+  authenticatorAttachment: z.enum(["platform", "cross-platform"]).optional(),
+});
+
+/**
+ * Schema for AuthenticationResponseJSON from @simplewebauthn/types
+ * Validates the structure before passing to verifyAuthenticationResponse
+ */
+const authenticationResponseSchema = z.object({
+  id: z.string().min(1),
+  rawId: z.string().min(1),
+  type: z.literal("public-key"),
+  response: z.object({
+    clientDataJSON: z.string().min(1),
+    authenticatorData: z.string().min(1),
+    signature: z.string().min(1),
+    userHandle: z.string().optional().nullable(),
+  }),
+  // Use record for clientExtensionResults to allow any extension properties
+  clientExtensionResults: z.record(z.unknown()).optional(),
+  authenticatorAttachment: z.enum(["platform", "cross-platform"]).optional(),
+});
+
+// =============================================================================
+// WebAuthn Configuration
+// =============================================================================
+
 const rpID = process.env.WEBAUTHN_RP_ID || "localhost";
 const rpName = process.env.WEBAUTHN_RP_NAME || "Onera";
 const origin = process.env.WEBAUTHN_ORIGIN || "http://localhost:5173";
 
-// Store challenges in memory (in production, use Redis or similar)
+// =============================================================================
+// Challenge Store
+// =============================================================================
+// 
+// TODO [PRODUCTION]: Replace in-memory challenge store with Redis or similar
+// distributed cache. The current implementation will not work correctly in:
+// - Multi-instance deployments (load-balanced servers)
+// - Serverless environments (Lambda, Vercel, etc.)
+// - After server restarts (all pending challenges lost)
+//
+// Recommended implementation:
+// 1. Use Redis with TTL (5 minutes)
+// 2. Key format: `webauthn:challenge:${challenge}`
+// 3. Value: JSON.stringify({ userId, type, createdAt })
+//
+// Example Redis implementation:
+// ```
+// import { Redis } from '@upstash/redis' // or ioredis
+// const redis = new Redis({ url: process.env.REDIS_URL })
+// 
+// async function storeChallenge(challenge: string, data: ChallengeData) {
+//   await redis.set(`webauthn:challenge:${challenge}`, JSON.stringify(data), { ex: 300 })
+// }
+// 
+// async function getChallenge(challenge: string): Promise<ChallengeData | null> {
+//   const data = await redis.get(`webauthn:challenge:${challenge}`)
+//   return data ? JSON.parse(data) : null
+// }
+// ```
+//
 // Key: challenge, Value: { userId, type, createdAt }
 const challengeStore = new Map<
   string,
@@ -55,8 +148,49 @@ function cleanupExpiredChallenges() {
   }
 }
 
-// Run cleanup periodically
+// Run cleanup periodically (only needed for in-memory store)
 setInterval(cleanupExpiredChallenges, 60 * 1000); // Every minute
+
+// =============================================================================
+// Rate Limiting
+// =============================================================================
+//
+// TODO [PRODUCTION]: Implement rate limiting for WebAuthn endpoints
+// 
+// While WebAuthn provides inherent protection via biometric/PIN requirements,
+// rate limiting helps prevent:
+// - Credential enumeration attacks
+// - Resource exhaustion from malicious registration attempts
+// - Brute force attacks on compromised devices
+//
+// Recommended limits:
+// - generateRegistrationOptions: 5 requests per minute per user
+// - verifyRegistration: 3 requests per minute per user
+// - generateAuthenticationOptions: 10 requests per minute per user
+// - verifyAuthentication: 5 requests per minute per user
+//
+// Implementation options:
+// 1. Use @upstash/ratelimit with Redis
+// 2. Use express-rate-limit if using Express
+// 3. Implement custom sliding window algorithm with Redis
+//
+// Example with @upstash/ratelimit:
+// ```
+// import { Ratelimit } from '@upstash/ratelimit'
+// import { Redis } from '@upstash/redis'
+// 
+// const ratelimit = new Ratelimit({
+//   redis: Redis.fromEnv(),
+//   limiter: Ratelimit.slidingWindow(5, '1 m'),
+//   prefix: 'webauthn-ratelimit',
+// })
+// 
+// // In each procedure:
+// const { success, limit, reset, remaining } = await ratelimit.limit(`${ctx.user.id}:registration`)
+// if (!success) {
+//   throw new TRPCError({ code: 'TOO_MANY_REQUESTS', message: 'Rate limit exceeded' })
+// }
+// ```
 
 /**
  * Generate a random PRF salt for new passkey registration
@@ -181,11 +315,11 @@ export const webauthnRouter = router({
   verifyRegistration: protectedProcedure
     .input(
       z.object({
-        response: z.any(), // RegistrationResponseJSON
-        prfSalt: z.string(),
-        encryptedMasterKey: z.string(),
-        masterKeyNonce: z.string(),
-        name: z.string().optional(),
+        response: registrationResponseSchema,
+        prfSalt: z.string().min(1),
+        encryptedMasterKey: z.string().min(1),
+        masterKeyNonce: z.string().min(1),
+        name: z.string().max(100).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -340,7 +474,7 @@ export const webauthnRouter = router({
   verifyAuthentication: protectedProcedure
     .input(
       z.object({
-        response: z.any(), // AuthenticationResponseJSON
+        response: authenticationResponseSchema,
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -403,11 +537,44 @@ export const webauthnRouter = router({
           });
         }
 
+        // Counter anomaly detection
+        const oldCounter = credential.counter;
+        const newCounter = verification.authenticationInfo.newCounter;
+        const counterJump = newCounter - oldCounter;
+
+        // Log suspicious counter behavior that might indicate credential cloning
+        // Note: A jump of exactly 1 is normal. Larger jumps can occur legitimately
+        // if the credential is used on another site, but very large jumps are suspicious.
+        const COUNTER_JUMP_WARNING_THRESHOLD = 100;
+        const COUNTER_JUMP_CRITICAL_THRESHOLD = 1000;
+
+        if (counterJump > COUNTER_JUMP_CRITICAL_THRESHOLD) {
+          console.error(
+            `[SECURITY] Critical counter anomaly detected for user ${ctx.user.id}, ` +
+            `credential ${credential.credentialId}: counter jumped from ${oldCounter} to ${newCounter} ` +
+            `(+${counterJump}). This may indicate credential cloning or replay attack.`
+          );
+          // TODO: In production, send alert to security monitoring system
+        } else if (counterJump > COUNTER_JUMP_WARNING_THRESHOLD) {
+          console.warn(
+            `[SECURITY] Counter anomaly warning for user ${ctx.user.id}, ` +
+            `credential ${credential.credentialId}: counter jumped from ${oldCounter} to ${newCounter} ` +
+            `(+${counterJump}). Monitor for additional suspicious activity.`
+          );
+        } else if (counterJump <= 0 && oldCounter > 0) {
+          // This should not happen - the library should reject it, but log just in case
+          console.error(
+            `[SECURITY] Counter did not increase for user ${ctx.user.id}, ` +
+            `credential ${credential.credentialId}: old=${oldCounter}, new=${newCounter}. ` +
+            `This indicates a potential replay attack or credential cloning.`
+          );
+        }
+
         // Update counter and last used timestamp
         await db
           .update(webauthnCredentials)
           .set({
-            counter: verification.authenticationInfo.newCounter,
+            counter: newCounter,
             lastUsedAt: new Date(),
           })
           .where(eq(webauthnCredentials.id, credential.id));

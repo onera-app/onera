@@ -250,6 +250,11 @@ export const Messages = memo(function Messages({
   // Count new messages for staggered animation delays
   // NOTE: Must be defined before any early returns to comply with Rules of Hooks
   const newMessagesCount = useRef(0);
+  
+  // Reset counter at start of each render so each batch of new messages
+  // starts with fresh animation delays (0ms, 50ms, 100ms...) instead of
+  // accumulating from previous renders
+  newMessagesCount.current = 0;
 
   if (messages.length === 0) {
     return (

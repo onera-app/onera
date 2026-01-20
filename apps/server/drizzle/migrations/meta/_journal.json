@@ -22,6 +22,20 @@
       "when": 1737073000000,
       "tag": "0002_drop_user_fk_constraints",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1737074000000,
+      "tag": "0003_privy_style_e2ee_security",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1737075000000,
+      "tag": "0004_webauthn_passkeys",
+      "breakpoints": true
     }
   ]
 }

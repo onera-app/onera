@@ -7,6 +7,7 @@
 export {
   // PRF Support
   checkWebAuthnPRFSupport,
+  validatePRFResults,
   type PRFSupportResult,
   // PRF Key Derivation
   generatePRFSalt,
