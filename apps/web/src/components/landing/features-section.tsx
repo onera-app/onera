@@ -1,85 +1,109 @@
-import { Card, CardContent } from "@/components/ui/card";
+"use client";
+
+import { motion } from "framer-motion";
 import {
-  MessageSquare,
-  Shield,
-  Zap,
-  Globe,
-  FileText,
-  X,
+  Key,
+  Database,
+  Lock,
+  Layers
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const features = [
   {
-    icon: MessageSquare,
-    title: "Multi-provider support",
-    description: "Connect to OpenAI, Anthropic, Ollama, and more with your own API keys",
+    title: "Bring Your Own Key",
+    description: "Connect directly to OpenAI, Anthropic, or DeepSeek using your own API keys. No middleman markup.",
+    icon: Key,
+    className: "md:col-span-2",
+    gradient: "from-blue-500/20 to-cyan-500/20",
+    textGradient: "text-blue-500"
   },
   {
-    icon: Shield,
-    title: "Client-side encryption",
-    description: "All encryption happens in your browser. Server only sees encrypted data",
+    title: "Local-First Storage",
+    description: "All your conversations and embeddings are stored locally in your browser (IndexedDB).",
+    icon: Database,
+    className: "md:col-span-1",
+    gradient: "from-emerald-500/20 to-teal-500/20",
+    textGradient: "text-emerald-500"
   },
   {
-    icon: Zap,
-    title: "Direct API connections",
-    description: "Chat directly with AI providers. No proxy, no delays, no middleman",
+    title: "End-to-End Encryption",
+    description: "Sync between devices securely. Your data is encrypted before it ever leaves your device.",
+    icon: Lock,
+    className: "md:col-span-1",
+    gradient: "from-orange-500/20 to-amber-500/20",
+    textGradient: "text-orange-500"
   },
   {
-    icon: Globe,
-    title: "Access anywhere",
-    description: "Use from any device with a web browser. Your data syncs encrypted",
-  },
-  {
-    icon: FileText,
-    title: "Notes & prompts",
-    description: "Save encrypted notes and prompt templates for quick access",
-  },
-  {
-    icon: X,
-    title: "No vendor lock-in",
-    description: "Export your data anytime. Cancel whenever you want",
+    title: "Multi-LLM Support",
+    description: "Switch seamlessly between GPT-4o, Claude 3.5 Sonnet, and DeepSeek V3 in the same chat.",
+    icon: Layers,
+    className: "md:col-span-2",
+    gradient: "from-purple-500/20 to-pink-500/20",
+    textGradient: "text-purple-500"
   },
 ];
 
 export function FeaturesSection() {
   return (
-    <section className="relative py-24 px-4 overflow-hidden">
-      {/* Subtle background */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:60px_60px]" />
-      </div>
+    <section id="features" className="py-24 px-4 bg-neutral-50 dark:bg-neutral-900/50 relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent" />
+      <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent" />
 
-      <div className="max-w-6xl mx-auto">
-        {/* Heading */}
+      <div className="max-w-6xl mx-auto relative z-10">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
-            What You Get
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Everything you need for private AI conversations
-          </p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+              Powerful features, <span className="text-neutral-400">zero compromise.</span>
+            </h2>
+            <p className="text-lg text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
+              Onera combines the convenience of a modernized chat interface with the security of a vault.
+            </p>
+          </motion.div>
         </div>
 
-        {/* Features Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature) => (
-            <Card 
-              key={feature.title} 
-              className="bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm border-neutral-200/60 dark:border-neutral-700/60 shadow-sm hover:shadow-md hover:bg-white/90 dark:hover:bg-neutral-800/90 transition-all duration-300"
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(0,1fr)]">
+          {features.map((feature, i) => (
+            <motion.div
+              key={feature.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              whileHover={{ y: -5 }}
+              className={cn(
+                "group relative overflow-hidden rounded-3xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 p-8 flex flex-col transition-all duration-300 hover:shadow-2xl hover:shadow-neutral-200/50 dark:hover:shadow-neutral-900/50",
+                feature.className
+              )}
             >
-              <CardContent className="pt-6">
-                {/* Icon */}
-                <div className="mb-4 rounded-xl bg-neutral-100/80 dark:bg-neutral-800/80 p-3 w-fit">
-                  <feature.icon className="size-6 text-neutral-700 dark:text-neutral-300" strokeWidth={1.5} />
+              {/* Gradient Splash */}
+              <div className={cn(
+                "absolute -right-20 -top-20 w-64 h-64 rounded-full blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br",
+                feature.gradient
+              )} />
+
+              <div className="relative z-10">
+                <div className={cn(
+                  "size-12 rounded-xl flex items-center justify-center mb-6 bg-neutral-100 dark:bg-neutral-900 group-hover:scale-110 transition-transform duration-300",
+                  feature.textGradient
+                )}>
+                  <feature.icon className="size-6" />
                 </div>
 
-                {/* Content */}
-                <h3 className="font-semibold mb-1">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <h3 className="text-xl font-semibold mb-3 text-neutral-900 dark:text-white">
+                  {feature.title}
+                </h3>
+                <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed">
                   {feature.description}
                 </p>
-              </CardContent>
-            </Card>
+              </div>
+            </motion.div>
           ))}
         </div>
       </div>
