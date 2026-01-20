@@ -203,6 +203,8 @@ export function ChatPage() {
   const currentHistoryRef = useRef<ChatHistory>({ currentId: null, messages: {} });
   // Ref to track previous display messages for stable references (React memo optimization)
   const prevDisplayMessagesRef = useRef<ChatMessage[]>([]);
+  // Ref to track current display messages for callbacks (avoids recreating callbacks during streaming)
+  const displayMessagesRef = useRef<ChatMessage[]>([]);
   // Refs for encryption keys - stable during streaming to avoid callback recreation
   const encryptionKeysRef = useRef<{ encryptedChatKey?: string; chatKeyNonce?: string }>({});
   // Refs for mutation functions to avoid callback recreation
@@ -617,6 +619,9 @@ export function ChatPage() {
     return result;
   }, [localHistory, aiMessages, selectedModelId]);
 
+  // Keep displayMessagesRef in sync for stable callbacks
+  displayMessagesRef.current = displayMessages;
+
   // Handle sending a message with optional attachments and search
   const handleSendMessage = useCallback(async (content: string, options?: MessageInputOptions) => {
     if (!isUnlocked || !chat || !selectedModelId || !chatId) {
@@ -884,7 +889,7 @@ export function ChatPage() {
     }
   }, [chatId, setMessages]);
 
-  // Handle message regeneration (uses encryptionKeysRef for stable callback)
+  // Handle message regeneration (uses refs for stable callback during streaming)
   const handleRegenerateMessage = useCallback(async (
     messageId: string,
     options?: { modifier?: string }
@@ -893,14 +898,17 @@ export function ChatPage() {
     const { encryptedChatKey } = encryptionKeysRef.current;
     if (!encryptedChatKey || !chatId || !selectedModelId || !isReady) return;
 
+    // Use ref to get current messages without recreating callback during streaming
+    const currentDisplayMessages = displayMessagesRef.current;
+
     try {
       // Find the message index
-      const messageIndex = displayMessages.findIndex(m => m.id === messageId);
+      const messageIndex = currentDisplayMessages.findIndex(m => m.id === messageId);
       if (messageIndex === -1) return;
 
       // Get all messages up to (but not including) the message to regenerate
       // This should include the user message that prompted this response
-      const messagesToKeep = displayMessages.slice(0, messageIndex);
+      const messagesToKeep = currentDisplayMessages.slice(0, messageIndex);
       const userMessage = messagesToKeep[messagesToKeep.length - 1];
 
       if (!userMessage || userMessage.role !== 'user') {
@@ -946,7 +954,7 @@ export function ChatPage() {
       console.error('Failed to regenerate message:', error);
       toast.error('Failed to regenerate message');
     }
-  }, [chatId, selectedModelId, isReady, displayMessages, setMessages, sendMessage]);
+  }, [chatId, selectedModelId, isReady, setMessages, sendMessage]);
 
   // Handle message deletion - uses refs to avoid callback recreation during streaming
   const handleDeleteMessage = useCallback(async (messageId: string) => {
@@ -994,6 +1002,14 @@ export function ChatPage() {
     }
   }, [chatId, setMessages]);
 
+  // Memoize navbar children to prevent ChatNavbar re-renders
+  // Must be before early returns to maintain consistent hook order
+  const navbarChildren = useMemo(() => (
+    <div className="hidden md:block">
+      <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />
+    </div>
+  ), [selectedModelId, setSelectedModel]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full bg-background">
@@ -1022,13 +1038,6 @@ export function ChatPage() {
       </div>
     );
   }
-
-  // Memoize navbar children to prevent ChatNavbar re-renders
-  const navbarChildren = useMemo(() => (
-    <div className="hidden md:block">
-      <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />
-    </div>
-  ), [selectedModelId, setSelectedModel]);
 
   return (
     <div className="relative flex flex-col h-full w-full bg-background overflow-hidden">

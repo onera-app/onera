@@ -1,5 +1,5 @@
-import { Link, useNavigate } from '@tanstack/react-router';
-import { useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from '@tanstack/react-router';
+import { useMemo, useState, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { useUIStore } from '@/stores/uiStore';
 import { useE2EE } from '@/providers/E2EEProvider';
@@ -58,6 +58,8 @@ interface FolderWithState {
 
 export function Sidebar() {
   const navigate = useNavigate();
+  const params = useParams({ strict: false });
+  const currentChatId = (params as { chatId?: string }).chatId;
   const { sidebarOpen, sidebarWidth, toggleSidebar, openSettingsModal } = useUIStore();
   const { isUnlocked } = useE2EE();
   const { user, signOut } = useAuth();
@@ -70,6 +72,13 @@ export function Sidebar() {
   const createFolder = useCreateFolder();
   const updateFolder = useUpdateFolder();
   const deleteFolder = useDeleteFolder();
+
+  // Refs for mutation functions to avoid recreating callbacks
+  // React Query returns new object references on every render
+  const deleteChatRef = useRef(deleteChat);
+  const updateChatRef = useRef(updateChat);
+  deleteChatRef.current = deleteChat;
+  updateChatRef.current = updateChat;
 
   // Track expanded folders and sections
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
@@ -189,9 +198,9 @@ export function Sidebar() {
     navigate({ to: '/app' });
   };
 
-  const handleDeleteChat = async (chatId: string) => {
-    await deleteChat.mutateAsync(chatId);
-  };
+  const handleDeleteChat = useCallback(async (chatId: string) => {
+    await deleteChatRef.current.mutateAsync(chatId);
+  }, []);
 
   // Folder actions
   const handleNewFolder = async () => {
@@ -247,20 +256,20 @@ export function Sidebar() {
     }
   };
 
-  const handleRemoveChatFromFolder = async (chatId: string) => {
+  const handleRemoveChatFromFolder = useCallback(async (chatId: string) => {
     try {
-      await updateChat.mutateAsync({
+      await updateChatRef.current.mutateAsync({
         id: chatId,
         data: { folderId: null },
       });
     } catch {
       toast.error('Failed to remove from folder');
     }
-  };
+  }, []);
 
-  const handleTogglePin = async (chatId: string, pinned: boolean) => {
+  const handleTogglePin = useCallback(async (chatId: string, pinned: boolean) => {
     try {
-      await updateChat.mutateAsync({
+      await updateChatRef.current.mutateAsync({
         id: chatId,
         data: { pinned },
       });
@@ -268,7 +277,7 @@ export function Sidebar() {
     } catch {
       toast.error('Failed to update pin status');
     }
-  };
+  }, []);
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -423,9 +432,10 @@ export function Sidebar() {
                                       updatedAt={chat.updatedAt}
                                       isLocked={chat.isLocked}
                                       isPinned={chat.isPinned}
+                                      isActive={chat.id === currentChatId}
                                       onDelete={handleDeleteChat}
                                       onTogglePin={handleTogglePin}
-                                      onRemoveFromFolder={() => handleRemoveChatFromFolder(chat.id)}
+                                      onRemoveFromFolder={handleRemoveChatFromFolder}
                                     />
                                   ))}
                                 </div>
@@ -464,6 +474,7 @@ export function Sidebar() {
                                 updatedAt={chat.updatedAt}
                                 isLocked={chat.isLocked}
                                 isPinned={chat.isPinned}
+                                isActive={chat.id === currentChatId}
                                 onDelete={handleDeleteChat}
                                 onTogglePin={handleTogglePin}
                               />
@@ -487,6 +498,7 @@ export function Sidebar() {
                                 updatedAt={chat.updatedAt}
                                 isLocked={chat.isLocked}
                                 isPinned={chat.isPinned}
+                                isActive={chat.id === currentChatId}
                                 onDelete={handleDeleteChat}
                                 onTogglePin={handleTogglePin}
                               />

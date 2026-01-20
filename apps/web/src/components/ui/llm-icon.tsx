@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { cn } from '@/lib/utils';
 
 interface LLMIconProps {
@@ -46,8 +47,9 @@ const iconSizeClasses = {
 
 /**
  * LLM Provider Icon - displays provider-specific icons for AI responses
+ * Memoized to prevent unnecessary re-renders during streaming
  */
-export function LLMIcon({ model, size = 'md', className, isLoading }: LLMIconProps) {
+export const LLMIcon = memo(function LLMIcon({ model, size = 'md', className, isLoading }: LLMIconProps) {
   const provider = getProviderFromModel(model);
   const sizeClass = sizeClasses[size];
   const iconSize = iconSizeClasses[size];
@@ -193,4 +195,4 @@ export function LLMIcon({ model, size = 'md', className, isLoading }: LLMIconPro
         </div>
       );
   }
-}
+});

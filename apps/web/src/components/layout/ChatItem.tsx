@@ -1,5 +1,5 @@
-import { Link, useParams } from '@tanstack/react-router';
-import { useState, useRef, useEffect } from 'react';
+import { Link } from '@tanstack/react-router';
+import { useState, useRef, useEffect, memo } from 'react';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -26,25 +26,24 @@ interface ChatItemProps {
   updatedAt: number;
   isLocked?: boolean;
   isPinned?: boolean;
+  isActive?: boolean;
   onDelete: (id: string) => void;
   onRename?: (id: string, newTitle: string) => void;
-  onRemoveFromFolder?: () => void;
+  onRemoveFromFolder?: (id: string) => void;
   onTogglePin?: (id: string, pinned: boolean) => void;
 }
 
-export function ChatItem({
+export const ChatItem = memo(function ChatItem({
   id,
   title,
   isLocked,
   isPinned,
+  isActive = false,
   onDelete,
   onRename,
   onRemoveFromFolder,
   onTogglePin,
 }: ChatItemProps) {
-  const params = useParams({ strict: false });
-  const currentChatId = (params as { chatId?: string }).chatId;
-  const isActive = currentChatId === id;
 
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(title);
@@ -215,7 +214,7 @@ export function ChatItem({
                 Rename
               </DropdownMenuItem>
               {onRemoveFromFolder && (
-                <DropdownMenuItem onClick={onRemoveFromFolder} className="gap-2">
+                <DropdownMenuItem onClick={() => onRemoveFromFolder(id)} className="gap-2">
                   <FolderMinus className="h-3.5 w-3.5" />
                   Remove from folder
                 </DropdownMenuItem>
@@ -233,25 +232,29 @@ export function ChatItem({
         </div>
       </div>
 
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="max-w-sm">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete conversation?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this conversation and all its messages.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-red-600 text-white hover:bg-red-700"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Only render AlertDialog when needed to avoid Radix UI overhead */}
+      {/* Only render AlertDialog when needed to avoid Radix UI overhead */}
+      {showDeleteDialog && (
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent className="max-w-sm">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete conversation?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete this conversation and all its messages.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="bg-red-600 text-white hover:bg-red-700"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </>
   );
-}
+});

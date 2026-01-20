@@ -284,31 +284,6 @@
     opacity: 0;
   }
 
-  /* Streaming message - subtle glow effect while content is being generated */
-  .message-streaming {
-    position: relative;
-  }
-
-  .message-streaming::before {
-    content: '';
-    position: absolute;
-    inset: -2px -8px;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      var(--color-primary) 50%,
-      transparent 100%
-    );
-    opacity: 0.04;
-    border-radius: 12px;
-    animation: streaming-pulse 2s ease-in-out infinite;
-    pointer-events: none;
-  }
-  
-  .light .message-streaming::before {
-    opacity: 0.06;
-  }
-
   /* Streaming cursor - blinking caret effect with smooth transitions */
   .streaming-cursor {
     position: relative;
@@ -353,17 +328,6 @@
 @keyframes cursor-blink {
   0%, 100% { opacity: 0.7; }
   50% { opacity: 0; }
-}
-
-@keyframes streaming-pulse {
-  0%, 100% {
-    opacity: 0;
-    transform: scaleX(0.98);
-  }
-  50% {
-    opacity: 1;
-    transform: scaleX(1);
-  }
 }
 
 @keyframes scroll-button-enter {
@@ -424,7 +388,6 @@
   /* Reduce motion for accessibility */
   @media (prefers-reduced-motion: reduce) {
     .streaming-cursor::after,
-    .message-streaming::before,
     .typing-dot {
       animation: none;
     }
@@ -475,4 +438,211 @@
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   @apply text-muted-foreground pointer-events-none float-left h-0;
+}
+
+/* 
+ * Syntax Highlighting Theme - High Contrast
+ * Custom highlight.js theme for premium dark/light modes
+ */
+
+/* Base code styling */
+.hljs {
+  color: oklch(0.90 0.01 90);
+  background: transparent;
+}
+
+/* Comments - muted but readable */
+.hljs-comment,
+.hljs-quote {
+  color: oklch(0.55 0.02 260);
+  font-style: italic;
+}
+
+/* Keywords - soft coral/salmon for better contrast than pure red */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-tag {
+  color: oklch(0.75 0.14 25);
+}
+
+/* Strings - warm gold */
+.hljs-string,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-addition {
+  color: oklch(0.80 0.14 85);
+}
+
+/* Numbers, booleans, constants - teal/cyan */
+.hljs-number,
+.hljs-literal,
+.hljs-variable,
+.hljs-attr {
+  color: oklch(0.78 0.12 195);
+}
+
+/* Functions - soft blue */
+.hljs-title,
+.hljs-title.function_,
+.hljs-section {
+  color: oklch(0.78 0.12 250);
+}
+
+/* Built-ins, types - purple/lavender */
+.hljs-built_in,
+.hljs-type,
+.hljs-class .hljs-title {
+  color: oklch(0.75 0.12 300);
+}
+
+/* Properties, attributes - soft green */
+.hljs-property,
+.hljs-attribute {
+  color: oklch(0.78 0.12 150);
+}
+
+/* Operators, punctuation */
+.hljs-operator,
+.hljs-punctuation {
+  color: oklch(0.75 0.02 260);
+}
+
+/* Meta, annotations */
+.hljs-meta,
+.hljs-meta .hljs-keyword,
+.hljs-meta .hljs-string {
+  color: oklch(0.70 0.10 60);
+}
+
+/* Deletion (diffs) */
+.hljs-deletion {
+  color: oklch(0.70 0.16 25);
+  background: oklch(0.25 0.05 25 / 0.3);
+}
+
+/* Addition (diffs) */
+.hljs-addition {
+  color: oklch(0.75 0.14 150);
+  background: oklch(0.25 0.05 150 / 0.3);
+}
+
+/* Selection within code */
+.hljs::selection,
+.hljs *::selection {
+  background: oklch(0.40 0.02 260);
+}
+
+/* Emphasis */
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: 600;
+}
+
+/* Link in code */
+.hljs-link {
+  color: oklch(0.75 0.12 250);
+  text-decoration: underline;
+}
+
+/* Regex */
+.hljs-regexp {
+  color: oklch(0.75 0.14 40);
+}
+
+/* Symbol */
+.hljs-symbol {
+  color: oklch(0.78 0.12 195);
+}
+
+/* Params - slightly muted */
+.hljs-params {
+  color: oklch(0.85 0.01 90);
+}
+
+/* Light mode overrides for syntax highlighting */
+.light .hljs {
+  color: oklch(0.30 0.01 260);
+}
+
+.light .hljs-comment,
+.light .hljs-quote {
+  color: oklch(0.50 0.02 260);
+  font-style: italic;
+}
+
+.light .hljs-keyword,
+.light .hljs-selector-tag,
+.light .hljs-tag {
+  color: oklch(0.50 0.18 25);
+}
+
+.light .hljs-string,
+.light .hljs-template-tag,
+.light .hljs-template-variable {
+  color: oklch(0.50 0.16 85);
+}
+
+.light .hljs-number,
+.light .hljs-literal,
+.light .hljs-variable,
+.light .hljs-attr {
+  color: oklch(0.48 0.14 195);
+}
+
+.light .hljs-title,
+.light .hljs-title.function_,
+.light .hljs-section {
+  color: oklch(0.48 0.14 250);
+}
+
+.light .hljs-built_in,
+.light .hljs-type,
+.light .hljs-class .hljs-title {
+  color: oklch(0.50 0.14 300);
+}
+
+.light .hljs-property,
+.light .hljs-attribute {
+  color: oklch(0.45 0.14 150);
+}
+
+.light .hljs-operator,
+.light .hljs-punctuation {
+  color: oklch(0.40 0.02 260);
+}
+
+.light .hljs-meta,
+.light .hljs-meta .hljs-keyword,
+.light .hljs-meta .hljs-string {
+  color: oklch(0.50 0.12 60);
+}
+
+.light .hljs-deletion {
+  color: oklch(0.50 0.18 25);
+  background: oklch(0.90 0.05 25 / 0.3);
+}
+
+.light .hljs-addition {
+  color: oklch(0.45 0.16 150);
+  background: oklch(0.90 0.05 150 / 0.3);
+}
+
+.light .hljs::selection,
+.light .hljs *::selection {
+  background: oklch(0.85 0.02 260);
+}
+
+.light .hljs-regexp {
+  color: oklch(0.50 0.16 40);
+}
+
+.light .hljs-symbol {
+  color: oklch(0.48 0.14 195);
+}
+
+.light .hljs-params {
+  color: oklch(0.35 0.01 260);
 }
