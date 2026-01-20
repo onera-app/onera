@@ -770,6 +770,15 @@ export function ChatPage() {
         userContent = `${userContent}\n\n${options.modifier}`;
       }
 
+      // Rewind history pointer to the parent of the user message
+      // This is CRITICAL to avoid creating cycles in the message tree if we are reusing the user message ID
+      if (userMessage.parentId) {
+        currentHistoryRef.current.currentId = userMessage.parentId;
+      } else {
+        // If no parent, we are at the root
+        currentHistoryRef.current.currentId = null;
+      }
+
       // Set up messages for regeneration (exclude the user message as sendMessage will add it back)
       const uiMessages = messagesToKeep.slice(0, -1).map(toUIMessage);
       setMessages(uiMessages);
