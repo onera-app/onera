@@ -5,12 +5,13 @@ import {
   PrivacySection,
   FeaturesSection,
   PricingSection,
+  FAQSection,
   Footer,
 } from "@/components/landing";
 
 export function LandingPage() {
   return (
-    <main className="min-h-screen bg-white dark:bg-neutral-950">
+    <main className="min-h-screen bg-white dark:bg-neutral-950 overflow-x-hidden">
       <Header />
       <Hero />
       <div id="how-it-works">
@@ -22,6 +23,9 @@ export function LandingPage() {
       <FeaturesSection />
       <div id="pricing">
         <PricingSection />
+      </div>
+      <div id="faq">
+        <FAQSection />
       </div>
       <Footer />
     </main>

@@ -4,5 +4,6 @@ export { HowItWorks } from "./how-it-works";
 export { PrivacySection } from "./privacy-section";
 export { FeaturesSection } from "./features-section";
 export { PricingSection } from "./pricing-section";
+export { FAQSection } from "./faq-section";
 export { Footer } from "./footer";
 export { ThemeToggle } from "./theme-toggle";
