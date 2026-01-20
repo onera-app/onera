@@ -173,6 +173,24 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
     setHighlightedIndex(0);
   }, [searchQuery, connectionFilter]);
 
+  // Stable callbacks for ModelItem - prevents re-renders of all items
+  const handleModelSelect = useCallback(
+    (modelId: string) => {
+      onChange(modelId);
+      setIsOpen(false);
+      setSearchQuery('');
+    },
+    [onChange]
+  );
+
+  const handleTogglePin = useCallback(
+    (modelId: string, e: React.MouseEvent) => {
+      e.stopPropagation();
+      togglePin(modelId);
+    },
+    [togglePin]
+  );
+
   const selectedModel = models.find((m) => m.id === value);
   const isLoading = checkingConnections || loadingModels;
 
@@ -281,15 +299,8 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
                               isSelected={model.id === value}
                               isHighlighted={flatIndex === highlightedIndex}
                               isPinned={true}
-                              onSelect={() => {
-                                onChange(model.id);
-                                setIsOpen(false);
-                                setSearchQuery('');
-                              }}
-                              onTogglePin={(e) => {
-                                e.stopPropagation();
-                                togglePin(model.id);
-                              }}
+                              onSelect={handleModelSelect}
+                              onTogglePin={handleTogglePin}
                             />
                           );
                         })}
@@ -312,15 +323,8 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
                               isSelected={model.id === value}
                               isHighlighted={flatIndex === highlightedIndex}
                               isPinned={isPinned(model.id)}
-                              onSelect={() => {
-                                onChange(model.id);
-                                setIsOpen(false);
-                                setSearchQuery('');
-                              }}
-                              onTogglePin={(e) => {
-                                e.stopPropagation();
-                                togglePin(model.id);
-                              }}
+                              onSelect={handleModelSelect}
+                              onTogglePin={handleTogglePin}
                             />
                           );
                         })}

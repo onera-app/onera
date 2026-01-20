@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, memo } from 'react';
+import { useState, useRef, useEffect, memo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { MessageActions } from './MessageActions';
 import { Button } from '@/components/ui/button';
@@ -8,11 +8,24 @@ import type { MessageContent } from '@onera/types';
 
 interface UserMessageProps {
   content: string | MessageContent[];
-  onEdit?: (newContent: string) => void;
-  onDelete?: () => void;
+  /** Message ID for callback binding */
+  messageId?: string;
+  /** Raw edit handler - will be bound to messageId internally */
+  onEditMessage?: (messageId: string, newContent: string) => void;
+  /** Raw delete handler - will be bound to messageId internally */
+  onDeleteMessage?: (messageId: string) => void;
+  /** Raw branch handlers - will be bound to messageId internally */
+  onPreviousBranchMessage?: (messageId: string) => void;
+  onNextBranchMessage?: (messageId: string) => void;
   onCopy?: () => void;
   branchInfo?: BranchInfo | null;
+  /** @deprecated Use onEditMessage with messageId instead */
+  onEdit?: (newContent: string) => void;
+  /** @deprecated Use onDeleteMessage with messageId instead */
+  onDelete?: () => void;
+  /** @deprecated Use onPreviousBranchMessage with messageId instead */
   onPreviousBranch?: () => void;
+  /** @deprecated Use onNextBranchMessage with messageId instead */
   onNextBranch?: () => void;
   edited?: boolean;
 }
@@ -55,12 +68,18 @@ function getDocuments(content: string | MessageContent[]): DocumentInfo[] {
 
 export const UserMessage = memo(function UserMessage({
   content,
-  onEdit,
-  onDelete,
+  messageId,
+  onEditMessage,
+  onDeleteMessage,
+  onPreviousBranchMessage,
+  onNextBranchMessage,
   onCopy,
   branchInfo,
-  onPreviousBranch,
-  onNextBranch,
+  // Legacy props for backward compatibility
+  onEdit: legacyOnEdit,
+  onDelete: legacyOnDelete,
+  onPreviousBranch: legacyOnPreviousBranch,
+  onNextBranch: legacyOnNextBranch,
   edited,
 }: UserMessageProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -70,6 +89,45 @@ export const UserMessage = memo(function UserMessage({
   const [editValue, setEditValue] = useState(textContent);
   const [copied, setCopied] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Determine if handlers are available (for conditional rendering)
+  const hasEdit = !!(legacyOnEdit || (messageId && onEditMessage));
+  const hasDelete = !!(legacyOnDelete || (messageId && onDeleteMessage));
+  const hasPreviousBranch = !!(legacyOnPreviousBranch || (messageId && onPreviousBranchMessage));
+  const hasNextBranch = !!(legacyOnNextBranch || (messageId && onNextBranchMessage));
+
+  // Create stable callbacks bound to messageId (or use legacy props if provided)
+  const onEdit = useCallback((newContent: string) => {
+    if (legacyOnEdit) {
+      legacyOnEdit(newContent);
+    } else if (messageId && onEditMessage) {
+      onEditMessage(messageId, newContent);
+    }
+  }, [messageId, onEditMessage, legacyOnEdit]);
+
+  const onDelete = useCallback(() => {
+    if (legacyOnDelete) {
+      legacyOnDelete();
+    } else if (messageId && onDeleteMessage) {
+      onDeleteMessage(messageId);
+    }
+  }, [messageId, onDeleteMessage, legacyOnDelete]);
+
+  const onPreviousBranch = useCallback(() => {
+    if (legacyOnPreviousBranch) {
+      legacyOnPreviousBranch();
+    } else if (messageId && onPreviousBranchMessage) {
+      onPreviousBranchMessage(messageId);
+    }
+  }, [messageId, onPreviousBranchMessage, legacyOnPreviousBranch]);
+
+  const onNextBranch = useCallback(() => {
+    if (legacyOnNextBranch) {
+      legacyOnNextBranch();
+    } else if (messageId && onNextBranchMessage) {
+      onNextBranchMessage(messageId);
+    }
+  }, [messageId, onNextBranchMessage, legacyOnNextBranch]);
 
   useEffect(() => {
     if (isEditing && textareaRef.current) {
@@ -165,12 +223,12 @@ export const UserMessage = memo(function UserMessage({
         <div className="self-center flex items-center gap-1 opacity-50 group-hover/message:opacity-100 transition-opacity duration-200">
           <MessageActions
             onCopy={handleCopy}
-            onEdit={onEdit ? handleStartEdit : undefined}
-            onDelete={onDelete}
+            onEdit={hasEdit ? handleStartEdit : undefined}
+            onDelete={hasDelete ? onDelete : undefined}
             isUser
             branchInfo={branchInfo}
-            onPreviousBranch={onPreviousBranch}
-            onNextBranch={onNextBranch}
+            onPreviousBranch={hasPreviousBranch ? onPreviousBranch : undefined}
+            onNextBranch={hasNextBranch ? onNextBranch : undefined}
           />
           {copied && (
             <span className="text-xs text-status-success-text animate-in fade-in">Copied!</span>

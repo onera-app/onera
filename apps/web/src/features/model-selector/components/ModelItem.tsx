@@ -1,4 +1,4 @@
-import { memo, type MouseEvent } from 'react';
+import { memo, type MouseEvent, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { Check, Pin, PinOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,8 +10,8 @@ interface ModelItemProps {
   isSelected: boolean;
   isHighlighted: boolean;
   isPinned: boolean;
-  onSelect: () => void;
-  onTogglePin: (e: MouseEvent) => void;
+  onSelect: (modelId: string) => void;
+  onTogglePin: (modelId: string, e: MouseEvent) => void;
 }
 
 export const ModelItem = memo(function ModelItem({
@@ -22,12 +22,20 @@ export const ModelItem = memo(function ModelItem({
   onSelect,
   onTogglePin,
 }: ModelItemProps) {
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleSelect = useCallback(() => {
+    onSelect(model.id);
+  }, [onSelect, model.id]);
+
+  const handleTogglePin = useCallback((e: MouseEvent) => {
+    onTogglePin(model.id, e);
+  }, [onTogglePin, model.id]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      onSelect();
+      onSelect(model.id);
     }
-  };
+  }, [onSelect, model.id]);
 
   return (
     <div
@@ -35,7 +43,7 @@ export const ModelItem = memo(function ModelItem({
       aria-selected={isSelected}
       tabIndex={0}
       data-model-item
-      onClick={onSelect}
+      onClick={handleSelect}
       onKeyDown={handleKeyDown}
       className={cn(
         'w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm group cursor-pointer',
@@ -57,7 +65,7 @@ export const ModelItem = memo(function ModelItem({
               type="button"
               variant="ghost"
               size="icon"
-              onClick={onTogglePin}
+              onClick={handleTogglePin}
               className={cn(
                 'h-7 w-7 transition-opacity',
                 isPinned

@@ -203,48 +203,56 @@ export const Messages = memo(function Messages({
   // Track seen message IDs for animation - handles branch switching correctly
   const seenMessageIdsRef = useRef<Set<string>>(new Set());
 
+  // Ref for history to avoid recreating callbacks during streaming
+  const historyRef = useRef(history);
+  
+  // Keep historyRef in sync
+  useEffect(() => {
+    historyRef.current = history;
+  });
+
   // Mark messages as seen after render
   useEffect(() => {
     messages.forEach(m => seenMessageIdsRef.current.add(m.id));
   });
 
-  // Get branch info for a message
+  // Get branch info for a message - uses ref for stable callback
   const getMessageBranchInfo = useCallback(
     (messageId: string): BranchInfo | null => {
-      if (!history) return null;
-      return getBranchInfo(history, messageId);
+      if (!historyRef.current) return null;
+      return getBranchInfo(historyRef.current, messageId);
     },
-    [history]
+    []
   );
 
-  // Navigate to previous sibling branch
+  // Navigate to previous sibling branch - uses ref for stable callback
   const handlePreviousBranch = useCallback(
     (messageId: string) => {
-      if (!history || !onSwitchBranch) return;
-      const siblings = getSiblings(history, messageId);
+      if (!historyRef.current || !onSwitchBranch) return;
+      const siblings = getSiblings(historyRef.current, messageId);
       const currentIdx = siblings.indexOf(messageId);
       if (currentIdx > 0) {
         const prevSiblingId = siblings[currentIdx - 1];
-        const targetId = getDeepestChild(history, prevSiblingId);
+        const targetId = getDeepestChild(historyRef.current, prevSiblingId);
         onSwitchBranch(targetId);
       }
     },
-    [history, onSwitchBranch]
+    [onSwitchBranch]
   );
 
-  // Navigate to next sibling branch
+  // Navigate to next sibling branch - uses ref for stable callback
   const handleNextBranch = useCallback(
     (messageId: string) => {
-      if (!history || !onSwitchBranch) return;
-      const siblings = getSiblings(history, messageId);
+      if (!historyRef.current || !onSwitchBranch) return;
+      const siblings = getSiblings(historyRef.current, messageId);
       const currentIdx = siblings.indexOf(messageId);
       if (currentIdx < siblings.length - 1) {
         const nextSiblingId = siblings[currentIdx + 1];
-        const targetId = getDeepestChild(history, nextSiblingId);
+        const targetId = getDeepestChild(historyRef.current, nextSiblingId);
         onSwitchBranch(targetId);
       }
     },
-    [history, onSwitchBranch]
+    [onSwitchBranch]
   );
 
   // Count new messages for staggered animation delays
@@ -318,11 +326,12 @@ export const Messages = memo(function Messages({
                   >
                     <UserMessage
                       content={message.content}
-                      onEdit={onEditMessage ? (newContent) => onEditMessage(message.id, newContent) : undefined}
-                      onDelete={onDeleteMessage ? () => onDeleteMessage(message.id) : undefined}
+                      messageId={message.id}
+                      onEditMessage={onEditMessage}
+                      onDeleteMessage={onDeleteMessage}
                       branchInfo={branchInfo}
-                      onPreviousBranch={() => handlePreviousBranch(message.id)}
-                      onNextBranch={() => handleNextBranch(message.id)}
+                      onPreviousBranchMessage={handlePreviousBranch}
+                      onNextBranchMessage={handleNextBranch}
                       edited={message.edited}
                     />
                   </div>
@@ -340,20 +349,17 @@ export const Messages = memo(function Messages({
                 >
                   <AssistantMessage
                     content={textContent}
+                    messageId={message.id}
                     model={message.model}
                     // Pass streaming-specific props only to the streaming message
                     parts={isStreamingMessage ? streamingParts : undefined}
                     sources={isStreamingMessage ? streamingSources : undefined}
                     isLoading={isStreamingMessage}
-                    onRegenerate={
-                      isLastMessage && !isStreaming && onRegenerateMessage
-                        ? (options) => onRegenerateMessage(message.id, options)
-                        : undefined
-                    }
-                    onDelete={onDeleteMessage ? () => onDeleteMessage(message.id) : undefined}
+                    onRegenerateMessage={isLastMessage && !isStreaming ? onRegenerateMessage : undefined}
+                    onDeleteMessage={onDeleteMessage}
                     branchInfo={branchInfo}
-                    onPreviousBranch={() => handlePreviousBranch(message.id)}
-                    onNextBranch={() => handleNextBranch(message.id)}
+                    onPreviousBranchMessage={handlePreviousBranch}
+                    onNextBranchMessage={handleNextBranch}
                   />
                   
                   {/* Follow-ups attached to last assistant message - aligned with text content */}

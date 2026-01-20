@@ -17,6 +17,8 @@ export interface RegenerateOptions {
 
 interface AssistantMessageProps {
   content: string;
+  /** Message ID for callback binding */
+  messageId?: string;
   /** AI SDK message parts - used for extracting reasoning, sources, tools from middleware */
   parts?: MessagePart[];
   /** Message metadata (token usage, latency, etc.) */
@@ -27,29 +29,85 @@ interface AssistantMessageProps {
   /** Whether this message is currently loading/streaming (Vercel pattern naming) */
   isLoading?: boolean;
   onCopy?: () => void;
-  onRegenerate?: (options?: RegenerateOptions) => void;
-  onDelete?: () => void;
+  /** Raw regenerate handler - will be bound to messageId internally */
+  onRegenerateMessage?: (messageId: string, options?: RegenerateOptions) => void;
+  /** Raw delete handler - will be bound to messageId internally */
+  onDeleteMessage?: (messageId: string) => void;
+  /** Raw branch handlers - will be bound to messageId internally */
+  onPreviousBranchMessage?: (messageId: string) => void;
+  onNextBranchMessage?: (messageId: string) => void;
   branchInfo?: BranchInfo | null;
+  /** @deprecated Use onRegenerateMessage with messageId instead */
+  onRegenerate?: (options?: RegenerateOptions) => void;
+  /** @deprecated Use onDeleteMessage with messageId instead */
+  onDelete?: () => void;
+  /** @deprecated Use onPreviousBranchMessage with messageId instead */
   onPreviousBranch?: () => void;
+  /** @deprecated Use onNextBranchMessage with messageId instead */
   onNextBranch?: () => void;
 }
 
 export const AssistantMessage = memo(function AssistantMessage({
   content,
+  messageId,
   parts,
   metadata,
   sources: externalSources,
   model,
   isLoading,
   onCopy,
-  onRegenerate,
-  onDelete,
+  onRegenerateMessage,
+  onDeleteMessage,
+  onPreviousBranchMessage,
+  onNextBranchMessage,
   branchInfo,
-  onPreviousBranch,
-  onNextBranch,
+  // Legacy props for backward compatibility
+  onRegenerate: legacyOnRegenerate,
+  onDelete: legacyOnDelete,
+  onPreviousBranch: legacyOnPreviousBranch,
+  onNextBranch: legacyOnNextBranch,
 }: AssistantMessageProps) {
   const [copied, setCopied] = useState(false);
   const streamingStartRef = useRef<number | null>(null);
+
+  // Determine if handlers are available (for conditional rendering)
+  const hasRegenerate = !!(legacyOnRegenerate || (messageId && onRegenerateMessage));
+  const hasDelete = !!(legacyOnDelete || (messageId && onDeleteMessage));
+  const hasPreviousBranch = !!(legacyOnPreviousBranch || (messageId && onPreviousBranchMessage));
+  const hasNextBranch = !!(legacyOnNextBranch || (messageId && onNextBranchMessage));
+
+  // Create stable callbacks bound to messageId (or use legacy props if provided)
+  const onRegenerate = useCallback((options?: RegenerateOptions) => {
+    if (legacyOnRegenerate) {
+      legacyOnRegenerate(options);
+    } else if (messageId && onRegenerateMessage) {
+      onRegenerateMessage(messageId, options);
+    }
+  }, [messageId, onRegenerateMessage, legacyOnRegenerate]);
+
+  const onDelete = useCallback(() => {
+    if (legacyOnDelete) {
+      legacyOnDelete();
+    } else if (messageId && onDeleteMessage) {
+      onDeleteMessage(messageId);
+    }
+  }, [messageId, onDeleteMessage, legacyOnDelete]);
+
+  const onPreviousBranch = useCallback(() => {
+    if (legacyOnPreviousBranch) {
+      legacyOnPreviousBranch();
+    } else if (messageId && onPreviousBranchMessage) {
+      onPreviousBranchMessage(messageId);
+    }
+  }, [messageId, onPreviousBranchMessage, legacyOnPreviousBranch]);
+
+  const onNextBranch = useCallback(() => {
+    if (legacyOnNextBranch) {
+      legacyOnNextBranch();
+    } else if (messageId && onNextBranchMessage) {
+      onNextBranchMessage(messageId);
+    }
+  }, [messageId, onNextBranchMessage, legacyOnNextBranch]);
 
   // Track when streaming starts for duration calculation
   useEffect(() => {
@@ -209,12 +267,12 @@ export const AssistantMessage = memo(function AssistantMessage({
               <div className="flex items-center gap-1 opacity-50 group-hover/message:opacity-100 transition-opacity duration-200">
                 <MessageActions
                   onCopy={handleCopy}
-                  onRegenerate={onRegenerate}
-                  onDelete={onDelete}
+                  onRegenerate={hasRegenerate ? onRegenerate : undefined}
+                  onDelete={hasDelete ? onDelete : undefined}
                   isUser={false}
                   branchInfo={branchInfo}
-                  onPreviousBranch={onPreviousBranch}
-                  onNextBranch={onNextBranch}
+                  onPreviousBranch={hasPreviousBranch ? onPreviousBranch : undefined}
+                  onNextBranch={hasNextBranch ? onNextBranch : undefined}
                 />
                 {copied && (
                   <span className="text-xs text-status-success-text ml-2 animate-in fade-in">Copied!</span>

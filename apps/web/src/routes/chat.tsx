@@ -158,31 +158,32 @@ export function ChatPage() {
 
   const isLoading = rawChat === undefined;
 
-  // Handle delete
+  // Handle delete - uses ref to avoid callback recreation
   const handleDelete = useCallback(async () => {
     if (!chatId) return;
     try {
-      await deleteChatMutation.mutateAsync(chatId);
+      await deleteChatMutationRef.current.mutateAsync(chatId);
       navigate({ to: '/app' });
       toast.success('Chat deleted');
     } catch {
       toast.error('Failed to delete chat');
     }
-  }, [chatId, deleteChatMutation, navigate]);
+  }, [chatId, navigate]);
 
-  // Handle title change
+  // Handle title change - uses refs to avoid recreating callback during streaming
   const handleTitleChange = useCallback(async (newTitle: string) => {
-    if (!chat || !chatId || !chat.encryptedChatKey || !chat.chatKeyNonce) return;
+    const { encryptedChatKey, chatKeyNonce } = encryptionKeysRef.current;
+    if (!chatId || !encryptedChatKey || !chatKeyNonce) return;
 
     try {
       const encrypted = encryptChatTitle(
         chatId,
-        chat.encryptedChatKey,
-        chat.chatKeyNonce,
+        encryptedChatKey,
+        chatKeyNonce,
         newTitle
       );
 
-      await updateChatMutation.mutateAsync({
+      await updateChatMutationRef.current.mutateAsync({
         id: chatId,
         data: {
           encryptedTitle: encrypted.encryptedTitle,
@@ -194,7 +195,7 @@ export function ChatPage() {
     } catch {
       toast.error('Failed to update title');
     }
-  }, [chat, chatId, updateChatMutation]);
+  }, [chatId]);
 
   // Ref to track pending user message for persistence (ref needed for async callbacks)
   const pendingUserMessageRef = useRef<ChatMessage | null>(null);
@@ -202,6 +203,11 @@ export function ChatPage() {
   const currentHistoryRef = useRef<ChatHistory>({ currentId: null, messages: {} });
   // Ref to track previous display messages for stable references (React memo optimization)
   const prevDisplayMessagesRef = useRef<ChatMessage[]>([]);
+  // Refs for encryption keys - stable during streaming to avoid callback recreation
+  const encryptionKeysRef = useRef<{ encryptedChatKey?: string; chatKeyNonce?: string }>({});
+  // Refs for mutation functions to avoid callback recreation
+  const deleteChatMutationRef = useRef(deleteChatMutation);
+  const updateChatMutationRef = useRef(updateChatMutation);
   
   // Local history state for immediate UI updates (server query may lag behind)
   const [localHistory, setLocalHistory] = useState<ChatHistory>({ currentId: null, messages: {} });
@@ -213,6 +219,22 @@ export function ChatPage() {
       setLocalHistory(chat.history);
     }
   }, [chat?.history]);
+
+  // Keep encryption keys ref in sync - these are stable during streaming
+  useEffect(() => {
+    if (chat?.encryptedChatKey && chat?.chatKeyNonce) {
+      encryptionKeysRef.current = {
+        encryptedChatKey: chat.encryptedChatKey,
+        chatKeyNonce: chat.chatKeyNonce,
+      };
+    }
+  }, [chat?.encryptedChatKey, chat?.chatKeyNonce]);
+
+  // Keep mutation refs in sync (no dependency tracking needed - always update)
+  useEffect(() => {
+    deleteChatMutationRef.current = deleteChatMutation;
+    updateChatMutationRef.current = updateChatMutation;
+  });
 
   // Handle message completion - persist user + assistant messages
   const handleFinish = useCallback(async (message: UIMessage) => {
@@ -764,9 +786,10 @@ export function ChatPage() {
     }
   }, [chat, chatId, isLoadingCredentials, isReady, isUnlocked, selectedModelId, sendMessage]);
 
-  // Handle message edit - creates a new branch
+  // Handle message edit - creates a new branch (uses refs for stable callback)
   const handleEditMessage = useCallback(async (messageId: string, newContent: string) => {
-    if (!chat || !chatId || !chat.encryptedChatKey || !chat.chatKeyNonce) return;
+    const { encryptedChatKey, chatKeyNonce } = encryptionKeysRef.current;
+    if (!chatId || !encryptedChatKey || !chatKeyNonce) return;
 
     try {
       // Create a new branch from the edit
@@ -783,12 +806,12 @@ export function ChatPage() {
       // Encrypt and save to server
       const encrypted = encryptChatContent(
         chatId,
-        chat.encryptedChatKey,
-        chat.chatKeyNonce,
+        encryptedChatKey,
+        chatKeyNonce,
         newHistory as unknown as Record<string, unknown>
       );
 
-      await updateChatMutation.mutateAsync({
+      await updateChatMutationRef.current.mutateAsync({
         id: chatId,
         data: {
           encryptedChat: encrypted.encryptedChat,
@@ -812,11 +835,12 @@ export function ChatPage() {
       console.error('Failed to edit message:', error);
       toast.error('Failed to edit message');
     }
-  }, [chat, chatId, updateChatMutation, setMessages, selectedModelId, isReady, sendMessage]);
+  }, [chatId, setMessages, selectedModelId, isReady, sendMessage]);
 
-  // Handle branch switching
+  // Handle branch switching (uses refs for stable callback)
   const handleSwitchBranch = useCallback(async (messageId: string) => {
-    if (!chat || !chatId || !chat.encryptedChatKey || !chat.chatKeyNonce) return;
+    const { encryptedChatKey, chatKeyNonce } = encryptionKeysRef.current;
+    if (!chatId || !encryptedChatKey || !chatKeyNonce) return;
 
     try {
       // Switch to the new branch
@@ -842,12 +866,12 @@ export function ChatPage() {
       // Encrypt and save to server (async, don't block UI)
       const encrypted = encryptChatContent(
         chatId,
-        chat.encryptedChatKey,
-        chat.chatKeyNonce,
+        encryptedChatKey,
+        chatKeyNonce,
         newHistory as unknown as Record<string, unknown>
       );
 
-      await updateChatMutation.mutateAsync({
+      await updateChatMutationRef.current.mutateAsync({
         id: chatId,
         data: {
           encryptedChat: encrypted.encryptedChat,
@@ -858,14 +882,16 @@ export function ChatPage() {
       console.error('Failed to switch branch:', error);
       toast.error('Failed to switch branch');
     }
-  }, [chat, chatId, updateChatMutation, setMessages]);
+  }, [chatId, setMessages]);
 
-  // Handle message regeneration
+  // Handle message regeneration (uses encryptionKeysRef for stable callback)
   const handleRegenerateMessage = useCallback(async (
     messageId: string,
     options?: { modifier?: string }
   ) => {
-    if (!chat || !chatId || !selectedModelId || !isReady) return;
+    // Check if we have encryption keys (means chat is loaded)
+    const { encryptedChatKey } = encryptionKeysRef.current;
+    if (!encryptedChatKey || !chatId || !selectedModelId || !isReady) return;
 
     try {
       // Find the message index
@@ -920,11 +946,12 @@ export function ChatPage() {
       console.error('Failed to regenerate message:', error);
       toast.error('Failed to regenerate message');
     }
-  }, [chat, chatId, selectedModelId, isReady, displayMessages, setMessages, sendMessage]);
+  }, [chatId, selectedModelId, isReady, displayMessages, setMessages, sendMessage]);
 
-  // Handle message deletion
+  // Handle message deletion - uses refs to avoid callback recreation during streaming
   const handleDeleteMessage = useCallback(async (messageId: string) => {
-    if (!chat || !chatId || !chat.encryptedChatKey || !chat.chatKeyNonce) return;
+    const { encryptedChatKey, chatKeyNonce } = encryptionKeysRef.current;
+    if (!chatId || !encryptedChatKey || !chatKeyNonce) return;
 
     try {
       // Delete the message and its children from history
@@ -937,12 +964,12 @@ export function ChatPage() {
       // Encrypt and save to server
       const encrypted = encryptChatContent(
         chatId,
-        chat.encryptedChatKey,
-        chat.chatKeyNonce,
+        encryptedChatKey,
+        chatKeyNonce,
         newHistory as unknown as Record<string, unknown>
       );
 
-      await updateChatMutation.mutateAsync({
+      await updateChatMutationRef.current.mutateAsync({
         id: chatId,
         data: {
           encryptedChat: encrypted.encryptedChat,
@@ -965,7 +992,7 @@ export function ChatPage() {
       console.error('Failed to delete message:', error);
       toast.error('Failed to delete message');
     }
-  }, [chat, chatId, updateChatMutation, setMessages]);
+  }, [chatId, setMessages]);
 
   if (isLoading) {
     return (
@@ -996,6 +1023,13 @@ export function ChatPage() {
     );
   }
 
+  // Memoize navbar children to prevent ChatNavbar re-renders
+  const navbarChildren = useMemo(() => (
+    <div className="hidden md:block">
+      <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />
+    </div>
+  ), [selectedModelId, setSelectedModel]);
+
   return (
     <div className="relative flex flex-col h-full w-full bg-background overflow-hidden">
       {/* Chat header - Absolute overlay */}
@@ -1005,9 +1039,7 @@ export function ChatPage() {
         onTitleChange={isUnlocked ? handleTitleChange : undefined}
         onDelete={handleDelete}
       >
-        <div className="hidden md:block">
-          <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />
-        </div>
+        {navbarChildren}
       </ChatNavbar>
 
       {/* Mobile Model Selector - visible only on small screens below navbar */}
