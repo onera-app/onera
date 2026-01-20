@@ -90,7 +90,7 @@ export function LLMIcon({ model, size = 'md', className, isLoading }: LLMIconPro
     case 'xai':
       return (
         <div className={cn(baseClass, 'bg-neutral-500/15')}>
-          <svg viewBox="0 0 24 24" fill="currentColor" className={cn(iconSize, 'text-neutral-300')}>
+          <svg viewBox="0 0 24 24" fill="currentColor" className={cn(iconSize, 'text-muted-foreground')}>
             <path d="M8 2L2 12l6 10h3l-6-10 6-10H8zm8 0l6 10-6 10h-3l6-10-6-10h3z" />
           </svg>
         </div>
@@ -180,11 +180,11 @@ export function LLMIcon({ model, size = 'md', className, isLoading }: LLMIconPro
     default:
       // Fallback sparkles icon for unknown providers
       return (
-        <div className={cn(baseClass, 'bg-white/5')}>
+        <div className={cn(baseClass, 'bg-muted')}>
           <svg
             viewBox="0 0 16 16"
             fill="currentColor"
-            className={cn(iconSize, 'text-white/80')}
+            className={cn(iconSize, 'text-muted-foreground')}
           >
             <path d="M2.5 0.5V0H3.5V0.5C3.5 1.60457 4.39543 2.5 5.5 2.5H6V3V3.5H5.5C4.39543 3.5 3.5 4.39543 3.5 5.5V6H3H2.5V5.5C2.5 4.39543 1.60457 3.5 0.5 3.5H0V3V2.5H0.5C1.60457 2.5 2.5 1.60457 2.5 0.5Z" />
             <path d="M14.5 4.5V5H13.5V4.5C13.5 3.94772 13.0523 3.5 12.5 3.5H12V3V2.5H12.5C13.0523 2.5 13.5 2.05228 13.5 1.5V1H14H14.5V1.5C14.5 2.05228 14.9477 2.5 15.5 2.5H16V3V3.5H15.5C14.9477 3.5 14.5 3.94772 14.5 4.5Z" />

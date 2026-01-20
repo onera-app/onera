@@ -124,7 +124,7 @@ export function FolderItem({
         <div
           className={cn(
             'relative group rounded-lg transition-all duration-200',
-            isDragOver && 'bg-white/10 ring-1 ring-white/20 ring-inset'
+            isDragOver && 'bg-sidebar-accent ring-1 ring-ring ring-inset'
           )}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -143,7 +143,7 @@ export function FolderItem({
                 }}
                 onBlur={handleSaveEdit}
                 placeholder="Folder name"
-                className="w-full h-9 px-3 rounded-lg bg-white/10 text-sm text-white focus:outline-none focus:ring-1 focus:ring-white/20 transition-all"
+                className="w-full h-9 px-3 rounded-lg bg-muted text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-all"
               />
             </div>
           ) : (
@@ -151,12 +151,12 @@ export function FolderItem({
               <button
                 className={cn(
                   'flex items-center gap-2 w-full py-2 px-2 rounded-lg text-left',
-                  'text-neutral-300 hover:text-white hover:bg-white/5 transition-all duration-150'
+                  'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-150'
                 )}
               >
                 <ChevronRight
                   className={cn(
-                    'h-3.5 w-3.5 text-neutral-400 transition-transform duration-200 flex-shrink-0',
+                    'h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 flex-shrink-0',
                     isExpanded && 'rotate-90'
                   )}
                 />
@@ -171,21 +171,21 @@ export function FolderItem({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="p-1 rounded text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
+                    className="p-1 rounded text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <MoreHorizontal className="h-4 w-4" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-36 bg-neutral-900 border-neutral-800">
-                  <DropdownMenuItem onClick={handleStartEdit} className="gap-2 text-neutral-300 focus:text-white focus:bg-white/10">
+                <DropdownMenuContent align="end" className="w-36 bg-popover border-border">
+                  <DropdownMenuItem onClick={handleStartEdit} className="gap-2 text-muted-foreground focus:text-foreground focus:bg-accent">
                     <Pencil className="h-3.5 w-3.5" />
                     Rename
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-neutral-800" />
+                  <DropdownMenuSeparator className="bg-border" />
                   <DropdownMenuItem
                     onClick={() => setShowDeleteDialog(true)}
-                    className="gap-2 text-red-400 focus:text-red-400 focus:bg-red-500/10"
+                    className="gap-2 text-red-500 dark:text-red-400 focus:text-red-500 dark:focus:text-red-400 focus:bg-red-500/10"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     Delete
@@ -202,15 +202,15 @@ export function FolderItem({
       </Collapsible>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="max-w-sm bg-neutral-900 border-neutral-800">
+        <AlertDialogContent className="max-w-sm bg-card border-border">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">Delete folder?</AlertDialogTitle>
-            <AlertDialogDescription className="text-neutral-300">
+            <AlertDialogTitle className="text-foreground">Delete folder?</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
               This will delete "{name}". Conversations inside will be moved to your main list.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-transparent border-neutral-700 text-neutral-300 hover:bg-white/5 hover:text-white">
+            <AlertDialogCancel className="bg-transparent border-border text-muted-foreground hover:bg-accent hover:text-foreground">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction

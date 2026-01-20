@@ -145,23 +145,23 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
       <DialogContent className="max-w-4xl h-[600px] p-0 overflow-hidden" hideCloseButton>
         <div className="flex h-full">
           {/* Left Panel - Search & Results */}
-          <div className="flex-1 flex flex-col border-r border-neutral-800/50">
+          <div className="flex-1 flex flex-col border-r border-border">
             {/* Search Input */}
             <div className="p-4">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <input
                   ref={inputRef}
                   type="text"
                   placeholder="Search conversations..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-12 pl-12 pr-12 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-[15px] placeholder:text-neutral-400 focus:outline-none focus:border-neutral-700 focus:ring-1 focus:ring-neutral-700 transition-all"
+                  className="w-full h-12 pl-12 pr-12 rounded-xl bg-muted border border-border text-foreground text-[15px] placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-all"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -172,24 +172,24 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             {/* Search Hints */}
             {!searchQuery && (
               <div className="px-4 pb-4">
-                <div className="p-3 rounded-xl bg-neutral-900/50 border border-neutral-800/50">
-                  <div className="text-xs font-medium text-neutral-300 mb-2">Quick filters</div>
+                <div className="p-3 rounded-xl bg-muted/50 border border-border">
+                  <div className="text-xs font-medium text-muted-foreground mb-2">Quick filters</div>
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => setSearchQuery('pinned:')}
-                      className="px-3 py-1.5 rounded-lg bg-neutral-800 text-xs text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors"
+                      className="px-3 py-1.5 rounded-lg bg-muted text-xs text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
                     >
                       pinned:
                     </button>
                     <button
                       onClick={() => setSearchQuery('folder:')}
-                      className="px-3 py-1.5 rounded-lg bg-neutral-800 text-xs text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors"
+                      className="px-3 py-1.5 rounded-lg bg-muted text-xs text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
                     >
                       folder:
                     </button>
                     <button
                       onClick={() => setSearchQuery('tag:')}
-                      className="px-3 py-1.5 rounded-lg bg-neutral-800 text-xs text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors"
+                      className="px-3 py-1.5 rounded-lg bg-muted text-xs text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
                     >
                       tag:
                     </button>
@@ -201,14 +201,14 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             {/* Results List */}
             <div className="flex-1 overflow-y-auto px-3">
               {filteredChats.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-neutral-400 pb-20">
-                  <div className="w-16 h-16 rounded-2xl bg-neutral-900 flex items-center justify-center mb-4">
-                    <MessageSquare className="h-8 w-8 text-neutral-500" />
+                <div className="flex flex-col items-center justify-center h-full text-muted-foreground pb-20">
+                  <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
+                    <MessageSquare className="h-8 w-8 text-muted-foreground/60" />
                   </div>
-                  <p className="text-sm font-medium text-neutral-300 mb-1">
+                  <p className="text-sm font-medium text-foreground mb-1">
                     {searchQuery ? 'No results found' : 'No conversations yet'}
                   </p>
-                  <p className="text-xs text-neutral-400">
+                  <p className="text-xs text-muted-foreground">
                     {searchQuery ? `Try a different search term` : 'Start a new chat to begin'}
                   </p>
                 </div>
@@ -216,7 +216,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                 <div className="py-1 space-y-4">
                   {Array.from(groupedChats.entries()).map(([group, groupChats]) => (
                     <div key={group}>
-                      <div className="px-3 py-2 text-xs font-medium text-neutral-400">
+                      <div className="px-3 py-2 text-xs font-medium text-muted-foreground">
                         {DATE_GROUP_LABELS[group as DateGroup]}
                       </div>
                       <div className="space-y-0.5">
@@ -228,8 +228,8 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                             className={cn(
                               'w-full flex items-center gap-3 px-3 h-10 rounded-xl text-left transition-all duration-150',
                               selectedChatId === chat.id
-                                ? 'bg-neutral-800 text-white'
-                                : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+                                ? 'bg-accent text-foreground'
+                                : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
                             )}
                           >
                             <span className="flex-1 truncate text-sm">{chat.decryptedTitle}</span>
@@ -243,14 +243,14 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             </div>
 
             {/* Footer hint */}
-            <div className="px-4 py-3 border-t border-neutral-800/50">
-              <div className="flex items-center gap-4 text-xs text-neutral-400">
+            <div className="px-4 py-3 border-t border-border">
+              <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1.5">
-                  <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono text-[10px]">↵</kbd>
+                  <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-[10px]">↵</kbd>
                   <span>open</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono text-[10px]">esc</kbd>
+                  <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-[10px]">esc</kbd>
                   <span>close</span>
                 </div>
               </div>
@@ -258,7 +258,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
           </div>
 
           {/* Right Panel - Preview */}
-          <div className="w-80 flex flex-col bg-neutral-900/30">
+          <div className="w-80 flex flex-col bg-muted/30">
             {selectedChat ? (
               <div className="flex-1 flex flex-col p-5">
                 {/* Chat icon */}
@@ -267,12 +267,12 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                 </div>
 
                 {/* Title */}
-                <h3 className="text-lg font-medium text-white mb-2 line-clamp-2">
+                <h3 className="text-lg font-medium text-foreground mb-2 line-clamp-2">
                   {selectedChat.decryptedTitle}
                 </h3>
 
                 {/* Date */}
-                <p className="text-sm text-neutral-500 mb-6">
+                <p className="text-sm text-muted-foreground mb-6">
                   {formatDate(selectedChat.updatedAt)}
                 </p>
 
@@ -282,7 +282,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                 {/* Open button */}
                 <button
                   onClick={() => handleOpenChat(selectedChat.id)}
-                  className="flex items-center justify-center gap-2 w-full h-11 bg-white text-black rounded-xl text-sm font-medium hover:bg-neutral-200 transition-colors group"
+                  className="flex items-center justify-center gap-2 w-full h-11 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors group"
                 >
                   <span>Open conversation</span>
                   <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
@@ -290,10 +290,10 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
               </div>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
-                <div className="w-16 h-16 rounded-2xl bg-neutral-800/50 flex items-center justify-center mb-4">
-                  <Search className="h-7 w-7 text-neutral-400" />
+                <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
+                  <Search className="h-7 w-7 text-muted-foreground" />
                 </div>
-                <p className="text-sm text-neutral-400">
+                <p className="text-sm text-muted-foreground">
                   Select a conversation to preview
                 </p>
               </div>

@@ -93,7 +93,7 @@ export function ChatItem({
     e.dataTransfer.effectAllowed = 'move';
 
     const dragImage = document.createElement('div');
-    dragImage.className = 'px-3 py-2 bg-neutral-800 rounded-lg text-sm text-white shadow-lg max-w-[200px] truncate';
+    dragImage.className = 'px-3 py-2 bg-card rounded-lg text-sm text-foreground shadow-lg max-w-[200px] truncate';
     dragImage.textContent = title.length > 30 ? title.slice(0, 30) + '...' : title;
     dragImage.style.position = 'absolute';
     dragImage.style.top = '-1000px';
@@ -122,7 +122,7 @@ export function ChatItem({
             if (e.key === 'Escape') handleCancelEdit();
           }}
           onBlur={handleCancelEdit}
-          className="w-full h-9 px-3 rounded-xl bg-neutral-800 text-sm text-white focus:outline-none focus:ring-1 focus:ring-neutral-600 transition-all"
+          className="w-full h-9 px-3 rounded-xl bg-muted text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-all"
         />
       </div>
     );
@@ -146,13 +146,13 @@ export function ChatItem({
           className={cn(
             'relative flex items-center w-full h-9 px-3 rounded-xl text-sm transition-all duration-150 overflow-hidden',
             isActive
-              ? 'bg-neutral-800 text-white'
-              : 'text-neutral-300 hover:text-white hover:bg-white/[0.06]'
+              ? 'bg-sidebar-accent text-sidebar-foreground'
+              : 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
           )}
         >
           {/* Lock indicator */}
           {isLocked && (
-            <Lock className="w-3.5 h-3.5 mr-2 flex-shrink-0 text-neutral-400" />
+            <Lock className="w-3.5 h-3.5 mr-2 flex-shrink-0 text-muted-foreground" />
           )}
 
           {/* Title container with fade effect */}
@@ -165,8 +165,8 @@ export function ChatItem({
               className={cn(
                 'absolute right-0 top-0 bottom-0 w-8 pointer-events-none bg-gradient-to-l to-transparent transition-colors duration-150',
                 isActive 
-                  ? 'from-neutral-800' 
-                  : 'from-[#0a0a0a] group-hover:from-[#111111]'
+                  ? 'from-sidebar-accent' 
+                  : 'from-sidebar-background group-hover:from-sidebar-accent/50'
               )}
             />
           </div>
@@ -186,8 +186,8 @@ export function ChatItem({
                 className={cn(
                   'p-1 rounded-md transition-colors',
                   isActive 
-                    ? 'text-neutral-300 hover:text-white hover:bg-white/10' 
-                    : 'text-neutral-400 hover:text-white hover:bg-white/10'
+                    ? 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent' 
+                    : 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent'
                 )}
                 onClick={(e) => e.preventDefault()}
               >

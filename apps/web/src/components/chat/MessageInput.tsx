@@ -299,9 +299,9 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
         ref={containerRef}
         className={cn(
           'relative rounded-3xl overflow-hidden transition-all duration-300 ease-out',
-          'bg-black/40 backdrop-blur-xl',
-          'border border-white/10 shadow-lg',
-          isFocused ? 'ring-1 ring-white/20 shadow-xl scale-[1.01]' : 'hover:bg-black/50',
+          'bg-card/70 backdrop-blur-xl',
+          'border border-border shadow-lg',
+          isFocused ? 'ring-1 ring-ring shadow-xl scale-[1.01]' : 'hover:bg-card/80',
           disabled && 'opacity-60'
         )}
         onDragEnter={handleDragEnter}
@@ -352,7 +352,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
               'disabled:cursor-not-allowed',
               'max-h-[200px] min-h-[44px]',
               'text-base leading-relaxed',
-              'placeholder:text-white/50 text-white'
+              'placeholder:text-muted-foreground text-foreground'
             )}
           />
 
@@ -392,8 +392,8 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
                     className={cn(
                       "h-8 w-8 rounded-full transition-all duration-200 shadow-lg",
                       canSend
-                        ? "bg-white text-black hover:scale-105"
-                        : "bg-white/10 text-white/40 cursor-not-allowed"
+                        ? "bg-primary text-primary-foreground hover:scale-105"
+                        : "bg-muted text-muted-foreground cursor-not-allowed"
                     )}
                   >
                     <ArrowUp className="h-4 w-4" strokeWidth={2.5} />

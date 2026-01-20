@@ -48,17 +48,17 @@ export function CodeBlock({
   const languageLabel = getLanguageLabel(displayLanguage);
 
   return (
-    <div className="group relative rounded-lg overflow-hidden bg-slate-900 dark:bg-slate-950 my-3">
+    <div className="group relative rounded-lg overflow-hidden bg-muted/60 dark:bg-muted/40 my-3 border border-border">
       {/* Header bar */}
-      <div className="flex items-center justify-between px-4 py-2 bg-slate-800 dark:bg-slate-900 border-b border-slate-700">
+      <div className="flex items-center justify-between px-4 py-2 bg-muted/80 dark:bg-muted/60 border-b border-border">
         <div className="flex items-center gap-2">
           {filename && (
             <>
-              <span className="text-xs text-slate-400">{filename}</span>
-              <span className="text-slate-500">|</span>
+              <span className="text-xs text-muted-foreground">{filename}</span>
+              <span className="text-muted-foreground/50">|</span>
             </>
           )}
-          <span className="text-xs text-slate-400 font-mono">{languageLabel}</span>
+          <span className="text-xs text-muted-foreground font-mono">{languageLabel}</span>
         </div>
 
         {/* Copy button */}
@@ -69,8 +69,8 @@ export function CodeBlock({
           className={cn(
             'h-7 px-2 text-xs',
             copied
-              ? 'text-status-success-text hover:text-status-success-text'
-              : 'text-slate-400 hover:text-white hover:bg-slate-700'
+              ? 'text-status-success hover:text-status-success'
+              : 'text-muted-foreground hover:text-foreground hover:bg-accent'
           )}
         >
           {copied ? (
@@ -91,7 +91,7 @@ export function CodeBlock({
       <div className="overflow-x-auto">
         <pre className={cn('p-4 text-sm', showLineNumbers && 'pl-12 relative')}>
           {showLineNumbers && (
-            <div className="absolute left-0 top-0 pt-4 pb-4 px-3 text-right text-slate-500 select-none border-r border-slate-700 bg-slate-900/50">
+            <div className="absolute left-0 top-0 pt-4 pb-4 px-3 text-right text-muted-foreground/60 select-none border-r border-border bg-muted/30">
               {code.split('\n').map((_, i) => (
                 <div key={i} className="leading-6">
                   {i + 1}
@@ -102,7 +102,7 @@ export function CodeBlock({
           <code
             ref={codeRef}
             className={cn(
-              'text-slate-100 font-mono leading-6',
+              'text-foreground font-mono leading-6',
               language && `language-${displayLanguage}`
             )}
           >

@@ -118,7 +118,7 @@ export function HomePage() {
 
   // Show welcome screen
   return (
-    <div className="flex flex-col h-full bg-[#0a0a0a]">
+    <div className="flex flex-col h-full bg-background">
       {/* Minimal header with model selector */}
       <header className="flex items-center justify-center p-4">
         <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />
@@ -129,24 +129,24 @@ export function HomePage() {
         <div className="w-full max-w-2xl">
           {/* Brand mark */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-semibold tracking-tight mb-3 text-white">
+            <h1 className="text-3xl font-semibold tracking-tight mb-3 text-foreground">
               What can I help with?
             </h1>
-            <p className="text-neutral-300 text-base">
+            <p className="text-muted-foreground text-base">
               Your conversations are end-to-end encrypted
             </p>
           </div>
 
           {/* No connections warning */}
           {!hasAnyConnections && isUnlocked && (
-            <Alert className="mb-6 bg-neutral-900 border-neutral-800">
+            <Alert className="mb-6 bg-card border-border">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
-              <AlertTitle className="text-white">No API Keys Connected</AlertTitle>
-              <AlertDescription className="flex items-center justify-between text-neutral-300">
+              <AlertTitle className="text-foreground">No API Keys Connected</AlertTitle>
+              <AlertDescription className="flex items-center justify-between text-muted-foreground">
                 <span>Add an API key to start chatting with AI models.</span>
                 <Button
                   variant="link"
-                  className="p-0 h-auto flex items-center gap-1 text-white"
+                  className="p-0 h-auto flex items-center gap-1 text-foreground"
                   onClick={() => openSettingsModal('connections')}
                 >
                   Add API Key <ArrowRight className="h-4 w-4" />
@@ -184,7 +184,7 @@ export function HomePage() {
                     onClick={() => handleSendMessage(suggestion.text)}
                     disabled={isCreating}
                     className={cn(
-                      'bg-transparent border-neutral-800 text-neutral-300 hover:bg-white/5 hover:text-white hover:border-neutral-700',
+                      'bg-transparent border-border text-muted-foreground hover:bg-accent hover:text-foreground hover:border-border/80',
                       'animate-in fade-in-up',
                       index === 0 && 'stagger-1',
                       index === 1 && 'stagger-2',
@@ -192,7 +192,7 @@ export function HomePage() {
                       index === 3 && 'stagger-4'
                     )}
                   >
-                    <Icon className="h-4 w-4 mr-2 text-neutral-400" />
+                    <Icon className="h-4 w-4 mr-2 text-muted-foreground" />
                     {suggestion.text}
                   </Button>
                 );
@@ -204,7 +204,7 @@ export function HomePage() {
 
       {/* Footer - minimal */}
       <footer className="p-4 text-center">
-        <p className="text-xs text-neutral-400 flex items-center justify-center gap-1.5">
+        <p className="text-xs text-muted-foreground flex items-center justify-center gap-1.5">
           <Lock className="h-3.5 w-3.5" />
           End-to-end encrypted
         </p>

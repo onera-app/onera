@@ -53,7 +53,7 @@ export const ChatNavbar = memo(function ChatNavbar({
   };
 
   return (
-    <header className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 h-14 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5">
+    <header className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 h-14 bg-background/80 backdrop-blur-xl border-b border-border">
       <div className="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
         {/* Menu button (shown when sidebar is closed) */}
         {!sidebarOpen && (
@@ -62,7 +62,7 @@ export const ChatNavbar = memo(function ChatNavbar({
             size="icon"
             onClick={toggleSidebar}
             title="Open sidebar"
-            className="text-neutral-300 hover:text-white hover:bg-white/5 h-8 w-8 flex-shrink-0"
+            className="text-muted-foreground hover:text-foreground hover:bg-accent h-8 w-8 flex-shrink-0"
           >
             <Menu className="h-5 w-5" />
           </Button>
@@ -84,15 +84,15 @@ export const ChatNavbar = memo(function ChatNavbar({
                 }
               }}
               onBlur={handleSaveTitle}
-              className="h-8 text-sm font-medium border-transparent bg-white/5 focus-visible:ring-1 focus-visible:ring-white/20 px-2 text-white max-w-md"
+              className="h-8 text-sm font-medium border-transparent bg-accent focus-visible:ring-1 focus-visible:ring-ring px-2 text-foreground max-w-md"
             />
           ) : (
             <button
               onClick={() => onTitleChange && setIsEditing(true)}
               className={cn(
-                'text-sm font-medium truncate text-left block w-full max-w-lg px-2 py-1 -ml-2 rounded-md transition-colors text-white',
+                'text-sm font-medium truncate text-left block w-full max-w-lg px-2 py-1 -ml-2 rounded-md transition-colors text-foreground',
                 onTitleChange
-                  ? 'hover:bg-white/5 cursor-text'
+                  ? 'hover:bg-accent cursor-text'
                   : 'cursor-default'
               )}
               title={onTitleChange ? 'Click to edit title' : title}
@@ -114,7 +114,7 @@ export const ChatNavbar = memo(function ChatNavbar({
           size="sm"
           onClick={() => navigate({ to: '/app' })}
           title="New chat"
-          className="text-neutral-300 hover:text-white hover:bg-white/5 hidden sm:flex h-8"
+          className="text-muted-foreground hover:text-foreground hover:bg-accent hidden sm:flex h-8"
         >
           <Plus className="h-4 w-4 mr-1.5" />
           New
@@ -125,7 +125,7 @@ export const ChatNavbar = memo(function ChatNavbar({
           size="icon"
           onClick={() => navigate({ to: '/app' })}
           title="New chat"
-          className="text-neutral-300 hover:text-white hover:bg-white/5 sm:hidden h-8 w-8"
+          className="text-muted-foreground hover:text-foreground hover:bg-accent sm:hidden h-8 w-8"
         >
           <Plus className="h-5 w-5" />
         </Button>
@@ -137,14 +137,14 @@ export const ChatNavbar = memo(function ChatNavbar({
               variant="ghost"
               size="icon"
               title="More options"
-              className="text-neutral-300 hover:text-white hover:bg-white/5 h-8 w-8"
+              className="text-muted-foreground hover:text-foreground hover:bg-accent h-8 w-8"
             >
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48 bg-neutral-900 border-neutral-800">
+          <DropdownMenuContent align="end" className="w-48 bg-popover border-border">
             {onTitleChange && (
-              <DropdownMenuItem onClick={() => setIsEditing(true)} className="gap-2 text-neutral-300 focus:text-white focus:bg-white/10">
+              <DropdownMenuItem onClick={() => setIsEditing(true)} className="gap-2 text-muted-foreground focus:text-foreground focus:bg-accent">
                 <Edit className="h-4 w-4" />
                 Rename
               </DropdownMenuItem>
@@ -152,10 +152,10 @@ export const ChatNavbar = memo(function ChatNavbar({
 
             {onDelete && (
               <>
-                <DropdownMenuSeparator className="bg-neutral-800" />
+                <DropdownMenuSeparator className="bg-border" />
                 <DropdownMenuItem
                   onClick={() => setShowDeleteDialog(true)}
-                  className="gap-2 text-red-400 focus:text-red-400 focus:bg-red-500/10"
+                  className="gap-2 text-red-500 dark:text-red-400 focus:text-red-500 dark:focus:text-red-400 focus:bg-red-500/10"
                 >
                   <Trash className="h-4 w-4" />
                   Delete Chat
@@ -168,15 +168,15 @@ export const ChatNavbar = memo(function ChatNavbar({
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="bg-neutral-900 border-neutral-800">
+        <AlertDialogContent className="bg-card border-border">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">Delete chat?</AlertDialogTitle>
-            <AlertDialogDescription className="text-neutral-300">
+            <AlertDialogTitle className="text-foreground">Delete chat?</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
               This action cannot be undone. This will permanently delete this conversation and all its messages.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-transparent border-neutral-700 text-neutral-300 hover:bg-white/5 hover:text-white">
+            <AlertDialogCancel className="bg-transparent border-border text-muted-foreground hover:bg-accent hover:text-foreground">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction

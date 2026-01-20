@@ -202,17 +202,17 @@
   }
 
   .chat-scrollbar::-webkit-scrollbar-thumb {
-    background: oklch(0.4 0.005 260 / 0.4);
+    background: var(--color-border);
     border-radius: 3px;
   }
 
   .chat-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.5 0.005 260 / 0.5);
+    background: var(--color-muted-foreground);
   }
 
   .chat-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: oklch(0.4 0.005 260 / 0.4) transparent;
+    scrollbar-color: var(--color-border) transparent;
   }
 
   /* Animations */
@@ -296,12 +296,17 @@
     background: linear-gradient(
       90deg,
       transparent 0%,
-      oklch(0.95 0.005 90 / 0.04) 50%,
+      var(--color-primary) 50%,
       transparent 100%
     );
+    opacity: 0.04;
     border-radius: 12px;
     animation: streaming-pulse 2s ease-in-out infinite;
     pointer-events: none;
+  }
+  
+  .light .message-streaming::before {
+    opacity: 0.06;
   }
 
   /* Streaming cursor - blinking caret effect with smooth transitions */

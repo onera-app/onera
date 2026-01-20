@@ -20,13 +20,13 @@ export const FollowUps = memo(function FollowUps({ followUps, onSelect, classNam
           className={cn(
             'group inline-flex items-center gap-2 text-left',
             'px-3 py-2 rounded-xl',
-            'bg-neutral-900/50 hover:bg-neutral-800/80',
-            'border border-neutral-800 hover:border-neutral-700',
-            'text-sm text-neutral-300 hover:text-white',
+            'bg-muted/50 hover:bg-muted',
+            'border border-border hover:border-border/80',
+            'text-sm text-muted-foreground hover:text-foreground',
             'transition-all duration-150'
           )}
         >
-          <ArrowRight className="h-3.5 w-3.5 text-neutral-500 group-hover:text-neutral-300 shrink-0 transition-colors" />
+          <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/60 group-hover:text-muted-foreground shrink-0 transition-colors" />
           <span>{followUp}</span>
         </button>
       ))}

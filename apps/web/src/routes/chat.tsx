@@ -969,11 +969,11 @@ export function ChatPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full bg-[#0a0a0a]">
+      <div className="flex items-center justify-center h-full bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 rounded-full border-2 border-neutral-700 border-t-white animate-spin" />
+          <div className="w-10 h-10 rounded-full border-2 border-border border-t-foreground animate-spin" />
           <div className="space-y-2">
-            <Skeleton className="h-4 w-32 bg-neutral-800" />
+            <Skeleton className="h-4 w-32 bg-muted" />
           </div>
         </div>
       </div>
@@ -982,12 +982,12 @@ export function ChatPage() {
 
   if (!chat) {
     return (
-      <div className="flex items-center justify-center h-full bg-[#0a0a0a]">
+      <div className="flex items-center justify-center h-full bg-background">
         <div className="text-center max-w-md px-4">
-          <Alert variant="destructive" className="bg-neutral-900 border-neutral-800">
+          <Alert variant="destructive" className="bg-card border-border">
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle className="text-white">Chat not found</AlertTitle>
-            <AlertDescription className="text-neutral-400">
+            <AlertTitle className="text-foreground">Chat not found</AlertTitle>
+            <AlertDescription className="text-muted-foreground">
               This conversation may have been deleted or doesn't exist.
             </AlertDescription>
           </Alert>
@@ -997,7 +997,7 @@ export function ChatPage() {
   }
 
   return (
-    <div className="relative flex flex-col h-full w-full bg-[#0a0a0a] overflow-hidden">
+    <div className="relative flex flex-col h-full w-full bg-background overflow-hidden">
       {/* Chat header - Absolute overlay */}
       <ChatNavbar
         title={chat?.title || 'Chat'}
@@ -1011,7 +1011,7 @@ export function ChatPage() {
       </ChatNavbar>
 
       {/* Mobile Model Selector - visible only on small screens below navbar */}
-      <div className="md:hidden absolute top-14 left-0 right-0 z-20 px-4 py-2 bg-[#0a0a0a]/80 backdrop-blur border-b border-white/5">
+      <div className="md:hidden absolute top-14 left-0 right-0 z-20 px-4 py-2 bg-background/80 backdrop-blur border-b border-border">
         <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />
       </div>
 
@@ -1037,7 +1037,7 @@ export function ChatPage() {
       </div>
 
       {/* Input area - Floating at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 p-4 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent pb-6 pt-10">
+      <div className="absolute bottom-0 left-0 right-0 z-20 p-4 bg-gradient-to-t from-background via-background/80 to-transparent pb-6 pt-10">
         <div className="max-w-3xl mx-auto">
           <MessageInput
             onSend={handleSendMessage}

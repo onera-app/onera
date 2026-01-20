@@ -261,10 +261,10 @@ export const Messages = memo(function Messages({
       <div className="flex flex-col items-center justify-center h-full px-4">
         {/* Empty state */}
         <div className="text-center mb-8 max-w-lg mx-auto">
-          <h1 className="text-3xl font-semibold tracking-tight mb-3 text-white">
+          <h1 className="text-3xl font-semibold tracking-tight mb-3 text-foreground">
             How can I help you today?
           </h1>
-          <p className="text-base text-neutral-300">
+          <p className="text-base text-muted-foreground">
             Start a conversation or try one of the suggestions below.
           </p>
         </div>
@@ -360,7 +360,7 @@ export const Messages = memo(function Messages({
                   {isLastMessage && message.role === 'assistant' && !isStreaming && onFollowUpSelect && (
                     <div className="mt-4 pl-10 md:pl-11">
                       {isGeneratingFollowUps ? (
-                        <div className="flex items-center gap-2 text-xs text-neutral-400">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <Loader2 className="h-3 w-3 animate-spin" />
                           <span>Generating suggestions...</span>
                         </div>
