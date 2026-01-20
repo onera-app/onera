@@ -405,13 +405,6 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
           </div>
         </div>
       </div>
-
-      {/* Keyboard hints */}
-      <div className="mt-2 text-center">
-        <div className="inline-flex items-center gap-3 text-[10px] text-muted-foreground/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100 peer-focus-within:opacity-100">
-          <span>Use <kbd className="font-sans">Shift + Return</kbd> for new line</span>
-        </div>
-      </div>
     </div>
   );
 });

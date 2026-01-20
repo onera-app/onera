@@ -11,7 +11,8 @@ import {
 } from '@/lib/messageTree';
 import type { Source } from './Sources';
 import { SuggestedActions } from './SuggestedActions';
-import { ArrowDown } from 'lucide-react';
+import { FollowUps } from './FollowUps';
+import { ArrowDown, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 // AI SDK message part types - compatible with UIMessagePart
@@ -73,6 +74,12 @@ interface MessagesProps {
   onSendMessage?: (content: string) => void;
   /** Whether message input is disabled (for suggested actions) */
   inputDisabled?: boolean;
+  /** Follow-up suggestions to display after last assistant message */
+  followUps?: string[];
+  /** Whether follow-ups are being generated */
+  isGeneratingFollowUps?: boolean;
+  /** Callback when a follow-up is selected */
+  onFollowUpSelect?: (followUp: string) => void;
 }
 
 export const Messages = memo(function Messages({
@@ -87,6 +94,9 @@ export const Messages = memo(function Messages({
   onSwitchBranch,
   onSendMessage,
   inputDisabled,
+  followUps,
+  isGeneratingFollowUps,
+  onFollowUpSelect,
 }: MessagesProps) {
   // Use observer-based scroll handling instead of useEffect on messages
   const { containerRef, endRef, isAtBottom, scrollToBottom } = useScrollToBottom();
@@ -141,13 +151,13 @@ export const Messages = memo(function Messages({
   if (messages.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full px-4">
-        {/* Onera branding / empty state */}
-        <div className="text-center mb-10 max-w-lg mx-auto">
-          <h1 className="text-4xl font-bold tracking-tight mb-4 text-foreground/90">
-            How can I help you?
+        {/* Empty state */}
+        <div className="text-center mb-8 max-w-lg mx-auto">
+          <h1 className="text-3xl font-semibold tracking-tight mb-3 text-white">
+            How can I help you today?
           </h1>
-          <p className="text-lg text-muted-foreground/80 font-light leading-relaxed">
-            I'm here to assist with coding, analysis, writing, and more.
+          <p className="text-base text-neutral-400">
+            Start a conversation or try one of the suggestions below.
           </p>
         </div>
 
@@ -235,6 +245,23 @@ export const Messages = memo(function Messages({
                     onPreviousBranch={() => handlePreviousBranch(message.id)}
                     onNextBranch={() => handleNextBranch(message.id)}
                   />
+                  
+                  {/* Follow-ups attached to last assistant message */}
+                  {isLastMessage && message.role === 'assistant' && !isStreaming && onFollowUpSelect && (
+                    <div className="mt-4 pl-0">
+                      {isGeneratingFollowUps ? (
+                        <div className="flex items-center gap-2 text-xs text-neutral-500">
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          <span>Generating suggestions...</span>
+                        </div>
+                      ) : followUps && followUps.length > 0 ? (
+                        <FollowUps
+                          followUps={followUps}
+                          onSelect={onFollowUpSelect}
+                        />
+                      ) : null}
+                    </div>
+                  )}
                 </div>
               );
             })}

@@ -23,8 +23,6 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import {
-  Folder,
-  FolderOpen,
   ChevronRight,
   MoreHorizontal,
   Pencil,
@@ -47,7 +45,6 @@ interface FolderItemProps {
 export function FolderItem({
   id,
   name,
-  chatCount,
   isExpanded,
   isNew,
   onToggle,
@@ -126,8 +123,8 @@ export function FolderItem({
       <Collapsible open={isExpanded} onOpenChange={onToggle}>
         <div
           className={cn(
-            'relative group rounded-xl transition-all duration-200',
-            isDragOver && 'bg-primary/10 ring-2 ring-primary/50 ring-inset'
+            'relative group rounded-lg transition-all duration-200',
+            isDragOver && 'bg-white/10 ring-1 ring-white/20 ring-inset'
           )}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -146,59 +143,49 @@ export function FolderItem({
                 }}
                 onBlur={handleSaveEdit}
                 placeholder="Folder name"
-                className="w-full h-9 px-3 rounded-xl bg-sidebar-accent text-sm text-sidebar-foreground focus:outline-none focus:ring-2 focus:ring-sidebar-ring/50 transition-all"
+                className="w-full h-9 px-3 rounded-lg bg-white/10 text-sm text-white focus:outline-none focus:ring-1 focus:ring-white/20 transition-all"
               />
             </div>
           ) : (
             <CollapsibleTrigger asChild>
               <button
                 className={cn(
-                  'flex items-center gap-2 w-full py-2.5 px-3 rounded-xl text-left',
-                  'text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-150'
+                  'flex items-center gap-2 w-full py-2 px-2 rounded-lg text-left',
+                  'text-neutral-300 hover:text-white hover:bg-white/5 transition-all duration-150'
                 )}
               >
                 <ChevronRight
                   className={cn(
-                    'h-4 w-4 text-muted-foreground/70 transition-transform duration-200 flex-shrink-0',
+                    'h-3.5 w-3.5 text-neutral-500 transition-transform duration-200 flex-shrink-0',
                     isExpanded && 'rotate-90'
                   )}
                 />
-                <div className="relative">
-                  {isExpanded ? (
-                    <FolderOpen className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                  ) : (
-                    <Folder className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                  )}
-                </div>
-                <span className="flex-1 text-secondary font-medium truncate">{name}</span>
-                <span className="text-caption text-muted-foreground/70 tabular-nums px-1.5 py-0.5 rounded-md bg-sidebar-accent/50">
-                  {chatCount}
-                </span>
+                <span className="flex-1 text-sm truncate">{name}</span>
               </button>
             </CollapsibleTrigger>
           )}
 
           {/* Menu button */}
           {!isEditing && (
-            <div className="absolute right-10 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+            <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="p-1.5 rounded-lg text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-background/60 transition-colors"
+                    className="p-1 rounded text-neutral-500 hover:text-white hover:bg-white/10 transition-colors"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <MoreHorizontal className="h-4 w-4" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40">
-                  <DropdownMenuItem onClick={handleStartEdit} className="gap-2 text-secondary">
+                <DropdownMenuContent align="end" className="w-36 bg-neutral-900 border-neutral-800">
+                  <DropdownMenuItem onClick={handleStartEdit} className="gap-2 text-neutral-300 focus:text-white focus:bg-white/10">
                     <Pencil className="h-3.5 w-3.5" />
                     Rename
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
+                  <DropdownMenuSeparator className="bg-neutral-800" />
                   <DropdownMenuItem
                     onClick={() => setShowDeleteDialog(true)}
-                    className="gap-2 text-secondary text-destructive focus:text-destructive"
+                    className="gap-2 text-red-400 focus:text-red-400 focus:bg-red-500/10"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     Delete
@@ -210,29 +197,25 @@ export function FolderItem({
         </div>
 
         <CollapsibleContent className="animate-accordion-down">
-          <div className="relative ml-[18px] pl-4 mt-0.5">
-            {/* Subtle connecting line */}
-            <div className="absolute left-0 top-0 bottom-2 w-px bg-gradient-to-b from-sidebar-border/60 via-sidebar-border/40 to-transparent" />
-            <div className="space-y-0.5">
-              {children}
-            </div>
-          </div>
+          {children}
         </CollapsibleContent>
       </Collapsible>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="max-w-sm">
+        <AlertDialogContent className="max-w-sm bg-neutral-900 border-neutral-800">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete folder?</AlertDialogTitle>
-            <AlertDialogDescription className="text-secondary">
+            <AlertDialogTitle className="text-white">Delete folder?</AlertDialogTitle>
+            <AlertDialogDescription className="text-neutral-400">
               This will delete "{name}". Conversations inside will be moved to your main list.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="text-secondary">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="bg-transparent border-neutral-700 text-neutral-300 hover:bg-white/5 hover:text-white">
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-secondary"
+              className="bg-red-600 text-white hover:bg-red-700"
             >
               Delete
             </AlertDialogAction>

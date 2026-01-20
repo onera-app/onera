@@ -11,7 +11,6 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AlertTriangle, ChevronDown, Lock, Search, Loader2, Pin } from 'lucide-react';
@@ -258,7 +257,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
             </div>
 
             {/* Model list */}
-            <ScrollArea className="max-h-80">
+            <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-700 scrollbar-track-transparent">
               <div ref={listRef} className="py-1">
                 {filteredModels.length === 0 ? (
                   <div className="px-4 py-8 text-center text-sm text-muted-foreground">
@@ -330,7 +329,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
                   </>
                 )}
               </div>
-            </ScrollArea>
+            </div>
 
             {/* Footer hint */}
             <div className="border-t border-border px-3 py-2 flex items-center justify-between">

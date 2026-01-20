@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Menu, Plus, Share, MoreHorizontal, Edit, Archive, Trash, MessagesSquare } from 'lucide-react';
+import { Menu, Plus, MoreHorizontal, Edit, Trash } from 'lucide-react';
 
 interface ChatNavbarProps {
   title: string;
@@ -22,7 +22,6 @@ export const ChatNavbar = memo(function ChatNavbar({
   chatId: _chatId,
   onTitleChange,
   onDelete,
-  onArchive,
   children,
 }: ChatNavbarProps) {
   const navigate = useNavigate();
@@ -54,8 +53,8 @@ export const ChatNavbar = memo(function ChatNavbar({
   };
 
   return (
-    <header className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 h-16 bg-white/5 backdrop-blur-xl border-b border-white/5 shadow-sm">
-      <div className="flex items-center gap-2 overflow-hidden">
+    <header className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 h-14 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5">
+      <div className="flex items-center gap-3 overflow-hidden">
         {/* Menu button (shown when sidebar is closed) */}
         {!sidebarOpen && (
           <Button
@@ -63,7 +62,7 @@ export const ChatNavbar = memo(function ChatNavbar({
             size="icon"
             onClick={toggleSidebar}
             title="Open sidebar"
-            className="text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            className="text-neutral-400 hover:text-white hover:bg-white/5 h-8 w-8"
           >
             <Menu className="h-5 w-5" />
           </Button>
@@ -71,8 +70,6 @@ export const ChatNavbar = memo(function ChatNavbar({
 
         {/* Title Section */}
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          {!sidebarOpen && <MessagesSquare className="h-5 w-5 text-muted-foreground/70 shrink-0" />}
-
           <div className="flex-1 min-w-0">
             {isEditing ? (
               <Input
@@ -88,15 +85,15 @@ export const ChatNavbar = memo(function ChatNavbar({
                   }
                 }}
                 onBlur={handleSaveTitle}
-                className="h-8 text-sm font-medium border-transparent focus-visible:ring-1 focus-visible:ring-ring px-2 -ml-2 bg-transparent"
+                className="h-8 text-sm font-medium border-transparent bg-white/5 focus-visible:ring-1 focus-visible:ring-white/20 px-2 text-white"
               />
             ) : (
               <button
                 onClick={() => onTitleChange && setIsEditing(true)}
                 className={cn(
-                  'text-sm font-medium truncate text-left max-w-full px-2 -ml-2 rounded-md transition-colors',
+                  'text-sm font-medium truncate text-left max-w-full px-2 py-1 -ml-2 rounded-md transition-colors text-white',
                   onTitleChange
-                    ? 'hover:bg-muted/50 hover:text-foreground cursor-text'
+                    ? 'hover:bg-white/5 cursor-text'
                     : 'cursor-default'
                 )}
                 title={onTitleChange ? 'Click to edit title' : title}
@@ -119,10 +116,10 @@ export const ChatNavbar = memo(function ChatNavbar({
           size="sm"
           onClick={() => navigate({ to: '/app' })}
           title="New chat"
-          className="text-muted-foreground hover:text-foreground hover:bg-muted/50 hidden sm:flex"
+          className="text-neutral-400 hover:text-white hover:bg-white/5 hidden sm:flex h-8"
         >
-          <Plus className="h-4 w-4 mr-2" />
-          New Chat
+          <Plus className="h-4 w-4 mr-1.5" />
+          New
         </Button>
 
         <Button
@@ -130,20 +127,9 @@ export const ChatNavbar = memo(function ChatNavbar({
           size="icon"
           onClick={() => navigate({ to: '/app' })}
           title="New chat"
-          className="text-muted-foreground hover:text-foreground hover:bg-muted/50 sm:hidden"
+          className="text-neutral-400 hover:text-white hover:bg-white/5 sm:hidden h-8 w-8"
         >
           <Plus className="h-5 w-5" />
-        </Button>
-
-        {/* Share button (placeholder) */}
-        <Button
-          variant="ghost"
-          size="icon"
-          title="Share (coming soon)"
-          disabled
-          className="text-muted-foreground/50"
-        >
-          <Share className="h-4 w-4" />
         </Button>
 
         {/* More menu */}
@@ -153,34 +139,27 @@ export const ChatNavbar = memo(function ChatNavbar({
               variant="ghost"
               size="icon"
               title="More options"
-              className="text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              className="text-neutral-400 hover:text-white hover:bg-white/5 h-8 w-8"
             >
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 p-1">
+          <DropdownMenuContent align="end" className="w-48 bg-neutral-900 border-neutral-800">
             {onTitleChange && (
-              <DropdownMenuItem onClick={() => setIsEditing(true)} className="rounded-sm">
-                <Edit className="h-4 w-4 mr-2" />
+              <DropdownMenuItem onClick={() => setIsEditing(true)} className="gap-2 text-neutral-300 focus:text-white focus:bg-white/10">
+                <Edit className="h-4 w-4" />
                 Rename
-              </DropdownMenuItem>
-            )}
-
-            {onArchive && (
-              <DropdownMenuItem onClick={onArchive} className="rounded-sm">
-                <Archive className="h-4 w-4 mr-2" />
-                Archive
               </DropdownMenuItem>
             )}
 
             {onDelete && (
               <>
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator className="bg-neutral-800" />
                 <DropdownMenuItem
                   onClick={() => setShowDeleteDialog(true)}
-                  className="text-destructive focus:text-destructive focus:bg-destructive/10 rounded-sm"
+                  className="gap-2 text-red-400 focus:text-red-400 focus:bg-red-500/10"
                 >
-                  <Trash className="h-4 w-4 mr-2" />
+                  <Trash className="h-4 w-4" />
                   Delete Chat
                 </DropdownMenuItem>
               </>
@@ -191,21 +170,23 @@ export const ChatNavbar = memo(function ChatNavbar({
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-neutral-900 border-neutral-800">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete chat?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-white">Delete chat?</AlertDialogTitle>
+            <AlertDialogDescription className="text-neutral-400">
               This action cannot be undone. This will permanently delete this conversation and all its messages.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="bg-transparent border-neutral-700 text-neutral-300 hover:bg-white/5 hover:text-white">
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 onDelete?.();
                 setShowDeleteDialog(false);
               }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-red-600 text-white hover:bg-red-700"
             >
               Delete
             </AlertDialogAction>
@@ -215,4 +196,3 @@ export const ChatNavbar = memo(function ChatNavbar({
     </header>
   );
 });
-

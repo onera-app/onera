@@ -19,7 +19,7 @@ import { generateChatTitle } from '@/lib/ai';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
-import { Sparkles, Lock, AlertTriangle, Mail, Lightbulb, Code, ArrowRight } from 'lucide-react';
+import { Lock, AlertTriangle, Mail, Lightbulb, Code, Sparkles, ArrowRight } from 'lucide-react';
 
 // Suggested prompts for new users
 const SUGGESTIONS = [
@@ -255,9 +255,9 @@ export function HomePage() {
   // Show streaming UI if we have messages
   if (displayMessages.length > 0 || isStreaming) {
     return (
-      <div className="flex flex-col h-full bg-background">
+      <div className="flex flex-col h-full bg-[#0a0a0a]">
         {/* Header */}
-        <header className="flex items-center justify-center p-4 border-b border-border">
+        <header className="flex items-center justify-center p-4 border-b border-white/5">
           <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />
         </header>
 
@@ -270,14 +270,14 @@ export function HomePage() {
         </div>
 
         {/* Input */}
-        <div className="p-4 bg-background">
+        <div className="p-4 bg-[#0a0a0a]">
           <div className="max-w-3xl mx-auto">
             <MessageInput
               onSend={handleSendMessage}
               onStop={handleStopStreaming}
               isStreaming={isStreaming}
               disabled={!isUnlocked || isCreating}
-              placeholder="Message Onera..."
+              placeholder="Message..."
             />
           </div>
         </div>
@@ -287,7 +287,7 @@ export function HomePage() {
 
   // Show welcome screen
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-[#0a0a0a]">
       {/* Minimal header with model selector */}
       <header className="flex items-center justify-center p-4">
         <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />
@@ -297,28 +297,25 @@ export function HomePage() {
       <div className="flex-1 flex flex-col items-center justify-center px-4 -mt-16">
         <div className="w-full max-w-2xl">
           {/* Brand mark */}
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-5 shadow-sm rotate-3">
-              <Sparkles className="w-8 h-8 text-primary" />
-            </div>
-            <h1 className="heading-hero mb-3">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-semibold tracking-tight mb-3 text-white">
               What can I help with?
             </h1>
-            <p className="text-muted-foreground text-base">
+            <p className="text-neutral-400 text-base">
               Your conversations are end-to-end encrypted
             </p>
           </div>
 
           {/* No connections warning */}
           {!hasAnyConnections && isUnlocked && (
-            <Alert className="mb-8">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>No API Keys Connected</AlertTitle>
-              <AlertDescription className="flex items-center justify-between">
+            <Alert className="mb-6 bg-neutral-900 border-neutral-800">
+              <AlertTriangle className="h-4 w-4 text-amber-500" />
+              <AlertTitle className="text-white">No API Keys Connected</AlertTitle>
+              <AlertDescription className="flex items-center justify-between text-neutral-400">
                 <span>Add an API key to start chatting with AI models.</span>
                 <Button
                   variant="link"
-                  className="p-0 h-auto flex items-center gap-1"
+                  className="p-0 h-auto flex items-center gap-1 text-white"
                   onClick={() => openSettingsModal('connections')}
                 >
                   Add API Key <ArrowRight className="h-4 w-4" />
@@ -328,7 +325,7 @@ export function HomePage() {
           )}
 
           {/* Message input - prominent */}
-          <div className="mb-8">
+          <div className="mb-6">
             <MessageInput
               onSend={handleSendMessage}
               disabled={!isUnlocked || isCreating || !hasAnyConnections}
@@ -339,7 +336,7 @@ export function HomePage() {
                   ? 'Add an API key to start chatting'
                   : !selectedModelId
                   ? 'Select a model above to start'
-                  : 'Message Onera...'
+                  : 'Message...'
               }
             />
           </div>
@@ -355,6 +352,7 @@ export function HomePage() {
                     variant="outline"
                     onClick={() => handleSendMessage(suggestion.text)}
                     className={cn(
+                      'bg-transparent border-neutral-800 text-neutral-300 hover:bg-white/5 hover:text-white hover:border-neutral-700',
                       'animate-in fade-in-up',
                       index === 0 && 'stagger-1',
                       index === 1 && 'stagger-2',
@@ -362,7 +360,7 @@ export function HomePage() {
                       index === 3 && 'stagger-4'
                     )}
                   >
-                    <Icon className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <Icon className="h-4 w-4 mr-2 text-neutral-500" />
                     {suggestion.text}
                   </Button>
                 );
@@ -374,7 +372,7 @@ export function HomePage() {
 
       {/* Footer - minimal */}
       <footer className="p-4 text-center">
-        <p className="text-xs text-muted-foreground flex items-center justify-center gap-1.5">
+        <p className="text-xs text-neutral-500 flex items-center justify-center gap-1.5">
           <Lock className="h-3.5 w-3.5" />
           End-to-end encrypted
         </p>

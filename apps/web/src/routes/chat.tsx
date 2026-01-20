@@ -19,7 +19,6 @@ import {
 import { MessageInput, type MessageInputOptions } from '@/components/chat/MessageInput';
 import { ChatNavbar } from '@/components/chat/ChatNavbar';
 import { ModelSelector } from '@/components/chat/ModelSelector';
-import { FollowUps } from '@/components/chat/FollowUps';
 import { useDirectChat } from '@/hooks/useDirectChat';
 import { generateFollowUps, getProviderFromModelId, supportsNativeSearch } from '@/lib/ai';
 import { executeSearch, formatSearchResultsForContext, type SearchResult } from '@/lib/search';
@@ -194,11 +193,15 @@ export function ChatPage() {
   const currentHistoryRef = useRef<ChatHistory>({ currentId: null, messages: {} });
   // Ref to track previous display messages for stable references (React memo optimization)
   const prevDisplayMessagesRef = useRef<ChatMessage[]>([]);
+  
+  // Local history state for immediate UI updates (server query may lag behind)
+  const [localHistory, setLocalHistory] = useState<ChatHistory>({ currentId: null, messages: {} });
 
-  // Keep currentHistoryRef in sync with chat
+  // Keep currentHistoryRef and localHistory in sync with chat
   useEffect(() => {
     if (chat?.history) {
       currentHistoryRef.current = chat.history;
+      setLocalHistory(chat.history);
     }
   }, [chat?.history]);
 
@@ -225,15 +228,19 @@ export function ChatPage() {
 
     // Add pending user message to history
     if (pendingUserMessage) {
+      // Check if this user message already exists (regeneration case)
+      const existingUserMessage = history.messages[pendingUserMessage.id];
+      
       // Add parentId and childrenIds to user message
+      // Preserve existing childrenIds for regeneration to maintain branches
       const userMsgWithTree: ChatMessage = {
         ...pendingUserMessage,
         parentId,
-        childrenIds: [],
+        childrenIds: existingUserMessage?.childrenIds || [],
       };
 
-      // Update parent's childrenIds if it exists
-      if (parentId && history.messages[parentId]) {
+      // Only update parent's childrenIds if this is a NEW message (not regeneration)
+      if (!existingUserMessage && parentId && history.messages[parentId]) {
         history.messages[parentId] = {
           ...history.messages[parentId],
           childrenIds: [...(history.messages[parentId].childrenIds || []), pendingUserMessage.id],
@@ -263,8 +270,9 @@ export function ChatPage() {
     history.messages[assistantMessage.id] = assistantMsgWithTree;
     history.currentId = assistantMessage.id;
 
-    // Update history ref for next message
+    // Update history ref and local state for immediate UI updates
     currentHistoryRef.current = history;
+    setLocalHistory(history);
 
     // Encrypt and save to server
     try {
@@ -441,7 +449,8 @@ export function ChatPage() {
   // Get display messages - combine stored messages with streaming state
   // Uses ref comparison to return stable reference when content unchanged
   const displayMessages = useMemo(() => {
-    const storedMessages = chat?.messages || [];
+    // Use localHistory for stored messages to reflect branch switches immediately
+    const storedMessages = createMessagesList(localHistory);
     let result: ChatMessage[];
 
     // If we have AI messages that include more than stored (user sent new message)
@@ -460,7 +469,7 @@ export function ChatPage() {
         return toChatMessage(m, m.role === 'assistant' ? selectedModelId || undefined : undefined);
       });
     } else {
-      // Use stored messages
+      // Use stored messages from localHistory
       result = storedMessages;
     }
 
@@ -470,7 +479,7 @@ export function ChatPage() {
     }
     prevDisplayMessagesRef.current = result;
     return result;
-  }, [chat?.messages, aiMessages, selectedModelId]);
+  }, [localHistory, aiMessages, selectedModelId]);
 
   // Handle sending a message with optional attachments and search
   const handleSendMessage = useCallback(async (content: string, options?: MessageInputOptions) => {
@@ -653,8 +662,9 @@ export function ChatPage() {
         newContent
       );
 
-      // Update history ref
+      // Update history ref and local state for immediate UI updates
       currentHistoryRef.current = newHistory;
+      setLocalHistory(newHistory);
 
       // Encrypt and save to server
       const encrypted = encryptChatContent(
@@ -698,10 +708,24 @@ export function ChatPage() {
       // Switch to the new branch
       const newHistory = switchToBranch(currentHistoryRef.current, messageId);
 
-      // Update history ref
+      // Update history ref and local state immediately for responsive UI
       currentHistoryRef.current = newHistory;
+      setLocalHistory(newHistory);
 
-      // Encrypt and save to server
+      // Update AI messages to reflect the switched branch
+      const newMessages = createMessagesList(newHistory);
+      const uiMessages = newMessages.map(toUIMessage);
+      setMessages(uiMessages);
+
+      // Load follow-ups from the new branch's last assistant message
+      const lastMessage = newMessages[newMessages.length - 1];
+      if (lastMessage?.role === 'assistant' && lastMessage.followUps && lastMessage.followUps.length > 0) {
+        setFollowUps(lastMessage.followUps);
+      } else {
+        setFollowUps([]);
+      }
+
+      // Encrypt and save to server (async, don't block UI)
       const encrypted = encryptChatContent(
         chatId,
         chat.encryptedChatKey,
@@ -716,19 +740,6 @@ export function ChatPage() {
           chatNonce: encrypted.chatNonce,
         },
       });
-
-      // Update AI messages to reflect the switched branch
-      const newMessages = createMessagesList(newHistory);
-      const uiMessages = newMessages.map(toUIMessage);
-      setMessages(uiMessages);
-
-      // Load follow-ups from the new branch's last assistant message
-      const lastMessage = newMessages[newMessages.length - 1];
-      if (lastMessage?.role === 'assistant' && lastMessage.followUps && lastMessage.followUps.length > 0) {
-        setFollowUps(lastMessage.followUps);
-      } else {
-        setFollowUps([]);
-      }
     } catch (error) {
       console.error('Failed to switch branch:', error);
       toast.error('Failed to switch branch');
@@ -805,8 +816,9 @@ export function ChatPage() {
       // Delete the message and its children from history
       const newHistory = deleteMessage(currentHistoryRef.current, messageId, true);
 
-      // Update history ref
+      // Update history ref and local state for immediate UI updates
       currentHistoryRef.current = newHistory;
+      setLocalHistory(newHistory);
 
       // Encrypt and save to server
       const encrypted = encryptChatContent(
@@ -843,15 +855,11 @@ export function ChatPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full bg-background">
+      <div className="flex items-center justify-center h-full bg-[#0a0a0a]">
         <div className="flex flex-col items-center gap-4">
-          <div className="relative">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            </div>
-          </div>
+          <div className="w-10 h-10 rounded-full border-2 border-neutral-700 border-t-white animate-spin" />
           <div className="space-y-2">
-            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-32 bg-neutral-800" />
           </div>
         </div>
       </div>
@@ -860,12 +868,12 @@ export function ChatPage() {
 
   if (!chat) {
     return (
-      <div className="flex items-center justify-center h-full bg-background">
+      <div className="flex items-center justify-center h-full bg-[#0a0a0a]">
         <div className="text-center max-w-md px-4">
-          <Alert variant="destructive" className="mb-4">
+          <Alert variant="destructive" className="bg-neutral-900 border-neutral-800">
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Chat not found</AlertTitle>
-            <AlertDescription>
+            <AlertTitle className="text-white">Chat not found</AlertTitle>
+            <AlertDescription className="text-neutral-400">
               This conversation may have been deleted or doesn't exist.
             </AlertDescription>
           </Alert>
@@ -875,10 +883,7 @@ export function ChatPage() {
   }
 
   return (
-    <div className="relative flex flex-col h-full w-full bg-background overflow-hidden">
-      {/* Background pattern (optional, adds texture) */}
-      <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02] pointer-events-none" />
-
+    <div className="relative flex flex-col h-full w-full bg-[#0a0a0a] overflow-hidden">
       {/* Chat header - Absolute overlay */}
       <ChatNavbar
         title={chat?.title || 'Chat'}
@@ -892,7 +897,7 @@ export function ChatPage() {
       </ChatNavbar>
 
       {/* Mobile Model Selector - visible only on small screens below navbar */}
-      <div className="md:hidden absolute top-16 left-0 right-0 z-20 px-4 py-2 bg-background/80 backdrop-blur border-b border-border/50">
+      <div className="md:hidden absolute top-14 left-0 right-0 z-20 px-4 py-2 bg-[#0a0a0a]/80 backdrop-blur border-b border-white/5">
         <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />
       </div>
 
@@ -900,7 +905,7 @@ export function ChatPage() {
       <div className="relative flex-1 w-full h-full">
         <Messages
           messages={displayMessages}
-          history={chat.history}
+          history={localHistory}
           streamingParts={streamingParts}
           streamingSources={searchSources}
           isStreaming={isStreaming}
@@ -910,29 +915,15 @@ export function ChatPage() {
           onSwitchBranch={handleSwitchBranch}
           onSendMessage={handleSendMessage}
           inputDisabled={!isUnlocked || !selectedModelId}
+          followUps={followUps}
+          isGeneratingFollowUps={isGeneratingFollowUps}
+          onFollowUpSelect={handleSendMessage}
         />
       </div>
 
       {/* Input area - Floating at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 p-4 bg-gradient-to-t from-background via-background/80 to-transparent pb-6 pt-10">
+      <div className="absolute bottom-0 left-0 right-0 z-20 p-4 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent pb-6 pt-10">
         <div className="max-w-3xl mx-auto">
-          {/* Follow-up suggestions */}
-          {!isStreaming && followUps.length > 0 && (
-            <FollowUps
-              followUps={followUps}
-              onSelect={handleSendMessage}
-              className="mb-4"
-            />
-          )}
-
-          {/* Loading follow-ups indicator */}
-          {isGeneratingFollowUps && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3 px-2">
-              <Loader2 className="h-3 w-3 animate-spin" />
-              <span>Generating suggestions...</span>
-            </div>
-          )}
-
           <MessageInput
             onSend={handleSendMessage}
             onStop={stop}

@@ -18,25 +18,29 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Lock, MoreHorizontal, Pencil, Trash2, FolderMinus } from 'lucide-react';
+import { Lock, MoreHorizontal, Pencil, Trash2, FolderMinus, Pin, PinOff } from 'lucide-react';
 
 interface ChatItemProps {
   id: string;
   title: string;
   updatedAt: number;
   isLocked?: boolean;
+  isPinned?: boolean;
   onDelete: (id: string) => void;
   onRename?: (id: string, newTitle: string) => void;
   onRemoveFromFolder?: () => void;
+  onTogglePin?: (id: string, pinned: boolean) => void;
 }
 
 export function ChatItem({
   id,
   title,
   isLocked,
+  isPinned,
   onDelete,
   onRename,
   onRemoveFromFolder,
+  onTogglePin,
 }: ChatItemProps) {
   const params = useParams({ strict: false });
   const currentChatId = (params as { chatId?: string }).chatId;
@@ -77,13 +81,19 @@ export function ChatItem({
     setShowDeleteDialog(false);
   };
 
+  const handleTogglePin = () => {
+    if (onTogglePin) {
+      onTogglePin(id, !isPinned);
+    }
+  };
+
   const handleDragStart = (e: React.DragEvent) => {
     setIsDragging(true);
     e.dataTransfer.setData('application/json', JSON.stringify({ type: 'chat', id }));
     e.dataTransfer.effectAllowed = 'move';
 
     const dragImage = document.createElement('div');
-    dragImage.className = 'px-3 py-2 bg-sidebar-accent rounded-xl text-sm text-sidebar-foreground shadow-lg max-w-[200px] truncate';
+    dragImage.className = 'px-3 py-2 bg-neutral-800 rounded-lg text-sm text-white shadow-lg max-w-[200px] truncate';
     dragImage.textContent = title.length > 30 ? title.slice(0, 30) + '...' : title;
     dragImage.style.position = 'absolute';
     dragImage.style.top = '-1000px';
@@ -101,7 +111,7 @@ export function ChatItem({
 
   if (isEditing) {
     return (
-      <div className="px-1 py-0.5">
+      <div className="px-0">
         <input
           ref={inputRef}
           type="text"
@@ -112,7 +122,7 @@ export function ChatItem({
             if (e.key === 'Escape') handleCancelEdit();
           }}
           onBlur={handleCancelEdit}
-          className="w-full h-9 px-3 rounded-xl bg-sidebar-accent text-sm text-sidebar-foreground focus:outline-none focus:ring-2 focus:ring-sidebar-ring/50 transition-all"
+          className="w-full h-9 px-3 rounded-xl bg-neutral-800 text-sm text-white focus:outline-none focus:ring-1 focus:ring-neutral-600 transition-all"
         />
       </div>
     );
@@ -122,7 +132,7 @@ export function ChatItem({
     <>
       <div
         className={cn(
-          'relative group rounded-xl transition-all duration-150',
+          'relative group transition-all duration-150',
           isDragging && 'opacity-40 scale-[0.98]'
         )}
         draggable
@@ -133,55 +143,61 @@ export function ChatItem({
           to="/app/c/$chatId"
           params={{ chatId: id }}
           className={cn(
-            'flex items-center w-full py-2.5 px-3 rounded-xl text-secondary transition-all duration-150',
+            'flex items-center w-full h-9 px-3 rounded-xl text-sm transition-all duration-150 overflow-hidden',
             isActive
-              ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm'
-              : 'text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
+              ? 'bg-neutral-800 text-white'
+              : 'text-neutral-400 hover:text-white hover:bg-white/5'
           )}
         >
           {/* Lock indicator */}
           {isLocked && (
-            <Lock className="w-3.5 h-3.5 mr-2.5 flex-shrink-0 text-muted-foreground/70" />
+            <Lock className="w-3.5 h-3.5 mr-2 flex-shrink-0 text-neutral-500" />
           )}
 
           {/* Title */}
-          <span className="flex-1 truncate text-left leading-snug" dir="auto">
+          <span className="flex-1 truncate text-left min-w-0" dir="auto">
             {title}
           </span>
 
-          {/* Gradient fade */}
+          {/* Menu trigger - shows on hover or when active */}
           <div
             className={cn(
-              'absolute right-0 top-0 h-full w-16 bg-gradient-to-l pointer-events-none transition-opacity duration-150',
-              isActive
-                ? 'from-sidebar-accent via-sidebar-accent/80 to-transparent'
-                : 'from-sidebar-background via-sidebar-background/80 to-transparent group-hover:from-sidebar-accent/50 group-hover:via-sidebar-accent/30'
-            )}
-          />
-
-          {/* Menu trigger */}
-          <div
-            className={cn(
-              'absolute right-1.5 top-1/2 -translate-y-1/2',
-              'opacity-0 group-hover:opacity-100 transition-all duration-150'
+              'flex-shrink-0 ml-2 flex items-center gap-0.5',
+              isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+              'transition-opacity duration-150'
             )}
           >
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className="p-1.5 rounded-lg text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-background/60 transition-colors"
+                  className="p-1 rounded-md text-neutral-500 hover:text-white hover:bg-white/10 transition-colors"
                   onClick={(e) => e.preventDefault()}
                 >
                   <MoreHorizontal className="h-4 w-4" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-44">
-                <DropdownMenuItem onClick={handleStartEdit} className="gap-2 text-secondary">
+                {onTogglePin && (
+                  <DropdownMenuItem onClick={handleTogglePin} className="gap-2">
+                    {isPinned ? (
+                      <>
+                        <PinOff className="h-3.5 w-3.5" />
+                        Unpin
+                      </>
+                    ) : (
+                      <>
+                        <Pin className="h-3.5 w-3.5" />
+                        Pin to top
+                      </>
+                    )}
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={handleStartEdit} className="gap-2">
                   <Pencil className="h-3.5 w-3.5" />
                   Rename
                 </DropdownMenuItem>
                 {onRemoveFromFolder && (
-                  <DropdownMenuItem onClick={onRemoveFromFolder} className="gap-2 text-secondary">
+                  <DropdownMenuItem onClick={onRemoveFromFolder} className="gap-2">
                     <FolderMinus className="h-3.5 w-3.5" />
                     Remove from folder
                   </DropdownMenuItem>
@@ -189,7 +205,7 @@ export function ChatItem({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => setShowDeleteDialog(true)}
-                  className="gap-2 text-secondary text-destructive focus:text-destructive"
+                  className="gap-2 text-red-400 focus:text-red-400 focus:bg-red-500/10"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                   Delete
@@ -204,15 +220,15 @@ export function ChatItem({
         <AlertDialogContent className="max-w-sm">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete conversation?</AlertDialogTitle>
-            <AlertDialogDescription className="text-secondary">
+            <AlertDialogDescription>
               This will permanently delete this conversation and all its messages.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="text-secondary">Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-secondary"
+              className="bg-red-600 text-white hover:bg-red-700"
             >
               Delete
             </AlertDialogAction>
