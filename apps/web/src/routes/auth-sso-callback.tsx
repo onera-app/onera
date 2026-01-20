@@ -20,8 +20,9 @@ import { usePasskeySupport } from '@/hooks/useWebAuthnSupport';
 import { usePasskeyRegistration } from '@/hooks/useWebAuthn';
 import { usePasswordSetup } from '@/hooks/usePasswordUnlock';
 import { RecoveryPhraseDisplay } from '@/components/e2ee/RecoveryPhraseDisplay';
+import { OnboardingFlow, AddApiKeyPrompt } from '@/components/onboarding';
 
-type CallbackStep = 'processing' | 'recovery' | 'confirm' | 'unlock-method' | 'passkey' | 'password' | 'error';
+type CallbackStep = 'processing' | 'onboarding' | 'recovery' | 'confirm' | 'unlock-method' | 'passkey' | 'password' | 'add-api-key' | 'error';
 
 function getDeviceName(): string {
   const ua = navigator.userAgent;
@@ -196,8 +197,9 @@ export function SSOCallbackPage() {
         });
 
         setRecoveryInfo(keyBundle.recoveryInfo);
-        setStep('recovery');
-        toast.success('Account created! Please save your recovery phrase.');
+        // Show onboarding flow for new users before recovery phrase
+        setStep('onboarding');
+        toast.success('Account created! Let\'s get you set up.');
       }
     }
 
@@ -239,8 +241,9 @@ export function SSOCallbackPage() {
         throw new Error('Master key not available');
       }
       await setupPasswordEncryption(password, masterKey);
-      toast.success('Encryption password set! Setup complete.');
-      navigate({ to: '/app' });
+      toast.success('Encryption password set!');
+      // Show API key prompt for new users
+      setStep('add-api-key');
     } catch (err) {
       setPasswordError(err instanceof Error ? err.message : 'Failed to set up password');
     }
@@ -254,8 +257,9 @@ export function SSOCallbackPage() {
         throw new Error('Master key not available');
       }
       await registerPasskey(masterKey, getDeviceName());
-      toast.success('Passkey registered! Setup complete.');
-      navigate({ to: '/app' });
+      toast.success('Passkey registered!');
+      // Show API key prompt for new users
+      setStep('add-api-key');
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Registration failed');
       // Don't show error for user cancellation
@@ -267,8 +271,8 @@ export function SSOCallbackPage() {
   };
 
   const handleSkipPasskey = () => {
-    toast.success('Setup complete! Welcome to Onera.');
-    navigate({ to: '/app' });
+    // Show API key prompt for new users
+    setStep('add-api-key');
   };
 
   // Processing step
@@ -307,6 +311,15 @@ export function SSOCallbackPage() {
     );
   }
 
+  // Onboarding flow for new users
+  if (step === 'onboarding') {
+    return (
+      <OnboardingFlow
+        onComplete={() => setStep('recovery')}
+      />
+    );
+  }
+
   // Recovery phrase display step
   if (step === 'recovery' && recoveryInfo) {
     return (
@@ -324,10 +337,10 @@ export function SSOCallbackPage() {
               <Lock className="h-8 w-8 text-amber-600 dark:text-amber-400" />
             </div>
             <h1 className="text-2xl font-semibold tracking-tight">
-              Save Your Recovery Phrase
+              Your Recovery Phrase
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              This phrase is the master key to your encrypted data
+              This is the only way to recover your encrypted data. Store it safely.
             </p>
           </div>
 
@@ -672,6 +685,15 @@ export function SSOCallbackPage() {
           </Card>
         </div>
       </div>
+    );
+  }
+
+  // Add API key prompt step
+  if (step === 'add-api-key') {
+    return (
+      <AddApiKeyPrompt
+        onSkip={() => navigate({ to: '/app' })}
+      />
     );
   }
 

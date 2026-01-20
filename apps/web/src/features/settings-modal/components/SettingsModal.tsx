@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import {
   Dialog,
@@ -135,6 +135,13 @@ interface SettingsModalProps {
 export function SettingsModal({ open, onOpenChange, initialTab = 'general' }: SettingsModalProps) {
   const [activeTab, setActiveTab] = useState<TabId>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Update active tab when initialTab prop changes (e.g., from openSettingsModal)
+  useEffect(() => {
+    if (open && initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [open, initialTab]);
 
   const filteredTabs = searchQuery
     ? tabs.filter(
