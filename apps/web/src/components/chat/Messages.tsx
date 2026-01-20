@@ -1,4 +1,4 @@
-import { useRef, useEffect, memo, useCallback } from 'react';
+import { useRef, useEffect, memo, useCallback, useState } from 'react';
 import { type ChatMessage, type ChatHistory } from '@onera/types';
 import { UserMessage, AssistantMessage, type BranchInfo, type RegenerateOptions } from './Message';
 import { cn } from '@/lib/utils';
@@ -14,6 +14,96 @@ import { SuggestedActions } from './SuggestedActions';
 import { FollowUps } from './FollowUps';
 import { ArrowDown, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
+// Custom hook for smooth scroll button visibility with animation
+function useScrollButtonVisibility(isAtBottom: boolean) {
+  const [shouldRender, setShouldRender] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    if (!isAtBottom) {
+      // Show button: render first, then animate in
+      setShouldRender(true);
+      // Small delay to ensure DOM is ready for animation
+      const timer = setTimeout(() => setIsVisible(true), 10);
+      return () => clearTimeout(timer);
+    } else {
+      // Hide button: animate out first, then remove from DOM
+      setIsVisible(false);
+      const timer = setTimeout(() => setShouldRender(false), 200);
+      return () => clearTimeout(timer);
+    }
+  }, [isAtBottom]);
+
+  return { shouldRender, isVisible };
+}
+
+// Custom hook to anchor user message at top when streaming starts
+function useStreamingAnchor(
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  messages: ChatMessage[],
+  isStreaming: boolean | undefined
+) {
+  const lastUserMessageRef = useRef<HTMLDivElement>(null);
+  const wasStreamingRef = useRef(false);
+  const hasAnchoredRef = useRef(false);
+  const prevMessageCountRef = useRef(messages.length);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const userMessageEl = lastUserMessageRef.current;
+    
+    // Capture previous state before updating
+    const wasStreaming = wasStreamingRef.current;
+    const prevMessageCount = prevMessageCountRef.current;
+    
+    // Detect state changes
+    const messageCountIncreased = messages.length > prevMessageCount;
+    const lastMessage = messages[messages.length - 1];
+    const isNewUserMessage = messageCountIncreased && lastMessage?.role === 'user';
+    const streamingJustStarted = isStreaming && !wasStreaming;
+    const streamingJustEnded = !isStreaming && wasStreaming;
+    
+    // Update refs for next render
+    prevMessageCountRef.current = messages.length;
+    wasStreamingRef.current = !!isStreaming;
+
+    // Reset anchor flag when streaming ends
+    if (streamingJustEnded) {
+      hasAnchoredRef.current = false;
+      return;
+    }
+
+    // Anchor when: new user message added OR streaming just started
+    const shouldAnchor = (isNewUserMessage || streamingJustStarted) && 
+                         userMessageEl && 
+                         container && 
+                         !hasAnchoredRef.current;
+
+    if (shouldAnchor) {
+      hasAnchoredRef.current = true;
+      
+      // Use requestAnimationFrame to ensure DOM is updated
+      requestAnimationFrame(() => {
+        if (!container || !userMessageEl) return;
+        
+        // Calculate scroll position to show user message at top with padding
+        const containerRect = container.getBoundingClientRect();
+        const messageRect = userMessageEl.getBoundingClientRect();
+        const relativeTop = messageRect.top - containerRect.top + container.scrollTop;
+        
+        // Position user message with comfortable top padding (accounts for navbar)
+        const topPadding = 100;
+        const targetScroll = Math.max(0, relativeTop - topPadding);
+        
+        // Instant scroll to anchor position (then smooth scroll takes over for streaming)
+        container.scrollTop = targetScroll;
+      });
+    }
+  }, [isStreaming, messages, containerRef]);
+
+  return { lastUserMessageRef };
+}
 
 // AI SDK message part types - compatible with UIMessagePart
 export type ToolInvocationState = 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
@@ -103,6 +193,12 @@ export const Messages = memo(function Messages({
 }: MessagesProps) {
   // Use observer-based scroll handling instead of useEffect on messages
   const { containerRef, endRef, isAtBottom, scrollToBottom } = useScrollToBottom();
+  
+  // Smooth scroll button visibility with animation
+  const { shouldRender: showScrollButton, isVisible: scrollButtonVisible } = useScrollButtonVisibility(isAtBottom);
+
+  // Anchor user message at top when streaming starts
+  const { lastUserMessageRef } = useStreamingAnchor(containerRef, messages, isStreaming);
 
   // Track seen message IDs for animation - handles branch switching correctly
   const seenMessageIdsRef = useRef<Set<string>>(new Set());
@@ -183,7 +279,7 @@ export const Messages = memo(function Messages({
 
   return (
     <div className="relative h-full">
-      <div ref={containerRef} className="h-full overflow-y-auto scroll-smooth">
+      <div ref={containerRef} className="h-full overflow-y-auto chat-scrollbar">
         {/* Messages container */}
         <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-20 pb-36">
           <div className="space-y-10 message-gap">
@@ -204,9 +300,14 @@ export const Messages = memo(function Messages({
               }
 
               if (message.role === 'user') {
+                // Check if this is the last user message (for anchoring during streaming)
+                const isLastUserMessage = index === messages.length - 1 || 
+                  (index === messages.length - 2 && messages[messages.length - 1]?.role === 'assistant');
+                
                 return (
                   <div
                     key={message.id}
+                    ref={isLastUserMessage ? lastUserMessageRef : undefined}
                     className={isNewMessage ? 'message-enter' : undefined}
                     style={isNewMessage ? { animationDelay: `${newMessageIndex * 50}ms` } : undefined}
                   >
@@ -287,13 +388,21 @@ export const Messages = memo(function Messages({
         </div>
       </div>
 
-      {/* Scroll to bottom button - appears when not at bottom */}
-      {!isAtBottom && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
+      {/* Scroll to bottom button - appears when not at bottom with smooth animation */}
+      {showScrollButton && (
+        <div 
+          className={cn(
+            "absolute bottom-6 left-1/2 z-10 transition-all duration-200",
+            scrollButtonVisible 
+              ? "opacity-100 translate-y-0 scale-100" 
+              : "opacity-0 translate-y-2 scale-95"
+          )}
+          style={{ transform: `translateX(-50%) translateY(${scrollButtonVisible ? 0 : 8}px) scale(${scrollButtonVisible ? 1 : 0.95})` }}
+        >
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 rounded-full shadow-md bg-background/80 backdrop-blur-sm border-border/50 hover:bg-background transition-all duration-200"
+            className="h-9 w-9 rounded-full shadow-lg bg-background/90 backdrop-blur-md border-border/40 hover:bg-background hover:border-border/60 hover:shadow-xl transition-all duration-200 hover:scale-105"
             onClick={() => scrollToBottom('smooth')}
           >
             <ArrowDown className="h-4 w-4" />

@@ -187,13 +187,15 @@ export const AssistantMessage = memo(function AssistantMessage({
           {/* Main content */}
           {displayContent ? (
             <div className={cn(
-              'bg-transparent px-0 py-0 text-left',
+              'bg-transparent px-0 py-0 text-left transition-opacity duration-200',
               isLoading && 'streaming-cursor'
             )}>
               <Streamdown>{displayContent}</Streamdown>
             </div>
           ) : isLoading && !hasReasoning ? (
-            <ThinkingMessage />
+            <div className="animate-in fade-in duration-300">
+              <ThinkingMessage />
+            </div>
           ) : null}
 
           {/* Sources/Citations */}
@@ -232,15 +234,25 @@ export const AssistantMessage = memo(function AssistantMessage({
 
 /**
  * ThinkingMessage - shown while waiting for initial response
- * Displays animated dots as a typing indicator, aligned with text content
+ * Displays elegant animated dots as a typing indicator
+ * Uses smooth pulse animation instead of bouncing for a more refined look
  */
 export const ThinkingMessage = () => {
   return (
-    <div className="flex items-center h-6 mt-2 text-muted-foreground/60">
-      <span className="inline-flex items-center gap-1">
-        <span className="w-1.5 h-1.5 bg-current rounded-full animate-bounce [animation-delay:0ms]" />
-        <span className="w-1.5 h-1.5 bg-current rounded-full animate-bounce [animation-delay:150ms]" />
-        <span className="w-1.5 h-1.5 bg-current rounded-full animate-bounce [animation-delay:300ms]" />
+    <div className="flex items-center h-6 mt-1 text-muted-foreground/50">
+      <span className="inline-flex items-center gap-1.5">
+        <span 
+          className="w-1.5 h-1.5 bg-current rounded-full typing-dot" 
+          style={{ animationDelay: '0ms' }} 
+        />
+        <span 
+          className="w-1.5 h-1.5 bg-current rounded-full typing-dot" 
+          style={{ animationDelay: '200ms' }} 
+        />
+        <span 
+          className="w-1.5 h-1.5 bg-current rounded-full typing-dot" 
+          style={{ animationDelay: '400ms' }} 
+        />
       </span>
     </div>
   );

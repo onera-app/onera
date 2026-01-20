@@ -1,17 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
- * useScrollToBottom - Vercel AI Chatbot-style scroll handling
+ * useScrollToBottom - Smooth scroll handling for streaming chat
  *
- * Uses MutationObserver + ResizeObserver for detecting DOM changes instead of
- * useEffect on messages array. This provides better performance and accuracy.
- *
- * Features:
- * - MutationObserver: detects DOM changes (new messages, content updates)
- * - ResizeObserver: detects size changes (images loading, code blocks expanding)
- * - User scroll detection: 150ms debounced flag to not interrupt manual scrolling
- * - 100px threshold: "at bottom" detection with tolerance
- * - Refs for state: avoids stale closures in callbacks
+ * Key behaviors:
+ * 1. When streaming starts: user message anchors near the top
+ * 2. As content streams: viewport follows with smooth, continuous scrolling
+ * 3. User scroll: respects manual scrolling, pauses auto-scroll
+ * 4. No jarring jumps: uses lerp-based animation for fluid motion
  */
 export function useScrollToBottom() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -20,15 +16,22 @@ export function useScrollToBottom() {
   // Track scroll state
   const [isAtBottom, setIsAtBottom] = useState(true);
 
-  // Refs to avoid stale closures in observers
+  // Refs for scroll tracking
   const isAtBottomRef = useRef(true);
   const isUserScrollingRef = useRef(false);
   const userScrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  
+  // Smooth scroll animation refs
+  const animationFrameRef = useRef<number | null>(null);
+  const lastScrollHeightRef = useRef(0);
+  const isAutoScrollingRef = useRef(false);
+  const currentScrollRef = useRef(0);
 
-  // Threshold for "at bottom" detection (pixels from bottom)
-  const SCROLL_THRESHOLD = 100;
-  // Debounce time for user scroll detection (ms)
-  const USER_SCROLL_DEBOUNCE = 150;
+  // Configuration
+  const SCROLL_THRESHOLD = 200; // Generous threshold for "at bottom" detection
+  const USER_SCROLL_DEBOUNCE = 400; // Time before resuming auto-scroll after user scrolls
+  const SCROLL_LERP = 0.12; // Smooth lerp factor (lower = smoother but slower)
+  const MIN_SCROLL_DELTA = 0.5; // Minimum pixels to scroll per frame
 
   // Check if container is scrolled to bottom
   const checkIsAtBottom = useCallback(() => {
@@ -40,12 +43,78 @@ export function useScrollToBottom() {
     return distanceFromBottom <= SCROLL_THRESHOLD;
   }, []);
 
-  // Scroll to bottom
-  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
-    endRef.current?.scrollIntoView({ behavior, block: 'end' });
+  // Smooth scroll animation loop
+  const animateScroll = useCallback(() => {
+    const container = containerRef.current;
+    if (!container || isUserScrollingRef.current) {
+      animationFrameRef.current = null;
+      isAutoScrollingRef.current = false;
+      return;
+    }
+
+    const targetScroll = container.scrollHeight - container.clientHeight;
+    const currentScroll = currentScrollRef.current;
+    const diff = targetScroll - currentScroll;
+
+    // If we're close enough, snap to target and stop
+    if (Math.abs(diff) < MIN_SCROLL_DELTA) {
+      container.scrollTop = targetScroll;
+      currentScrollRef.current = targetScroll;
+      animationFrameRef.current = null;
+      isAutoScrollingRef.current = false;
+      return;
+    }
+
+    // Lerp towards target for smooth motion
+    const step = diff * SCROLL_LERP;
+    const newScroll = currentScroll + Math.max(MIN_SCROLL_DELTA, Math.abs(step)) * Math.sign(step);
+    
+    container.scrollTop = newScroll;
+    currentScrollRef.current = newScroll;
+
+    // Continue animation
+    animationFrameRef.current = requestAnimationFrame(animateScroll);
   }, []);
 
-  // Handle scroll events
+  // Start or update smooth scroll animation
+  const startSmoothScroll = useCallback(() => {
+    if (isUserScrollingRef.current) return;
+    
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Initialize current scroll position if not animating
+    if (!isAutoScrollingRef.current) {
+      currentScrollRef.current = container.scrollTop;
+    }
+
+    isAutoScrollingRef.current = true;
+
+    // Start animation if not already running
+    if (!animationFrameRef.current) {
+      animationFrameRef.current = requestAnimationFrame(animateScroll);
+    }
+  }, [animateScroll]);
+
+  // Manual scroll to bottom
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const targetScroll = container.scrollHeight - container.clientHeight;
+
+    if (behavior === 'instant') {
+      container.scrollTop = targetScroll;
+      currentScrollRef.current = targetScroll;
+      return;
+    }
+
+    // Use smooth animation
+    currentScrollRef.current = container.scrollTop;
+    startSmoothScroll();
+  }, [startSmoothScroll]);
+
+  // Handle user scroll events
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -57,18 +126,35 @@ export function useScrollToBottom() {
       isAtBottomRef.current = atBottom;
       setIsAtBottom(atBottom);
 
-      // Mark user as scrolling (debounced)
-      isUserScrollingRef.current = true;
-
-      // Clear existing timeout
-      if (userScrollTimeoutRef.current) {
-        clearTimeout(userScrollTimeoutRef.current);
+      // Track current scroll position
+      if (!isAutoScrollingRef.current) {
+        currentScrollRef.current = container.scrollTop;
       }
 
-      // Reset user scrolling flag after debounce period
-      userScrollTimeoutRef.current = setTimeout(() => {
-        isUserScrollingRef.current = false;
-      }, USER_SCROLL_DEBOUNCE);
+      // Detect user scrolling (not auto-scroll)
+      if (!isAutoScrollingRef.current) {
+        isUserScrollingRef.current = true;
+
+        // Cancel any ongoing auto-scroll
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+          animationFrameRef.current = null;
+        }
+
+        // Clear existing timeout
+        if (userScrollTimeoutRef.current) {
+          clearTimeout(userScrollTimeoutRef.current);
+        }
+
+        // Resume auto-scroll after debounce if user scrolled to bottom
+        userScrollTimeoutRef.current = setTimeout(() => {
+          isUserScrollingRef.current = false;
+          // If user scrolled to bottom, resume following
+          if (isAtBottomRef.current) {
+            startSmoothScroll();
+          }
+        }, USER_SCROLL_DEBOUNCE);
+      }
     };
 
     container.addEventListener('scroll', handleScroll, { passive: true });
@@ -78,46 +164,52 @@ export function useScrollToBottom() {
       if (userScrollTimeoutRef.current) {
         clearTimeout(userScrollTimeoutRef.current);
       }
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
     };
-  }, [checkIsAtBottom]);
+  }, [checkIsAtBottom, startSmoothScroll]);
 
-  // Auto-scroll on DOM mutations and size changes
+  // Auto-scroll on content changes during streaming
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const handleDOMChange = () => {
-      // Only auto-scroll if user was at bottom and not currently scrolling
-      if (isAtBottomRef.current && !isUserScrollingRef.current) {
-        // Use requestAnimationFrame for smooth scrolling
-        requestAnimationFrame(() => {
-          scrollToBottom('smooth');
-        });
+    const handleContentChange = () => {
+      const currentScrollHeight = container.scrollHeight;
+      const heightDelta = currentScrollHeight - lastScrollHeightRef.current;
+      lastScrollHeightRef.current = currentScrollHeight;
+
+      // Only auto-scroll if:
+      // 1. User was at/near bottom before the change
+      // 2. Not currently manually scrolling
+      // 3. Content grew (positive delta)
+      if (isAtBottomRef.current && !isUserScrollingRef.current && heightDelta > 0) {
+        startSmoothScroll();
       }
     };
 
-    // MutationObserver for DOM changes (new messages, content updates)
-    const mutationObserver = new MutationObserver(handleDOMChange);
+    // Initialize
+    lastScrollHeightRef.current = container.scrollHeight;
+    currentScrollRef.current = container.scrollTop;
+
+    // MutationObserver for DOM changes
+    const mutationObserver = new MutationObserver(handleContentChange);
     mutationObserver.observe(container, {
       childList: true,
       subtree: true,
       characterData: true,
     });
 
-    // ResizeObserver for size changes (images loading, code blocks expanding)
-    const resizeObserver = new ResizeObserver(handleDOMChange);
+    // ResizeObserver for size changes
+    const resizeObserver = new ResizeObserver(handleContentChange);
     resizeObserver.observe(container);
-
-    // Also observe the end marker for size changes
-    if (endRef.current) {
-      resizeObserver.observe(endRef.current);
-    }
 
     return () => {
       mutationObserver.disconnect();
       resizeObserver.disconnect();
     };
-  }, [scrollToBottom]);
+  }, [startSmoothScroll]);
 
   return {
     containerRef,

@@ -180,6 +180,35 @@
     scrollbar-width: none;
   }
 
+  /* Smooth scrolling with enhanced behavior */
+  .scroll-smooth {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Custom scrollbar for chat containers */
+  .chat-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .chat-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .chat-scrollbar::-webkit-scrollbar-thumb {
+    background: oklch(0.3 0 0 / 0.3);
+    border-radius: 3px;
+  }
+
+  .chat-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: oklch(0.4 0 0 / 0.4);
+  }
+
+  .chat-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(0.3 0 0 / 0.3) transparent;
+  }
+
   /* Animations */
   .animate-enter {
     animation: enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -247,7 +276,151 @@
   .message-enter {
     animation: slide-up-fade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     opacity: 0;
-    /* Starte hidden */
+  }
+
+  /* Streaming message - subtle glow effect while content is being generated */
+  .message-streaming {
+    position: relative;
+  }
+
+  .message-streaming::before {
+    content: '';
+    position: absolute;
+    inset: -2px -8px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      oklch(0.98 0 0 / 0.03) 50%,
+      transparent 100%
+    );
+    border-radius: 12px;
+    animation: streaming-pulse 2s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* Streaming cursor - blinking caret effect with smooth transitions */
+  .streaming-cursor {
+    position: relative;
+  }
+
+  .streaming-cursor::after {
+    content: '';
+    display: inline-block;
+    width: 2px;
+    height: 1.1em;
+    background: currentColor;
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: cursor-blink 1s steps(2, start) infinite, cursor-fade-in 0.2s ease-out;
+    opacity: 0.7;
+    border-radius: 1px;
+  }
+
+  /* Fade in animation for cursor appearance */
+  @keyframes cursor-fade-in {
+    0% {
+      opacity: 0;
+      transform: scaleY(0.5);
+    }
+    100% {
+      opacity: 0.7;
+      transform: scaleY(1);
+    }
+  }
+
+  /* Scroll-to-bottom button animation */
+  .scroll-to-bottom-enter {
+    animation: scroll-button-enter 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .scroll-to-bottom-exit {
+    animation: scroll-button-exit 0.15s ease-out forwards;
+  }
+}
+
+/* Streaming animations */
+@keyframes cursor-blink {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 0; }
+}
+
+@keyframes streaming-pulse {
+  0%, 100% {
+    opacity: 0;
+    transform: scaleX(0.98);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes scroll-button-enter {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+@keyframes scroll-button-exit {
+  0% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px) scale(0.9);
+  }
+}
+
+/* Smooth content transition for streaming text */
+@keyframes content-appear {
+  0% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Typing indicator pulse - smoother than bounce */
+@keyframes typing-pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+}
+
+@layer utilities {
+  /* Typing indicator with smooth pulse */
+  .typing-dot {
+    animation: typing-pulse 1.4s ease-in-out infinite;
+  }
+
+  /* Message content that just finished streaming */
+  .streaming-complete {
+    animation: content-appear 0.3s ease-out;
+  }
+  
+  /* Reduce motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    .streaming-cursor::after,
+    .message-streaming::before,
+    .typing-dot {
+      animation: none;
+    }
+    
+    .scroll-smooth {
+      scroll-behavior: auto;
+    }
   }
 }
 
