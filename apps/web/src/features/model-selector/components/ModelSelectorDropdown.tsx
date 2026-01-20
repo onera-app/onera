@@ -225,7 +225,10 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
           variant="outline"
           onClick={() => setIsOpen(!isOpen)}
           disabled={isLoading || models.length === 0}
-          className={cn('min-w-[180px] justify-between', isOpen && 'ring-1 ring-ring')}
+          className={cn(
+            'h-9 min-w-[140px] sm:min-w-[180px] justify-between',
+            isOpen && 'ring-1 ring-ring'
+          )}
         >
           {isLoading ? (
             <>
@@ -240,14 +243,14 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
                 {selectedModel?.name || 'Select model'}
               </span>
               <ChevronDown
-                className={cn('h-4 w-4 ml-2 transition-transform', isOpen && 'rotate-180')}
+                className={cn('h-4 w-4 ml-2 flex-shrink-0 transition-transform', isOpen && 'rotate-180')}
               />
             </>
           )}
         </Button>
 
         {isOpen && models.length > 0 && (
-          <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-80 z-50 bg-popover rounded-xl shadow-xl border border-border overflow-hidden">
+          <div className="absolute left-0 mt-2 w-72 sm:w-80 max-w-[calc(100vw-2rem)] z-50 bg-popover rounded-xl shadow-xl border border-border overflow-hidden">
             {/* Search input */}
             <div className="p-2 border-b border-border">
               <div className="relative">

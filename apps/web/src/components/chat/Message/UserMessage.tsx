@@ -218,9 +218,9 @@ export const UserMessage = memo(function UserMessage({
       className="group/message fade-in w-full animate-in duration-200"
       data-role="user"
     >
-      <div className="flex w-full items-start gap-2 md:gap-3 justify-end">
-        {/* Actions (visible with subtle opacity, full on hover) */}
-        <div className="self-center flex items-center gap-1 opacity-50 group-hover/message:opacity-100 transition-opacity duration-200">
+      <div className="flex w-full items-start gap-1.5 sm:gap-2 md:gap-3 justify-end">
+        {/* Actions - always visible */}
+        <div className="self-center flex items-center gap-0.5 sm:gap-1">
           <MessageActions
             onCopy={handleCopy}
             onEdit={hasEdit ? handleStartEdit : undefined}
@@ -236,7 +236,7 @@ export const UserMessage = memo(function UserMessage({
         </div>
 
         {/* Message content */}
-        <div className="flex flex-col max-w-[calc(100%-2.5rem)] sm:max-w-[min(fit-content,80%)]">
+        <div className="flex flex-col max-w-[85%] sm:max-w-[min(fit-content,80%)]">
           {/* Attachments/Images */}
           {images.length > 0 && (
             <div className="flex flex-row justify-end gap-2 mb-2">
@@ -295,9 +295,9 @@ export const UserMessage = memo(function UserMessage({
           {/* Text bubble - Vercel style blue bubble equivalent using theme */}
           {textContent && (
             <div
-              className="wrap-break-word w-fit rounded-2xl rounded-tr-sm px-4 py-2.5 text-left bg-primary text-primary-foreground shadow-sm"
+              className="wrap-break-word w-fit rounded-2xl rounded-tr-sm px-3 sm:px-4 py-2 sm:py-2.5 text-left bg-primary text-primary-foreground shadow-sm"
             >
-              <p className="whitespace-pre-wrap break-words text-base leading-normal">{textContent}</p>
+              <p className="whitespace-pre-wrap break-words text-[15px] sm:text-base leading-normal">{textContent}</p>
             </div>
           )}
 

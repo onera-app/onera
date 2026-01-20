@@ -59,6 +59,8 @@ export function ResizeHandle() {
   return (
     <div
       className={cn(
+        // Hidden on mobile - resize only works on desktop
+        'hidden md:block',
         'w-1 flex-shrink-0 cursor-col-resize relative group',
         'hover:bg-accent/20 transition-colors duration-150',
         isDragging && 'bg-accent/30'

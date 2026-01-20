@@ -23,7 +23,7 @@ const suggestedActions = [
 function PureSuggestedActions({ onSend, disabled }: SuggestedActionsProps) {
   return (
     <div
-      className="grid w-full gap-2 sm:grid-cols-2"
+      className="grid w-full gap-2 grid-cols-1 sm:grid-cols-2"
       data-testid="suggested-actions"
     >
       {suggestedActions.map((suggestedAction, index) => (
@@ -39,7 +39,7 @@ function PureSuggestedActions({ onSend, disabled }: SuggestedActionsProps) {
           style={{ animationDelay: `${index * 50}ms` }}
         >
           <Suggestion
-            className="h-auto w-full whitespace-normal p-3 text-left justify-start"
+            className="h-auto w-full whitespace-normal p-2.5 sm:p-3 text-left justify-start text-sm sm:text-base"
             onClick={(suggestion) => {
               onSend(suggestion);
             }}

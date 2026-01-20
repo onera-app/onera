@@ -170,33 +170,6 @@ export function ChatPage() {
     }
   }, [chatId, navigate]);
 
-  // Handle title change - uses refs to avoid recreating callback during streaming
-  const handleTitleChange = useCallback(async (newTitle: string) => {
-    const { encryptedChatKey, chatKeyNonce } = encryptionKeysRef.current;
-    if (!chatId || !encryptedChatKey || !chatKeyNonce) return;
-
-    try {
-      const encrypted = encryptChatTitle(
-        chatId,
-        encryptedChatKey,
-        chatKeyNonce,
-        newTitle
-      );
-
-      await updateChatMutationRef.current.mutateAsync({
-        id: chatId,
-        data: {
-          encryptedTitle: encrypted.encryptedTitle,
-          titleNonce: encrypted.titleNonce,
-        },
-      });
-
-      toast.success('Title updated');
-    } catch {
-      toast.error('Failed to update title');
-    }
-  }, [chatId]);
-
   // Ref to track pending user message for persistence (ref needed for async callbacks)
   const pendingUserMessageRef = useRef<ChatMessage | null>(null);
   // Ref to track current history for persistence (required for async callbacks)
@@ -1005,9 +978,7 @@ export function ChatPage() {
   // Memoize navbar children to prevent ChatNavbar re-renders
   // Must be before early returns to maintain consistent hook order
   const navbarChildren = useMemo(() => (
-    <div className="hidden md:block">
-      <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />
-    </div>
+    <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />
   ), [selectedModelId, setSelectedModel]);
 
   if (isLoading) {
@@ -1040,24 +1011,17 @@ export function ChatPage() {
   }
 
   return (
-    <div className="relative flex flex-col h-full w-full bg-background overflow-hidden">
+    <div className="relative flex flex-col h-full w-full min-w-0 bg-background overflow-hidden">
       {/* Chat header - Absolute overlay */}
       <ChatNavbar
-        title={chat?.title || 'Chat'}
         chatId={chatId || ''}
-        onTitleChange={isUnlocked ? handleTitleChange : undefined}
         onDelete={handleDelete}
       >
         {navbarChildren}
       </ChatNavbar>
 
-      {/* Mobile Model Selector - visible only on small screens below navbar */}
-      <div className="md:hidden absolute top-14 left-0 right-0 z-20 px-4 py-2 bg-background/80 backdrop-blur border-b border-border">
-        <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />
-      </div>
-
       {/* Messages - Takes full space */}
-      <div className="relative flex-1 w-full h-full">
+      <div className="relative flex-1 w-full h-full min-w-0 overflow-hidden">
         <Messages
           messages={displayMessages}
           history={localHistory}
@@ -1078,8 +1042,8 @@ export function ChatPage() {
       </div>
 
       {/* Input area - Floating at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 p-4 bg-gradient-to-t from-background via-background/80 to-transparent pb-6 pt-10">
-        <div className="max-w-3xl mx-auto">
+      <div className="absolute bottom-0 left-0 right-0 z-20 px-4 sm:px-6 bg-gradient-to-t from-background via-background/95 to-transparent pb-4 sm:pb-6 pt-8 sm:pt-10 w-full">
+        <div className="max-w-3xl mx-auto w-full">
           <MessageInput
             onSend={handleSendMessage}
             onStop={stop}

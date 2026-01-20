@@ -43,7 +43,7 @@ export const MessageInput = memo(function MessageInput({
   // Use rich text input if enabled
   if (useRichTextInput) {
     return (
-      <div className="w-full max-w-3xl mx-auto px-4 pb-4">
+      <div className="w-full max-w-3xl mx-auto">
         <RichTextMessageInput
           onSend={onSend}
           disabled={disabled}
@@ -57,7 +57,7 @@ export const MessageInput = memo(function MessageInput({
 
   // Fallback to simple textarea input
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 pb-4">
+    <div className="w-full max-w-3xl mx-auto">
       <SimpleMessageInput
         onSend={onSend}
         disabled={disabled}
@@ -323,9 +323,9 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
         )}
 
         {/* Textarea row */}
-        <div className="flex items-end pl-3 pr-2 py-2 gap-2">
+        <div className="flex items-end pl-2 sm:pl-3 pr-2 py-2 gap-1.5 sm:gap-2">
           {/* Attach file button */}
-          <div className="pb-0.5">
+          <div className="pb-0.5 flex-shrink-0">
             <AttachmentButton
               onFilesSelected={handleFilesSelected}
               disabled={disabled || isStreaming}
@@ -347,18 +347,18 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
             rows={1}
             className={cn(
               'flex-1 w-full bg-transparent resize-none border-0 shadow-none',
-              'px-0 py-2.5',
+              'px-0 py-2 sm:py-2.5',
               'focus-visible:ring-0',
               'disabled:cursor-not-allowed',
-              'max-h-[200px] min-h-[44px]',
-              'text-base leading-relaxed',
+              'max-h-[150px] sm:max-h-[200px] min-h-[40px] sm:min-h-[44px]',
+              'text-[16px] sm:text-base leading-relaxed',
               'placeholder:text-muted-foreground text-foreground'
             )}
           />
 
           {/* Right side actions */}
-          <div className="flex items-center gap-2 pb-1">
-            {/* Search toggle */}
+          <div className="flex items-center gap-1.5 sm:gap-2 pb-1 flex-shrink-0">
+            {/* Search toggle - hide on very small screens, show icon only */}
             <SearchToggle
               enabled={searchEnabled}
               onToggle={setSearchEnabled}

@@ -215,14 +215,14 @@ export const AssistantMessage = memo(function AssistantMessage({
       className="group/message fade-in w-full animate-in duration-200"
       data-role="assistant"
     >
-      <div className="flex w-full items-start gap-2 md:gap-3 justify-start">
+      <div className="flex w-full items-start gap-2 sm:gap-2.5 md:gap-3 justify-start">
         {/* Avatar with provider icon */}
-        <LLMIcon model={model} size="md" isLoading={isLoading} className="-mt-1" />
+        <LLMIcon model={model} size="md" isLoading={isLoading} className="-mt-1 flex-shrink-0" />
 
         {/* Message content */}
         <div className={cn(
-          'flex flex-col w-full',
-          displayContent || toolInvocations.length > 0 || hasReasoning ? 'gap-2 md:gap-4' : ''
+          'flex flex-col w-full min-w-0',
+          displayContent || toolInvocations.length > 0 || hasReasoning ? 'gap-2 sm:gap-3 md:gap-4' : ''
         )}>
           {/* Model name indicator */}
           {name && (
@@ -263,8 +263,8 @@ export const AssistantMessage = memo(function AssistantMessage({
 
           {/* Actions and Metadata */}
           {!isLoading && content && (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1 opacity-50 group-hover/message:opacity-100 transition-opacity duration-200">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-0.5 sm:gap-1">
                 <MessageActions
                   onCopy={handleCopy}
                   onRegenerate={hasRegenerate ? onRegenerate : undefined}
@@ -280,7 +280,7 @@ export const AssistantMessage = memo(function AssistantMessage({
               </div>
               {/* Token usage and metadata */}
               {metadata && (
-                <MessageMetadata metadata={metadata} className="opacity-0 group-hover/message:opacity-100 transition-opacity duration-200" />
+                <MessageMetadata metadata={metadata} className="hidden sm:flex" />
               )}
             </div>
           )}

@@ -15,7 +15,7 @@ import { ModelSelector } from '@/components/chat/ModelSelector';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
-import { Lock, AlertTriangle, Mail, Lightbulb, Code, Sparkles, ArrowRight } from 'lucide-react';
+import { Lock, AlertTriangle, Mail, Lightbulb, Code, Sparkles, ArrowRight, Menu } from 'lucide-react';
 
 // Suggested prompts for new users
 const SUGGESTIONS = [
@@ -28,7 +28,7 @@ const SUGGESTIONS = [
 export function HomePage() {
   const navigate = useNavigate();
   const { isUnlocked } = useE2EE();
-  const { openSettingsModal } = useUIStore();
+  const { openSettingsModal, sidebarOpen, toggleSidebar } = useUIStore();
   const { selectedModelId, setSelectedModel } = useModelStore();
   const createChat = useCreateChat();
   const utils = trpc.useUtils();
@@ -118,35 +118,47 @@ export function HomePage() {
 
   // Show welcome screen
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full w-full min-w-0 bg-background overflow-x-hidden">
       {/* Minimal header with model selector */}
-      <header className="flex items-center justify-center p-4">
+      <header className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 h-14 w-full">
+        {/* Menu button - visible when sidebar is closed */}
+        {!sidebarOpen && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={toggleSidebar}
+            className="h-9 w-9 text-muted-foreground hover:text-foreground flex-shrink-0"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        )}
+        
         <ModelSelector value={selectedModelId || ''} onChange={setSelectedModel} />
       </header>
 
       {/* Centered welcome content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 -mt-16">
-        <div className="w-full max-w-2xl">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 -mt-8 sm:-mt-16 min-w-0 w-full">
+        <div className="w-full max-w-2xl min-w-0">
           {/* Brand mark */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-semibold tracking-tight mb-3 text-foreground">
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight mb-2 sm:mb-3 text-foreground">
               What can I help with?
             </h1>
-            <p className="text-muted-foreground text-base">
+            <p className="text-muted-foreground text-sm sm:text-base">
               Your conversations are end-to-end encrypted
             </p>
           </div>
 
           {/* No connections warning */}
           {!hasAnyConnections && isUnlocked && (
-            <Alert className="mb-6 bg-card border-border">
+            <Alert className="mb-4 sm:mb-6 bg-card border-border">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
-              <AlertTitle className="text-foreground">No API Keys Connected</AlertTitle>
-              <AlertDescription className="flex items-center justify-between text-muted-foreground">
+              <AlertTitle className="text-foreground text-sm sm:text-base">No API Keys Connected</AlertTitle>
+              <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-muted-foreground text-sm">
                 <span>Add an API key to start chatting with AI models.</span>
                 <Button
                   variant="link"
-                  className="p-0 h-auto flex items-center gap-1 text-foreground"
+                  className="p-0 h-auto flex items-center gap-1 text-foreground self-start sm:self-auto"
                   onClick={() => openSettingsModal('connections')}
                 >
                   Add API Key <ArrowRight className="h-4 w-4" />
@@ -156,7 +168,7 @@ export function HomePage() {
           )}
 
           {/* Message input - prominent */}
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             <MessageInput
               onSend={handleSendMessage}
               disabled={!isUnlocked || isCreating || !hasAnyConnections}
@@ -174,17 +186,19 @@ export function HomePage() {
 
           {/* Suggestion chips */}
           {hasAnyConnections && selectedModelId && isUnlocked && !isCreating && (
-            <div className="flex flex-wrap justify-center gap-2">
+            <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
               {SUGGESTIONS.map((suggestion, index) => {
                 const Icon = suggestion.icon;
                 return (
                   <Button
                     key={index}
                     variant="outline"
+                    size="sm"
                     onClick={() => handleSendMessage(suggestion.text)}
                     disabled={isCreating}
                     className={cn(
                       'bg-transparent border-border text-muted-foreground hover:bg-accent hover:text-foreground hover:border-border/80',
+                      'text-xs sm:text-sm h-8 sm:h-9 px-2.5 sm:px-3',
                       'animate-in fade-in-up',
                       index === 0 && 'stagger-1',
                       index === 1 && 'stagger-2',
@@ -192,8 +206,9 @@ export function HomePage() {
                       index === 3 && 'stagger-4'
                     )}
                   >
-                    <Icon className="h-4 w-4 mr-2 text-muted-foreground" />
-                    {suggestion.text}
+                    <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-muted-foreground" />
+                    <span className="hidden xs:inline sm:inline">{suggestion.text}</span>
+                    <span className="xs:hidden sm:hidden">{suggestion.text.split(' ').slice(0, 3).join(' ')}...</span>
                   </Button>
                 );
               })}
@@ -203,7 +218,7 @@ export function HomePage() {
       </div>
 
       {/* Footer - minimal */}
-      <footer className="p-4 text-center">
+      <footer className="px-4 py-3 sm:py-4 text-center w-full">
         <p className="text-xs text-muted-foreground flex items-center justify-center gap-1.5">
           <Lock className="h-3.5 w-3.5" />
           End-to-end encrypted

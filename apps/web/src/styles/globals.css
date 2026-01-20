@@ -136,13 +136,21 @@
     @apply border-border;
   }
 
+  html {
+    @apply h-full;
+  }
+
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
+    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary min-h-full;
     font-feature-settings: "rlig" 1, "calt" 1;
     background-image:
       radial-gradient(circle at top left, oklch(0.95 0.005 90 / 0.04), transparent 45%),
       radial-gradient(circle at bottom right, oklch(0.95 0.005 90 / 0.02), transparent 45%);
     background-attachment: fixed;
+  }
+
+  #root {
+    @apply h-full w-full;
   }
 
   .light body {

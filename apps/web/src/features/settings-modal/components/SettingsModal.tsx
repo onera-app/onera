@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   Settings,
   Layout,
@@ -19,6 +20,8 @@ import {
   Info,
   Wrench,
   Smartphone,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 
 // Tab components
@@ -135,13 +138,25 @@ interface SettingsModalProps {
 export function SettingsModal({ open, onOpenChange, initialTab = 'general' }: SettingsModalProps) {
   const [activeTab, setActiveTab] = useState<TabId>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
+  // On mobile, track whether we're viewing a tab or the tab list
+  const [mobileShowContent, setMobileShowContent] = useState(false);
 
   // Update active tab when initialTab prop changes (e.g., from openSettingsModal)
   useEffect(() => {
     if (open && initialTab) {
       setActiveTab(initialTab);
+      // On desktop, always show content; on mobile, show content if initialTab specified
+      setMobileShowContent(initialTab !== 'general');
     }
   }, [open, initialTab]);
+
+  // Reset mobile state when modal closes
+  useEffect(() => {
+    if (!open) {
+      setMobileShowContent(false);
+      setSearchQuery('');
+    }
+  }, [open]);
 
   const filteredTabs = searchQuery
     ? tabs.filter(
@@ -154,20 +169,49 @@ export function SettingsModal({ open, onOpenChange, initialTab = 'general' }: Se
   const handleTabChange = useCallback((tabId: TabId) => {
     setActiveTab(tabId);
     setSearchQuery('');
+    setMobileShowContent(true);
+  }, []);
+
+  const handleMobileBack = useCallback(() => {
+    setMobileShowContent(false);
   }, []);
 
   const ActiveTabComponent = tabs.find((t) => t.id === activeTab)?.component || GeneralTab;
+  const activeTabLabel = tabs.find((t) => t.id === activeTab)?.label || 'Settings';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[85vh] p-0 gap-0 flex flex-col border-0">
-        <DialogHeader className="px-6 py-4 shrink-0">
+      <DialogContent className="max-w-4xl h-[85vh] max-h-[85vh] sm:h-[85vh] p-0 gap-0 flex flex-col border-0 w-[calc(100vw-2rem)] sm:w-full">
+        {/* Desktop Header - always visible on desktop */}
+        <DialogHeader className="hidden sm:block px-6 py-4 shrink-0">
           <DialogTitle className="text-xl">Settings</DialogTitle>
         </DialogHeader>
 
+        {/* Mobile Header - changes based on state */}
+        <DialogHeader className="sm:hidden px-3 py-3 shrink-0 border-b border-border">
+          {mobileShowContent ? (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 -ml-1"
+                onClick={handleMobileBack}
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+              <DialogTitle className="text-lg">{activeTabLabel}</DialogTitle>
+            </div>
+          ) : (
+            <DialogTitle className="text-lg">Settings</DialogTitle>
+          )}
+        </DialogHeader>
+
         <div className="flex flex-1 min-h-0">
-          {/* Sidebar navigation */}
-          <div className="w-56 flex flex-col shrink-0">
+          {/* Sidebar navigation - hidden on mobile when viewing content */}
+          <div className={cn(
+            "w-full sm:w-56 flex flex-col shrink-0",
+            mobileShowContent && "hidden sm:flex"
+          )}>
             {/* Search */}
             <div className="p-3">
               <Input
@@ -188,14 +232,15 @@ export function SettingsModal({ open, onOpenChange, initialTab = 'general' }: Se
                       key={tab.id}
                       onClick={() => handleTabChange(tab.id)}
                       className={cn(
-                        'w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                        'w-full flex items-center gap-3 px-3 py-2.5 sm:py-2 rounded-md text-sm font-medium transition-colors',
                         activeTab === tab.id
                           ? 'bg-accent text-accent-foreground'
                           : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                       )}
                     >
                       <Icon className="h-4 w-4" />
-                      {tab.label}
+                      <span className="flex-1 text-left">{tab.label}</span>
+                      <ChevronRight className="h-4 w-4 sm:hidden text-muted-foreground" />
                     </button>
                   );
                 })}
@@ -203,9 +248,12 @@ export function SettingsModal({ open, onOpenChange, initialTab = 'general' }: Se
             </ScrollArea>
           </div>
 
-          {/* Tab content */}
-          <ScrollArea className="flex-1">
-            <div className="p-6">
+          {/* Tab content - hidden on mobile when viewing tab list */}
+          <ScrollArea className={cn(
+            "flex-1",
+            !mobileShowContent && "hidden sm:block"
+          )}>
+            <div className="p-4 sm:p-6">
               <ActiveTabComponent />
             </div>
           </ScrollArea>

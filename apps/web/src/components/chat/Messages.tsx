@@ -268,18 +268,18 @@ export const Messages = memo(function Messages({
     return (
       <div className="flex flex-col items-center justify-center h-full px-4">
         {/* Empty state */}
-        <div className="text-center mb-8 max-w-lg mx-auto">
-          <h1 className="text-3xl font-semibold tracking-tight mb-3 text-foreground">
+        <div className="text-center mb-6 sm:mb-8 max-w-lg mx-auto px-2">
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight mb-2 sm:mb-3 text-foreground">
             How can I help you today?
           </h1>
-          <p className="text-base text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Start a conversation or try one of the suggestions below.
           </p>
         </div>
 
         {/* Suggested actions grid */}
         {onSendMessage && (
-          <div className="w-full max-w-2xl px-4">
+          <div className="w-full max-w-2xl px-2 sm:px-4">
             <SuggestedActions
               onSend={onSendMessage}
               disabled={inputDisabled}
@@ -294,8 +294,8 @@ export const Messages = memo(function Messages({
     <div className="relative h-full">
       <div ref={containerRef} className="h-full overflow-y-auto chat-scrollbar">
         {/* Messages container */}
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-20 pb-36">
-          <div className="space-y-10 message-gap">
+        <div className="max-w-3xl mx-auto px-3 sm:px-4 md:px-6 pb-32 sm:pb-36 pt-20">
+          <div className="space-y-6 sm:space-y-8 md:space-y-10 message-gap">
             {messages.map((message, index) => {
               const textContent = getMessageText(message);
               const isLastMessage = index === messages.length - 1;
@@ -364,7 +364,7 @@ export const Messages = memo(function Messages({
                   
                   {/* Follow-ups attached to last assistant message - aligned with text content */}
                   {isLastMessage && message.role === 'assistant' && !isStreaming && onFollowUpSelect && (
-                    <div className="mt-4 pl-10 md:pl-11">
+                    <div className="mt-3 sm:mt-4 pl-8 sm:pl-10 md:pl-11">
                       {isGeneratingFollowUps ? (
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <Loader2 className="h-3 w-3 animate-spin" />
@@ -403,7 +403,7 @@ export const Messages = memo(function Messages({
       {showScrollButton && (
         <div 
           className={cn(
-            "absolute bottom-6 left-1/2 z-10 transition-all duration-200",
+            "absolute bottom-24 sm:bottom-28 left-1/2 z-10 transition-all duration-200",
             scrollButtonVisible 
               ? "opacity-100 translate-y-0 scale-100" 
               : "opacity-0 translate-y-2 scale-95"
@@ -413,10 +413,10 @@ export const Messages = memo(function Messages({
           <Button
             variant="outline"
             size="icon"
-            className="h-9 w-9 rounded-full shadow-lg bg-background/90 backdrop-blur-md border-border/40 hover:bg-background hover:border-border/60 hover:shadow-xl transition-all duration-200 hover:scale-105"
+            className="h-8 w-8 sm:h-9 sm:w-9 rounded-full shadow-lg bg-background/90 backdrop-blur-md border-border/40 hover:bg-background hover:border-border/60 hover:shadow-xl transition-all duration-200 hover:scale-105"
             onClick={() => scrollToBottom('smooth')}
           >
-            <ArrowDown className="h-4 w-4" />
+            <ArrowDown className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span className="sr-only">Scroll to bottom</span>
           </Button>
         </div>

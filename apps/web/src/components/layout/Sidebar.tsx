@@ -24,6 +24,13 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   Search,
   FileText,
   MessageSquare,
@@ -281,15 +288,29 @@ export function Sidebar() {
 
   return (
     <TooltipProvider delayDuration={300}>
+      {/* Mobile overlay backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 md:hidden animate-in fade-in duration-200"
+          onClick={toggleSidebar}
+          aria-hidden="true"
+        />
+      )}
+      
       <nav
         id="sidebar"
         className={cn(
-          'relative flex flex-col h-full transition-all duration-300 ease-out flex-shrink-0 z-20 bg-sidebar-background',
-          sidebarOpen ? 'w-[280px] min-w-[280px]' : 'w-0 min-w-0 overflow-hidden'
+          'flex flex-col h-full transition-all duration-300 ease-out flex-shrink-0 bg-sidebar-background',
+          // Mobile: fixed overlay that slides in from left
+          'fixed md:relative z-40 md:z-20',
+          // Width handling
+          sidebarOpen 
+            ? 'w-[280px] min-w-[280px] translate-x-0' 
+            : 'w-[280px] min-w-[280px] -translate-x-full md:w-0 md:min-w-0 md:translate-x-0 md:overflow-hidden'
         )}
         style={{
-          width: sidebarOpen ? `${sidebarWidth}px` : 0,
-          minWidth: sidebarOpen ? `${sidebarWidth}px` : 0,
+          width: sidebarOpen ? `${sidebarWidth}px` : undefined,
+          minWidth: sidebarOpen ? `${sidebarWidth}px` : undefined,
         }}
       >
         {/* Content */}
@@ -523,51 +544,46 @@ export function Sidebar() {
           {/* User Profile Section */}
           {user && (
             <div className="border-t border-sidebar-border p-3">
-              <div className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-sidebar-accent transition-colors group">
-                {/* Avatar */}
-                {user.imageUrl ? (
-                  <img
-                    src={user.imageUrl}
-                    alt={user.name || 'User'}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-sm font-medium">
-                    {(user.name || user.email || 'U').charAt(0).toUpperCase()}
-                  </div>
-                )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-sidebar-accent transition-colors w-full text-left">
+                    {/* Avatar */}
+                    {user.imageUrl ? (
+                      <img
+                        src={user.imageUrl}
+                        alt={user.name || 'User'}
+                        className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
+                        {(user.name || user.email || 'U').charAt(0).toUpperCase()}
+                      </div>
+                    )}
 
-                {/* Name */}
-                <span className="flex-1 min-w-0 text-sm font-medium text-sidebar-foreground truncate">
-                  {user.name || 'User'}
-                </span>
+                    {/* Name */}
+                    <span className="flex-1 min-w-0 text-sm font-medium text-sidebar-foreground truncate">
+                      {user.name || 'User'}
+                    </span>
 
-                {/* Actions */}
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={() => openSettingsModal()}
-                        className="p-1.5 rounded-lg text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
-                      >
-                        <Settings className="h-4 w-4" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="text-xs">Settings</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={() => signOut()}
-                        className="p-1.5 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                      >
-                        <LogOut className="h-4 w-4" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="text-xs">Sign out</TooltipContent>
-                  </Tooltip>
-                </div>
-              </div>
+                    {/* Chevron indicator */}
+                    <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" side="top" className="w-48 mb-1">
+                  <DropdownMenuItem onClick={() => openSettingsModal()} className="gap-2">
+                    <Settings className="h-4 w-4" />
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={() => signOut()} 
+                    className="gap-2 text-red-500 dark:text-red-400 focus:text-red-500 dark:focus:text-red-400 focus:bg-red-500/10"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           )}
         </div>
