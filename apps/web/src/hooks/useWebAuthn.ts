@@ -62,11 +62,13 @@ export function usePasskeyRegistration() {
   });
 
   /**
-   * Register a passkey with immediate PRF authentication
+   * Register a passkey with PRF extension for master key encryption
    *
-   * This performs a two-step process:
-   * 1. Register the passkey (without PRF output)
-   * 2. Immediately authenticate to get PRF output and encrypt master key
+   * This registers a passkey and uses the PRF extension during registration
+   * to get the PRF output needed for encrypting the master key.
+   *
+   * Note: PRF output during registration requires browser support (Chrome 116+, Safari 18+).
+   * The prf.eval extension input is included in registration to get PRF output in one step.
    *
    * @param masterKey - The master key to encrypt
    * @param name - Optional name for the passkey
@@ -75,61 +77,50 @@ export function usePasskeyRegistration() {
     masterKey: Uint8Array,
     name?: string
   ): Promise<{ success: boolean }> {
-    // Step 1: Get registration options
+    // Step 1: Get registration options and PRF salt from server
     const { options, prfSalt } = await generateOptions.mutateAsync({ name });
 
-    // Step 2: Register the passkey with PRF extension enabled
+    // Step 2: Create PRF extension inputs for registration
+    // Modern browsers (Chrome 116+, Safari 18+) support PRF evaluation during registration
+    const prfInputs = createPRFExtensionInputs(prfSalt);
+
+    // Add PRF extension to registration options
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const optionsWithPRF: PublicKeyCredentialCreationOptionsJSON = {
+      ...options,
+      extensions: {
+        ...options.extensions,
+        ...prfInputs,
+      } as any,
+    };
+
+    // Step 3: Register the passkey with PRF extension enabled
     const registrationResponse = await startRegistration({
-      optionsJSON: options as PublicKeyCredentialCreationOptionsJSON,
+      optionsJSON: optionsWithPRF,
       useAutoRegister: false,
     });
 
-    // Step 3: Now immediately authenticate to get PRF output
-    // We need to create authentication options for this specific credential
-    const prfInputs = createPRFExtensionInputs(prfSalt);
-
-    // Create authentication options targeting the just-registered credential
-    // PRF extension types are not in standard WebAuthn types yet
+    // Step 4: Extract PRF output from registration response
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const authOptions: PublicKeyCredentialRequestOptionsJSON = {
-      challenge: options.challenge, // Reuse challenge (server should accept)
-      rpId: options.rp.id,
-      userVerification: "required",
-      allowCredentials: [
-        {
-          id: registrationResponse.id,
-          type: "public-key",
-          transports: registrationResponse.response.transports,
-        },
-      ],
-      timeout: 60000,
-      extensions: prfInputs as any,
-    };
+    const extResults = registrationResponse.clientExtensionResults as any;
+    const prfResults = extResults?.prf?.results;
 
-    // Start authentication to get PRF output
-    const authResponse = await startAuthentication({
-      optionsJSON: authOptions,
-    });
-
-    // Extract PRF output from authentication
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const authExtResults = authResponse.clientExtensionResults as any;
-    const prfResults = authExtResults?.prf?.results;
-
-    // Validate PRF results before extraction
+    // Validate PRF results - if not available during registration, the authenticator
+    // or browser may not support PRF evaluation during registration
     if (!validatePRFResults(prfResults)) {
       throw new Error(
-        "Failed to get PRF output from authenticator. This passkey may not support the PRF extension. " +
-        "Please try a different passkey or use an alternative unlock method."
+        "Failed to get PRF output during passkey registration. " +
+        "Your browser or authenticator may not support PRF evaluation during registration. " +
+        "Please try using Chrome 116+ or Safari 18+, or use an alternative unlock method."
       );
     }
 
     const prfOutput = extractPRFOutput(prfResults);
 
-    // Step 4: Encrypt master key with PRF-derived KEK
+    // Step 5: Encrypt master key with PRF-derived KEK
     const encrypted = await encryptMasterKeyWithPRF(masterKey, prfOutput, prfSalt);
 
-    // Step 5: Complete registration with encrypted master key
+    // Step 6: Complete registration with encrypted master key
     // Note: Type assertion needed because @simplewebauthn types don't have index signature
     // that matches the Zod schema inference for clientExtensionResults
     await verifyRegistration.mutateAsync({
