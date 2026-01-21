@@ -127,7 +127,7 @@ export function PasskeyRegistrationModal({
           </div>
 
           <DialogFooter>
-            <Button onClick={handleClose}>Close</Button>
+            <Button onClick={handleClose} className="w-full sm:w-auto">Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -178,10 +178,10 @@ export function PasskeyRegistrationModal({
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={handleClose}>
+              <Button variant="outline" onClick={handleClose} className="w-full sm:w-auto">
                 Cancel
               </Button>
-              <Button onClick={() => setStep("naming")}>Continue</Button>
+              <Button onClick={() => setStep("naming")} className="w-full sm:w-auto">Continue</Button>
             </DialogFooter>
           </>
         )}
@@ -213,10 +213,10 @@ export function PasskeyRegistrationModal({
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setStep("intro")}>
+              <Button variant="outline" onClick={() => setStep("intro")} className="w-full sm:w-auto">
                 Back
               </Button>
-              <Button onClick={handleStartRegistration}>
+              <Button onClick={handleStartRegistration} className="w-full sm:w-auto">
                 <Fingerprint className="h-4 w-4 mr-2" />
                 Create Passkey
               </Button>
@@ -265,7 +265,7 @@ export function PasskeyRegistrationModal({
             </div>
 
             <DialogFooter>
-              <Button onClick={handleClose}>Done</Button>
+              <Button onClick={handleClose} className="w-full sm:w-auto">Done</Button>
             </DialogFooter>
           </>
         )}
@@ -290,10 +290,10 @@ export function PasskeyRegistrationModal({
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={handleClose}>
+              <Button variant="outline" onClick={handleClose} className="w-full sm:w-auto">
                 Cancel
               </Button>
-              <Button onClick={() => setStep("naming")}>Try Again</Button>
+              <Button onClick={() => setStep("naming")} className="w-full sm:w-auto">Try Again</Button>
             </DialogFooter>
           </>
         )}

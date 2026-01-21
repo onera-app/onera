@@ -67,11 +67,13 @@ export function SSOCallbackPage() {
 
   // tRPC mutations for E2EE
   const keySharesQuery = trpc.keyShares.get.useQuery(undefined, { enabled: false });
+  const onboardingStatusQuery = trpc.keyShares.getOnboardingStatus.useQuery(undefined, { enabled: false });
   const createKeySharesMutation = trpc.keyShares.create.useMutation({
     onSuccess: () => {
       // Invalidate the keyShares.check query so AppLayout doesn't show "Encryption Setup Required"
       trpcUtils.keyShares.check.invalidate();
       trpcUtils.keyShares.get.invalidate();
+      trpcUtils.keyShares.getOnboardingStatus.invalidate();
     },
   });
   const registerDeviceMutation = trpc.devices.register.useMutation();
@@ -136,27 +138,33 @@ export function SSOCallbackPage() {
     }
 
     async function handleE2EE(_userId: string, _presumedNewUser: boolean) {
-      // Check if user has existing key shares
-      let keyShares = null;
+      // Check onboarding status to determine where user is in the flow
+      let onboardingStatus = null;
       try {
-        const result = await keySharesQuery.refetch();
-        keyShares = result.data;
+        const result = await onboardingStatusQuery.refetch();
+        onboardingStatus = result.data;
       } catch {
-        // No existing key shares found - new user
+        // No status found - treat as new user
       }
 
-      if (keyShares) {
-        // Existing user - redirect to home, E2EEUnlockModal will prompt for recovery phrase
-        // SECURITY: We no longer auto-unlock with user ID (was a vulnerability)
-
-        // Update device last seen
+      if (onboardingStatus?.hasKeyShares) {
+        // User has encryption set up
         const deviceId = getOrCreateDeviceId();
         await updateLastSeenMutation.mutateAsync({ deviceId }).catch(() => {
           // Device may not be registered yet, that's okay
         });
 
-        toast.info('Please enter your recovery phrase to unlock your data.');
-        navigate({ to: '/app' });
+        if (onboardingStatus.onboardingComplete) {
+          // Fully onboarded user - redirect to home, E2EEUnlockModal will prompt for unlock
+          toast.info('Please unlock your encryption to continue.');
+          navigate({ to: '/app' });
+        } else {
+          // User has keyShares but no unlock method - incomplete onboarding
+          // They need to enter their recovery phrase to unlock, then set up passkey/password
+          // AppLayout will show OnboardingCompletionModal after they unlock
+          toast.info('Please complete your encryption setup. Enter your recovery phrase to continue.');
+          navigate({ to: '/app' });
+        }
       } else {
         // New user - register device first to get deviceSecret, then setup E2EE keys
         // Step 1: Register device to get server-generated deviceSecret
@@ -204,7 +212,7 @@ export function SSOCallbackPage() {
     }
 
     handleOAuthAndE2EE();
-  }, [clerk.loaded, clerk.user, signUp, signIn, setSignUpActive, setSignInActive, keySharesQuery, createKeySharesMutation, registerDeviceMutation, updateLastSeenMutation, navigate]);
+  }, [clerk.loaded, clerk.user, signUp, signIn, setSignUpActive, setSignInActive, keySharesQuery, onboardingStatusQuery, createKeySharesMutation, registerDeviceMutation, updateLastSeenMutation, navigate]);
 
   const handleConfirmRecovery = (e: React.FormEvent) => {
     e.preventDefault();

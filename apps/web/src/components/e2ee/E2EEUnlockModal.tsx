@@ -20,6 +20,7 @@ import {
   getOrCreateDeviceId,
   decryptKey,
   fromBase64,
+  clearAllDeviceData,
 } from '@onera/crypto';
 import {
   Dialog,
@@ -27,8 +28,10 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
-import { Loader2, Lock, AlertTriangle, Key, KeyRound, Eye, EyeOff } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2, Lock, AlertTriangle, Key, KeyRound, Eye, EyeOff, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -38,10 +41,10 @@ import { useHasPasskeys } from '@/hooks/useWebAuthn';
 import { usePasskeySupport } from '@/hooks/useWebAuthnSupport';
 import { useHasPasswordEncryption, usePasswordUnlock } from '@/hooks/usePasswordUnlock';
 
-type UnlockView = 'options' | 'password' | 'recovery';
+type UnlockView = 'options' | 'password' | 'recovery' | 'reset';
 
 export function E2EEUnlockModal() {
-  const { setStatus, setError } = useE2EEStore();
+  const { setStatus, setError, setNeedsSetup } = useE2EEStore();
   const { user } = useUser();
   const { signOut } = useClerk();
   const [recoveryPhrase, setRecoveryPhrase] = useState('');
@@ -50,6 +53,11 @@ export function E2EEUnlockModal() {
   const [unlockState, setUnlockState] = useState<'waiting' | 'unlocking' | 'error'>('waiting');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<UnlockView>('options');
+  const [resetConfirmInput, setResetConfirmInput] = useState('');
+  const [resetError, setResetError] = useState<string | null>(null);
+
+  // tRPC utils for cache invalidation
+  const trpcUtils = trpc.useUtils();
 
   // Check for passkey support
   const { hasPasskeys, isLoading: isCheckingPasskeys } = useHasPasskeys(!!user);
@@ -67,6 +75,21 @@ export function E2EEUnlockModal() {
 
   // Update device last seen
   const updateLastSeenMutation = trpc.devices.updateLastSeen.useMutation();
+
+  // Reset encryption mutation
+  const resetEncryptionMutation = trpc.keyShares.resetEncryption.useMutation({
+    onSuccess: () => {
+      // Clear local device data
+      clearAllDeviceData();
+      // Invalidate all queries
+      trpcUtils.keyShares.invalidate();
+      trpcUtils.webauthn.invalidate();
+      trpcUtils.devices.invalidate();
+      // Set needs setup to trigger E2EESetupModal
+      setNeedsSetup(true);
+      toast.success('Encryption reset. Please set up encryption again.');
+    },
+  });
 
   // Show passkey option if user has passkeys and browser supports it
   const canUsePasskey = hasPasskeys && passkeySupported && !isCheckingPasskeys && !isCheckingSupport;
@@ -174,7 +197,24 @@ export function E2EEUnlockModal() {
     setErrorMessage(null);
     setRecoveryPhrase('');
     setPassword('');
+    setResetConfirmInput('');
+    setResetError(null);
     setCurrentView('options');
+  };
+
+  const handleReset = async () => {
+    setResetError(null);
+    
+    if (resetConfirmInput !== 'RESET MY ENCRYPTION') {
+      setResetError('Please type "RESET MY ENCRYPTION" exactly to confirm');
+      return;
+    }
+
+    try {
+      await resetEncryptionMutation.mutateAsync({ confirmPhrase: resetConfirmInput });
+    } catch (err) {
+      setResetError(err instanceof Error ? err.message : 'Failed to reset encryption');
+    }
   };
 
   // Loading state while fetching key shares
@@ -193,7 +233,7 @@ export function E2EEUnlockModal() {
           </DialogHeader>
 
           <div className="flex flex-col items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
           </div>
         </DialogContent>
       </Dialog>
@@ -215,15 +255,17 @@ export function E2EEUnlockModal() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="py-4">
             <p className="text-sm text-muted-foreground">
               Please sign out and sign in again to set up encryption.
             </p>
+          </div>
 
-            <Button onClick={handleSignOut} className="w-full" variant="destructive">
+          <DialogFooter>
+            <Button onClick={handleSignOut} variant="destructive" className="w-full">
               Sign Out
             </Button>
-          </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     );
@@ -244,20 +286,20 @@ export function E2EEUnlockModal() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="py-4">
             <p className="text-sm text-muted-foreground">
               Make sure you entered your 12 or 24 word recovery phrase correctly.
             </p>
-
-            <div className="flex gap-2">
-              <Button onClick={handleRetry} variant="outline" className="flex-1">
-                Try Again
-              </Button>
-              <Button onClick={handleSignOut} variant="destructive" className="flex-1">
-                Sign Out
-              </Button>
-            </div>
           </div>
+
+          <DialogFooter>
+            <Button onClick={handleRetry} variant="outline" className="w-full sm:w-auto">
+              Try Again
+            </Button>
+            <Button onClick={handleSignOut} variant="destructive" className="w-full sm:w-auto">
+              Sign Out
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     );
@@ -271,7 +313,7 @@ export function E2EEUnlockModal() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Lock className="h-5 w-5 text-primary" />
-              Unlocking E2EE
+              Unlocking Encryption
             </DialogTitle>
             <DialogDescription>
               Decrypting your data...
@@ -279,7 +321,7 @@ export function E2EEUnlockModal() {
           </DialogHeader>
 
           <div className="flex flex-col items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+            <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
             <p className="text-sm text-muted-foreground">
               Please wait while we unlock your encrypted data.
             </p>
@@ -305,148 +347,255 @@ export function E2EEUnlockModal() {
     return `Use your ${methods.slice(0, -1).join(', ')} or ${methods[methods.length - 1]} to unlock.`;
   };
 
-  // Waiting state - show unlock options
+  // Options view
+  if (currentView === 'options') {
+    return (
+      <Dialog open>
+        <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5 text-primary" />
+              Unlock Encryption
+            </DialogTitle>
+            <DialogDescription>
+              {getDescription()}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            {isLoadingUnlockInfo ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {canUsePasskey && (
+                  <PasskeyUnlockButton className="w-full" />
+                )}
+
+                {canUsePassword && (
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => setCurrentView('password')}
+                  >
+                    <KeyRound className="h-4 w-4 mr-2" />
+                    Unlock with Password
+                  </Button>
+                )}
+
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => setCurrentView('recovery')}
+                >
+                  <Key className="h-4 w-4 mr-2" />
+                  Use Recovery Phrase
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={handleSignOut} className="w-full sm:w-auto">
+              Sign out instead
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Password view
+  if (currentView === 'password') {
+    return (
+      <Dialog open>
+        <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="h-5 w-5 text-primary" />
+              Enter Password
+            </DialogTitle>
+            <DialogDescription>
+              Enter your encryption password to unlock.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="unlock-password">Encryption Password</Label>
+              <div className="relative">
+                <Input
+                  id="unlock-password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Enter your encryption password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handlePasswordUnlock()}
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCurrentView('options')} className="w-full sm:w-auto">
+              Back
+            </Button>
+            <Button
+              onClick={handlePasswordUnlock}
+              className="w-full sm:w-auto sm:flex-1"
+              disabled={!password.trim() || isUnlockingWithPassword}
+            >
+              {isUnlockingWithPassword ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Unlocking...
+                </>
+              ) : (
+                'Unlock'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Recovery phrase view
+  if (currentView === 'recovery') {
+    return (
+      <Dialog open>
+        <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Key className="h-5 w-5 text-primary" />
+              Recovery Phrase
+            </DialogTitle>
+            <DialogDescription>
+              Enter your 12 or 24 word recovery phrase.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="recovery-phrase">Recovery Phrase</Label>
+              <Textarea
+                id="recovery-phrase"
+                placeholder="Enter your recovery phrase (words separated by spaces)"
+                value={recoveryPhrase}
+                onChange={(e) => setRecoveryPhrase(e.target.value)}
+                rows={4}
+                className="font-mono text-sm"
+                autoFocus
+              />
+              <p className="text-xs text-muted-foreground">
+                This is the phrase you saved when you first created your account.
+              </p>
+            </div>
+
+            <div className="pt-2 border-t">
+              <button
+                onClick={() => setCurrentView('reset')}
+                className="text-xs text-muted-foreground hover:text-destructive hover:underline"
+              >
+                Lost your recovery phrase? Reset encryption
+              </button>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCurrentView('options')} className="w-full sm:w-auto">
+              Back
+            </Button>
+            <Button
+              onClick={handleUnlock}
+              className="w-full sm:w-auto sm:flex-1"
+              disabled={!recoveryPhrase.trim()}
+            >
+              Unlock
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Reset view
   return (
     <Dialog open>
       <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Lock className="h-5 w-5 text-primary" />
-            Unlock Encryption
+            <Trash2 className="h-5 w-5 text-destructive" />
+            Reset Encryption
           </DialogTitle>
           <DialogDescription>
-            {getDescription()}
+            This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          {/* Loading state */}
-          {isLoadingUnlockInfo ? (
-            <div className="flex items-center justify-center py-4">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            </div>
-          ) : currentView === 'options' ? (
-            /* Options view - show available unlock methods */
-            <div className="space-y-3">
-              {/* Passkey option */}
-              {canUsePasskey && (
-                <PasskeyUnlockButton className="w-full" />
-              )}
+        <div className="py-4 space-y-4">
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Warning:</strong> This will permanently delete your encryption keys. 
+              Any encrypted data (chats, notes, API keys) will become inaccessible forever.
+            </AlertDescription>
+          </Alert>
 
-              {/* Password option */}
-              {canUsePassword && (
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => setCurrentView('password')}
-                >
-                  <KeyRound className="h-4 w-4 mr-2" />
-                  Unlock with Password
-                </Button>
-              )}
-
-              {/* Recovery phrase option */}
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() => setCurrentView('recovery')}
-              >
-                <Key className="h-4 w-4 mr-2" />
-                Use Recovery Phrase
-              </Button>
-            </div>
-          ) : currentView === 'password' ? (
-            /* Password input view */
-            <div className="space-y-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full"
-                onClick={() => setCurrentView('options')}
-              >
-                &larr; Back to options
-              </Button>
-
-              <div className="space-y-2">
-                <Label htmlFor="unlock-password">Encryption Password</Label>
-                <div className="relative">
-                  <Input
-                    id="unlock-password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter your encryption password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handlePasswordUnlock()}
-                    autoFocus
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <Button
-                onClick={handlePasswordUnlock}
-                className="w-full"
-                disabled={!password.trim() || isUnlockingWithPassword}
-              >
-                {isUnlockingWithPassword ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Unlocking...
-                  </>
-                ) : (
-                  'Unlock'
-                )}
-              </Button>
-            </div>
-          ) : (
-            /* Recovery phrase input view */
-            <div className="space-y-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full"
-                onClick={() => setCurrentView('options')}
-              >
-                &larr; Back to options
-              </Button>
-
-              <div className="space-y-2">
-                <Label htmlFor="recovery-phrase">Recovery Phrase</Label>
-                <Textarea
-                  id="recovery-phrase"
-                  placeholder="Enter your recovery phrase (12 or 24 words separated by spaces)"
-                  value={recoveryPhrase}
-                  onChange={(e) => setRecoveryPhrase(e.target.value)}
-                  rows={4}
-                  className="font-mono text-sm"
-                  autoFocus
-                />
-                <p className="text-xs text-muted-foreground">
-                  This is the phrase you saved when you first created your account.
-                </p>
-              </div>
-
-              <Button onClick={handleUnlock} className="w-full" disabled={!recoveryPhrase.trim()}>
-                Unlock
-              </Button>
-            </div>
-          )}
-
-          <div className="text-center">
-            <button
-              onClick={handleSignOut}
-              className="text-sm text-muted-foreground hover:underline"
-            >
-              Sign out instead
-            </button>
+          <div className="space-y-2">
+            <Label htmlFor="reset-confirm">
+              Type <span className="font-mono font-bold">RESET MY ENCRYPTION</span> to confirm
+            </Label>
+            <Input
+              id="reset-confirm"
+              placeholder="RESET MY ENCRYPTION"
+              value={resetConfirmInput}
+              onChange={(e) => setResetConfirmInput(e.target.value)}
+              className="font-mono"
+              autoFocus
+            />
           </div>
+
+          {resetError && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>{resetError}</AlertDescription>
+            </Alert>
+          )}
         </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setCurrentView('recovery')} className="w-full sm:w-auto">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleReset}
+            variant="destructive"
+            className="w-full sm:w-auto sm:flex-1"
+            disabled={resetConfirmInput !== 'RESET MY ENCRYPTION' || resetEncryptionMutation.isPending}
+          >
+            {resetEncryptionMutation.isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Resetting...
+              </>
+            ) : (
+              <>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Reset Encryption
+              </>
+            )}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

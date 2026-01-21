@@ -13,6 +13,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
@@ -38,16 +39,18 @@ export function E2EESetupModal() {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="py-4">
           <p className="text-sm text-muted-foreground">
             This can happen if your initial sign-in was interrupted. Please sign out
             and sign in again to complete the encryption setup.
           </p>
+        </div>
 
-          <Button onClick={handleSignOut} className="w-full" variant="destructive">
+        <DialogFooter>
+          <Button onClick={handleSignOut} className="w-full sm:w-auto" variant="destructive">
             Sign Out and Re-authenticate
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

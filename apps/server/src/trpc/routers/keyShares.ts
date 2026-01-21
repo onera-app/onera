@@ -16,7 +16,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { eq, and } from "drizzle-orm";
 import { router, protectedProcedure } from "../trpc";
-import { db, keyShares, devices } from "../../db/client";
+import { db, keyShares, devices, webauthnCredentials } from "../../db/client";
 import { randomBytes } from "crypto";
 
 /**
@@ -38,6 +38,56 @@ export const keySharesRouter = router({
       .limit(1);
 
     return { hasShares: !!shares };
+  }),
+
+  /**
+   * Get comprehensive onboarding status derived from database state
+   * 
+   * This allows the frontend to resume onboarding from the correct step
+   * if a user leaves mid-flow. The status is derived from:
+   * - keyShares existence (encryption set up)
+   * - webauthnCredentials existence (passkey set up)
+   * - encryptedMasterKeyWithPassword existence (password set up)
+   * 
+   * Onboarding is considered complete when:
+   * - User has keyShares AND
+   * - User has at least one unlock method (passkey OR password)
+   */
+  getOnboardingStatus: protectedProcedure.query(async ({ ctx }) => {
+    // Check key shares and password encryption in one query
+    const [shares] = await db
+      .select({
+        id: keyShares.id,
+        hasPassword: keyShares.encryptedMasterKeyWithPassword,
+      })
+      .from(keyShares)
+      .where(eq(keyShares.userId, ctx.user.id))
+      .limit(1);
+
+    const hasKeyShares = !!shares;
+    const hasPassword = !!shares?.hasPassword;
+
+    // Check if user has any passkeys
+    let hasPasskey = false;
+    if (hasKeyShares) {
+      const [credential] = await db
+        .select({ id: webauthnCredentials.id })
+        .from(webauthnCredentials)
+        .where(eq(webauthnCredentials.userId, ctx.user.id))
+        .limit(1);
+      hasPasskey = !!credential;
+    }
+
+    const hasUnlockMethod = hasPasskey || hasPassword;
+    const onboardingComplete = hasKeyShares && hasUnlockMethod;
+
+    return {
+      hasKeyShares,
+      hasPasskey,
+      hasPassword,
+      hasUnlockMethod,
+      onboardingComplete,
+    };
   }),
 
   /**
@@ -170,6 +220,42 @@ export const keySharesRouter = router({
     await db.delete(keyShares).where(eq(keyShares.userId, ctx.user.id));
     return { success: true };
   }),
+
+  /**
+   * Reset encryption completely - for users who lost their recovery phrase
+   * 
+   * WARNING: This is destructive! All encrypted data will become inaccessible.
+   * Use only when user cannot unlock and has no other option.
+   * 
+   * This deletes:
+   * - Key shares
+   * - All devices
+   * - All WebAuthn credentials
+   * 
+   * After reset, user will go through onboarding again.
+   */
+  resetEncryption: protectedProcedure
+    .input(
+      z.object({
+        confirmPhrase: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Require explicit confirmation
+      if (input.confirmPhrase !== 'RESET MY ENCRYPTION') {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Please type "RESET MY ENCRYPTION" to confirm',
+        });
+      }
+
+      // Delete in order: webauthn credentials, devices, key shares
+      await db.delete(webauthnCredentials).where(eq(webauthnCredentials.userId, ctx.user.id));
+      await db.delete(devices).where(eq(devices.userId, ctx.user.id));
+      await db.delete(keyShares).where(eq(keyShares.userId, ctx.user.id));
+
+      return { success: true };
+    }),
 
   /**
    * Check if user has password-based encryption set up

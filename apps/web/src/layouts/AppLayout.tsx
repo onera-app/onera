@@ -1,5 +1,5 @@
 import { Outlet, useNavigate } from '@tanstack/react-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useE2EEStore } from '@/stores/e2eeStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -7,17 +7,25 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { ResizeHandle } from '@/components/layout/ResizeHandle';
 import { E2EEUnlockModal } from '@/components/e2ee/E2EEUnlockModal';
 import { E2EESetupModal } from '@/components/e2ee/E2EESetupModal';
+import { OnboardingCompletionModal } from '@/components/e2ee/OnboardingCompletionModal';
 import { SettingsModal } from '@/features/settings-modal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { Sparkles } from 'lucide-react';
+import { useOnboardingStatus } from '@/hooks/useOnboardingStatus';
 
 export function AppLayout() {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useAuth();
   const { status: e2eeStatus, needsSetup } = useE2EEStore();
   const { chatDensity, settingsModalOpen, settingsModalTab, closeSettingsModal } = useUIStore();
+  
+  // Check onboarding status to detect users who left mid-onboarding
+  const { onboardingComplete, isLoading: isOnboardingStatusLoading } = useOnboardingStatus(isAuthenticated);
+  
+  // Track if user has completed onboarding in this session (to avoid showing modal again)
+  const [onboardingCompletedThisSession, setOnboardingCompletedThisSession] = useState(false);
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -83,6 +91,18 @@ export function AppLayout() {
 
         {/* E2EE Unlock Modal - show when locked or unlocking */}
         {!needsSetup && (e2eeStatus === 'locked' || e2eeStatus === 'unlocking') && <E2EEUnlockModal />}
+
+        {/* Onboarding Completion Modal - show when unlocked but no unlock method set up */}
+        {!needsSetup && 
+         e2eeStatus === 'unlocked' && 
+         !isOnboardingStatusLoading && 
+         !onboardingComplete && 
+         !onboardingCompletedThisSession && (
+          <OnboardingCompletionModal
+            open={true}
+            onComplete={() => setOnboardingCompletedThisSession(true)}
+          />
+        )}
 
         {/* Settings Modal */}
         <SettingsModal
