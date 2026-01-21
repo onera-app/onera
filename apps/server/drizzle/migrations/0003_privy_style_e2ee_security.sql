@@ -8,6 +8,12 @@
 -- 4. Remove login key shortcut: This was the primary vulnerability
 
 -- ============================================
+-- 0. Enable pgcrypto extension for gen_random_bytes
+-- ============================================
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+--> statement-breakpoint
+
+-- ============================================
 -- 1. Auth Share: Remove encrypted columns, add plaintext
 -- ============================================
 
