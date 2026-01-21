@@ -11,6 +11,8 @@ import { ChatPage } from './routes/chat';
 import { NotesPage } from './routes/notes';
 import { PromptsPage } from './routes/prompts';
 import { LandingPage } from './routes/landing';
+import { PrivacyPage } from './routes/privacy';
+import { TermsPage } from './routes/terms';
 
 // Root route with layout
 const rootRoute = createRootRoute({
@@ -22,6 +24,20 @@ const landingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   component: LandingPage,
+});
+
+// Privacy page (public)
+const privacyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/privacy',
+  component: PrivacyPage,
+});
+
+// Terms page (public)
+const termsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/terms',
+  component: TermsPage,
 });
 
 // Auth route (login/signup)
@@ -80,6 +96,8 @@ const promptsRoute = createRoute({
 // Build the route tree
 export const routeTree = rootRoute.addChildren([
   landingRoute,
+  privacyRoute,
+  termsRoute,
   authRoute,
   ssoCallbackRoute,
   appRoute.addChildren([homeRoute, chatRoute, notesRoute, promptsRoute]),

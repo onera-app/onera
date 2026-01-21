@@ -4,3 +4,5 @@ export { ChatPage } from './chat';
 export { NotesPage } from './notes';
 export { PromptsPage } from './prompts';
 export { LandingPage } from './landing';
+export { PrivacyPage } from './privacy';
+export { TermsPage } from './terms';

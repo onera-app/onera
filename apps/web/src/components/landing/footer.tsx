@@ -21,12 +21,12 @@ export function Footer() {
 
         {/* Links */}
         <div className="flex items-center gap-6 sm:gap-8 text-sm font-medium text-neutral-600 dark:text-neutral-300">
-          <Link to="/" className="hover:text-neutral-900 dark:hover:text-white transition-colors">Terms</Link>
-          <Link to="/" className="hover:text-neutral-900 dark:hover:text-white transition-colors">Privacy</Link>
-          <a href="https://github.com/onera-org/onera" target="_blank" rel="noopener noreferrer" className="hover:text-neutral-900 dark:hover:text-white transition-colors">
+          <Link to="/terms" className="hover:text-neutral-900 dark:hover:text-white transition-colors">Terms</Link>
+          <Link to="/privacy" className="hover:text-neutral-900 dark:hover:text-white transition-colors">Privacy</Link>
+          <a href="https://github.com/onera-app" target="_blank" rel="noopener noreferrer" className="hover:text-neutral-900 dark:hover:text-white transition-colors">
             <Github className="size-5" />
           </a>
-          <a href="https://twitter.com/onera_ai" target="_blank" rel="noopener noreferrer" className="hover:text-neutral-900 dark:hover:text-white transition-colors">
+          <a href="https://x.com/onerachat" target="_blank" rel="noopener noreferrer" className="hover:text-neutral-900 dark:hover:text-white transition-colors">
             <Twitter className="size-5" />
           </a>
         </div>
