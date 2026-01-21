@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, ShieldCheck, AlertTriangle, Fingerprint, ArrowRight, KeyRound, Eye, EyeOff, Lock } from 'lucide-react';
+import { Loader2, ShieldCheck, AlertTriangle, Fingerprint, KeyRound, Eye, EyeOff, Lock } from 'lucide-react';
 import {
   setupUserKeysWithSharding,
   getOrCreateDeviceId,
@@ -22,7 +22,7 @@ import { usePasswordSetup } from '@/hooks/usePasswordUnlock';
 import { RecoveryPhraseDisplay } from '@/components/e2ee/RecoveryPhraseDisplay';
 import { OnboardingFlow, AddApiKeyPrompt } from '@/components/onboarding';
 
-type CallbackStep = 'processing' | 'onboarding' | 'recovery' | 'confirm' | 'unlock-method' | 'passkey' | 'password' | 'add-api-key' | 'error';
+type CallbackStep = 'processing' | 'onboarding' | 'recovery' | 'passkey' | 'password' | 'add-api-key' | 'error';
 
 function getDeviceName(): string {
   const ua = navigator.userAgent;
@@ -49,7 +49,6 @@ export function SSOCallbackPage() {
   const [step, setStep] = useState<CallbackStep>('processing');
   const [error, setError] = useState<string | null>(null);
   const [recoveryInfo, setRecoveryInfo] = useState<RecoveryKeyInfo | null>(null);
-  const [confirmInput, setConfirmInput] = useState('');
   const [passkeyError, setPasskeyError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [password, setPassword] = useState('');
@@ -214,21 +213,6 @@ export function SSOCallbackPage() {
     handleOAuthAndE2EE();
   }, [clerk.loaded, clerk.user, signUp, signIn, setSignUpActive, setSignInActive, keySharesQuery, onboardingStatusQuery, createKeySharesMutation, registerDeviceMutation, updateLastSeenMutation, navigate]);
 
-  const handleConfirmRecovery = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!recoveryInfo) return;
-
-    const firstFourWords = recoveryInfo.mnemonic.split(' ').slice(0, 4).join(' ');
-    if (confirmInput.toLowerCase().trim() !== firstFourWords.toLowerCase()) {
-      toast.error('Please enter the first 4 words of your recovery phrase');
-      return;
-    }
-
-    // Show unlock method selection
-    setStep('unlock-method');
-  };
-
   const handleSetupPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordError(null);
@@ -250,8 +234,8 @@ export function SSOCallbackPage() {
       }
       await setupPasswordEncryption(password, masterKey);
       toast.success('Encryption password set!');
-      // Show API key prompt for new users
-      setStep('add-api-key');
+      // Show backup recovery phrase
+      setStep('recovery');
     } catch (err) {
       setPasswordError(err instanceof Error ? err.message : 'Failed to set up password');
     }
@@ -266,8 +250,8 @@ export function SSOCallbackPage() {
       }
       await registerPasskey(masterKey, getDeviceName());
       toast.success('Passkey registered!');
-      // Show API key prompt for new users
-      setStep('add-api-key');
+      // Show backup recovery phrase
+      setStep('recovery');
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Registration failed');
       // Don't show error for user cancellation
@@ -278,9 +262,8 @@ export function SSOCallbackPage() {
     }
   };
 
-  const handleSkipPasskey = () => {
-    // Show API key prompt for new users
-    setStep('add-api-key');
+  const handleUsePasswordInstead = () => {
+    setStep('password');
   };
 
   // Processing step
@@ -323,12 +306,22 @@ export function SSOCallbackPage() {
   if (step === 'onboarding') {
     return (
       <OnboardingFlow
-        onComplete={() => setStep('recovery')}
+        onComplete={() => {
+          // Go directly to passkey if supported, otherwise password
+          if (!isCheckingPasskeySupport && passkeySupported) {
+            setStep('passkey');
+          } else if (!isCheckingPasskeySupport && !passkeySupported) {
+            setStep('password');
+          } else {
+            // Still checking - default to passkey, will show loading
+            setStep('passkey');
+          }
+        }}
       />
     );
   }
 
-  // Recovery phrase display step
+  // Recovery phrase display step (backup insurance)
   if (step === 'recovery' && recoveryInfo) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-background">
@@ -345,160 +338,21 @@ export function SSOCallbackPage() {
               <Lock className="h-8 w-8 text-amber-600 dark:text-amber-400" />
             </div>
             <h1 className="text-2xl font-semibold tracking-tight">
-              Your Recovery Phrase
+              Backup Recovery Phrase
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              This is the only way to recover your encrypted data. Store it safely.
+              Save this as insurance in case you ever lose access to your passkey or password.
             </p>
           </div>
 
           {/* Recovery Phrase Card */}
           <Card className="border-border/50 shadow-xl shadow-black/5">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <RecoveryPhraseDisplay
                 recoveryInfo={recoveryInfo}
-                onContinue={() => setStep('confirm')}
+                onContinue={() => setStep('add-api-key')}
+                continueLabel="Continue"
               />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  // Confirm recovery phrase step
-  if (step === 'confirm' && recoveryInfo) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-        <div className="w-full max-w-md">
-          <Card>
-            <CardHeader className="text-center space-y-4">
-              <div className="mx-auto w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <ShieldCheck className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <CardTitle className="text-2xl">Confirm Recovery Phrase</CardTitle>
-                <CardDescription>
-                  Verify you've saved your recovery phrase
-                </CardDescription>
-              </div>
-            </CardHeader>
-
-            <CardContent>
-              <form onSubmit={handleConfirmRecovery} className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  To confirm you've saved your recovery phrase, enter the first 4 words below.
-                </p>
-
-                <div className="space-y-2">
-                  <label htmlFor="confirm-words" className="text-sm font-medium">
-                    First 4 words
-                  </label>
-                  <input
-                    id="confirm-words"
-                    type="text"
-                    value={confirmInput}
-                    onChange={(e) => setConfirmInput(e.target.value)}
-                    placeholder="Enter the first 4 words..."
-                    required
-                    autoFocus
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setStep('recovery')}
-                  >
-                    Back
-                  </Button>
-                  <Button type="submit" className="flex-1">
-                    Confirm
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  // Unlock method selection step
-  if (step === 'unlock-method') {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-        <div className="w-full max-w-md">
-          <Card>
-            <CardHeader className="text-center space-y-4">
-              <div className="mx-auto w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <ShieldCheck className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <CardTitle className="text-2xl">Set Up Quick Unlock</CardTitle>
-                <CardDescription>
-                  Choose how you want to unlock your encrypted data
-                </CardDescription>
-              </div>
-            </CardHeader>
-
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground text-center">
-                Your recovery phrase always works as a backup, but you can set up a faster way to unlock.
-              </p>
-
-              <div className="space-y-3">
-                {/* Passkey option - only show if supported */}
-                {passkeySupported && !isCheckingPasskeySupport && (
-                  <button
-                    onClick={() => setStep('passkey')}
-                    className="w-full flex items-start gap-3 p-4 rounded-lg border bg-card hover:bg-accent transition-colors text-left"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Fingerprint className="w-5 h-5 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium">Passkey</p>
-                      <p className="text-sm text-muted-foreground">
-                        Use Face ID, Touch ID, or Windows Hello. Most secure option.
-                      </p>
-                    </div>
-                    <ArrowRight className="w-5 h-5 text-muted-foreground mt-2" />
-                  </button>
-                )}
-
-                {/* Password option */}
-                <button
-                  onClick={() => setStep('password')}
-                  className="w-full flex items-start gap-3 p-4 rounded-lg border bg-card hover:bg-accent transition-colors text-left"
-                >
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <KeyRound className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium">Encryption Password</p>
-                    <p className="text-sm text-muted-foreground">
-                      Set a password to unlock your data. Works on any device.
-                    </p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-muted-foreground mt-2" />
-                </button>
-              </div>
-
-              <Button
-                variant="ghost"
-                onClick={handleSkipPasskey}
-                className="w-full"
-              >
-                Skip for now
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-
-              <p className="text-xs text-center text-muted-foreground">
-                You can always set this up later in Settings
-              </p>
             </CardContent>
           </Card>
         </div>
@@ -573,26 +427,16 @@ export function SSOCallbackPage() {
                   </Alert>
                 )}
 
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setStep('unlock-method')}
-                    disabled={isSettingUpPassword}
-                  >
-                    Back
-                  </Button>
-                  <Button type="submit" className="flex-1" disabled={isSettingUpPassword}>
-                    {isSettingUpPassword ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Setting up...
-                      </>
-                    ) : (
-                      'Set Password'
-                    )}
-                  </Button>
-                </div>
+                <Button type="submit" className="w-full" disabled={isSettingUpPassword}>
+                  {isSettingUpPassword ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Setting up...
+                    </>
+                  ) : (
+                    'Set Password'
+                  )}
+                </Button>
               </form>
             </CardContent>
           </Card>
@@ -603,6 +447,26 @@ export function SSOCallbackPage() {
 
   // Passkey setup step (for SSO users with PRF support)
   if (step === 'passkey') {
+    // If still checking passkey support or passkey not supported, redirect to password
+    if (isCheckingPasskeySupport) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+          <Card className="w-full max-w-md">
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
+              <p className="text-muted-foreground">Checking device capabilities...</p>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
+    if (!passkeySupported) {
+      // Redirect to password if passkey not supported
+      setStep('password');
+      return null;
+    }
+
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-background">
         <div className="w-full max-w-md">
@@ -614,7 +478,7 @@ export function SSOCallbackPage() {
               <div>
                 <CardTitle className="text-2xl">Add a Passkey</CardTitle>
                 <CardDescription>
-                  Unlock faster with Face ID, Touch ID, or Windows Hello
+                  Unlock with Face ID, Touch ID, or Windows Hello
                 </CardDescription>
               </div>
             </CardHeader>
@@ -624,9 +488,9 @@ export function SSOCallbackPage() {
                 <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
                   <Fingerprint className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-medium">Quick unlock</p>
+                    <p className="text-sm font-medium">Instant unlock</p>
                     <p className="text-xs text-muted-foreground">
-                      Use biometrics instead of typing your recovery phrase
+                      One tap to access your encrypted data
                     </p>
                   </div>
                 </div>
@@ -634,9 +498,9 @@ export function SSOCallbackPage() {
                 <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
                   <ShieldCheck className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-medium">Secure by design</p>
+                    <p className="text-sm font-medium">Phishing resistant</p>
                     <p className="text-xs text-muted-foreground">
-                      Your passkey stays on your device and can't be phished
+                      Your passkey is bound to this device and can't be stolen
                     </p>
                   </div>
                 </div>
@@ -667,28 +531,14 @@ export function SSOCallbackPage() {
                 )}
               </Button>
 
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setStep('unlock-method')}
-                  disabled={isRegisteringPasskey}
-                >
-                  Back
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={handleSkipPasskey}
-                  disabled={isRegisteringPasskey}
-                  className="flex-1"
-                >
-                  Skip for now
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </div>
-
-              <p className="text-xs text-center text-muted-foreground">
-                You can always add a passkey later in Settings
-              </p>
+              <button
+                type="button"
+                onClick={handleUsePasswordInstead}
+                disabled={isRegisteringPasskey}
+                className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Use password instead
+              </button>
             </CardContent>
           </Card>
         </div>

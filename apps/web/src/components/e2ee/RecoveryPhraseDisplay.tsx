@@ -82,10 +82,10 @@ Delete this file after storing the phrase safely.
           </div>
           <div>
             <p className="font-medium text-amber-900 dark:text-amber-100">
-              Save these {recoveryInfo.wordCount} words securely
+              Backup these {recoveryInfo.wordCount} words
             </p>
             <p className="mt-0.5 text-sm text-amber-800/80 dark:text-amber-200/70">
-              This is the only way to recover your encrypted data if you lose access to your account.
+              This is your backup if you ever lose your passkey or forget your password.
             </p>
           </div>
         </div>
@@ -186,19 +186,19 @@ Delete this file after storing the phrase safely.
 
       {/* Tips */}
       <div className="space-y-2 rounded-lg border border-dashed border-border/60 bg-muted/20 p-3">
-        <p className="text-xs font-medium text-muted-foreground">Storage tips:</p>
+        <p className="text-xs font-medium text-muted-foreground">Quick save options:</p>
         <ul className="space-y-1 text-xs text-muted-foreground/80">
           <li className="flex gap-2">
-            <span className="text-primary">1.</span>
-            Write it down on paper and store in a safe place
+            <span className="text-primary">•</span>
+            Copy to your password manager
           </li>
           <li className="flex gap-2">
-            <span className="text-primary">2.</span>
-            Save it in a secure password manager
+            <span className="text-primary">•</span>
+            Download and store securely
           </li>
           <li className="flex gap-2">
-            <span className="text-primary">3.</span>
-            Never share it or enter it on suspicious sites
+            <span className="text-primary">•</span>
+            Write it down and keep it safe
           </li>
         </ul>
       </div>
