@@ -11,11 +11,22 @@ export function Hero() {
 
   return (
     <section className="relative flex flex-col items-center justify-center min-h-screen px-4 pt-28 sm:pt-32 pb-16 sm:pb-20 overflow-hidden">
-      {/* Premium Background */}
+      {/* Premium Hero Background - Enhances the page gradient */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-background" />
-        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-neutral-900/5 dark:bg-white/5 blur-[150px] animate-pulse-soft" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-neutral-900/5 dark:bg-white/5 blur-[150px] animate-pulse-soft delay-1000" />
+        {/* Spotlight effect from top */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[150%] h-[60%] bg-[radial-gradient(ellipse_at_center,rgba(64,64,64,0.08)_0%,transparent_70%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.1)_0%,transparent_70%)]" />
+        
+        {/* Animated gradient orbs for hero section - neutral */}
+        <div className="absolute top-[10%] left-[15%] w-[300px] h-[300px] rounded-full bg-gradient-to-br from-neutral-400/12 to-neutral-500/8 dark:from-white/12 dark:to-white/6 blur-[80px] animate-gradient-float" />
+        <div className="absolute top-[20%] right-[10%] w-[350px] h-[350px] rounded-full bg-gradient-to-bl from-neutral-500/10 to-neutral-400/6 dark:from-white/10 dark:to-white/5 blur-[90px] animate-gradient-float-delayed" />
+        <div className="absolute bottom-[15%] left-[5%] w-[280px] h-[280px] rounded-full bg-gradient-to-tr from-neutral-400/8 to-neutral-300/4 dark:from-white/8 dark:to-white/4 blur-[70px] animate-gradient-float-slow" />
+        <div className="absolute bottom-[25%] right-[15%] w-[250px] h-[250px] rounded-full bg-gradient-to-tl from-neutral-500/8 to-neutral-400/4 dark:from-white/8 dark:to-white/4 blur-[60px] animate-gradient-float-reverse" />
+        
+        {/* Center glow for text emphasis */}
+        <div className="absolute top-[30%] left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(100,100,100,0.06)_0%,transparent_60%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.08)_0%,transparent_60%)]" />
+        
+        {/* Grid pattern overlay for texture */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.01)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.01)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black_40%,transparent_100%)]" />
       </div>
 
       <div className="container relative z-10 flex flex-col items-center text-center max-w-4xl">

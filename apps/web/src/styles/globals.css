@@ -270,6 +270,76 @@
   }
 }
 
+/* Premium gradient animations for landing page */
+@keyframes gradient-float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.8;
+  }
+  25% {
+    transform: translate(5%, 5%) scale(1.05);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(2%, -3%) scale(0.95);
+    opacity: 0.7;
+  }
+  75% {
+    transform: translate(-3%, 2%) scale(1.02);
+    opacity: 0.9;
+  }
+}
+
+@keyframes gradient-float-delayed {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.7;
+  }
+  33% {
+    transform: translate(-4%, 6%) scale(1.08);
+    opacity: 1;
+  }
+  66% {
+    transform: translate(3%, -4%) scale(0.92);
+    opacity: 0.6;
+  }
+}
+
+@keyframes gradient-float-slow {
+  0%, 100% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-2%, 4%) scale(1.1) rotate(2deg);
+    opacity: 0.9;
+  }
+}
+
+@keyframes gradient-float-reverse {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+  40% {
+    transform: translate(6%, -3%) scale(1.06);
+    opacity: 0.8;
+  }
+  80% {
+    transform: translate(-4%, 5%) scale(0.94);
+    opacity: 0.6;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 @keyframes slide-up-fade {
   from {
     opacity: 0;
@@ -285,6 +355,31 @@
 @layer utilities {
   .animate-pulse-soft {
     animation: pulse-soft 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Premium gradient animations */
+  .animate-gradient-float {
+    animation: gradient-float 20s ease-in-out infinite;
+  }
+
+  .animate-gradient-float-delayed {
+    animation: gradient-float-delayed 25s ease-in-out infinite;
+    animation-delay: -5s;
+  }
+
+  .animate-gradient-float-slow {
+    animation: gradient-float-slow 30s ease-in-out infinite;
+    animation-delay: -10s;
+  }
+
+  .animate-gradient-float-reverse {
+    animation: gradient-float-reverse 22s ease-in-out infinite;
+    animation-delay: -8s;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 8s ease-in-out infinite;
+    background-size: 200% 100%;
   }
 
   .message-enter {

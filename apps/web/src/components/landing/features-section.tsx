@@ -2,11 +2,9 @@
 
 import { motion } from "framer-motion";
 import {
-  Shield,
   Key,
   Lock,
   Sparkles,
-  ServerOff,
   RefreshCw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -19,33 +17,21 @@ const features = [
     className: "md:col-span-2",
   },
   {
-    title: "Client-Side Encryption",
-    description: "All data is encrypted in your browser using AES-256-GCM before transmission. Our servers only ever see ciphertext.",
-    icon: Shield,
-    className: "md:col-span-1",
-  },
-  {
     title: "Zero-Knowledge Architecture",
     description: "Your master key never leaves your device. We can't decrypt your data, reset your password, or comply with data requests.",
     icon: Lock,
     className: "md:col-span-1",
   },
   {
-    title: "Local Ollama Support",
-    description: "For maximum privacy, run models locally via Ollama. Your prompts never leave your machine. Combined with E2EE storage, this is fully air-gapped AI.",
-    icon: ServerOff,
+    title: "Cloud or Local, Your Choice",
+    description: "Use GPT-4, Claude, or run Llama/Mistral locally. Switch between cloud speed and local privacy based on your needs. All with the same encrypted chat history.",
+    icon: Sparkles,
     className: "md:col-span-1",
   },
   {
     title: "Self-Host Privacy, Zero DevOps",
     description: "Get the privacy of self-hosting without managing servers, updates, or backups. E2EE sync across devices, automatic encrypted backups, polished UI. Your data, our infrastructure.",
     icon: RefreshCw,
-    className: "md:col-span-1",
-  },
-  {
-    title: "Cloud or Local, Your Choice",
-    description: "Use GPT-4, Claude, or run Llama/Mistral locally. Switch between cloud speed and local privacy based on your needs. All with the same encrypted chat history.",
-    icon: Sparkles,
     className: "md:col-span-2",
   },
 ];
