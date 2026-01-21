@@ -18,8 +18,8 @@ jobs:
       id-token: write
       contents: read
     env:
-      WEBAUTHN_RP_ID: onera.app
-      WEBAUTHN_ORIGIN: https://onera.app
+      WEBAUTHN_RP_ID: onera.chat
+      WEBAUTHN_ORIGIN: https://onera.chat
       WEBAUTHN_RP_NAME: Onera
 
     steps:

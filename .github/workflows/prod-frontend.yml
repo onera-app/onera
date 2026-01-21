@@ -32,8 +32,8 @@ jobs:
         run: bun run build
         working-directory: apps/web
         env:
-          VITE_API_URL: https://api.onera.app
-          VITE_WS_URL: https://api.onera.app
+          VITE_API_URL: https://api.onera.chat
+          VITE_WS_URL: https://api.onera.chat
           VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY_PROD }}
           NODE_OPTIONS: --max-old-space-size=4096
 
