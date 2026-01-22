@@ -1,12 +1,63 @@
 import { trpc } from "@/lib/trpc";
+import { decryptDeviceName, isUnlocked } from "@onera/crypto";
+import { useMemo } from "react";
+
+/**
+ * Device with decrypted name
+ */
+interface DecryptedDevice {
+  id: string;
+  userId: string;
+  deviceId: string;
+  deviceName: string | null; // Decrypted name
+  userAgent: string | null;
+  trusted: boolean;
+  lastSeenAt: Date | string;
+  createdAt: Date | string;
+}
 
 /**
  * Get list of registered devices for the current user
+ * Device names are decrypted client-side
  */
 export function useDevices() {
   const query = trpc.devices.list.useQuery();
+
+  // Decrypt device names client-side
+  const devices = useMemo<DecryptedDevice[] | undefined>(() => {
+    if (!query.data) return undefined;
+
+    return query.data.map((device) => {
+      let deviceName: string | null = null;
+
+      // Prefer encrypted name if available and E2EE is unlocked
+      if (device.encryptedDeviceName && device.deviceNameNonce && isUnlocked()) {
+        try {
+          deviceName = decryptDeviceName(device.encryptedDeviceName, device.deviceNameNonce);
+        } catch (error) {
+          console.error('Failed to decrypt device name:', error);
+          deviceName = device.deviceName; // Fallback to legacy plaintext
+        }
+      } else {
+        // Fallback to legacy plaintext name
+        deviceName = device.deviceName;
+      }
+
+      return {
+        id: device.id,
+        userId: device.userId,
+        deviceId: device.deviceId,
+        deviceName,
+        userAgent: device.userAgent,
+        trusted: device.trusted,
+        lastSeenAt: device.lastSeenAt,
+        createdAt: device.createdAt,
+      };
+    });
+  }, [query.data]);
+
   return {
-    devices: query.data,
+    devices,
     isLoading: query.isLoading,
     error: query.error,
     refetch: query.refetch,

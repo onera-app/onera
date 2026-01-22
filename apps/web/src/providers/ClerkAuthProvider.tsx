@@ -29,6 +29,7 @@ import {
   getOrCreateDeviceId,
   setDecryptedKeys,
   clearSession as clearCryptoSession,
+  encryptDeviceName,
   type RecoveryKeyInfo,
 } from "@onera/crypto";
 import { useE2EEStore } from "@/stores/e2eeStore";
@@ -213,10 +214,12 @@ export function useSignUpWithE2EE() {
         }
 
         // 3. Register device and get device secret FIRST
+        // Note: deviceName is plaintext initially, we'll encrypt after key setup
         const deviceId = getOrCreateDeviceId();
+        const plaintextDeviceName = getDeviceName();
         const deviceResult = await registerDeviceMutation.mutateAsync({
           deviceId,
-          deviceName: getDeviceName(),
+          deviceName: plaintextDeviceName,
           userAgent: navigator.userAgent,
         });
 
@@ -243,6 +246,20 @@ export function useSignUpWithE2EE() {
           publicKey: keyBundle.keyPair.publicKey,
           privateKey: keyBundle.keyPair.privateKey,
         });
+
+        // 7. Now encrypt the device name and update
+        try {
+          const encryptedName = encryptDeviceName(plaintextDeviceName);
+          await registerDeviceMutation.mutateAsync({
+            deviceId,
+            encryptedDeviceName: encryptedName.encryptedDeviceName,
+            deviceNameNonce: encryptedName.deviceNameNonce,
+            userAgent: navigator.userAgent,
+          });
+        } catch (err) {
+          // Non-fatal: device already registered, encryption is nice-to-have
+          console.warn('Failed to encrypt device name:', err);
+        }
 
         return {
           recoveryInfo: keyBundle.recoveryInfo,
@@ -284,10 +301,12 @@ export function useSignUpWithE2EE() {
         }
 
         // Register device and get device secret FIRST
+        // Note: deviceName is plaintext initially, we'll encrypt after key setup
         const deviceId = getOrCreateDeviceId();
+        const plaintextDeviceName = getDeviceName();
         const deviceResult = await registerDeviceMutation.mutateAsync({
           deviceId,
-          deviceName: getDeviceName(),
+          deviceName: plaintextDeviceName,
           userAgent: navigator.userAgent,
         });
 
@@ -312,6 +331,20 @@ export function useSignUpWithE2EE() {
           publicKey: keyBundle.keyPair.publicKey,
           privateKey: keyBundle.keyPair.privateKey,
         });
+
+        // Now encrypt the device name and update
+        try {
+          const encryptedName = encryptDeviceName(plaintextDeviceName);
+          await registerDeviceMutation.mutateAsync({
+            deviceId,
+            encryptedDeviceName: encryptedName.encryptedDeviceName,
+            deviceNameNonce: encryptedName.deviceNameNonce,
+            userAgent: navigator.userAgent,
+          });
+        } catch (err) {
+          // Non-fatal: device already registered, encryption is nice-to-have
+          console.warn('Failed to encrypt device name:', err);
+        }
 
         return {
           recoveryInfo: keyBundle.recoveryInfo,
@@ -575,10 +608,12 @@ export function useSSOCallback() {
         // New user - setup E2EE keys
 
         // Register device and get device secret FIRST
+        // Note: deviceName is plaintext initially, we'll encrypt after key setup
         const deviceId = getOrCreateDeviceId();
+        const plaintextDeviceName = getDeviceName();
         const deviceResult = await registerDeviceMutation.mutateAsync({
           deviceId,
-          deviceName: getDeviceName(),
+          deviceName: plaintextDeviceName,
           userAgent: navigator.userAgent,
         });
 
@@ -603,6 +638,20 @@ export function useSSOCallback() {
           publicKey: keyBundle.keyPair.publicKey,
           privateKey: keyBundle.keyPair.privateKey,
         });
+
+        // Now encrypt the device name and update
+        try {
+          const encryptedName = encryptDeviceName(plaintextDeviceName);
+          await registerDeviceMutation.mutateAsync({
+            deviceId,
+            encryptedDeviceName: encryptedName.encryptedDeviceName,
+            deviceNameNonce: encryptedName.deviceNameNonce,
+            userAgent: navigator.userAgent,
+          });
+        } catch (err) {
+          // Non-fatal: device already registered, encryption is nice-to-have
+          console.warn('Failed to encrypt device name:', err);
+        }
 
         return { isNewUser: true, recoveryInfo: keyBundle.recoveryInfo };
       }

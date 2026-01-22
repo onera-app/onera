@@ -17,8 +17,14 @@ export const promptsRouter = router({
       id: prompt.id,
       userId: prompt.userId,
       name: prompt.name,
+      encryptedName: prompt.encryptedName,
+      nameNonce: prompt.nameNonce,
       description: prompt.description,
+      encryptedDescription: prompt.encryptedDescription,
+      descriptionNonce: prompt.descriptionNonce,
       content: prompt.content,
+      encryptedContent: prompt.encryptedContent,
+      contentNonce: prompt.contentNonce,
       createdAt: prompt.createdAt.getTime(),
       updatedAt: prompt.updatedAt.getTime(),
     }));
@@ -42,8 +48,14 @@ export const promptsRouter = router({
         id: prompt.id,
         userId: prompt.userId,
         name: prompt.name,
+        encryptedName: prompt.encryptedName,
+        nameNonce: prompt.nameNonce,
         description: prompt.description,
+        encryptedDescription: prompt.encryptedDescription,
+        descriptionNonce: prompt.descriptionNonce,
         content: prompt.content,
+        encryptedContent: prompt.encryptedContent,
+        contentNonce: prompt.contentNonce,
         createdAt: prompt.createdAt.getTime(),
         updatedAt: prompt.updatedAt.getTime(),
       };
@@ -52,9 +64,13 @@ export const promptsRouter = router({
   create: protectedProcedure
     .input(
       z.object({
-        name: z.string().min(1).max(255),
-        description: z.string().optional(),
-        content: z.string(),
+        // Encrypted fields (required for new prompts)
+        encryptedName: z.string(),
+        nameNonce: z.string(),
+        encryptedDescription: z.string().optional(),
+        descriptionNonce: z.string().optional(),
+        encryptedContent: z.string(),
+        contentNonce: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -62,9 +78,15 @@ export const promptsRouter = router({
         .insert(prompts)
         .values({
           userId: ctx.user.id,
-          name: input.name,
-          description: input.description,
-          content: input.content,
+          name: null, // No plaintext for new prompts
+          description: null,
+          content: null,
+          encryptedName: input.encryptedName,
+          nameNonce: input.nameNonce,
+          encryptedDescription: input.encryptedDescription,
+          descriptionNonce: input.descriptionNonce,
+          encryptedContent: input.encryptedContent,
+          contentNonce: input.contentNonce,
         })
         .returning();
 
@@ -72,8 +94,14 @@ export const promptsRouter = router({
         id: prompt.id,
         userId: prompt.userId,
         name: prompt.name,
+        encryptedName: prompt.encryptedName,
+        nameNonce: prompt.nameNonce,
         description: prompt.description,
+        encryptedDescription: prompt.encryptedDescription,
+        descriptionNonce: prompt.descriptionNonce,
         content: prompt.content,
+        encryptedContent: prompt.encryptedContent,
+        contentNonce: prompt.contentNonce,
         createdAt: prompt.createdAt.getTime(),
         updatedAt: prompt.updatedAt.getTime(),
       };
@@ -87,20 +115,46 @@ export const promptsRouter = router({
     .input(
       z.object({
         promptId: z.string().uuid(),
-        name: z.string().min(1).max(255).optional(),
-        description: z.string().nullable().optional(),
-        content: z.string().optional(),
+        // Encrypted fields
+        encryptedName: z.string().optional(),
+        nameNonce: z.string().optional(),
+        encryptedDescription: z.string().nullable().optional(),
+        descriptionNonce: z.string().nullable().optional(),
+        encryptedContent: z.string().optional(),
+        contentNonce: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { promptId, ...updates } = input;
+      const { promptId, ...inputUpdates } = input;
+
+      const updates: Record<string, any> = {
+        updatedAt: new Date(),
+      };
+
+      // If updating name, always use encrypted (upgrades legacy prompts)
+      if (inputUpdates.encryptedName && inputUpdates.nameNonce) {
+        updates.encryptedName = inputUpdates.encryptedName;
+        updates.nameNonce = inputUpdates.nameNonce;
+        updates.name = null; // Clear plaintext
+      }
+
+      // If updating description, always use encrypted
+      if (inputUpdates.encryptedDescription !== undefined && inputUpdates.descriptionNonce !== undefined) {
+        updates.encryptedDescription = inputUpdates.encryptedDescription;
+        updates.descriptionNonce = inputUpdates.descriptionNonce;
+        updates.description = null; // Clear plaintext
+      }
+
+      // If updating content, always use encrypted
+      if (inputUpdates.encryptedContent && inputUpdates.contentNonce) {
+        updates.encryptedContent = inputUpdates.encryptedContent;
+        updates.contentNonce = inputUpdates.contentNonce;
+        updates.content = null; // Clear plaintext
+      }
 
       const [prompt] = await db
         .update(prompts)
-        .set({
-          ...updates,
-          updatedAt: new Date(),
-        })
+        .set(updates)
         .where(and(eq(prompts.id, promptId), eq(prompts.userId, ctx.user.id)))
         .returning();
 
@@ -112,8 +166,14 @@ export const promptsRouter = router({
         id: prompt.id,
         userId: prompt.userId,
         name: prompt.name,
+        encryptedName: prompt.encryptedName,
+        nameNonce: prompt.nameNonce,
         description: prompt.description,
+        encryptedDescription: prompt.encryptedDescription,
+        descriptionNonce: prompt.descriptionNonce,
         content: prompt.content,
+        encryptedContent: prompt.encryptedContent,
+        contentNonce: prompt.contentNonce,
         createdAt: prompt.createdAt.getTime(),
         updatedAt: prompt.updatedAt.getTime(),
       };

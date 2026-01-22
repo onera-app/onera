@@ -32,6 +32,7 @@ import {
   usePasskeyList,
   useDeletePasskey,
   useRenamePasskey,
+  decryptPasskeyName,
 } from "@/hooks/useWebAuthn";
 
 interface PasskeyListProps {
@@ -48,9 +49,10 @@ export function PasskeyList({ onDelete }: PasskeyListProps) {
   const [editName, setEditName] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  const handleStartEdit = (credentialId: string, currentName: string | null) => {
+  const handleStartEdit = (credentialId: string, passkey: typeof passkeys extends (infer T)[] | undefined ? T : never) => {
     setEditingId(credentialId);
-    setEditName(currentName || "");
+    // Use decrypted name for editing
+    setEditName(decryptPasskeyName(passkey));
   };
 
   const handleCancelEdit = () => {
@@ -65,10 +67,8 @@ export function PasskeyList({ onDelete }: PasskeyListProps) {
     }
 
     try {
-      await renamePasskey.mutateAsync({
-        credentialId,
-        name: editName.trim(),
-      });
+      // Use renameWithEncryption for automatic encryption
+      await renamePasskey.renameWithEncryption(credentialId, editName.trim());
       toast.success("Passkey renamed");
       setEditingId(null);
       setEditName("");
@@ -172,7 +172,7 @@ export function PasskeyList({ onDelete }: PasskeyListProps) {
                 ) : (
                   <>
                     <p className="text-sm font-medium truncate">
-                      {passkey.name || "Unnamed Passkey"}
+                      {decryptPasskeyName(passkey)}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {passkey.deviceType}
@@ -196,7 +196,7 @@ export function PasskeyList({ onDelete }: PasskeyListProps) {
                   variant="ghost"
                   className="h-8 w-8"
                   onClick={() =>
-                    handleStartEdit(passkey.credentialId, passkey.name)
+                    handleStartEdit(passkey.credentialId, passkey)
                   }
                   title="Rename passkey"
                 >
@@ -227,7 +227,7 @@ export function PasskeyList({ onDelete }: PasskeyListProps) {
             <AlertDialogTitle>Delete Passkey?</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete{" "}
-              <strong>"{passkeyToDelete?.name || "this passkey"}"</strong>?
+              <strong>"{passkeyToDelete ? decryptPasskeyName(passkeyToDelete) : "this passkey"}"</strong>?
               <br />
               <br />
               You can still unlock with your recovery phrase or other passkeys.

@@ -22,7 +22,12 @@ import {
   validatePRFResults,
   type PRFEncryptedMasterKey,
 } from "@onera/crypto/webauthn";
-import { fromBase64 } from "@onera/crypto";
+import {
+  fromBase64,
+  encryptWebauthnCredentialName,
+  decryptWebauthnCredentialName,
+  isUnlocked,
+} from "@onera/crypto";
 
 /**
  * Hook for checking if user has any passkeys
@@ -37,6 +42,23 @@ export function useHasPasskeys(enabled = true) {
     isLoading: query.isLoading,
     error: query.error,
   };
+}
+
+/**
+ * Decrypt a passkey name from server response
+ * Returns decrypted name if encrypted, otherwise returns plaintext name
+ */
+export function decryptPasskeyName(passkey: {
+  name: string | null;
+  encryptedName: string | null;
+  nameNonce: string | null;
+}): string {
+  // Try encrypted name first
+  if (passkey.encryptedName && passkey.nameNonce && isUnlocked()) {
+    return decryptWebauthnCredentialName(passkey.encryptedName, passkey.nameNonce);
+  }
+  // Fall back to plaintext name
+  return passkey.name || "Unnamed Passkey";
 }
 
 /**
@@ -120,7 +142,13 @@ export function usePasskeyRegistration() {
     // Step 5: Encrypt master key with PRF-derived KEK
     const encrypted = await encryptMasterKeyWithPRF(masterKey, prfOutput, prfSalt);
 
-    // Step 6: Complete registration with encrypted master key
+    // Step 6: Encrypt the passkey name if E2EE is unlocked
+    let encryptedNameData: { encryptedName: string; nameNonce: string } | undefined;
+    if (name && isUnlocked()) {
+      encryptedNameData = encryptWebauthnCredentialName(name);
+    }
+
+    // Step 7: Complete registration with encrypted master key and encrypted name
     // Note: Type assertion needed because @simplewebauthn types don't have index signature
     // that matches the Zod schema inference for clientExtensionResults
     await verifyRegistration.mutateAsync({
@@ -128,7 +156,10 @@ export function usePasskeyRegistration() {
       prfSalt,
       encryptedMasterKey: encrypted.ciphertext,
       masterKeyNonce: encrypted.nonce,
-      name,
+      // Use encrypted name if available, otherwise fall back to plaintext
+      name: encryptedNameData ? undefined : name,
+      encryptedName: encryptedNameData?.encryptedName,
+      nameNonce: encryptedNameData?.nameNonce,
     });
 
     return { success: true };
@@ -241,6 +272,7 @@ export function usePasskeyAuthentication() {
 
 /**
  * Hook for renaming a passkey
+ * Automatically encrypts the name if E2EE is unlocked
  */
 export function useRenamePasskey() {
   const utils = trpc.useUtils();
@@ -250,7 +282,31 @@ export function useRenamePasskey() {
     },
   });
 
-  return mutation;
+  /**
+   * Rename a passkey with automatic encryption if E2EE is unlocked
+   */
+  async function renameWithEncryption(credentialId: string, name: string) {
+    if (isUnlocked()) {
+      // Encrypt the name
+      const encryptedNameData = encryptWebauthnCredentialName(name);
+      return mutation.mutateAsync({
+        credentialId,
+        encryptedName: encryptedNameData.encryptedName,
+        nameNonce: encryptedNameData.nameNonce,
+      });
+    } else {
+      // Fall back to plaintext
+      return mutation.mutateAsync({
+        credentialId,
+        name,
+      });
+    }
+  }
+
+  return {
+    ...mutation,
+    renameWithEncryption,
+  };
 }
 
 /**

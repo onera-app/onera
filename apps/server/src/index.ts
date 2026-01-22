@@ -38,6 +38,19 @@ app.get("/health", (c) => {
   return c.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
+// Apple App Site Association for passkeys/WebAuthn
+// This enables passkey authentication on iOS
+app.get("/.well-known/apple-app-site-association", (c) => {
+  const aasa = {
+    webcredentials: {
+      apps: ["J3LH4H9AA4.chat.onera.mobile"],
+    },
+  };
+  return c.json(aasa, 200, {
+    "Content-Type": "application/json",
+  });
+});
+
 // Note: Authentication is handled by Clerk (https://clerk.com)
 // JWT tokens are verified in the tRPC context via the Authorization header
 

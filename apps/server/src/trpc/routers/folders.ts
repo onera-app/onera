@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { router, protectedProcedure } from "../trpc";
 import { db, folders } from "../../db/client";
-import { eq, and, asc } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { broadcastToUser } from "../../websocket";
 
@@ -10,13 +10,14 @@ export const foldersRouter = router({
     const result = await db
       .select()
       .from(folders)
-      .where(eq(folders.userId, ctx.user.id))
-      .orderBy(asc(folders.name));
+      .where(eq(folders.userId, ctx.user.id));
 
     return result.map((folder) => ({
       id: folder.id,
       userId: folder.userId,
       name: folder.name,
+      encryptedName: folder.encryptedName,
+      nameNonce: folder.nameNonce,
       parentId: folder.parentId,
       createdAt: folder.createdAt.getTime(),
       updatedAt: folder.updatedAt.getTime(),
@@ -41,6 +42,8 @@ export const foldersRouter = router({
         id: folder.id,
         userId: folder.userId,
         name: folder.name,
+        encryptedName: folder.encryptedName,
+        nameNonce: folder.nameNonce,
         parentId: folder.parentId,
         createdAt: folder.createdAt.getTime(),
         updatedAt: folder.updatedAt.getTime(),
@@ -50,7 +53,8 @@ export const foldersRouter = router({
   create: protectedProcedure
     .input(
       z.object({
-        name: z.string().min(1).max(255),
+        encryptedName: z.string(),
+        nameNonce: z.string(),
         parentId: z.string().uuid().optional(),
       })
     )
@@ -59,7 +63,9 @@ export const foldersRouter = router({
         .insert(folders)
         .values({
           userId: ctx.user.id,
-          name: input.name,
+          name: null,
+          encryptedName: input.encryptedName,
+          nameNonce: input.nameNonce,
           parentId: input.parentId,
         })
         .returning();
@@ -68,6 +74,8 @@ export const foldersRouter = router({
         id: folder.id,
         userId: folder.userId,
         name: folder.name,
+        encryptedName: folder.encryptedName,
+        nameNonce: folder.nameNonce,
         parentId: folder.parentId,
         createdAt: folder.createdAt.getTime(),
         updatedAt: folder.updatedAt.getTime(),
@@ -82,19 +90,32 @@ export const foldersRouter = router({
     .input(
       z.object({
         folderId: z.string().uuid(),
-        name: z.string().min(1).max(255).optional(),
+        encryptedName: z.string().optional(),
+        nameNonce: z.string().optional(),
         parentId: z.string().uuid().nullable().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { folderId, ...updates } = input;
+      const { folderId, ...inputUpdates } = input;
+
+      const updates: Record<string, any> = {
+        updatedAt: new Date(),
+      };
+
+      // If renaming, always use encrypted (upgrades legacy folders)
+      if (inputUpdates.encryptedName && inputUpdates.nameNonce) {
+        updates.encryptedName = inputUpdates.encryptedName;
+        updates.nameNonce = inputUpdates.nameNonce;
+        updates.name = null; // Clear plaintext
+      }
+
+      if (inputUpdates.parentId !== undefined) {
+        updates.parentId = inputUpdates.parentId;
+      }
 
       const [folder] = await db
         .update(folders)
-        .set({
-          ...updates,
-          updatedAt: new Date(),
-        })
+        .set(updates)
         .where(and(eq(folders.id, folderId), eq(folders.userId, ctx.user.id)))
         .returning();
 
@@ -106,6 +127,8 @@ export const foldersRouter = router({
         id: folder.id,
         userId: folder.userId,
         name: folder.name,
+        encryptedName: folder.encryptedName,
+        nameNonce: folder.nameNonce,
         parentId: folder.parentId,
         createdAt: folder.createdAt.getTime(),
         updatedAt: folder.updatedAt.getTime(),

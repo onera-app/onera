@@ -16,8 +16,15 @@ export const credentialsRouter = router({
     return result.map((credential) => ({
       id: credential.id,
       userId: credential.userId,
+      // Legacy plaintext fields
       provider: credential.provider,
       name: credential.name,
+      // Encrypted metadata fields
+      encryptedName: credential.encryptedName,
+      nameNonce: credential.nameNonce,
+      encryptedProvider: credential.encryptedProvider,
+      providerNonce: credential.providerNonce,
+      // Encrypted API key data
       encryptedData: credential.encryptedData,
       iv: credential.iv,
       createdAt: credential.createdAt.getTime(),
@@ -28,8 +35,12 @@ export const credentialsRouter = router({
   create: protectedProcedure
     .input(
       z.object({
-        provider: z.string().min(1).max(50),
-        name: z.string().min(1).max(255),
+        // Encrypted metadata fields (required for new credentials)
+        encryptedName: z.string(),
+        nameNonce: z.string(),
+        encryptedProvider: z.string(),
+        providerNonce: z.string(),
+        // Encrypted API key data
         encryptedData: z.string(),
         iv: z.string(),
       })
@@ -39,8 +50,12 @@ export const credentialsRouter = router({
         .insert(credentials)
         .values({
           userId: ctx.user.id,
-          provider: input.provider,
-          name: input.name,
+          name: null, // No plaintext for new credentials
+          provider: null,
+          encryptedName: input.encryptedName,
+          nameNonce: input.nameNonce,
+          encryptedProvider: input.encryptedProvider,
+          providerNonce: input.providerNonce,
           encryptedData: input.encryptedData,
           iv: input.iv,
         })
@@ -51,6 +66,10 @@ export const credentialsRouter = router({
         userId: credential.userId,
         provider: credential.provider,
         name: credential.name,
+        encryptedName: credential.encryptedName,
+        nameNonce: credential.nameNonce,
+        encryptedProvider: credential.encryptedProvider,
+        providerNonce: credential.providerNonce,
         encryptedData: credential.encryptedData,
         iv: credential.iv,
         createdAt: credential.createdAt.getTime(),
@@ -66,21 +85,46 @@ export const credentialsRouter = router({
     .input(
       z.object({
         credentialId: z.string().uuid(),
-        provider: z.string().min(1).max(50),
-        name: z.string().min(1).max(255),
-        encryptedData: z.string(),
-        iv: z.string(),
+        // Encrypted metadata fields
+        encryptedName: z.string().optional(),
+        nameNonce: z.string().optional(),
+        encryptedProvider: z.string().optional(),
+        providerNonce: z.string().optional(),
+        // Encrypted API key data
+        encryptedData: z.string().optional(),
+        iv: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { credentialId, ...updates } = input;
+      const { credentialId, ...inputUpdates } = input;
+
+      const updates: Record<string, any> = {
+        updatedAt: new Date(),
+      };
+
+      // If updating name, always use encrypted (upgrades legacy credentials)
+      if (inputUpdates.encryptedName && inputUpdates.nameNonce) {
+        updates.encryptedName = inputUpdates.encryptedName;
+        updates.nameNonce = inputUpdates.nameNonce;
+        updates.name = null; // Clear plaintext
+      }
+
+      // If updating provider, always use encrypted
+      if (inputUpdates.encryptedProvider && inputUpdates.providerNonce) {
+        updates.encryptedProvider = inputUpdates.encryptedProvider;
+        updates.providerNonce = inputUpdates.providerNonce;
+        updates.provider = null; // Clear plaintext
+      }
+
+      // If updating API key data
+      if (inputUpdates.encryptedData && inputUpdates.iv) {
+        updates.encryptedData = inputUpdates.encryptedData;
+        updates.iv = inputUpdates.iv;
+      }
 
       const [credential] = await db
         .update(credentials)
-        .set({
-          ...updates,
-          updatedAt: new Date(),
-        })
+        .set(updates)
         .where(
           and(
             eq(credentials.id, credentialId),
@@ -101,6 +145,10 @@ export const credentialsRouter = router({
         userId: credential.userId,
         provider: credential.provider,
         name: credential.name,
+        encryptedName: credential.encryptedName,
+        nameNonce: credential.nameNonce,
+        encryptedProvider: credential.encryptedProvider,
+        providerNonce: credential.providerNonce,
         encryptedData: credential.encryptedData,
         iv: credential.iv,
         createdAt: credential.createdAt.getTime(),
