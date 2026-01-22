@@ -3,7 +3,13 @@
  * Handles E2EE decryption and caching of LLM credentials
  */
 
-import { decryptCredentials, isUnlocked, secureZero } from '@onera/crypto';
+import {
+  decryptCredentials,
+  decryptCredentialName,
+  decryptCredentialProvider,
+  isUnlocked,
+  secureZero,
+} from '@onera/crypto';
 import type { DecryptedCredential } from './types';
 import type { LLMProvider } from '@onera/types';
 
@@ -11,19 +17,27 @@ import type { LLMProvider } from '@onera/types';
 let cachedCredentials: DecryptedCredential[] | null = null;
 
 /**
- * Raw credential format from Convex
+ * Raw credential format from server (supports both legacy and encrypted metadata)
  */
 export interface RawCredential {
   id: string;
-  provider: string;
-  name: string;
+  // Legacy plaintext fields (nullable - cleared when encrypted)
+  provider: string | null;
+  name: string | null;
+  // Encrypted metadata fields
+  encryptedName?: string | null;
+  nameNonce?: string | null;
+  encryptedProvider?: string | null;
+  providerNonce?: string | null;
+  // Encrypted API key data
   encryptedData: string;
   iv: string;
 }
 
 /**
  * Decrypt credentials from raw encrypted format
- * Used by hooks that already have credentials from Convex
+ * Handles both legacy plaintext and encrypted name/provider fields
+ * Used by hooks that already have credentials from the server
  */
 export function decryptRawCredentials(encrypted: RawCredential[]): DecryptedCredential[] {
   if (!isUnlocked()) {
@@ -34,16 +48,29 @@ export function decryptRawCredentials(encrypted: RawCredential[]): DecryptedCred
     return [];
   }
 
-  // Decrypt using master key
-  const decrypted = decryptCredentials(
-    encrypted.map((c) => ({
+  // First, decrypt name and provider metadata
+  const withDecryptedMetadata = encrypted.map((c) => {
+    // Decrypt name: prefer encrypted, fall back to legacy plaintext
+    const name = c.encryptedName && c.nameNonce
+      ? decryptCredentialName(c.encryptedName, c.nameNonce)
+      : c.name ?? 'Unnamed Credential';
+
+    // Decrypt provider: prefer encrypted, fall back to legacy plaintext
+    const provider = c.encryptedProvider && c.providerNonce
+      ? decryptCredentialProvider(c.encryptedProvider, c.providerNonce)
+      : c.provider ?? 'unknown';
+
+    return {
       id: c.id,
-      provider: c.provider,
-      name: c.name,
+      provider,
+      name,
       encrypted_data: c.encryptedData,
       iv: c.iv,
-    }))
-  );
+    };
+  });
+
+  // Decrypt API key data using master key
+  const decrypted = decryptCredentials(withDecryptedMetadata);
 
   // Filter failed decryptions and transform to our format
   return decrypted

@@ -36,6 +36,41 @@
       "when": 1737075000000,
       "tag": "0004_webauthn_passkeys",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1737076000000,
+      "tag": "0005_encrypted_folder_names",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1737077000000,
+      "tag": "0006_encrypted_prompts",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1737078000000,
+      "tag": "0007_encrypted_credentials_metadata",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1737079000000,
+      "tag": "0008_encrypted_device_name",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1737080000000,
+      "tag": "0009_encrypted_webauthn_name",
+      "breakpoints": true
     }
   ]
 }

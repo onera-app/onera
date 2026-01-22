@@ -8,7 +8,9 @@ import {
 	encryptKey,
 	decryptKey,
 	encryptJSON,
-	decryptJSON
+	decryptJSON,
+	encryptString,
+	decryptString
 } from './symmetric';
 import type { EncryptedData } from './utils';
 import { getMasterKey, isUnlocked } from './keyManager';
@@ -186,5 +188,93 @@ export function clearCredentialsKeyCache(): void {
 	if (orgCredentialsKey) {
 		secureZero(orgCredentialsKey);
 		orgCredentialsKey = null;
+	}
+}
+
+// ============================================
+// Credential Metadata Encryption (name, provider)
+// ============================================
+
+/**
+ * Encrypted credential name data for storage
+ */
+export interface EncryptedCredentialNameData {
+	encryptedName: string;
+	nameNonce: string;
+}
+
+/**
+ * Encrypted credential provider data for storage
+ */
+export interface EncryptedCredentialProviderData {
+	encryptedProvider: string;
+	providerNonce: string;
+}
+
+/**
+ * Encrypt credential name
+ */
+export function encryptCredentialName(name: string): EncryptedCredentialNameData {
+	if (!isUnlocked()) {
+		throw new Error('E2EE not unlocked');
+	}
+
+	const masterKey = getMasterKey();
+	const encrypted = encryptString(name, masterKey);
+
+	return {
+		encryptedName: encrypted.ciphertext,
+		nameNonce: encrypted.nonce
+	};
+}
+
+/**
+ * Decrypt credential name
+ */
+export function decryptCredentialName(encryptedName: string, nameNonce: string): string {
+	if (!isUnlocked()) {
+		throw new Error('E2EE not unlocked');
+	}
+
+	try {
+		const masterKey = getMasterKey();
+		return decryptString({ ciphertext: encryptedName, nonce: nameNonce }, masterKey);
+	} catch (error) {
+		console.error('Failed to decrypt credential name:', error);
+		return 'Encrypted Credential';
+	}
+}
+
+/**
+ * Encrypt credential provider
+ */
+export function encryptCredentialProvider(provider: string): EncryptedCredentialProviderData {
+	if (!isUnlocked()) {
+		throw new Error('E2EE not unlocked');
+	}
+
+	const masterKey = getMasterKey();
+	const encrypted = encryptString(provider, masterKey);
+
+	return {
+		encryptedProvider: encrypted.ciphertext,
+		providerNonce: encrypted.nonce
+	};
+}
+
+/**
+ * Decrypt credential provider
+ */
+export function decryptCredentialProvider(encryptedProvider: string, providerNonce: string): string {
+	if (!isUnlocked()) {
+		throw new Error('E2EE not unlocked');
+	}
+
+	try {
+		const masterKey = getMasterKey();
+		return decryptString({ ciphertext: encryptedProvider, nonce: providerNonce }, masterKey);
+	} catch (error) {
+		console.error('Failed to decrypt credential provider:', error);
+		return 'unknown';
 	}
 }

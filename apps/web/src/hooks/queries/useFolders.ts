@@ -1,9 +1,22 @@
+import { useMemo } from "react";
 import { trpc } from "@/lib/trpc";
+import { encryptFolderName, decryptFolderName } from "@onera/crypto";
 
 export function useFolders() {
   const query = trpc.folders.list.useQuery();
+
+  const decryptedFolders = useMemo(() => {
+    if (!query.data) return [];
+    return query.data.map((folder) => ({
+      ...folder,
+      name: folder.encryptedName
+        ? decryptFolderName(folder.encryptedName, folder.nameNonce!)
+        : folder.name ?? "Unnamed Folder",
+    }));
+  }, [query.data]);
+
   return {
-    data: query.data,
+    data: decryptedFolders,
     isLoading: query.isLoading,
   };
 }
@@ -13,8 +26,19 @@ export function useFolder(id: string) {
     { folderId: id },
     { enabled: !!id }
   );
+
+  const decryptedFolder = useMemo(() => {
+    if (!query.data) return undefined;
+    return {
+      ...query.data,
+      name: query.data.encryptedName
+        ? decryptFolderName(query.data.encryptedName, query.data.nameNonce!)
+        : query.data.name ?? "Unnamed Folder",
+    };
+  }, [query.data]);
+
   return {
-    data: query.data,
+    data: decryptedFolder,
     isLoading: query.isLoading,
   };
 }
@@ -29,10 +53,20 @@ export function useCreateFolder() {
 
   return {
     mutateAsync: async (data: { name: string; parentId?: string }) => {
-      return mutation.mutateAsync(data);
+      const encrypted = encryptFolderName(data.name);
+      return mutation.mutateAsync({
+        encryptedName: encrypted.encryptedName,
+        nameNonce: encrypted.nameNonce,
+        parentId: data.parentId,
+      });
     },
     mutate: (data: { name: string; parentId?: string }) => {
-      mutation.mutate(data);
+      const encrypted = encryptFolderName(data.name);
+      mutation.mutate({
+        encryptedName: encrypted.encryptedName,
+        nameNonce: encrypted.nameNonce,
+        parentId: data.parentId,
+      });
     },
   };
 }
@@ -54,10 +88,23 @@ export function useUpdateFolder() {
       id: string;
       data: { name?: string; parentId?: string | null };
     }) => {
-      return mutation.mutateAsync({
-        folderId: id,
-        ...data,
-      });
+      const input: {
+        folderId: string;
+        encryptedName?: string;
+        nameNonce?: string;
+        parentId?: string | null;
+      } = { folderId: id };
+
+      if (data.name) {
+        const encrypted = encryptFolderName(data.name);
+        input.encryptedName = encrypted.encryptedName;
+        input.nameNonce = encrypted.nameNonce;
+      }
+      if (data.parentId !== undefined) {
+        input.parentId = data.parentId;
+      }
+
+      return mutation.mutateAsync(input);
     },
     mutate: ({
       id,
@@ -66,10 +113,23 @@ export function useUpdateFolder() {
       id: string;
       data: { name?: string; parentId?: string | null };
     }) => {
-      mutation.mutate({
-        folderId: id,
-        ...data,
-      });
+      const input: {
+        folderId: string;
+        encryptedName?: string;
+        nameNonce?: string;
+        parentId?: string | null;
+      } = { folderId: id };
+
+      if (data.name) {
+        const encrypted = encryptFolderName(data.name);
+        input.encryptedName = encrypted.encryptedName;
+        input.nameNonce = encrypted.nameNonce;
+      }
+      if (data.parentId !== undefined) {
+        input.parentId = data.parentId;
+      }
+
+      mutation.mutate(input);
     },
   };
 }

@@ -162,8 +162,14 @@ export {
 	encryptCredentialWithOrgKey,
 	decryptCredentialWithOrgKey,
 	clearCredentialsKeyCache,
+	encryptCredentialName,
+	decryptCredentialName,
+	encryptCredentialProvider,
+	decryptCredentialProvider,
 	type LLMCredential,
-	type EncryptedCredentialData
+	type EncryptedCredentialData,
+	type EncryptedCredentialNameData,
+	type EncryptedCredentialProviderData
 } from './credentialsEncryption';
 
 // Notes encryption
@@ -176,6 +182,42 @@ export {
 	decryptNote,
 	type EncryptedNoteData
 } from './notesEncryption';
+
+// Folders encryption
+export {
+	encryptFolderName,
+	decryptFolderName,
+	type EncryptedFolderNameData
+} from './foldersEncryption';
+
+// Prompts encryption
+export {
+	encryptPromptName,
+	decryptPromptName,
+	encryptPromptDescription,
+	decryptPromptDescription,
+	encryptPromptContent,
+	decryptPromptContent,
+	encryptPrompt,
+	type EncryptedPromptNameData,
+	type EncryptedPromptDescriptionData,
+	type EncryptedPromptContentData,
+	type EncryptedPromptData
+} from './promptsEncryption';
+
+// Devices encryption
+export {
+	encryptDeviceName,
+	decryptDeviceName,
+	type EncryptedDeviceNameData
+} from './devicesEncryption';
+
+// WebAuthn credentials encryption
+export {
+	encryptWebauthnCredentialName,
+	decryptWebauthnCredentialName,
+	type EncryptedWebauthnNameData
+} from './webauthnEncryption';
 
 // Key Sharding (re-export for convenience)
 export * from '../sharding';

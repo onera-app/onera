@@ -283,8 +283,26 @@ export const LLM_PROVIDERS: LLMProvider[] = [
   },
 ];
 
-// Credential type matching Convex schema
+// Credential type matching server schema
 export interface Credential {
+  id: string;
+  // Legacy plaintext fields (nullable - cleared when encrypted)
+  provider: string | null;
+  name: string | null;
+  // Encrypted metadata fields
+  encryptedName: string | null;
+  nameNonce: string | null;
+  encryptedProvider: string | null;
+  providerNonce: string | null;
+  // Encrypted API key data
+  encryptedData: string;
+  iv: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+// Decrypted credential type for client-side use
+export interface DecryptedCredential {
   id: string;
   provider: string;
   name: string;

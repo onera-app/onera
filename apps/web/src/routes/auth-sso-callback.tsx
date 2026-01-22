@@ -13,6 +13,7 @@ import {
   getOrCreateDeviceId,
   setDecryptedKeys,
   getDecryptedMasterKey,
+  encryptDeviceName,
   type RecoveryKeyInfo,
 } from '@onera/crypto';
 import { trpc } from '@/lib/trpc';
@@ -167,10 +168,12 @@ export function SSOCallbackPage() {
       } else {
         // New user - register device first to get deviceSecret, then setup E2EE keys
         // Step 1: Register device to get server-generated deviceSecret
+        // Note: deviceName is registered as plaintext initially because we don't have the master key yet
         const deviceId = getOrCreateDeviceId();
+        const plaintextDeviceName = getDeviceName();
         const deviceResult = await registerDeviceMutation.mutateAsync({
           deviceId,
-          deviceName: getDeviceName(),
+          deviceName: plaintextDeviceName, // Plaintext for now, will encrypt after key setup
           userAgent: navigator.userAgent,
         });
 
@@ -202,6 +205,20 @@ export function SSOCallbackPage() {
           publicKey: keyBundle.keyPair.publicKey,
           privateKey: keyBundle.keyPair.privateKey,
         });
+
+        // Step 4: Now that E2EE is set up, update device with encrypted name
+        try {
+          const encryptedName = encryptDeviceName(plaintextDeviceName);
+          await registerDeviceMutation.mutateAsync({
+            deviceId,
+            encryptedDeviceName: encryptedName.encryptedDeviceName,
+            deviceNameNonce: encryptedName.deviceNameNonce,
+            userAgent: navigator.userAgent,
+          });
+        } catch (err) {
+          // Non-fatal: device name encryption is nice-to-have, device is already registered
+          console.warn('Failed to encrypt device name:', err);
+        }
 
         setRecoveryInfo(keyBundle.recoveryInfo);
         // Show onboarding flow for new users before recovery phrase

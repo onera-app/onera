@@ -101,8 +101,12 @@ export const devices = pgTable(
     id: uuidPrimaryKey("id"),
     userId: text("user_id").notNull(), // Clerk user ID
     deviceId: text("device_id").notNull(), // Browser-generated device ID
-    deviceName: text("device_name"), // User-friendly name (e.g., "Chrome on MacBook")
+    deviceName: text("device_name"), // Legacy plaintext name (e.g., "Chrome on MacBook")
     userAgent: text("user_agent"), // Browser user agent for identification
+
+    // Encrypted device name (XSalsa20-Poly1305 with master key)
+    encryptedDeviceName: text("encrypted_device_name"),
+    deviceNameNonce: text("device_name_nonce"),
 
     // Server-generated entropy for device share encryption
     // Combined with deviceId + fingerprint to derive the device share encryption key
@@ -159,7 +163,13 @@ export const webauthnCredentials = pgTable(
     prfSalt: text("prf_salt").notNull(), // Base64 encoded, used in HKDF
 
     // User-friendly metadata
+    // Legacy plaintext name (nullable - cleared when encrypted)
     name: text("name"), // e.g., "MacBook Pro Touch ID"
+
+    // Encrypted name (XSalsa20-Poly1305 with master key)
+    encryptedName: text("encrypted_name"),
+    nameNonce: text("name_nonce"),
+
     lastUsedAt: timestamp("last_used_at", { mode: "date" }),
     createdAt: timestamp("created_at", { mode: "date" })
       .default(sql`now()`)
@@ -175,13 +185,20 @@ export const webauthnCredentials = pgTable(
 // Application Tables
 // ============================================
 
-// Folders (hierarchical)
+// Folders (hierarchical, with encrypted names)
 export const folders = pgTable(
   "folders",
   {
     id: uuidPrimaryKey("id"),
     userId: text("user_id").notNull(), // Clerk user ID
-    name: text("name").notNull(),
+
+    // Legacy plaintext name (nullable - cleared when encrypted)
+    name: text("name"),
+
+    // Encrypted name (XSalsa20-Poly1305 with master key)
+    encryptedName: text("encrypted_name"),
+    nameNonce: text("name_nonce"),
+
     parentId: uuid("parent_id").references((): any => folders.id, {
       onDelete: "set null",
     }),
@@ -273,10 +290,23 @@ export const credentials = pgTable(
   {
     id: uuidPrimaryKey("id"),
     userId: text("user_id").notNull(), // Clerk user ID
-    provider: text("provider").notNull(),
-    name: text("name").notNull(),
+
+    // Legacy plaintext fields (nullable - cleared when encrypted)
+    provider: text("provider"),
+    name: text("name"),
+
+    // Encrypted name (XSalsa20-Poly1305 with master key)
+    encryptedName: text("encrypted_name"),
+    nameNonce: text("name_nonce"),
+
+    // Encrypted provider (XSalsa20-Poly1305 with master key)
+    encryptedProvider: text("encrypted_provider"),
+    providerNonce: text("provider_nonce"),
+
+    // Encrypted API key data (already encrypted)
     encryptedData: text("encrypted_data").notNull(),
     iv: text("iv").notNull(),
+
     createdAt: timestamp("created_at", { mode: "date" })
       .default(sql`now()`)
       .notNull(),
@@ -293,9 +323,24 @@ export const prompts = pgTable(
   {
     id: uuidPrimaryKey("id"),
     userId: text("user_id").notNull(), // Clerk user ID
-    name: text("name").notNull(),
+
+    // Legacy plaintext fields (nullable - cleared when encrypted)
+    name: text("name"),
     description: text("description"),
-    content: text("content").notNull(),
+    content: text("content"),
+
+    // Encrypted name (XSalsa20-Poly1305 with master key)
+    encryptedName: text("encrypted_name"),
+    nameNonce: text("name_nonce"),
+
+    // Encrypted description (XSalsa20-Poly1305 with master key)
+    encryptedDescription: text("encrypted_description"),
+    descriptionNonce: text("description_nonce"),
+
+    // Encrypted content (XSalsa20-Poly1305 with master key)
+    encryptedContent: text("encrypted_content"),
+    contentNonce: text("content_nonce"),
+
     createdAt: timestamp("created_at", { mode: "date" })
       .default(sql`now()`)
       .notNull(),
