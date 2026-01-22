@@ -28,10 +28,10 @@ import { useToolsStore } from '@/stores/toolsStore';
 import { useE2EE } from '@/providers/E2EEProvider';
 import { useCredentials } from '@/hooks/queries/useCredentials';
 import {
-  decryptRawCredentials,
+  decryptCredentialsWithMetadata,
   getAvailableModelsFromCredentials,
   type ModelOption,
-  type RawCredential,
+  type PartiallyDecryptedCredential,
 } from '@/lib/ai';
 import { MentionList, type MentionListRef } from './MentionList';
 import type { ProcessedFile } from '@/lib/fileProcessing';
@@ -88,14 +88,14 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
       }
 
       try {
-        const raw: RawCredential[] = rawCredentials.map((c) => ({
+        const partial: PartiallyDecryptedCredential[] = rawCredentials.map((c) => ({
           id: c.id,
           provider: c.provider,
           name: c.name,
           encryptedData: c.encryptedData,
           iv: c.iv,
         }));
-        const decrypted = decryptRawCredentials(raw);
+        const decrypted = decryptCredentialsWithMetadata(partial);
         const availableModels = await getAvailableModelsFromCredentials(decrypted);
         setModels(availableModels);
       } catch (err) {

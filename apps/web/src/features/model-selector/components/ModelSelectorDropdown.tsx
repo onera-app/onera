@@ -3,10 +3,10 @@ import { useUIStore } from '@/stores/uiStore';
 import { useE2EE } from '@/providers/E2EEProvider';
 import { useCredentials } from '@/hooks/queries/useCredentials';
 import {
-  decryptRawCredentials,
+  decryptCredentialsWithMetadata,
   getAvailableModelsFromCredentials,
   type ModelOption,
-  type RawCredential,
+  type PartiallyDecryptedCredential,
 } from '@/lib/ai';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -80,14 +80,14 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
 
       setLoadingModels(true);
       try {
-        const raw: RawCredential[] = rawCredentials.map((c) => ({
+        const partial: PartiallyDecryptedCredential[] = rawCredentials.map((c) => ({
           id: c.id,
           provider: c.provider,
           name: c.name,
           encryptedData: c.encryptedData,
           iv: c.iv,
         }));
-        const decrypted = decryptRawCredentials(raw);
+        const decrypted = decryptCredentialsWithMetadata(partial);
         const availableModels = await getAvailableModelsFromCredentials(decrypted);
         setModels(availableModels);
       } catch (err) {

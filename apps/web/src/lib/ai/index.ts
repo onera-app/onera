@@ -17,7 +17,7 @@ export type {
 
 // Credential management
 export {
-  decryptRawCredentials,
+  decryptCredentialsWithMetadata,
   setCredentialCache,
   getCredentialById,
   clearCredentialCache,
@@ -28,7 +28,7 @@ export {
   createModelId,
   getAvailableModelsFromCredentials,
   type ModelOption,
-  type RawCredential,
+  type PartiallyDecryptedCredential,
 } from './credentials';
 
 // Provider factory

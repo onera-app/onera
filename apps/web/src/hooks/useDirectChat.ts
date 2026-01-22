@@ -11,11 +11,11 @@ import { useModelStore } from '@/stores/modelStore';
 import { useCredentials } from '@/hooks/queries/useCredentials';
 import {
   DirectBrowserTransport,
-  decryptRawCredentials,
+  decryptCredentialsWithMetadata,
   setCredentialCache,
   clearCredentialCache,
   clearProviderCache,
-  type RawCredential,
+  type PartiallyDecryptedCredential,
 } from '@/lib/ai';
 import type { NativeSearchSettings } from '@/stores/toolsStore';
 import { useModelParamsStore } from '@/stores/modelParamsStore';
@@ -141,14 +141,14 @@ export function useDirectChat({
     if (!rawCredentials || !isUnlocked) return [];
 
     try {
-      const raw: RawCredential[] = rawCredentials.map(c => ({
+      const partial: PartiallyDecryptedCredential[] = rawCredentials.map(c => ({
         id: c.id,
         provider: c.provider,
         name: c.name,
         encryptedData: c.encryptedData,
         iv: c.iv,
       }));
-      return decryptRawCredentials(raw);
+      return decryptCredentialsWithMetadata(partial);
     } catch (err) {
       console.error('Failed to decrypt credentials:', err);
       return [];

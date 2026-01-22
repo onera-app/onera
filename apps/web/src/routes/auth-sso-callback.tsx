@@ -168,12 +168,11 @@ export function SSOCallbackPage() {
       } else {
         // New user - register device first to get deviceSecret, then setup E2EE keys
         // Step 1: Register device to get server-generated deviceSecret
-        // Note: deviceName is registered as plaintext initially because we don't have the master key yet
+        // Note: We don't include deviceName yet - we'll encrypt it after key setup
         const deviceId = getOrCreateDeviceId();
         const plaintextDeviceName = getDeviceName();
         const deviceResult = await registerDeviceMutation.mutateAsync({
           deviceId,
-          deviceName: plaintextDeviceName, // Plaintext for now, will encrypt after key setup
           userAgent: navigator.userAgent,
         });
 

@@ -101,7 +101,6 @@ export const devices = pgTable(
     id: uuidPrimaryKey("id"),
     userId: text("user_id").notNull(), // Clerk user ID
     deviceId: text("device_id").notNull(), // Browser-generated device ID
-    deviceName: text("device_name"), // Legacy plaintext name (e.g., "Chrome on MacBook")
     userAgent: text("user_agent"), // Browser user agent for identification
 
     // Encrypted device name (XSalsa20-Poly1305 with master key)
@@ -163,9 +162,6 @@ export const webauthnCredentials = pgTable(
     prfSalt: text("prf_salt").notNull(), // Base64 encoded, used in HKDF
 
     // User-friendly metadata
-    // Legacy plaintext name (nullable - cleared when encrypted)
-    name: text("name"), // e.g., "MacBook Pro Touch ID"
-
     // Encrypted name (XSalsa20-Poly1305 with master key)
     encryptedName: text("encrypted_name"),
     nameNonce: text("name_nonce"),
@@ -191,9 +187,6 @@ export const folders = pgTable(
   {
     id: uuidPrimaryKey("id"),
     userId: text("user_id").notNull(), // Clerk user ID
-
-    // Legacy plaintext name (nullable - cleared when encrypted)
-    name: text("name"),
 
     // Encrypted name (XSalsa20-Poly1305 with master key)
     encryptedName: text("encrypted_name"),
@@ -291,10 +284,6 @@ export const credentials = pgTable(
     id: uuidPrimaryKey("id"),
     userId: text("user_id").notNull(), // Clerk user ID
 
-    // Legacy plaintext fields (nullable - cleared when encrypted)
-    provider: text("provider"),
-    name: text("name"),
-
     // Encrypted name (XSalsa20-Poly1305 with master key)
     encryptedName: text("encrypted_name"),
     nameNonce: text("name_nonce"),
@@ -323,11 +312,6 @@ export const prompts = pgTable(
   {
     id: uuidPrimaryKey("id"),
     userId: text("user_id").notNull(), // Clerk user ID
-
-    // Legacy plaintext fields (nullable - cleared when encrypted)
-    name: text("name"),
-    description: text("description"),
-    content: text("content"),
 
     // Encrypted name (XSalsa20-Poly1305 with master key)
     encryptedName: text("encrypted_name"),

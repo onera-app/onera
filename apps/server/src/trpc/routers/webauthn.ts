@@ -223,7 +223,6 @@ export const webauthnRouter = router({
       .select({
         id: webauthnCredentials.id,
         credentialId: webauthnCredentials.credentialId,
-        name: webauthnCredentials.name,
         encryptedName: webauthnCredentials.encryptedName,
         nameNonce: webauthnCredentials.nameNonce,
         credentialDeviceType: webauthnCredentials.credentialDeviceType,
@@ -322,8 +321,6 @@ export const webauthnRouter = router({
         prfSalt: z.string().min(1),
         encryptedMasterKey: z.string().min(1),
         masterKeyNonce: z.string().min(1),
-        // Legacy plaintext name (for backward compatibility)
-        name: z.string().max(100).optional(),
         // Encrypted name fields
         encryptedName: z.string().optional(),
         nameNonce: z.string().optional(),
@@ -378,12 +375,7 @@ export const webauthnRouter = router({
           });
         }
 
-        // Determine default name if none provided
-        const defaultName = registrationInfo.credentialDeviceType === "multiDevice"
-          ? "Synced Passkey"
-          : "Device Passkey";
-
-        // Store the credential with encrypted name if provided, else legacy plaintext
+        // Store the credential with encrypted name
         await db.insert(webauthnCredentials).values({
           userId: ctx.user.id,
           credentialId: registrationInfo.credential.id,
@@ -397,11 +389,8 @@ export const webauthnRouter = router({
           encryptedMasterKey: input.encryptedMasterKey,
           masterKeyNonce: input.masterKeyNonce,
           prfSalt: input.prfSalt,
-          // Use encrypted name if provided, otherwise fall back to plaintext
           encryptedName: input.encryptedName,
           nameNonce: input.nameNonce,
-          // Clear plaintext name if encrypted name is provided
-          name: input.encryptedName ? null : (input.name || defaultName),
         });
 
         // Clean up the used challenge
@@ -625,42 +614,24 @@ export const webauthnRouter = router({
 
   /**
    * Update passkey name
-   * Accepts encrypted name fields; clears plaintext when encrypted name is provided
+   * Accepts encrypted name fields
    */
   rename: protectedProcedure
     .input(
       z.object({
         credentialId: z.string(),
-        // Legacy plaintext name (for backward compatibility)
-        name: z.string().min(1).max(100).optional(),
         // Encrypted name fields
-        encryptedName: z.string().optional(),
-        nameNonce: z.string().optional(),
+        encryptedName: z.string(),
+        nameNonce: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Require either plaintext name or encrypted name
-      if (!input.name && !input.encryptedName) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Either name or encryptedName must be provided",
-        });
-      }
-
-      // If encrypted name is provided, use it and clear plaintext
-      const updateData = input.encryptedName
-        ? {
-            encryptedName: input.encryptedName,
-            nameNonce: input.nameNonce,
-            name: null, // Clear plaintext when using encrypted
-          }
-        : {
-            name: input.name,
-          };
-
       await db
         .update(webauthnCredentials)
-        .set(updateData)
+        .set({
+          encryptedName: input.encryptedName,
+          nameNonce: input.nameNonce,
+        })
         .where(
           and(
             eq(webauthnCredentials.userId, ctx.user.id),

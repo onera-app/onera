@@ -16,9 +16,6 @@ export const credentialsRouter = router({
     return result.map((credential) => ({
       id: credential.id,
       userId: credential.userId,
-      // Legacy plaintext fields
-      provider: credential.provider,
-      name: credential.name,
       // Encrypted metadata fields
       encryptedName: credential.encryptedName,
       nameNonce: credential.nameNonce,
@@ -50,8 +47,6 @@ export const credentialsRouter = router({
         .insert(credentials)
         .values({
           userId: ctx.user.id,
-          name: null, // No plaintext for new credentials
-          provider: null,
           encryptedName: input.encryptedName,
           nameNonce: input.nameNonce,
           encryptedProvider: input.encryptedProvider,
@@ -64,8 +59,6 @@ export const credentialsRouter = router({
       const result = {
         id: credential.id,
         userId: credential.userId,
-        provider: credential.provider,
-        name: credential.name,
         encryptedName: credential.encryptedName,
         nameNonce: credential.nameNonce,
         encryptedProvider: credential.encryptedProvider,
@@ -102,18 +95,16 @@ export const credentialsRouter = router({
         updatedAt: new Date(),
       };
 
-      // If updating name, always use encrypted (upgrades legacy credentials)
+      // If updating name, always use encrypted
       if (inputUpdates.encryptedName && inputUpdates.nameNonce) {
         updates.encryptedName = inputUpdates.encryptedName;
         updates.nameNonce = inputUpdates.nameNonce;
-        updates.name = null; // Clear plaintext
       }
 
       // If updating provider, always use encrypted
       if (inputUpdates.encryptedProvider && inputUpdates.providerNonce) {
         updates.encryptedProvider = inputUpdates.encryptedProvider;
         updates.providerNonce = inputUpdates.providerNonce;
-        updates.provider = null; // Clear plaintext
       }
 
       // If updating API key data
@@ -143,8 +134,6 @@ export const credentialsRouter = router({
       const result = {
         id: credential.id,
         userId: credential.userId,
-        provider: credential.provider,
-        name: credential.name,
         encryptedName: credential.encryptedName,
         nameNonce: credential.nameNonce,
         encryptedProvider: credential.encryptedProvider,

@@ -372,7 +372,6 @@ export const devicesRouter = router({
         id: devices.id,
         userId: devices.userId,
         deviceId: devices.deviceId,
-        deviceName: devices.deviceName, // Legacy plaintext (for migration)
         encryptedDeviceName: devices.encryptedDeviceName,
         deviceNameNonce: devices.deviceNameNonce,
         userAgent: devices.userAgent,
@@ -391,16 +390,12 @@ export const devicesRouter = router({
    * Register a new device and get its deviceSecret
    * The deviceSecret is used as server-side entropy for device share encryption
    *
-   * Accepts either plaintext deviceName (legacy) or encrypted device name fields.
-   * New registrations should use encryptedDeviceName/deviceNameNonce.
-   *
    * @returns deviceSecret for deriving device share encryption key
    */
   register: protectedProcedure
     .input(
       z.object({
         deviceId: z.string(),
-        deviceName: z.string().optional(), // Legacy plaintext (for backward compatibility)
         encryptedDeviceName: z.string().optional(),
         deviceNameNonce: z.string().optional(),
         userAgent: z.string().optional(),
@@ -421,7 +416,6 @@ export const devicesRouter = router({
 
       if (existing) {
         // Update existing device and return existing secret
-        // Only update encrypted fields if provided (migration support)
         const updateData: Record<string, unknown> = {
           userAgent: input.userAgent,
           lastSeenAt: new Date(),
@@ -430,9 +424,6 @@ export const devicesRouter = router({
         if (input.encryptedDeviceName && input.deviceNameNonce) {
           updateData.encryptedDeviceName = input.encryptedDeviceName;
           updateData.deviceNameNonce = input.deviceNameNonce;
-          updateData.deviceName = null; // Clear plaintext when encrypted
-        } else if (input.deviceName) {
-          updateData.deviceName = input.deviceName;
         }
 
         await db
@@ -448,7 +439,6 @@ export const devicesRouter = router({
         await db.insert(devices).values({
           userId: ctx.user.id,
           deviceId: input.deviceId,
-          deviceName: input.encryptedDeviceName ? null : input.deviceName, // Only store plaintext if no encryption
           encryptedDeviceName: input.encryptedDeviceName,
           deviceNameNonce: input.deviceNameNonce,
           userAgent: input.userAgent,

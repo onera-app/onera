@@ -15,7 +15,6 @@ export const foldersRouter = router({
     return result.map((folder) => ({
       id: folder.id,
       userId: folder.userId,
-      name: folder.name,
       encryptedName: folder.encryptedName,
       nameNonce: folder.nameNonce,
       parentId: folder.parentId,
@@ -41,7 +40,6 @@ export const foldersRouter = router({
       return {
         id: folder.id,
         userId: folder.userId,
-        name: folder.name,
         encryptedName: folder.encryptedName,
         nameNonce: folder.nameNonce,
         parentId: folder.parentId,
@@ -63,7 +61,6 @@ export const foldersRouter = router({
         .insert(folders)
         .values({
           userId: ctx.user.id,
-          name: null,
           encryptedName: input.encryptedName,
           nameNonce: input.nameNonce,
           parentId: input.parentId,
@@ -73,7 +70,6 @@ export const foldersRouter = router({
       const result = {
         id: folder.id,
         userId: folder.userId,
-        name: folder.name,
         encryptedName: folder.encryptedName,
         nameNonce: folder.nameNonce,
         parentId: folder.parentId,
@@ -102,11 +98,10 @@ export const foldersRouter = router({
         updatedAt: new Date(),
       };
 
-      // If renaming, always use encrypted (upgrades legacy folders)
+      // If renaming, always use encrypted
       if (inputUpdates.encryptedName && inputUpdates.nameNonce) {
         updates.encryptedName = inputUpdates.encryptedName;
         updates.nameNonce = inputUpdates.nameNonce;
-        updates.name = null; // Clear plaintext
       }
 
       if (inputUpdates.parentId !== undefined) {
@@ -126,7 +121,6 @@ export const foldersRouter = router({
       const result = {
         id: folder.id,
         userId: folder.userId,
-        name: folder.name,
         encryptedName: folder.encryptedName,
         nameNonce: folder.nameNonce,
         parentId: folder.parentId,

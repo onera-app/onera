@@ -16,13 +16,10 @@ export const promptsRouter = router({
     return result.map((prompt) => ({
       id: prompt.id,
       userId: prompt.userId,
-      name: prompt.name,
       encryptedName: prompt.encryptedName,
       nameNonce: prompt.nameNonce,
-      description: prompt.description,
       encryptedDescription: prompt.encryptedDescription,
       descriptionNonce: prompt.descriptionNonce,
-      content: prompt.content,
       encryptedContent: prompt.encryptedContent,
       contentNonce: prompt.contentNonce,
       createdAt: prompt.createdAt.getTime(),
@@ -47,13 +44,10 @@ export const promptsRouter = router({
       return {
         id: prompt.id,
         userId: prompt.userId,
-        name: prompt.name,
         encryptedName: prompt.encryptedName,
         nameNonce: prompt.nameNonce,
-        description: prompt.description,
         encryptedDescription: prompt.encryptedDescription,
         descriptionNonce: prompt.descriptionNonce,
-        content: prompt.content,
         encryptedContent: prompt.encryptedContent,
         contentNonce: prompt.contentNonce,
         createdAt: prompt.createdAt.getTime(),
@@ -78,9 +72,6 @@ export const promptsRouter = router({
         .insert(prompts)
         .values({
           userId: ctx.user.id,
-          name: null, // No plaintext for new prompts
-          description: null,
-          content: null,
           encryptedName: input.encryptedName,
           nameNonce: input.nameNonce,
           encryptedDescription: input.encryptedDescription,
@@ -93,13 +84,10 @@ export const promptsRouter = router({
       const result = {
         id: prompt.id,
         userId: prompt.userId,
-        name: prompt.name,
         encryptedName: prompt.encryptedName,
         nameNonce: prompt.nameNonce,
-        description: prompt.description,
         encryptedDescription: prompt.encryptedDescription,
         descriptionNonce: prompt.descriptionNonce,
-        content: prompt.content,
         encryptedContent: prompt.encryptedContent,
         contentNonce: prompt.contentNonce,
         createdAt: prompt.createdAt.getTime(),
@@ -131,25 +119,22 @@ export const promptsRouter = router({
         updatedAt: new Date(),
       };
 
-      // If updating name, always use encrypted (upgrades legacy prompts)
+      // If updating name, always use encrypted
       if (inputUpdates.encryptedName && inputUpdates.nameNonce) {
         updates.encryptedName = inputUpdates.encryptedName;
         updates.nameNonce = inputUpdates.nameNonce;
-        updates.name = null; // Clear plaintext
       }
 
       // If updating description, always use encrypted
       if (inputUpdates.encryptedDescription !== undefined && inputUpdates.descriptionNonce !== undefined) {
         updates.encryptedDescription = inputUpdates.encryptedDescription;
         updates.descriptionNonce = inputUpdates.descriptionNonce;
-        updates.description = null; // Clear plaintext
       }
 
       // If updating content, always use encrypted
       if (inputUpdates.encryptedContent && inputUpdates.contentNonce) {
         updates.encryptedContent = inputUpdates.encryptedContent;
         updates.contentNonce = inputUpdates.contentNonce;
-        updates.content = null; // Clear plaintext
       }
 
       const [prompt] = await db
@@ -165,13 +150,10 @@ export const promptsRouter = router({
       const result = {
         id: prompt.id,
         userId: prompt.userId,
-        name: prompt.name,
         encryptedName: prompt.encryptedName,
         nameNonce: prompt.nameNonce,
-        description: prompt.description,
         encryptedDescription: prompt.encryptedDescription,
         descriptionNonce: prompt.descriptionNonce,
-        content: prompt.content,
         encryptedContent: prompt.encryptedContent,
         contentNonce: prompt.contentNonce,
         createdAt: prompt.createdAt.getTime(),

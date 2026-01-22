@@ -214,12 +214,11 @@ export function useSignUpWithE2EE() {
         }
 
         // 3. Register device and get device secret FIRST
-        // Note: deviceName is plaintext initially, we'll encrypt after key setup
+        // Note: We don't include deviceName yet - we'll encrypt it after key setup
         const deviceId = getOrCreateDeviceId();
         const plaintextDeviceName = getDeviceName();
         const deviceResult = await registerDeviceMutation.mutateAsync({
           deviceId,
-          deviceName: plaintextDeviceName,
           userAgent: navigator.userAgent,
         });
 
@@ -301,12 +300,11 @@ export function useSignUpWithE2EE() {
         }
 
         // Register device and get device secret FIRST
-        // Note: deviceName is plaintext initially, we'll encrypt after key setup
+        // Note: We don't include deviceName yet - we'll encrypt it after key setup
         const deviceId = getOrCreateDeviceId();
         const plaintextDeviceName = getDeviceName();
         const deviceResult = await registerDeviceMutation.mutateAsync({
           deviceId,
-          deviceName: plaintextDeviceName,
           userAgent: navigator.userAgent,
         });
 
@@ -608,12 +606,11 @@ export function useSSOCallback() {
         // New user - setup E2EE keys
 
         // Register device and get device secret FIRST
-        // Note: deviceName is plaintext initially, we'll encrypt after key setup
+        // Note: We don't include deviceName yet - we'll encrypt it after key setup
         const deviceId = getOrCreateDeviceId();
         const plaintextDeviceName = getDeviceName();
         const deviceResult = await registerDeviceMutation.mutateAsync({
           deviceId,
-          deviceName: plaintextDeviceName,
           userAgent: navigator.userAgent,
         });
 

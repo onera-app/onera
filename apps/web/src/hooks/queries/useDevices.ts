@@ -30,17 +30,14 @@ export function useDevices() {
     return query.data.map((device) => {
       let deviceName: string | null = null;
 
-      // Prefer encrypted name if available and E2EE is unlocked
+      // Decrypt device name (plaintext columns have been dropped)
       if (device.encryptedDeviceName && device.deviceNameNonce && isUnlocked()) {
         try {
           deviceName = decryptDeviceName(device.encryptedDeviceName, device.deviceNameNonce);
         } catch (error) {
           console.error('Failed to decrypt device name:', error);
-          deviceName = device.deviceName; // Fallback to legacy plaintext
+          deviceName = null;
         }
-      } else {
-        // Fallback to legacy plaintext name
-        deviceName = device.deviceName;
       }
 
       return {

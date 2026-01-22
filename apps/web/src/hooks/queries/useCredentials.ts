@@ -15,12 +15,8 @@ export function useCredentials() {
     if (!query.data) return undefined;
     return query.data.map((credential) => ({
       ...credential,
-      name: credential.encryptedName
-        ? decryptCredentialName(credential.encryptedName, credential.nameNonce!)
-        : credential.name ?? "Unnamed Credential",
-      provider: credential.encryptedProvider
-        ? decryptCredentialProvider(credential.encryptedProvider, credential.providerNonce!)
-        : credential.provider ?? "unknown",
+      name: decryptCredentialName(credential.encryptedName!, credential.nameNonce!),
+      provider: decryptCredentialProvider(credential.encryptedProvider!, credential.providerNonce!),
     }));
   }, [query.data]);
 

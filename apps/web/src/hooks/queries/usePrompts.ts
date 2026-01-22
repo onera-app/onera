@@ -16,15 +16,11 @@ export function usePrompts() {
     if (!query.data) return [];
     return query.data.map((prompt) => ({
       ...prompt,
-      name: prompt.encryptedName
-        ? decryptPromptName(prompt.encryptedName, prompt.nameNonce!)
-        : prompt.name ?? "Unnamed Prompt",
+      name: decryptPromptName(prompt.encryptedName!, prompt.nameNonce!),
       description: prompt.encryptedDescription
         ? decryptPromptDescription(prompt.encryptedDescription, prompt.descriptionNonce!)
-        : prompt.description ?? null,
-      content: prompt.encryptedContent
-        ? decryptPromptContent(prompt.encryptedContent, prompt.contentNonce!)
-        : prompt.content ?? "",
+        : null,
+      content: decryptPromptContent(prompt.encryptedContent!, prompt.contentNonce!),
     }));
   }, [query.data]);
 
@@ -44,15 +40,11 @@ export function usePrompt(id: string) {
     if (!query.data) return undefined;
     return {
       ...query.data,
-      name: query.data.encryptedName
-        ? decryptPromptName(query.data.encryptedName, query.data.nameNonce!)
-        : query.data.name ?? "Unnamed Prompt",
+      name: decryptPromptName(query.data.encryptedName!, query.data.nameNonce!),
       description: query.data.encryptedDescription
         ? decryptPromptDescription(query.data.encryptedDescription, query.data.descriptionNonce!)
-        : query.data.description ?? null,
-      content: query.data.encryptedContent
-        ? decryptPromptContent(query.data.encryptedContent, query.data.contentNonce!)
-        : query.data.content ?? "",
+        : null,
+      content: decryptPromptContent(query.data.encryptedContent!, query.data.contentNonce!),
     };
   }, [query.data]);
 

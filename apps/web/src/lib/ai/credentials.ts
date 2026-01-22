@@ -5,8 +5,6 @@
 
 import {
   decryptCredentials,
-  decryptCredentialName,
-  decryptCredentialProvider,
   isUnlocked,
   secureZero,
 } from '@onera/crypto';
@@ -17,60 +15,44 @@ import type { LLMProvider } from '@onera/types';
 let cachedCredentials: DecryptedCredential[] | null = null;
 
 /**
- * Raw credential format from server (supports both legacy and encrypted metadata)
+ * Credential with pre-decrypted metadata (name/provider already decrypted by useCredentials hook)
+ * Used by components that receive credentials from useCredentials()
  */
-export interface RawCredential {
+export interface PartiallyDecryptedCredential {
   id: string;
-  // Legacy plaintext fields (nullable - cleared when encrypted)
-  provider: string | null;
-  name: string | null;
-  // Encrypted metadata fields
-  encryptedName?: string | null;
-  nameNonce?: string | null;
-  encryptedProvider?: string | null;
-  providerNonce?: string | null;
-  // Encrypted API key data
+  // Already decrypted by useCredentials hook
+  name: string;
+  provider: string;
+  // Encrypted API key data (still needs decryption)
   encryptedData: string;
   iv: string;
 }
 
 /**
- * Decrypt credentials from raw encrypted format
- * Handles both legacy plaintext and encrypted name/provider fields
- * Used by hooks that already have credentials from the server
+ * Decrypt credentials that have pre-decrypted metadata
+ * Used by components that receive credentials from useCredentials() hook
+ * which already decrypts name/provider - this just decrypts the API key data
  */
-export function decryptRawCredentials(encrypted: RawCredential[]): DecryptedCredential[] {
+export function decryptCredentialsWithMetadata(credentials: PartiallyDecryptedCredential[]): DecryptedCredential[] {
   if (!isUnlocked()) {
     throw new Error('E2EE not unlocked');
   }
 
-  if (encrypted.length === 0) {
+  if (credentials.length === 0) {
     return [];
   }
 
-  // First, decrypt name and provider metadata
-  const withDecryptedMetadata = encrypted.map((c) => {
-    // Decrypt name: prefer encrypted, fall back to legacy plaintext
-    const name = c.encryptedName && c.nameNonce
-      ? decryptCredentialName(c.encryptedName, c.nameNonce)
-      : c.name ?? 'Unnamed Credential';
-
-    // Decrypt provider: prefer encrypted, fall back to legacy plaintext
-    const provider = c.encryptedProvider && c.providerNonce
-      ? decryptCredentialProvider(c.encryptedProvider, c.providerNonce)
-      : c.provider ?? 'unknown';
-
-    return {
-      id: c.id,
-      provider,
-      name,
-      encrypted_data: c.encryptedData,
-      iv: c.iv,
-    };
-  });
+  // Transform to format expected by decryptCredentials
+  const withMetadata = credentials.map((c) => ({
+    id: c.id,
+    provider: c.provider,
+    name: c.name,
+    encrypted_data: c.encryptedData,
+    iv: c.iv,
+  }));
 
   // Decrypt API key data using master key
-  const decrypted = decryptCredentials(withDecryptedMetadata);
+  const decrypted = decryptCredentials(withMetadata);
 
   // Filter failed decryptions and transform to our format
   return decrypted

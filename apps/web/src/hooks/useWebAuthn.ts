@@ -46,19 +46,16 @@ export function useHasPasskeys(enabled = true) {
 
 /**
  * Decrypt a passkey name from server response
- * Returns decrypted name if encrypted, otherwise returns plaintext name
+ * Plaintext columns have been dropped - only encrypted names are available
  */
 export function decryptPasskeyName(passkey: {
-  name: string | null;
   encryptedName: string | null;
   nameNonce: string | null;
 }): string {
-  // Try encrypted name first
   if (passkey.encryptedName && passkey.nameNonce && isUnlocked()) {
     return decryptWebauthnCredentialName(passkey.encryptedName, passkey.nameNonce);
   }
-  // Fall back to plaintext name
-  return passkey.name || "Unnamed Passkey";
+  return "Unnamed Passkey";
 }
 
 /**
@@ -142,7 +139,7 @@ export function usePasskeyRegistration() {
     // Step 5: Encrypt master key with PRF-derived KEK
     const encrypted = await encryptMasterKeyWithPRF(masterKey, prfOutput, prfSalt);
 
-    // Step 6: Encrypt the passkey name if E2EE is unlocked
+    // Step 6: Encrypt the passkey name (required since plaintext columns were dropped)
     let encryptedNameData: { encryptedName: string; nameNonce: string } | undefined;
     if (name && isUnlocked()) {
       encryptedNameData = encryptWebauthnCredentialName(name);
@@ -156,8 +153,7 @@ export function usePasskeyRegistration() {
       prfSalt,
       encryptedMasterKey: encrypted.ciphertext,
       masterKeyNonce: encrypted.nonce,
-      // Use encrypted name if available, otherwise fall back to plaintext
-      name: encryptedNameData ? undefined : name,
+      // Only encrypted name is supported (plaintext column dropped)
       encryptedName: encryptedNameData?.encryptedName,
       nameNonce: encryptedNameData?.nameNonce,
     });
@@ -295,11 +291,8 @@ export function useRenamePasskey() {
         nameNonce: encryptedNameData.nameNonce,
       });
     } else {
-      // Fall back to plaintext
-      return mutation.mutateAsync({
-        credentialId,
-        name,
-      });
+      // E2EE must be unlocked to rename
+      throw new Error('E2EE must be unlocked to rename passkey');
     }
   }
 

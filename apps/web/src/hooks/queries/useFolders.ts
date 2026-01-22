@@ -9,9 +9,7 @@ export function useFolders() {
     if (!query.data) return [];
     return query.data.map((folder) => ({
       ...folder,
-      name: folder.encryptedName
-        ? decryptFolderName(folder.encryptedName, folder.nameNonce!)
-        : folder.name ?? "Unnamed Folder",
+      name: decryptFolderName(folder.encryptedName!, folder.nameNonce!),
     }));
   }, [query.data]);
 
@@ -31,9 +29,7 @@ export function useFolder(id: string) {
     if (!query.data) return undefined;
     return {
       ...query.data,
-      name: query.data.encryptedName
-        ? decryptFolderName(query.data.encryptedName, query.data.nameNonce!)
-        : query.data.name ?? "Unnamed Folder",
+      name: decryptFolderName(query.data.encryptedName!, query.data.nameNonce!),
     };
   }, [query.data]);
 
