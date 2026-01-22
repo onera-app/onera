@@ -6,13 +6,14 @@ import {
   decryptCredentialName,
   encryptCredentialProvider,
   decryptCredentialProvider,
+  isUnlocked,
 } from "@onera/crypto";
 
 export function useCredentials() {
   const query = trpc.credentials.list.useQuery();
 
   const decryptedCredentials = useMemo(() => {
-    if (!query.data) return undefined;
+    if (!query.data || !isUnlocked()) return undefined;
     return query.data.map((credential) => ({
       ...credential,
       name: decryptCredentialName(credential.encryptedName!, credential.nameNonce!),

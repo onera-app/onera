@@ -1,12 +1,12 @@
 import { useMemo } from "react";
 import { trpc } from "@/lib/trpc";
-import { encryptFolderName, decryptFolderName } from "@onera/crypto";
+import { encryptFolderName, decryptFolderName, isUnlocked } from "@onera/crypto";
 
 export function useFolders() {
   const query = trpc.folders.list.useQuery();
 
   const decryptedFolders = useMemo(() => {
-    if (!query.data) return [];
+    if (!query.data || !isUnlocked()) return [];
     return query.data.map((folder) => ({
       ...folder,
       name: decryptFolderName(folder.encryptedName!, folder.nameNonce!),
@@ -26,7 +26,7 @@ export function useFolder(id: string) {
   );
 
   const decryptedFolder = useMemo(() => {
-    if (!query.data) return undefined;
+    if (!query.data || !isUnlocked()) return undefined;
     return {
       ...query.data,
       name: decryptFolderName(query.data.encryptedName!, query.data.nameNonce!),

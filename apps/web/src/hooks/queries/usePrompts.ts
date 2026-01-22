@@ -7,13 +7,14 @@ import {
   decryptPromptDescription,
   encryptPromptContent,
   decryptPromptContent,
+  isUnlocked,
 } from "@onera/crypto";
 
 export function usePrompts() {
   const query = trpc.prompts.list.useQuery();
 
   const decryptedPrompts = useMemo(() => {
-    if (!query.data) return [];
+    if (!query.data || !isUnlocked()) return [];
     return query.data.map((prompt) => ({
       ...prompt,
       name: decryptPromptName(prompt.encryptedName!, prompt.nameNonce!),
@@ -37,7 +38,7 @@ export function usePrompt(id: string) {
   );
 
   const decryptedPrompt = useMemo(() => {
-    if (!query.data) return undefined;
+    if (!query.data || !isUnlocked()) return undefined;
     return {
       ...query.data,
       name: decryptPromptName(query.data.encryptedName!, query.data.nameNonce!),
