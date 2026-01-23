@@ -1,0 +1,120 @@
+---
+title: Multi-Device Support
+description: Device registration and re-sharding for multiple devices
+---
+
+# Multi-Device Support
+
+## Device Registration
+
+When a user signs in on a new device:
+
+```mermaid
+sequenceDiagram
+    participant Device as New Device
+    participant Server as Server
+    
+    Device->>Server: 1. Authenticate with Clerk
+    Device->>Server: 2. Register device<br/>{ deviceId, fingerprint }
+    Note over Server: 3. Server generates and stores<br/>device secret (32 bytes)
+    Server->>Device: 4. Return device secret
+    Note over Device: 5. Derive device encryption key<br/>key = hash(deviceId +<br/>fingerprint + deviceSecret)
+```
+
+## Re-sharding for New Device
+
+When adding a new device, the key shares must be regenerated:
+
+```typescript
+function reshardForNewDevice(
+  masterKey: Uint8Array,
+  existingAuthShare: Uint8Array
+): NewShares {
+  // Generate new random device share
+  const newDeviceShare = randombytes_buf(32);
+
+  // Calculate new recovery share to maintain:
+  // M = D' XOR A XOR R'
+  const newRecoveryShare = new Uint8Array(32);
+  for (let i = 0; i < 32; i++) {
+    newRecoveryShare[i] = masterKey[i] ^
+                          newDeviceShare[i] ^
+                          existingAuthShare[i];
+  }
+
+  return {
+    deviceShare: newDeviceShare,
+    recoveryShare: newRecoveryShare,
+    // Auth share remains unchanged
+  };
+}
+```
+
+## New Device Setup Flow
+
+```mermaid
+flowchart TB
+    Start["New Device Setup"]
+    Auth["User authenticates with Clerk"]
+    Check{"Device recognized?"}
+    
+    Recovery["Enter recovery phrase"]
+    Fetch["Fetch stored device share (encrypted)"]
+    
+    DecryptMK["Decrypt MK with recovery key"]
+    DecryptShare["Decrypt device share"]
+    
+    Reshard["Re-shard for device"]
+    
+    SetPW["Set password/passkey for this device"]
+    Done["Session established"]
+    
+    Start --> Auth --> Check
+    Check -->|No| Recovery --> DecryptMK --> Reshard --> SetPW
+    Check -->|Yes| Fetch --> DecryptShare --> SetPW
+    SetPW --> Done
+```
+
+## Device Management
+
+```mermaid
+erDiagram
+    DEVICES {
+        uuid id PK
+        string userId
+        string deviceId "Browser-generated UUID"
+        string deviceSecret "Server-generated entropy (32 bytes)"
+        boolean trusted "User can revoke"
+        timestamp lastSeenAt
+        timestamp createdAt
+    }
+```
+
+### Database Schema
+
+```sql
+CREATE TABLE devices (
+  id UUID PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  device_id TEXT NOT NULL,         -- Browser UUID
+  device_secret TEXT NOT NULL,     -- Server-generated entropy
+  trusted BOOLEAN DEFAULT false,
+  last_seen_at TIMESTAMP,
+  created_at TIMESTAMP
+);
+```
+
+## Device Revocation
+
+When a device is revoked:
+
+1. **Server deletes device record** (deviceSecret destroyed)
+2. **Device share on that device becomes undecryptable**
+3. **User must re-authenticate** on that device as new device
+
+```mermaid
+flowchart LR
+    Revoke["User revokes device"] --> Delete["Server deletes device record<br/>(deviceSecret destroyed)"]
+    Delete --> Undecryptable["Device share becomes<br/>undecryptable"]
+    Undecryptable --> Reauth["Must re-authenticate<br/>as new device"]
+```

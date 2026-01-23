@@ -1,0 +1,21 @@
+{
+  "title": "E2EE Architecture",
+  "pages": [
+    "index",
+    "threat-model",
+    "cryptographic-primitives",
+    "key-hierarchy",
+    "key-derivation",
+    "key-sharding",
+    "encryption-flows",
+    "session-management",
+    "recovery",
+    "multi-device",
+    "webauthn",
+    "server-architecture",
+    "security-analysis",
+    "comparison",
+    "conclusion",
+    "references"
+  ]
+}

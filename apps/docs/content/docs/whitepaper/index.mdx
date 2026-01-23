@@ -1,0 +1,76 @@
+---
+title: E2EE Architecture Whitepaper
+description: Technical documentation of Onera's end-to-end encryption architecture
+---
+
+# Onera E2EE Architecture Whitepaper
+
+**Version:** 1.0  
+**Date:** January 2026  
+**Authors:** Onera Security Team
+
+## Abstract
+
+Onera is a privacy-focused AI chat application that implements true end-to-end encryption (E2EE) for all user data. This whitepaper details Onera's cryptographic architecture, which ensures that sensitive information—including chat messages, API credentials, and personal notes—remains encrypted at rest and in transit, with decryption possible only on authorized user devices.
+
+Our architecture employs a defense-in-depth approach combining:
+
+- **XSalsa20-Poly1305** for authenticated symmetric encryption
+- **X25519** for asymmetric key exchange and sharing
+- **Argon2id** for memory-hard password-based key derivation
+- **3-share XOR-based key sharding** requiring compromise of multiple independent systems
+- **WebAuthn PRF** for hardware-bound passkey authentication
+
+The server operates exclusively as an encrypted blob store, never accessing plaintext user data. LLM API calls are made directly from the client to providers, bypassing Onera infrastructure entirely.
+
+## Introduction
+
+### Motivation
+
+As AI assistants become integral to daily workflows, users increasingly share sensitive information—personal conversations, proprietary code, API credentials, and confidential business data. Traditional AI chat applications transmit and store this data in plaintext on provider servers, creating significant privacy and security risks.
+
+Onera addresses this fundamental issue by implementing end-to-end encryption where:
+- All sensitive data is encrypted client-side before transmission
+- The server stores only encrypted blobs it cannot decrypt
+- Decryption keys never leave the user's devices
+- LLM API calls connect directly to providers, bypassing Onera servers
+
+### Design Goals
+
+1. **Zero-Knowledge Server**: The server cannot access plaintext user data under any circumstances
+2. **Defense in Depth**: Multiple independent security layers protect user data
+3. **Usability**: Strong security without sacrificing user experience
+4. **Recovery**: Multiple paths to recover access without compromising security
+5. **Multi-Device**: Seamless synchronization across authenticated devices
+6. **Transparency**: Open architecture that can be independently audited
+
+### Document Scope
+
+This whitepaper covers:
+- Cryptographic algorithms and their selection rationale
+- Key generation, derivation, and management
+- Data encryption and decryption flows
+- Threat model and security analysis
+- Recovery and multi-device mechanisms
+
+Implementation details reference the open-source codebase at `/packages/crypto/`.
+
+## Table of Contents
+
+<Cards>
+  <Card title="Threat Model" href="/docs/whitepaper/threat-model" description="Adversary capabilities, security goals, and trust boundaries" />
+  <Card title="Cryptographic Primitives" href="/docs/whitepaper/cryptographic-primitives" description="Symmetric encryption, asymmetric encryption, and key derivation" />
+  <Card title="Key Hierarchy" href="/docs/whitepaper/key-hierarchy" description="Master key, private keys, chat keys, and session keys" />
+  <Card title="Key Derivation" href="/docs/whitepaper/key-derivation" description="Password to KEK derivation and unlock flows" />
+  <Card title="Key Sharding" href="/docs/whitepaper/key-sharding" description="3-share XOR-based key sharding system" />
+  <Card title="Encryption Flows" href="/docs/whitepaper/encryption-flows" description="Chat, credential, and notes encryption" />
+  <Card title="Session Management" href="/docs/whitepaper/session-management" description="Browser sessions and XSS protection" />
+  <Card title="Recovery Mechanisms" href="/docs/whitepaper/recovery" description="BIP39 mnemonic and account recovery" />
+  <Card title="Multi-Device Support" href="/docs/whitepaper/multi-device" description="Device registration and re-sharding" />
+  <Card title="WebAuthn Integration" href="/docs/whitepaper/webauthn" description="Passkey authentication with PRF extension" />
+  <Card title="Server Architecture" href="/docs/whitepaper/server-architecture" description="Zero-knowledge design and database schema" />
+  <Card title="Security Analysis" href="/docs/whitepaper/security-analysis" description="Cryptographic strength and attack resistance" />
+  <Card title="Industry Comparison" href="/docs/whitepaper/comparison" description="Comparison with Signal, Ente, Bitwarden, and ProtonMail" />
+  <Card title="Conclusion" href="/docs/whitepaper/conclusion" description="Summary and security guarantees" />
+  <Card title="References" href="/docs/whitepaper/references" description="Citations and source code references" />
+</Cards>

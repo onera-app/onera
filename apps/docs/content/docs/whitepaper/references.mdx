@@ -1,0 +1,63 @@
+---
+title: References
+description: Citations and source code references
+---
+
+# References
+
+## External References
+
+1. **libsodium Documentation**  
+   https://doc.libsodium.org/
+
+2. **Argon2 Specification (RFC 9106)**  
+   https://www.rfc-editor.org/rfc/rfc9106
+
+3. **BIP39: Mnemonic code for generating deterministic keys**  
+   https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki
+
+4. **WebAuthn PRF Extension**  
+   https://w3c.github.io/webauthn/#prf-extension
+
+5. **Signal Protocol Specification**  
+   https://signal.org/docs/
+
+6. **Ente Architecture**  
+   https://ente.io/architecture/
+
+7. **NIST SP 800-132: Password-Based Key Derivation**  
+   https://csrc.nist.gov/publications/detail/sp/800-132/final
+
+8. **XSalsa20 and Poly1305**  
+   https://nacl.cr.yp.to/
+
+## Source Code References
+
+| Component | Path |
+|-----------|------|
+| libsodium init | `/packages/crypto/src/sodium/init.ts` |
+| Symmetric encryption | `/packages/crypto/src/sodium/symmetric.ts` |
+| Asymmetric encryption | `/packages/crypto/src/sodium/asymmetric.ts` |
+| Master key management | `/packages/crypto/src/sodium/masterKey.ts` |
+| Key manager | `/packages/crypto/src/sodium/keyManager.ts` |
+| Password derivation | `/packages/crypto/src/password/passwordDerivation.ts` |
+| Chat encryption | `/packages/crypto/src/sodium/chatEncryption.ts` |
+| Key sharding | `/packages/crypto/src/sharding/shareManager.ts` |
+| Device share | `/packages/crypto/src/sharding/deviceShare.ts` |
+| Recovery key | `/packages/crypto/src/sodium/recoveryKey.ts` |
+| WebAuthn PRF | `/packages/crypto/src/webauthn/prfDerivation.ts` |
+| Secure session | `/packages/crypto/src/session/secureSession.ts` |
+| Database schema | `/apps/server/src/db/schema.ts` |
+
+## Cryptographic Libraries
+
+| Library | Version | Purpose |
+|---------|---------|---------|
+| libsodium-sumo | 0.7.16 | Core cryptographic operations |
+| @simplewebauthn/browser | 13.2.2 | WebAuthn/passkey support |
+
+## Document Information
+
+**Document Version:** 1.0  
+**Last Updated:** January 2026  
+**Contact:** security@onera.ai

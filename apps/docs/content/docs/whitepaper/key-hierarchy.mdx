@@ -1,0 +1,91 @@
+---
+title: Key Hierarchy
+description: Master key, private keys, chat keys, and session keys
+---
+
+# Key Hierarchy
+
+Onera uses a hierarchical key structure where a single master key protects all user data.
+
+## Key Types Overview
+
+```mermaid
+flowchart TB
+    MK["Master Key<br/>(256-bit)<br/>Root of all encryption operations"]
+    
+    MK --> PK["Private Key<br/>(X25519)<br/>For sharing"]
+    MK --> CK["Chat Keys<br/>(per-chat)<br/>256-bit each"]
+    MK --> CE["Credential<br/>Encryption<br/>Direct w/ MK"]
+    
+    PK --> SCK["Shared Chat<br/>Key Exchange"]
+    CK --> CC["Chat Content<br/>& Titles"]
+```
+
+## Key Descriptions
+
+| Key | Size | Generation | Purpose |
+|-----|------|------------|---------|
+| **Master Key** | 256-bit | `randombytes_buf(32)` | Root key for all encryption |
+| **Private Key** | 256-bit | `crypto_box_keypair()` | Asymmetric decryption, chat sharing |
+| **Public Key** | 256-bit | `crypto_box_keypair()` | Asymmetric encryption, identity |
+| **Recovery Key** | 256-bit | `randombytes_buf(32)` | Account recovery via BIP39 mnemonic |
+| **Chat Key** | 256-bit | `randombytes_buf(32)` | Per-chat symmetric encryption |
+| **Session Key** | 256-bit | `crypto.subtle.generateKey()` | Browser session (non-extractable) |
+
+## Key Relationships
+
+```mermaid
+flowchart TB
+    subgraph masterEncrypts [Master Key Encrypts]
+        PK2[Private key - for storage]
+        CK2[Chat keys - for storage]
+        Creds[Credentials - API keys]
+        Notes[Notes content]
+    end
+
+    subgraph chatEncrypts [Chat Keys Encrypt]
+        Titles[Chat titles]
+        Messages[Chat message content]
+    end
+
+    subgraph privateDecrypts [Private Key Decrypts]
+        SharedKeys[Shared chat keys from other users]
+    end
+
+    subgraph recoveryEncrypts [Recovery Key Encrypts]
+        MKBackup[Backup copy of master key]
+    end
+
+    subgraph sessionEncrypts [Session Key Encrypts]
+        MKSession[Master key - for browser persistence]
+        PKSession[Private key - for browser persistence]
+    end
+
+    MK[Master Key] --> masterEncrypts
+    CK[Chat Key] --> chatEncrypts
+    PrivK[Private Key] --> privateDecrypts
+    RK[Recovery Key] --> recoveryEncrypts
+    SK[Session Key] --> sessionEncrypts
+```
+
+### Relationship Summary
+
+1. **Master Key** encrypts:
+   - Private key (for storage)
+   - Chat keys (for storage)
+   - Credentials (API keys)
+   - Notes content
+
+2. **Chat Keys** encrypt:
+   - Chat titles
+   - Chat message content
+
+3. **Private Key** decrypts:
+   - Shared chat keys from other users
+
+4. **Recovery Key** encrypts:
+   - Backup copy of master key (for recovery)
+
+5. **Session Key** encrypts:
+   - Master key (for browser session persistence)
+   - Private key (for browser session persistence)

@@ -21,7 +21,9 @@
 		"db:migrate": "turbo run db:migrate --filter=@onera/server",
 		"docker:up": "docker compose up -d",
 		"docker:down": "docker compose down",
-		"docker:build": "docker compose build"
+		"docker:build": "docker compose build",
+		"dev:docs": "turbo run dev --filter=@onera/docs",
+		"build:docs": "turbo run build --filter=@onera/docs"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.57.0",

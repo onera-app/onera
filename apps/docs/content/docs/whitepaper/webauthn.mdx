@@ -1,0 +1,129 @@
+---
+title: WebAuthn/Passkey Integration
+description: Passkey authentication with PRF extension for hardware-bound key derivation
+---
+
+# WebAuthn/Passkey Integration
+
+## PRF Extension Overview
+
+WebAuthn's PRF (Pseudo-Random Function) extension enables device-bound key derivation:
+
+```mermaid
+flowchart TB
+    subgraph auth [Authenticator]
+        PK["Private Key<br/>(never exported)"]
+        Salt["Salt<br/>(from relying party)"]
+        PRF["PRF Evaluation"]
+        Output["PRF Output<br/>(32 bytes, unique per salt)"]
+        
+        PK --> PRF
+        Salt --> PRF
+        PRF --> Output
+    end
+```
+
+### Key Properties
+
+- **PRF output never leaves the authenticator** in extractable form
+- **Different salt → different output** (allows key rotation)
+- **Requires user verification** (biometric/PIN)
+- **Bound to the authenticator hardware**
+
+## PRF to KEK Derivation
+
+```mermaid
+flowchart TB
+    PRFOut["PRF Output (32 bytes)"]
+    HKDF["HKDF-SHA256<br/>info: 'onera-webauthn-prf-kek-v1'<br/>salt: stored per-credential"]
+    KEK["KEK (256-bit)"]
+    Decrypt["Decrypt master key<br/>masterKey = XSalsa20_open(<br/>encryptedMasterKey, KEK, nonce)"]
+    
+    PRFOut --> HKDF --> KEK --> Decrypt
+```
+
+## Passkey Registration Flow
+
+```mermaid
+flowchart TB
+    Init["1. User initiates passkey setup"]
+    GenSalt["2. Generate PRF salt<br/>salt = randombytes_buf(32)"]
+    Create["3. Call WebAuthn create() with PRF extension"]
+    Extract["4. Extract PRF output from response"]
+    Derive["5. Derive KEK<br/>KEK = HKDF(prfOutput, salt, info)"]
+    Encrypt["6. Encrypt master key<br/>encrypted = XSalsa20(masterKey, KEK)"]
+    Store["7. Store credential<br/>{credentialId, publicKey,<br/>encryptedMasterKey, prfSalt}"]
+    
+    Init --> GenSalt --> Create --> Extract --> Derive --> Encrypt --> Store
+```
+
+### Registration Code
+
+```typescript
+credential = navigator.credentials.create({
+  publicKey: {
+    extensions: {
+      prf: { eval: { first: salt } }
+    }
+  }
+});
+```
+
+## Passkey Authentication Flow
+
+```mermaid
+flowchart TB
+    Init["1. User initiates passkey login"]
+    Fetch["2. Fetch credential metadata<br/>(credentialId, prfSalt)"]
+    Get["3. Call WebAuthn get() with PRF extension"]
+    Extract["4. Extract PRF output from response"]
+    Derive["5. Derive KEK<br/>KEK = HKDF(prfOutput, prfSalt, info)"]
+    Decrypt["6. Decrypt master key<br/>masterKey = XSalsa20_open(encrypted, KEK)"]
+    Done["7. Session established"]
+    
+    Init --> Fetch --> Get --> Extract --> Derive --> Decrypt --> Done
+```
+
+## Multiple Passkeys
+
+Each passkey has its own:
+- Credential ID
+- PRF salt
+- Encrypted copy of master key
+
+```mermaid
+flowchart TB
+    subgraph creds [WebAuthn Credentials Table]
+        C1["credentialId: 'abc123...'<br/>encryptedMasterKey: XSalsa20(MK, KEK_from_PRF_1)<br/>prfSalt: salt_1"]
+        C2["credentialId: 'def456...'<br/>encryptedMasterKey: XSalsa20(MK, KEK_from_PRF_2)<br/>prfSalt: salt_2"]
+    end
+```
+
+This allows **independent passkey revocation** without affecting others.
+
+## PRF Support Detection
+
+PRF support is detected heuristically (no direct API):
+
+1. WebAuthn API available
+2. Platform authenticator available
+3. Conditional mediation supported
+4. Verified during registration via `clientExtensionResults.prf.enabled`
+
+```typescript
+async function checkPRFSupport(): Promise<boolean> {
+  // Check WebAuthn availability
+  if (!window.PublicKeyCredential) return false;
+  
+  // Check platform authenticator
+  const available = await PublicKeyCredential
+    .isUserVerifyingPlatformAuthenticatorAvailable();
+  if (!available) return false;
+  
+  // Check conditional mediation (modern passkey support)
+  const conditional = await PublicKeyCredential
+    .isConditionalMediationAvailable?.();
+  
+  return conditional ?? false;
+}
+```

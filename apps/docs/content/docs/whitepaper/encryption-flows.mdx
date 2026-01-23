@@ -1,0 +1,107 @@
+---
+title: Encryption Flows
+description: Chat, credential, and notes encryption flows
+---
+
+# Encryption Flows
+
+## Chat Encryption
+
+Each chat has its own symmetric key for content isolation.
+
+### Creating a New Chat
+
+```mermaid
+flowchart TB
+    subgraph creation [Chat Creation Flow]
+        Gen["1. Generate chat key<br/>chatKey = randombytes_buf(32)"]
+        EncKey["2. Encrypt chat key with master key<br/>encryptedChatKey = XSalsa20(chatKey, masterKey)"]
+        EncTitle["3. Encrypt title<br/>encryptedTitle = XSalsa20(title, chatKey)"]
+        EncContent["4. Encrypt content<br/>encryptedChat = XSalsa20(JSON.stringify(messages), chatKey)"]
+        Store["5. Store on server<br/>{encryptedChatKey, encryptedTitle, encryptedChat, nonces}"]
+    end
+    
+    Gen --> EncKey --> EncTitle --> EncContent --> Store
+```
+
+### Decrypting a Chat
+
+```mermaid
+flowchart TB
+    Fetch["1. Retrieve encrypted chat from server"]
+    DecKey["2. Decrypt chat key<br/>chatKey = XSalsa20_open(encryptedChatKey, masterKey, nonce)"]
+    Cache["3. Cache chat key in LRU<br/>(100 entries, 10min TTL)"]
+    DecTitle["4. Decrypt title<br/>title = XSalsa20_open(encryptedTitle, chatKey, nonce)"]
+    DecContent["5. Decrypt content<br/>messages = JSON.parse(XSalsa20_open(encryptedChat, chatKey, nonce))"]
+    
+    Fetch --> DecKey --> Cache --> DecTitle --> DecContent
+```
+
+## Chat Key Caching
+
+To avoid repeated decryption, chat keys are cached in memory:
+
+```typescript
+SecureLRUCache<chatId, chatKey> {
+  maxSize: 100,
+  ttl: 10 * 60 * 1000,  // 10 minutes
+  onEvict: (key) => sodium.memzero(key)
+}
+```
+
+## Credential Encryption
+
+LLM API credentials are encrypted directly with the master key:
+
+```mermaid
+flowchart LR
+    subgraph serialize [1. Serialize]
+        Data["JSON.stringify({<br/>api_key, base_url, model<br/>})"]
+    end
+    
+    subgraph encrypt [2. Encrypt]
+        Enc["XSalsa20(data, masterKey)"]
+    end
+    
+    subgraph store [3. Store]
+        DB["{ encrypted_data, iv (nonce) }"]
+    end
+    
+    serialize --> encrypt --> store
+```
+
+## Notes Encryption
+
+Notes follow the same pattern as credentials:
+
+```typescript
+encryptedTitle = XSalsa20(title, masterKey)
+encryptedContent = XSalsa20(content, masterKey)
+```
+
+## Chat Sharing (Key Exchange)
+
+When sharing a chat with another user:
+
+```mermaid
+sequenceDiagram
+    participant Alice as Sender (Alice)
+    participant Bob as Recipient (Bob)
+    
+    Alice->>Bob: 1. Get Bob's public key
+    
+    Note over Alice: 2. Encrypt chat key with Bob's<br/>public key using sealed box:<br/>sealed = crypto_box_seal(<br/>chatKey, bobPublicKey)
+    
+    Alice->>Bob: 3. Send sealed key to Bob
+    
+    Note over Bob: 4. Bob decrypts:<br/>chatKey = crypto_box_seal_open(<br/>sealed, bobPublicKey, bobPrivateKey)
+```
+
+### Public Key Verification
+
+Users can verify each other's public keys using a 12-word verification phrase:
+
+```typescript
+verificationId = SHA256(publicKey)[0:16]  // First 128 bits
+verificationPhrase = BIP39.encode(verificationId)  // 12 words
+```
