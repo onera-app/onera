@@ -372,9 +372,6 @@ export function Sidebar() {
             </Link>
           </div>
 
-          {/* Divider */}
-          <div className="mx-4 my-3 h-px bg-sidebar-border" />
-
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto overflow-x-hidden px-3">
             <div className="pb-4">
