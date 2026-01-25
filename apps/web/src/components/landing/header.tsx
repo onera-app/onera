@@ -84,6 +84,14 @@ export function Header() {
                 {link.label}
               </button>
             ))}
+            <a
+              href="https://docs.onera.chat"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 text-sm font-medium text-neutral-600 dark:text-white/80 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/10 rounded-full transition-all"
+            >
+              Docs
+            </a>
           </nav>
 
           {/* Right Side */}
@@ -169,6 +177,15 @@ export function Header() {
                     <ArrowRight className="size-4 opacity-70" />
                   </button>
                 ))}
+                <a
+                  href="https://docs.onera.chat"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between w-full p-3 text-lg font-medium text-neutral-600 dark:text-white/80 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-white/5 rounded-xl transition-all"
+                >
+                  Docs
+                  <ArrowRight className="size-4 opacity-70" />
+                </a>
               </div>
 
               <div className="mt-auto pt-8 border-t border-neutral-200 dark:border-white/10 flex flex-col gap-3">
