@@ -20,8 +20,7 @@ Onera ensures that sensitive information—including chat messages, API credenti
 
 ## Architecture Overview
 
-```mermaid
-flowchart TB
+<Mermaid chart={`flowchart TB
     subgraph trusted [Trusted Zone - User Device]
         Browser[Browser Client]
         KeyGen[Key Generation]
@@ -29,7 +28,7 @@ flowchart TB
     end
 
     subgraph untrusted [Untrusted Zone]
-        Server[Onera Server<br/>Encrypted Blob Store]
+        Server[Onera Server - Encrypted Blob Store]
     end
 
     subgraph llm [LLM Providers]
@@ -44,7 +43,7 @@ flowchart TB
     Browser -->|Direct HTTPS| OpenAI
     Browser -->|Direct HTTPS| Anthropic
     Browser -->|Direct HTTPS| Other
-```
+`} />
 
 ## Documentation
 

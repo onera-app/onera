@@ -10,6 +10,8 @@
     "postinstall": "fumadocs-mdx"
   },
   "dependencies": {
+    "@types/mdast": "4.0.4",
+    "@types/unist": "3.0.3",
     "fumadocs-core": "16.4.7",
     "fumadocs-mdx": "14.2.6",
     "fumadocs-ui": "16.4.7",
@@ -19,7 +21,9 @@
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "rehype-mermaid": "3.0.0",
-    "tailwind-merge": "^3.4.0"
+    "tailwind-merge": "^3.4.0",
+    "unified": "11.0.5",
+    "unist-util-visit": "5.1.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
