@@ -146,7 +146,7 @@ export const ChatItem = memo(function ChatItem({
             'relative flex items-center w-full h-9 px-3 rounded-xl text-sm transition-all duration-150 overflow-hidden',
             isActive
               ? 'bg-sidebar-accent text-sidebar-foreground'
-              : 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
+              : 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50 active:scale-[0.98] active:bg-sidebar-accent/70'
           )}
         >
           {/* Lock indicator */}
@@ -183,10 +183,9 @@ export const ChatItem = memo(function ChatItem({
             <DropdownMenuTrigger asChild>
               <button
                 className={cn(
-                  'p-1 rounded-md transition-colors',
-                  isActive 
-                    ? 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent' 
-                    : 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent'
+                  'p-1 rounded-md transition-all duration-150',
+                  'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent',
+                  'active:scale-90 active:bg-sidebar-accent/80'
                 )}
                 onClick={(e) => e.preventDefault()}
               >

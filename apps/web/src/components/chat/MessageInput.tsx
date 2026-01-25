@@ -375,9 +375,9 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
                   <Button
                     onClick={onStop}
                     size="icon"
-                    className="h-8 w-8 rounded-full bg-foreground text-background hover:bg-foreground/90 transition-all duration-200"
+                    className="h-9 w-9 rounded-2xl bg-red-500 text-white hover:bg-red-600 transition-all duration-200 shadow-md"
                   >
-                    <Square className="h-3 w-3 fill-current" />
+                    <Square className="h-3.5 w-3.5 fill-current" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Stop generating</TooltipContent>
@@ -390,10 +390,10 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
                     disabled={!canSend}
                     size="icon"
                     className={cn(
-                      "h-8 w-8 rounded-full transition-all duration-200 shadow-lg",
+                      "h-9 w-9 rounded-2xl transition-all duration-200 shadow-md",
                       canSend
-                        ? "bg-primary text-primary-foreground hover:scale-105"
-                        : "bg-muted text-muted-foreground cursor-not-allowed"
+                        ? "bg-white dark:bg-white text-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-200 hover:scale-105"
+                        : "bg-neutral-600 dark:bg-neutral-700 text-neutral-400 dark:text-neutral-500 cursor-not-allowed"
                     )}
                   >
                     <ArrowUp className="h-4 w-4" strokeWidth={2.5} />

@@ -1,8 +1,7 @@
-
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, ShieldCheck, Lock, Sparkles, MessageCircle, Heart } from "lucide-react";
+import { ArrowRight, Lock, Shield, Key, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
 
@@ -100,82 +99,119 @@ export function Hero() {
           </Button>
         </motion.div>
 
-        {/* Abstract Floating UI / Illustration */}
+        {/* App Preview */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, rotateX: 20 }}
-          animate={{ opacity: 1, scale: 1, rotateX: 0 }}
-          transition={{ duration: 1, delay: 0.5, type: "spring", bounce: 0.4 }}
-          className="mt-16 sm:mt-24 relative perspective-1000 w-full max-w-5xl"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+          className="mt-16 sm:mt-20 w-full max-w-5xl"
         >
-          <div className="relative z-10 bg-neutral-100/80 dark:bg-black/40 p-2 sm:p-3 rounded-2xl sm:rounded-3xl border border-neutral-200/60 dark:border-white/10 backdrop-blur-2xl shadow-2xl">
-            <div className="relative rounded-xl sm:rounded-2xl overflow-hidden bg-neutral-50 dark:bg-[#0A0A0A] border border-neutral-200/60 dark:border-white/5 shadow-inner min-h-[280px] sm:min-h-[400px]">
-              {/* Fake UI Header */}
-              <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-neutral-200/60 dark:border-white/5 bg-neutral-100/80 dark:bg-white/5 backdrop-blur-md">
-                <div className="flex gap-1.5 sm:gap-2">
-                  <div className="size-2.5 sm:size-3 rounded-full bg-red-500/80" />
-                  <div className="size-2.5 sm:size-3 rounded-full bg-amber-500/80" />
-                  <div className="size-2.5 sm:size-3 rounded-full bg-emerald-500/80" />
+          <div className="relative">
+            {/* Glow effect behind */}
+            <div className="absolute -inset-4 bg-gradient-to-r from-neutral-200/50 via-neutral-100/30 to-neutral-200/50 dark:from-neutral-800/50 dark:via-neutral-900/30 dark:to-neutral-800/50 rounded-2xl blur-2xl opacity-60" />
+            
+            <div className="relative rounded-xl border border-neutral-200/80 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 shadow-2xl shadow-neutral-900/10 dark:shadow-black/40 overflow-hidden">
+              {/* Window Header */}
+              <div className="flex items-center px-4 py-2.5 border-b border-neutral-200/80 dark:border-neutral-800 bg-neutral-100/80 dark:bg-neutral-900/80">
+                <div className="flex gap-1.5">
+                  <div className="size-3 rounded-full bg-[#FF5F56]" />
+                  <div className="size-3 rounded-full bg-[#FFBD2E]" />
+                  <div className="size-3 rounded-full bg-[#27CA40]" />
                 </div>
-                <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-neutral-600 dark:text-white/70 font-mono bg-neutral-200/80 dark:bg-black/40 px-2 sm:px-3 py-1 rounded-full border border-neutral-300/60 dark:border-white/10">
-                  <Lock className="size-2.5 sm:size-3" />
-                  Private Chat
+                <div className="flex-1 flex justify-center">
+                  <div className="px-3 py-1 rounded-md bg-neutral-200/60 dark:bg-neutral-800 text-[11px] text-neutral-500 dark:text-neutral-400 font-medium">
+                    onera.chat
+                  </div>
                 </div>
+                <div className="w-[52px]" />
               </div>
 
-              {/* Fake UI Body */}
-              <div className="p-6 sm:p-10 flex flex-col items-center justify-center gap-6 sm:gap-8 relative overflow-hidden min-h-[220px] sm:min-h-[400px]">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(66,66,66,0.05)_0%,_transparent_50%)] dark:bg-[radial-gradient(circle_at_50%_50%,_rgba(66,66,66,0.1)_0%,_transparent_50%)]" />
-
-                {/* Floating cards - hidden on small screens */}
-                <motion.div
-                  animate={{ y: [-15, 15, -15], rotate: [-2, 2, -2] }}
-                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                  className="hidden md:block absolute left-[5%] lg:left-[10%] top-[20%] p-4 lg:p-5 rounded-2xl bg-white/90 dark:bg-black/60 backdrop-blur-xl border border-neutral-200/60 dark:border-white/10 shadow-2xl max-w-[180px] lg:max-w-[240px] z-20"
-                >
-                  <div className="flex items-center gap-2 lg:gap-3 mb-2 lg:mb-3">
-                    <div className="p-1.5 lg:p-2 rounded-xl bg-indigo-500/20 text-indigo-500 dark:text-indigo-400">
-                      <MessageCircle className="size-4 lg:size-5" />
+              {/* App Layout */}
+              <div className="flex min-h-[340px] sm:min-h-[400px]">
+                {/* Sidebar */}
+                <div className="hidden sm:flex w-56 flex-col border-r border-neutral-200/80 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-900/50 p-3">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-medium text-neutral-600 dark:text-neutral-400">Chats</span>
+                    <div className="size-5 rounded bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center">
+                      <span className="text-[10px] text-neutral-500">+</span>
                     </div>
-                    <div className="h-2 lg:h-2.5 w-16 lg:w-20 bg-neutral-200 dark:bg-white/10 rounded-full" />
                   </div>
-                  <div className="space-y-1.5 lg:space-y-2">
-                    <div className="h-1.5 lg:h-2 w-full bg-neutral-100 dark:bg-white/5 rounded-full" />
-                    <div className="h-1.5 lg:h-2 w-3/4 bg-neutral-100 dark:bg-white/5 rounded-full" />
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  animate={{ y: [15, -15, 15], rotate: [2, -2, 2] }}
-                  transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                  className="hidden md:block absolute right-[5%] lg:right-[10%] bottom-[20%] p-4 lg:p-5 rounded-2xl bg-white/90 dark:bg-black/60 backdrop-blur-xl border border-neutral-200/60 dark:border-white/10 shadow-2xl max-w-[180px] lg:max-w-[240px] z-20"
-                >
-                  <div className="flex items-center gap-2 lg:gap-3 mb-2 lg:mb-3">
-                    <div className="p-1.5 lg:p-2 rounded-xl bg-pink-500/20 text-pink-500 dark:text-pink-400">
-                      <Heart className="size-4 lg:size-5" />
+                  <div className="space-y-1">
+                    <div className="p-2 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200/80 dark:border-neutral-700">
+                      <div className="flex items-center gap-2">
+                        <Lock className="size-3 text-emerald-500" />
+                        <span className="text-xs font-medium text-neutral-800 dark:text-neutral-200 truncate">Privacy research</span>
+                      </div>
+                      <p className="text-[10px] text-neutral-500 dark:text-neutral-500 mt-1 truncate">Zero-knowledge encryption...</p>
                     </div>
-                    <div className="h-2 lg:h-2.5 w-16 lg:w-20 bg-neutral-200 dark:bg-white/10 rounded-full" />
+                    <div className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-neutral-800/50 transition-colors">
+                      <div className="flex items-center gap-2">
+                        <Lock className="size-3 text-neutral-400" />
+                        <span className="text-xs text-neutral-600 dark:text-neutral-400 truncate">Code review</span>
+                      </div>
+                    </div>
+                    <div className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-neutral-800/50 transition-colors">
+                      <div className="flex items-center gap-2">
+                        <Lock className="size-3 text-neutral-400" />
+                        <span className="text-xs text-neutral-600 dark:text-neutral-400 truncate">Writing assistant</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="space-y-1.5 lg:space-y-2">
-                    <div className="h-1.5 lg:h-2 w-full bg-neutral-100 dark:bg-white/5 rounded-full" />
-                    <div className="h-1.5 lg:h-2 w-3/4 bg-neutral-100 dark:bg-white/5 rounded-full" />
+                  
+                  {/* Encryption badge */}
+                  <div className="mt-auto pt-3 border-t border-neutral-200/80 dark:border-neutral-800">
+                    <div className="flex items-center gap-1.5 text-[10px] text-emerald-600 dark:text-emerald-500">
+                      <Shield className="size-3" />
+                      <span>All chats encrypted</span>
+                    </div>
                   </div>
-                </motion.div>
+                </div>
 
-                {/* Central Focus */}
-                <div className="z-10 text-center relative">
-                  <div className="absolute inset-0 bg-indigo-500/10 dark:bg-indigo-500/20 blur-[60px] rounded-full" />
-                  <div className="relative inline-flex items-center justify-center p-4 sm:p-5 mb-4 sm:mb-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-black/80 backdrop-blur-xl border border-neutral-200/60 dark:border-white/10 shadow-2xl shadow-indigo-500/10 dark:shadow-indigo-500/20">
-                    <Sparkles className="size-8 sm:size-10 text-primary" />
+                {/* Main Chat Area */}
+                <div className="flex-1 flex flex-col bg-white dark:bg-neutral-950">
+                  {/* Chat header */}
+                  <div className="px-4 py-3 border-b border-neutral-100 dark:border-neutral-800 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="size-6 rounded-full bg-gradient-to-br from-neutral-700 to-neutral-900 dark:from-neutral-300 dark:to-neutral-100 flex items-center justify-center">
+                        <span className="text-[10px] text-white dark:text-neutral-900 font-medium">AI</span>
+                      </div>
+                      <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">LLM</span>
+                    </div>
+                    <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800">
+                      <Lock className="size-2.5 text-emerald-600 dark:text-emerald-500" />
+                      <span className="text-[10px] font-medium text-emerald-700 dark:text-emerald-400">Encrypted</span>
+                    </div>
                   </div>
-                  <h3 className="text-xl sm:text-3xl font-bold text-neutral-900 dark:text-white mb-1 sm:mb-2 tracking-tight">Private by Design</h3>
-                  <p className="text-neutral-600 dark:text-white/75 text-sm sm:text-base">Your thoughts stay yours.</p>
+
+                  {/* Messages */}
+                  <div className="flex-1 p-4 space-y-4 overflow-hidden">
+                    <div className="flex justify-end">
+                      <div className="max-w-[85%] px-3.5 py-2 rounded-2xl rounded-br-sm bg-neutral-900 dark:bg-neutral-700 text-white text-sm">
+                        Explain end-to-end encryption simply
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <div className="size-6 rounded-full bg-gradient-to-br from-neutral-700 to-neutral-900 dark:from-neutral-300 dark:to-neutral-100 flex-shrink-0 flex items-center justify-center">
+                        <span className="text-[9px] text-white dark:text-neutral-900 font-medium">AI</span>
+                      </div>
+                      <div className="max-w-[85%] px-3.5 py-2 rounded-2xl rounded-tl-sm bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 text-sm leading-relaxed">
+                        Think of it like sending a letter in a locked box. Only you and the recipient have the key. Even the postal service can't open it.
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Input */}
+                  <div className="p-3 border-t border-neutral-100 dark:border-neutral-800">
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+                      <span className="text-sm text-neutral-400 flex-1">Message...</span>
+                      <Key className="size-3.5 text-neutral-400" />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-
-          {/* Reflection */}
-          <div className="absolute -bottom-16 inset-x-10 sm:inset-x-20 h-32 bg-gradient-to-t from-primary/5 dark:from-primary/10 to-transparent blur-3xl opacity-40 transform scale-y-[-1]" />
         </motion.div>
       </div>
     </section>

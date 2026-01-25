@@ -333,9 +333,9 @@ export function Sidebar() {
               <TooltipTrigger asChild>
                 <button
                   onClick={toggleSidebar}
-                  className="p-1.5 rounded-lg text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+                  className="p-1.5 rounded-full text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent active:scale-95 active:bg-sidebar-accent/80 transition-all duration-150"
                 >
-                  <PanelLeftClose className="h-5 w-5" />
+                  <PanelLeftClose className="h-4 w-4" />
                 </button>
               </TooltipTrigger>
               <TooltipContent side="right" className="text-xs">Close sidebar</TooltipContent>
@@ -343,31 +343,31 @@ export function Sidebar() {
           </header>
 
           {/* Navigation Menu */}
-          <div className="px-3 space-y-0.5">
+          <div className="px-3">
             {/* New Chat */}
             <button
               onClick={handleNewChat}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground/90 group"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-sidebar-accent active:scale-[0.98] active:bg-sidebar-accent/80 transition-all duration-150 text-sidebar-foreground/90 group"
             >
-              <Pencil className="h-[18px] w-[18px] text-muted-foreground group-hover:text-sidebar-foreground transition-colors" />
+              <Pencil className="h-4 w-4 text-muted-foreground group-hover:text-sidebar-foreground transition-colors" />
               <span className="text-[14px]">New Chat</span>
             </button>
 
             {/* Search */}
             <button
               onClick={() => setSearchModalOpen(true)}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground/90 group"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-sidebar-accent active:scale-[0.98] active:bg-sidebar-accent/80 transition-all duration-150 text-sidebar-foreground/90 group"
             >
-              <Search className="h-[18px] w-[18px] text-muted-foreground group-hover:text-sidebar-foreground transition-colors" />
+              <Search className="h-4 w-4 text-muted-foreground group-hover:text-sidebar-foreground transition-colors" />
               <span className="text-[14px]">Search</span>
             </button>
 
             {/* Notes */}
             <Link
               to="/app/notes"
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground/90 group"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-sidebar-accent active:scale-[0.98] active:bg-sidebar-accent/80 transition-all duration-150 text-sidebar-foreground/90 group"
             >
-              <FileText className="h-[18px] w-[18px] text-muted-foreground group-hover:text-sidebar-foreground transition-colors" />
+              <FileText className="h-4 w-4 text-muted-foreground group-hover:text-sidebar-foreground transition-colors" />
               <span className="text-[14px]">Notes</span>
             </Link>
           </div>
@@ -407,7 +407,7 @@ export function Sidebar() {
                         <TooltipTrigger asChild>
                           <button
                             onClick={handleNewFolder}
-                            className="p-1 rounded text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+                            className="p-1 rounded text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent active:scale-90 active:bg-sidebar-accent/80 transition-all duration-150"
                           >
                             <Plus className="h-3.5 w-3.5" />
                           </button>
@@ -546,7 +546,7 @@ export function Sidebar() {
             <div className="border-t border-sidebar-border p-3">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-sidebar-accent transition-colors w-full text-left">
+                  <button className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-sidebar-accent active:scale-[0.98] active:bg-sidebar-accent/80 transition-all duration-150 w-full text-left">
                     {/* Avatar */}
                     {user.imageUrl ? (
                       <img

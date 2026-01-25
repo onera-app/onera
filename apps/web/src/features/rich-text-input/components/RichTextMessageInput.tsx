@@ -431,9 +431,9 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
       <div
         ref={containerRef}
         className={cn(
-          'relative rounded-xl overflow-hidden',
-          'bg-background',
-          'border border-input',
+          'relative rounded-3xl overflow-hidden',
+          'bg-background dark:bg-neutral-900',
+          'border border-input dark:border-neutral-700',
           'shadow-sm',
           'transition-all duration-200',
           'focus-within:ring-1 focus-within:ring-ring',
@@ -493,8 +493,12 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
             {isStreaming ? (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button onClick={onStop} size="icon" className="h-9 w-9">
-                    <Square className="h-4 w-4 fill-current" />
+                  <Button 
+                    onClick={onStop} 
+                    size="icon" 
+                    className="h-9 w-9 rounded-2xl bg-red-500 text-white hover:bg-red-600 transition-all duration-200 shadow-md"
+                  >
+                    <Square className="h-3.5 w-3.5 fill-current" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Stop generating</TooltipContent>
@@ -506,9 +510,14 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
                     onClick={handleSubmit}
                     disabled={!canSend || disabled}
                     size="icon"
-                    className="h-9 w-9"
+                    className={cn(
+                      "h-9 w-9 rounded-2xl transition-all duration-200 shadow-md",
+                      canSend && !disabled
+                        ? "bg-white dark:bg-white text-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-200 hover:scale-105"
+                        : "bg-neutral-600 dark:bg-neutral-700 text-neutral-400 dark:text-neutral-500 cursor-not-allowed"
+                    )}
                   >
-                    <ArrowUp className="h-5 w-5" />
+                    <ArrowUp className="h-4 w-4" strokeWidth={2.5} />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Send message</TooltipContent>

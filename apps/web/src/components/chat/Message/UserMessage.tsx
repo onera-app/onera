@@ -215,7 +215,7 @@ export const UserMessage = memo(function UserMessage({
 
   return (
     <div
-      className="group/message fade-in w-full animate-in duration-200"
+      className="group/message fade-in w-full animate-in duration-200 select-none"
       data-role="user"
     >
       <div className="flex w-full items-start gap-1.5 sm:gap-2 md:gap-3 justify-end">
@@ -236,7 +236,7 @@ export const UserMessage = memo(function UserMessage({
         </div>
 
         {/* Message content */}
-        <div className="flex flex-col max-w-[85%] sm:max-w-[min(fit-content,80%)]">
+        <div className="flex flex-col items-end max-w-[85%] sm:max-w-[min(fit-content,80%)]">
           {/* Attachments/Images */}
           {images.length > 0 && (
             <div className="flex flex-row justify-end gap-2 mb-2">
@@ -292,16 +292,14 @@ export const UserMessage = memo(function UserMessage({
             </div>
           )}
 
-          {/* Text bubble - Vercel style blue bubble equivalent using theme */}
+          {/* Text bubble - ChatGPT style grayish bubble in dark mode */}
           {textContent && (
             <div
-              className="wrap-break-word w-fit rounded-2xl rounded-tr-sm px-3 sm:px-4 py-2 sm:py-2.5 text-left bg-primary text-primary-foreground shadow-sm"
+              className="inline-block w-fit rounded-2xl rounded-tr-sm px-3 sm:px-4 py-2 sm:py-2.5 text-left bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 shadow-sm select-text"
             >
-              <p className="whitespace-pre-wrap break-words text-[15px] sm:text-base leading-normal">{textContent}</p>
+              <span className="whitespace-pre-wrap break-words text-[15px] sm:text-base leading-normal">{textContent}</span>
             </div>
           )}
-
-
           {edited && (
             <span className="text-xs text-muted-foreground mt-1 text-right">edited</span>
           )}

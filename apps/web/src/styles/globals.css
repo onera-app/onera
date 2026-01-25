@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @source "../node_modules/streamdown/dist/*.js";
 
 /*
@@ -9,58 +9,57 @@
 
 @theme {
   /* 
-   * Color Palette - Premium Neutral
-   * Sophisticated neutrals with subtle warmth.
-   * Dark mode uses softer charcoal tones instead of pure black.
+   * Color Palette - OpenWebUI Style
+   * Very dark theme with subtle contrast between sidebar and main area.
    */
 
-  --color-background: oklch(0.18 0.005 260);
-  /* Soft charcoal with subtle cool tint */
-  --color-foreground: oklch(0.95 0.005 90);
-  /* Warm off-white */
+  --color-background: oklch(0.17 0.005 260);
+  /* OpenWebUI-style very dark main area #212121 */
+  --color-foreground: oklch(0.92 0.005 90);
+  /* Clean white text */
 
-  --color-card: oklch(0.22 0.005 260 / 0.7);
+  --color-card: oklch(0.20 0.005 260);
   /* Elevated surface */
-  --color-card-foreground: oklch(0.95 0.005 90);
+  --color-card-foreground: oklch(0.92 0.005 90);
 
-  --color-popover: oklch(0.20 0.005 260 / 0.95);
-  --color-popover-foreground: oklch(0.95 0.005 90);
+  --color-popover: oklch(0.18 0.005 260 / 0.98);
+  --color-popover-foreground: oklch(0.92 0.005 90);
 
-  --color-primary: oklch(0.95 0.005 90);
-  /* Warm off-white as Primary */
-  --color-primary-foreground: oklch(0.18 0.005 260);
-  /* Charcoal text on Primary */
+  --color-primary: oklch(0.92 0.005 90);
+  /* White as Primary */
+  --color-primary-foreground: oklch(0.15 0.005 260);
+  /* Dark text on Primary */
 
-  --color-secondary: oklch(0.26 0.005 260);
-  /* Lighter charcoal */
-  --color-secondary-foreground: oklch(0.95 0.005 90);
+  --color-secondary: oklch(0.24 0.005 260);
+  /* Slightly lighter for secondary */
+  --color-secondary-foreground: oklch(0.92 0.005 90);
 
-  --color-muted: oklch(0.24 0.005 260);
-  --color-muted-foreground: oklch(0.65 0.01 260);
-  /* Accessible mid grey - passes WCAG AA */
+  --color-muted: oklch(0.22 0.005 260);
+  --color-muted-foreground: oklch(0.55 0.01 260);
+  /* Muted gray text */
 
-  --color-accent: oklch(0.28 0.005 260);
-  /* Subtle interaction state */
-  --color-accent-foreground: oklch(0.95 0.005 90);
+  --color-accent: oklch(0.26 0.005 260);
+  /* Hover/interaction state */
+  --color-accent-foreground: oklch(0.92 0.005 90);
 
   --color-destructive: oklch(0.55 0.18 25);
-  /* Softer red for errors */
+  /* Red for errors */
   --color-destructive-foreground: oklch(0.98 0 0);
 
-  --color-border: oklch(0.32 0.005 260 / 0.5);
-  --color-input: oklch(0.28 0.005 260 / 0.6);
-  --color-ring: oklch(0.75 0.01 260 / 0.5);
-  /* Subtle ring */
+  --color-border: oklch(0.28 0.005 260 / 0.6);
+  --color-input: oklch(0.22 0.005 260);
+  --color-ring: oklch(0.50 0.01 260 / 0.5);
 
-  /* Sidebar */
-  --color-sidebar-background: oklch(0.16 0.005 260 / 0.98);
-  --color-sidebar-foreground: oklch(0.88 0.005 90);
-  --color-sidebar-primary: oklch(0.95 0.005 90);
-  --color-sidebar-primary-foreground: oklch(0.18 0.005 260);
-  --color-sidebar-accent: oklch(0.24 0.005 260);
-  --color-sidebar-accent-foreground: oklch(0.95 0.005 90);
-  --color-sidebar-border: oklch(0.26 0.005 260);
-  --color-sidebar-ring: oklch(0.75 0.01 260 / 0.5);
+  /* Sidebar - darker than main content like OpenWebUI */
+  --color-sidebar-background: oklch(0.13 0.005 260);
+  /* Very dark sidebar #171717 */
+  --color-sidebar-foreground: oklch(0.80 0.005 90);
+  --color-sidebar-primary: oklch(0.92 0.005 90);
+  --color-sidebar-primary-foreground: oklch(0.13 0.005 260);
+  --color-sidebar-accent: oklch(0.22 0.005 260);
+  --color-sidebar-accent-foreground: oklch(0.92 0.005 90);
+  --color-sidebar-border: oklch(0.22 0.005 260);
+  --color-sidebar-ring: oklch(0.50 0.01 260 / 0.5);
 
   /* AI Provider Colors - Desaturated / Neutralized where appropriate, or kept distinct but darker */
   --color-provider-anthropic: oklch(0.70 0.05 45);
@@ -80,7 +79,7 @@
   /* 12px default radius */
 
   /* Fonts */
-  --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
@@ -141,26 +140,36 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary min-h-full;
+    @apply bg-background text-foreground antialiased selection:bg-blue-500/30 selection:text-blue-900 dark:selection:bg-blue-500/40 dark:selection:text-blue-100 min-h-full;
     font-feature-settings: "rlig" 1, "calt" 1;
-    background-image:
-      radial-gradient(circle at top left, oklch(0.95 0.005 90 / 0.04), transparent 45%),
-      radial-gradient(circle at bottom right, oklch(0.95 0.005 90 / 0.02), transparent 45%);
-    background-attachment: fixed;
   }
 
   #root {
     @apply h-full w-full;
   }
 
-  .light body {
-    background-image:
-      radial-gradient(circle at top left, oklch(0.25 0.01 260 / 0.02), transparent 45%),
-      radial-gradient(circle at bottom right, oklch(0.25 0.01 260 / 0.015), transparent 45%);
-  }
 }
 
 @layer utilities {
+
+  /* Pressable / Interactive Element Utility */
+  .pressable {
+    @apply cursor-pointer select-none transition-all duration-200 ease-out;
+    @apply hover:bg-accent/50 hover:-translate-y-0.5;
+    @apply active:scale-[0.98] active:translate-y-0 active:opacity-90;
+  }
+
+  .pressable-scale {
+    @apply cursor-pointer select-none transition-transform duration-150 ease-out;
+    @apply hover:scale-[1.02];
+    @apply active:scale-[0.98];
+  }
+
+  .pressable-opacity {
+    @apply cursor-pointer select-none transition-opacity duration-150 ease-out;
+    @apply hover:opacity-80;
+    @apply active:opacity-60;
+  }
 
   /* Glassmorphism Utilities */
   .glass-panel {
@@ -168,7 +177,9 @@
   }
 
   .glass-button {
-    @apply bg-foreground/5 hover:bg-foreground/10 active:bg-foreground/5 border border-border backdrop-blur-md transition-all duration-300;
+    @apply bg-foreground/5 border border-border backdrop-blur-md transition-all duration-200 cursor-pointer select-none;
+    @apply hover:bg-foreground/10 hover:-translate-y-0.5;
+    @apply active:bg-foreground/5 active:scale-[0.98] active:translate-y-0;
   }
 
   .glass-input {
