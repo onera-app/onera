@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { ShieldCheck, Github, Twitter } from "lucide-react";
+import { Github, Twitter } from "lucide-react";
+import { OneraLogo } from "@/components/ui/onera-logo";
 
 export function Footer() {
   return (
@@ -9,8 +10,8 @@ export function Footer() {
         {/* Brand */}
         <div className="flex flex-col items-center md:items-start gap-3 sm:gap-4">
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="size-8 rounded-xl bg-neutral-900 dark:bg-white flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
-              <ShieldCheck className="size-4 text-white dark:text-neutral-900" />
+            <div className="size-8 rounded-xl overflow-hidden transition-transform duration-200 group-hover:scale-105">
+              <OneraLogo size={32} />
             </div>
             <span className="font-bold text-xl text-neutral-900 dark:text-white">Onera</span>
           </Link>

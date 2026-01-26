@@ -39,10 +39,10 @@ import {
   PanelLeftClose,
   Plus,
   Pin,
-  Sparkles,
   Settings,
   LogOut,
 } from 'lucide-react';
+import { OneraLogo } from '@/components/ui/onera-logo';
 
 interface ChatWithTitle {
   id: string;
@@ -321,8 +321,8 @@ export function Sidebar() {
               to="/app"
               className="flex items-center gap-2.5 group"
             >
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/20">
-                <Sparkles className="w-4.5 h-4.5 text-white" />
+              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-lg">
+                <OneraLogo size={32} />
               </div>
               <span className="font-semibold text-[15px] text-sidebar-foreground tracking-tight">
                 Onera

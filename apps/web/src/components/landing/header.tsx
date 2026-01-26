@@ -2,7 +2,8 @@
 
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, ArrowRight, Menu, X } from "lucide-react";
+import { ArrowRight, Menu, X } from "lucide-react";
+import { OneraLogo } from "@/components/ui/onera-logo";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
@@ -65,8 +66,8 @@ export function Header() {
             to="/"
             className="flex items-center gap-2.5 font-medium tracking-tight group ml-2"
           >
-            <div className="size-9 rounded-full bg-neutral-900 dark:bg-white flex items-center justify-center transition-transform duration-200 group-hover:scale-105 shadow-sm">
-              <ShieldCheck className="size-4 text-white dark:text-black" />
+            <div className="size-9 rounded-full overflow-hidden transition-transform duration-200 group-hover:scale-105 shadow-sm">
+              <OneraLogo size={36} />
             </div>
             <span className="font-bold transition-colors text-neutral-900 dark:text-white">
               Onera
@@ -155,7 +156,7 @@ export function Header() {
             >
               <div className="flex items-center justify-between mb-8">
                 <span className="font-bold text-xl text-neutral-900 dark:text-white flex items-center gap-2">
-                  <ShieldCheck className="size-6" />
+                  <OneraLogo size={24} />
                   Onera
                 </span>
                 <button
