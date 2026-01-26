@@ -43,6 +43,8 @@ coverage/
 *.pem
 *.key
 .playwright-mcp/
+docs/plans
+docs/whitepapers
 
 .env.staging
 .env.staging.local
