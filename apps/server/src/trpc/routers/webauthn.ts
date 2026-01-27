@@ -481,16 +481,31 @@ export const webauthnRouter = router({
     .mutation(async ({ ctx, input }) => {
       const response = input.response as AuthenticationResponseJSON;
 
-      // Find the expected challenge
+      // Find the expected challenge from clientDataJSON to avoid stale entries
       let expectedChallenge: string | undefined;
-      for (const [challenge, data] of challengeStore.entries()) {
-        if (data.userId === ctx.user.id && data.type === "authentication") {
-          expectedChallenge = challenge;
-          break;
-        }
+      try {
+        const clientDataJson = Buffer.from(
+          response.response.clientDataJSON,
+          "base64url"
+        ).toString("utf8");
+        const clientData = JSON.parse(clientDataJson) as { challenge?: string };
+        expectedChallenge = clientData.challenge;
+      } catch (error) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid clientDataJSON",
+        });
       }
 
-      if (!expectedChallenge) {
+      const challengeEntry = expectedChallenge
+        ? challengeStore.get(expectedChallenge)
+        : undefined;
+
+      if (
+        !challengeEntry ||
+        challengeEntry.userId !== ctx.user.id ||
+        challengeEntry.type !== "authentication"
+      ) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "No pending authentication challenge found",
