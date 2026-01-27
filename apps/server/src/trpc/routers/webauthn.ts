@@ -502,6 +502,7 @@ export const webauthnRouter = router({
         : undefined;
 
       if (
+        !expectedChallenge ||
         !challengeEntry ||
         challengeEntry.userId !== ctx.user.id ||
         challengeEntry.type !== "authentication"
