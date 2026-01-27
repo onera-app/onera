@@ -37,6 +37,7 @@ import {
   ChevronRight,
   Pencil,
   PanelLeftClose,
+  PanelLeftOpen,
   Plus,
   Pin,
   Settings,
@@ -288,6 +289,22 @@ export function Sidebar() {
 
   return (
     <TooltipProvider delayDuration={300}>
+      {/* Open sidebar button - visible when sidebar is closed */}
+      {!sidebarOpen && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={toggleSidebar}
+              className="fixed top-3 left-3 z-50 p-2 rounded-lg bg-background/80 backdrop-blur-sm border border-border shadow-sm text-muted-foreground hover:text-foreground hover:bg-accent active:scale-95 transition-all duration-150"
+              aria-label="Open sidebar"
+            >
+              <PanelLeftOpen className="h-5 w-5" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="right" className="text-xs">Open sidebar</TooltipContent>
+        </Tooltip>
+      )}
+
       {/* Mobile overlay backdrop */}
       {sidebarOpen && (
         <div
