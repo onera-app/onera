@@ -139,12 +139,12 @@ export const enclavesRouter = router({
           id: enclave.id,
           host: enclave.host,
           port: enclave.port,
-          publicKey: enclave.publicKey || '',
+          public_key: enclave.publicKey || '',
         },
         wsEndpoint: enclave.wsEndpoint,
         attestationEndpoint: enclave.attestationEndpoint,
         expectedMeasurements: model.expectedLaunchDigest
-          ? { launchDigest: model.expectedLaunchDigest }
+          ? { launch_digest: model.expectedLaunchDigest }
           : undefined,
         assignmentId,
       };

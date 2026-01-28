@@ -3,6 +3,7 @@ import { getSodium } from '../sodium/init';
 import type { AttestationQuote, EnclaveMeasurements } from '@onera/types';
 
 // AMD SEV-SNP attestation report structure offsets
+// Aligned with mock enclave implementation (infra/enclave/src/attestation.rs)
 const REPORT_OFFSETS = {
   VERSION: 0,
   GUEST_SVN: 4,
@@ -10,9 +11,9 @@ const REPORT_OFFSETS = {
   FAMILY_ID: 16,
   IMAGE_ID: 32,
   VMPL: 48,
-  LAUNCH_MEASUREMENT: 80, // 48 bytes
-  REPORT_DATA: 128, // 64 bytes
-  SIGNATURE: 512,
+  REPORT_DATA: 80, // 64 bytes - contains public key hash
+  LAUNCH_MEASUREMENT: 144, // 48 bytes (only 32 used in mock)
+  SIGNATURE: 672,
 } as const;
 
 const MEASUREMENT_SIZE = 48;

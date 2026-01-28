@@ -1,5 +1,14 @@
 import type { AttestationQuote } from '@onera/types';
 import { parseSevSnpQuote, verifyPublicKeyBinding } from './sevsnp';
+import { toBase64, fromHex } from '../sodium/utils';
+
+/**
+ * Convert hex string to base64
+ */
+function hexToBase64(hex: string): string {
+  const bytes = fromHex(hex);
+  return toBase64(bytes);
+}
 
 export interface VerificationResult {
   valid: boolean;
@@ -73,8 +82,13 @@ export async function fetchAndVerifyAttestation(
       };
     }
 
-    const { quote: rawQuote, publicKey } = await response.json();
-    return verifyAttestation(rawQuote, publicKey, knownMeasurements);
+    // Handle both snake_case (from Rust) and camelCase field names
+    const data = await response.json();
+    const rawQuote = data.quote;
+    // Rust sends hex-encoded public_key, convert to base64
+    const publicKeyHex = data.public_key || data.publicKey;
+    const publicKeyBase64 = hexToBase64(publicKeyHex);
+    return verifyAttestation(rawQuote, publicKeyBase64, knownMeasurements);
   } catch (error) {
     return {
       valid: false,
