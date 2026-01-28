@@ -10,7 +10,8 @@
     "./session": "./src/session/index.ts",
     "./webauthn": "./src/webauthn/index.ts",
     "./password": "./src/password/index.ts",
-    "./noise": "./src/noise/index.ts"
+    "./noise": "./src/noise/index.ts",
+    "./attestation": "./src/attestation/index.ts"
   },
   "scripts": {
     "build": "tsc",
