@@ -9,7 +9,8 @@
     "./sharding": "./src/sharding/index.ts",
     "./session": "./src/session/index.ts",
     "./webauthn": "./src/webauthn/index.ts",
-    "./password": "./src/password/index.ts"
+    "./password": "./src/password/index.ts",
+    "./noise": "./src/noise/index.ts"
   },
   "scripts": {
     "build": "tsc",
@@ -19,6 +20,7 @@
     "libsodium-wrappers-sumo": "^0.7.16",
     "bip39": "^3.1.0",
     "buffer": "^6.0.3",
+    "noise-protocol": "^3.0.1",
     "uuid": "^11.0.0"
   },
   "devDependencies": {
