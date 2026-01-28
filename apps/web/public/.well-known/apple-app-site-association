@@ -1,5 +1,10 @@
 {
   "webcredentials": {
-    "apps": ["X2662V5DT2.chat.onera"]
+    "apps": [
+      "X2662V5DT2.chat.onera",
+      "X2662V5DT2.chat.onera.staging",
+      "FYS9RNAGTV.chat.onera",
+      "FYS9RNAGTV.chat.onera.staging"
+    ]
   }
 }
