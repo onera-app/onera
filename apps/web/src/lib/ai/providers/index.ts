@@ -3,6 +3,12 @@
  * Creates AI SDK provider instances from decrypted E2EE credentials
  */
 
+export {
+  createPrivateInferenceModel,
+  getPrivateInferenceModel,
+  clearPrivateInferenceCache,
+} from './private-inference';
+
 import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';

@@ -250,7 +250,8 @@ export type LLMProvider =
   | 'ollama'
   | 'lmstudio'
   | 'azure'
-  | 'custom';
+  | 'custom'
+  | 'onera-private';
 
 export interface CreateCredentialForm {
   provider: LLMProvider;
