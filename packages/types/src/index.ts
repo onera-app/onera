@@ -320,3 +320,42 @@ export interface ModelInfo {
   name: string;
   provider: string;
 }
+
+// Private Inference Types
+export type EnclaveTier = 'shared' | 'dedicated';
+
+export interface EnclaveEndpoint {
+  id: string;
+  host: string;
+  port: number;
+  public_key: string; // Base64-encoded X25519 public key from attestation
+}
+
+export interface AttestationQuote {
+  raw_quote: string; // Base64-encoded AMD SEV-SNP quote
+  public_key: string; // Base64-encoded X25519 public key bound to quote
+  timestamp: number;
+  measurements: EnclaveMeasurements;
+}
+
+export interface EnclaveMeasurements {
+  launch_digest: string; // Hex-encoded measurement of enclave code
+  family_id: string;
+  image_id: string;
+  vmpl: number;
+  report_data: string; // Contains hash of public key
+}
+
+export interface PrivateInferenceModel {
+  id: string;
+  name: string;
+  provider: 'onera-private';
+  context_length: number;
+  tier: EnclaveTier;
+}
+
+export interface NoiseSession {
+  encrypt(plaintext: Uint8Array): Uint8Array;
+  decrypt(ciphertext: Uint8Array): Uint8Array;
+  close(): void;
+}
