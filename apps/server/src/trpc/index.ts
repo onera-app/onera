@@ -11,6 +11,7 @@ import { chatsRouter } from "./routers/chats";
 import { notesRouter } from "./routers/notes";
 import { credentialsRouter } from "./routers/credentials";
 import { promptsRouter } from "./routers/prompts";
+import { enclavesRouter } from "./routers/enclaves";
 
 // Main app router
 export const appRouter = router({
@@ -24,6 +25,7 @@ export const appRouter = router({
   notes: notesRouter,
   credentials: credentialsRouter,
   prompts: promptsRouter,
+  enclaves: enclavesRouter,
 });
 
 export type AppRouter = typeof appRouter;
