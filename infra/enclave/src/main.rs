@@ -84,8 +84,9 @@ async fn main() -> anyhow::Result<()> {
 
     // Spawn HTTP server
     let http_handle = tokio::spawn(async move {
-        let listener = tokio::net::TcpListener::bind(http_addr).await.unwrap();
-        axum::serve(listener, http_app).await.unwrap();
+        let listener = tokio::net::TcpListener::bind(http_addr).await?;
+        axum::serve(listener, http_app).await?;
+        Ok::<(), anyhow::Error>(())
     });
 
     // Run WebSocket server for Noise protocol
@@ -94,13 +95,17 @@ async fn main() -> anyhow::Result<()> {
     // Wait for both servers
     tokio::select! {
         result = http_handle => {
-            if let Err(e) = result {
-                tracing::error!("HTTP server error: {}", e);
+            match result {
+                Err(e) => return Err(anyhow::anyhow!("HTTP server task panicked: {}", e)),
+                Ok(Err(e)) => return Err(e.context("HTTP server failed")),
+                Ok(Ok(())) => {}
             }
         }
         result = ws_handle => {
-            if let Err(e) = result {
-                tracing::error!("WebSocket server error: {}", e);
+            match result {
+                Err(e) => return Err(anyhow::anyhow!("WebSocket server task panicked: {}", e)),
+                Ok(Err(e)) => return Err(e.context("WebSocket server failed")),
+                Ok(Ok(())) => {}
             }
         }
     }

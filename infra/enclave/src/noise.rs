@@ -7,15 +7,18 @@
 
 use std::net::SocketAddr;
 use std::sync::Arc;
+use std::time::Duration;
 
 use anyhow::{anyhow, Result};
 use futures_util::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
 use snow::{Builder, HandshakeState, TransportState};
 use tokio::net::{TcpListener, TcpStream};
-use tokio::sync::RwLock;
+use tokio::sync::{RwLock, Semaphore};
+use tokio::time::timeout;
 use tokio_tungstenite::{accept_async, tungstenite::Message};
 use tracing::{debug, error, info, warn};
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 use crate::AppState;
 
@@ -25,11 +28,19 @@ const NOISE_PATTERN: &str = "Noise_NK_25519_ChaChaPoly_SHA256";
 /// Maximum message size (64KB should be plenty for chat messages)
 const MAX_MESSAGE_SIZE: usize = 65536;
 
+/// Maximum concurrent connections to prevent resource exhaustion
+const MAX_CONCURRENT_CONNECTIONS: usize = 100;
+
+/// Timeout for reading WebSocket messages (10 minutes)
+const MESSAGE_READ_TIMEOUT: Duration = Duration::from_secs(600);
+
 /// Noise server that manages the static keypair
+#[derive(Zeroize, ZeroizeOnDrop)]
 pub struct NoiseServer {
     /// Server's static private key
     private_key: [u8; 32],
     /// Server's static public key
+    #[zeroize(skip)]
     public_key: [u8; 32],
 }
 
@@ -99,14 +110,24 @@ pub async fn run_websocket_server(
     state: Arc<RwLock<AppState>>,
 ) -> Result<()> {
     let listener = TcpListener::bind(addr).await?;
-    info!("Noise WebSocket server listening on {}", addr);
+    let connection_semaphore = Arc::new(Semaphore::new(MAX_CONCURRENT_CONNECTIONS));
+    info!("Noise WebSocket server listening on {} (max {} concurrent connections)", addr, MAX_CONCURRENT_CONNECTIONS);
 
     loop {
         match listener.accept().await {
             Ok((stream, peer_addr)) => {
+                let permit = match connection_semaphore.clone().try_acquire_owned() {
+                    Ok(permit) => permit,
+                    Err(_) => {
+                        warn!("Connection limit reached, rejecting connection from {}", peer_addr);
+                        continue;
+                    }
+                };
+
                 info!("New connection from {}", peer_addr);
                 let state = state.clone();
                 tokio::spawn(async move {
+                    let _permit = permit; // Hold permit until connection completes
                     if let Err(e) = handle_connection(stream, peer_addr, state).await {
                         error!("Connection error from {}: {}", peer_addr, e);
                     }
@@ -184,8 +205,16 @@ async fn handle_messages(
 ) -> Result<()> {
     let mut buf = vec![0u8; MAX_MESSAGE_SIZE];
 
-    while let Some(msg) = read.next().await {
-        let msg = msg?;
+    loop {
+        // Apply timeout to message reads
+        let msg = match timeout(MESSAGE_READ_TIMEOUT, read.next()).await {
+            Ok(Some(msg)) => msg?,
+            Ok(None) => break, // Stream ended
+            Err(_) => {
+                warn!("Connection timed out after {:?}", MESSAGE_READ_TIMEOUT);
+                return Err(anyhow!("Connection timed out"));
+            }
+        };
 
         match msg {
             Message::Binary(ciphertext) => {
@@ -193,8 +222,9 @@ async fn handle_messages(
                 let len = transport.read_message(&ciphertext, &mut buf)?;
                 let plaintext = &buf[..len];
 
-                // Parse request (don't log content for privacy)
-                let request: InferenceRequest = serde_json::from_slice(plaintext)?;
+                // Parse request with sanitized error handling to prevent plaintext leakage
+                let request: InferenceRequest = serde_json::from_slice(plaintext)
+                    .map_err(|_| anyhow!("Failed to parse request: invalid JSON format"))?;
                 debug!(
                     "Received inference request, stream={}",
                     request.stream

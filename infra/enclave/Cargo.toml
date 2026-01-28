@@ -24,6 +24,7 @@ serde_json = "1"
 sha2 = "0.10"
 base64 = "0.22"
 hex = "0.4"
+zeroize = { version = "1", features = ["derive"] }
 
 # vLLM client (HTTP to local vLLM server)
 reqwest = { version = "0.12", features = ["json", "stream"] }
@@ -36,5 +37,3 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 thiserror = "1"
 anyhow = "1"
 
-# Streaming
-async-stream = "0.3"

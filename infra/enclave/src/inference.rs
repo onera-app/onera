@@ -93,10 +93,14 @@ impl InferenceClient {
     pub async fn health_check(&self) -> Result<bool> {
         let url = format!("{}/health", self.base_url);
 
-        match self.client.get(&url).send().await {
-            Ok(response) => Ok(response.status().is_success()),
-            Err(_) => Ok(false),
-        }
+        let response = self
+            .client
+            .get(&url)
+            .send()
+            .await
+            .map_err(|e| anyhow!("Health check request failed: {}", e))?;
+
+        Ok(response.status().is_success())
     }
 
     /// List available models
