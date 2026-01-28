@@ -23,7 +23,9 @@
 		"docker:down": "docker compose down",
 		"docker:build": "docker compose build",
 		"dev:docs": "turbo run dev --filter=@onera/docs",
-		"build:docs": "turbo run build --filter=@onera/docs"
+		"build:docs": "turbo run build --filter=@onera/docs",
+		"dev:tee": "docker compose -f infra/docker-compose.dev.yml up",
+		"dev:tee:build": "docker compose -f infra/docker-compose.dev.yml build"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.57.0",

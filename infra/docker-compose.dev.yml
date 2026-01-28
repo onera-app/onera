@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # Mock vLLM server for development (uses smaller model)
+  vllm:
+    image: vllm/vllm-openai:latest
+    command:
+      - --model
+      - TinyLlama/TinyLlama-1.1B-Chat-v1.0
+      - --port
+      - "8000"
+    ports:
+      - "8000:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    # For CPU-only development, comment above and use:
+    # environment:
+    #   - VLLM_USE_CPU=1
+
+  # Enclave runtime (mock TEE for development)
+  enclave:
+    build:
+      context: ./enclave
+      dockerfile: Dockerfile.dev
+    environment:
+      - RUST_LOG=debug
+      - VLLM_URL=http://vllm:8000
+    ports:
+      - "8080:8080"  # Attestation endpoint
+      - "8081:8081"  # Noise WebSocket
+    depends_on:
+      - vllm
+
+  # Control plane (uses main server)
+  # Run separately with: bun run dev:server
+
+networks:
+  default:
+    name: onera-private-inference

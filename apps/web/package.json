@@ -7,7 +7,9 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
-    "lint": "eslint src --ext ts,tsx"
+    "lint": "eslint src --ext ts,tsx",
+    "dev:tee": "docker compose -f infra/docker-compose.dev.yml up",
+    "dev:tee:build": "docker compose -f infra/docker-compose.dev.yml build"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "3.0.9",

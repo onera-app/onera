@@ -1,0 +1,24 @@
+FROM rust:1.75-bookworm AS builder
+
+WORKDIR /app
+COPY Cargo.toml Cargo.lock ./
+COPY src ./src
+
+RUN cargo build --release
+
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app/target/release/onera-enclave /usr/local/bin/
+
+ENV RUST_LOG=info
+ENV HTTP_ADDR=0.0.0.0:8080
+ENV WS_ADDR=0.0.0.0:8081
+ENV VLLM_URL=http://vllm:8000
+
+EXPOSE 8080 8081
+
+CMD ["onera-enclave"]
