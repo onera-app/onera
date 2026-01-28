@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, mock, spyOn } from 'bun:test';
+import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
 import type { EnclaveEndpoint } from '@onera/types';
 
 // Store mock functions for use across tests
@@ -300,13 +300,13 @@ describe('Private Inference Provider', () => {
       inputFormat: 'messages',
     } as any);
 
-    expect(result.request.body).toMatchObject({
+    expect(result.request?.body).toMatchObject({
       type: 'generate',
       messages: [{ role: 'user', content: 'Hi' }],
     });
-    expect(result.response.id).toBe('response-123');
-    expect(result.response.modelId).toBe(mockEndpoint.id);
-    expect(result.response.timestamp).toBeInstanceOf(Date);
+    expect(result.response?.id).toBe('response-123');
+    expect(result.response?.modelId).toBe(mockEndpoint.id);
+    expect(result.response?.timestamp).toBeInstanceOf(Date);
   });
 
   it('should pass generation options to the enclave', async () => {
@@ -435,7 +435,7 @@ describe('Private Inference Provider', () => {
         inputFormat: 'messages',
       } as any);
 
-      expect(result.request.body).toMatchObject({
+      expect(result.request?.body).toMatchObject({
         type: 'stream',
         messages: [{ role: 'user', content: 'Test' }],
       });
