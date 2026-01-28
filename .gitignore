@@ -8,6 +8,7 @@ __pycache__/
 # Build outputs
 build/
 dist/
+target/
 
 # Environment
 .env

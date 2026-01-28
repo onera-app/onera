@@ -1,0 +1,40 @@
+[package]
+name = "onera-enclave"
+version = "0.1.0"
+edition = "2021"
+description = "Private inference enclave runtime for Onera"
+
+[dependencies]
+# Noise protocol
+snow = "0.9"
+rand = "0.8"
+
+# Web server
+tokio = { version = "1", features = ["full"] }
+tokio-tungstenite = "0.21"
+futures-util = "0.3"
+axum = "0.7"
+tower = "0.4"
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Crypto
+sha2 = "0.10"
+base64 = "0.22"
+hex = "0.4"
+
+# vLLM client (HTTP to local vLLM server)
+reqwest = { version = "0.12", features = ["json", "stream"] }
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Error handling
+thiserror = "1"
+anyhow = "1"
+
+# Streaming
+async-stream = "0.3"
