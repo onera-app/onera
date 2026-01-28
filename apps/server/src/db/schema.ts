@@ -397,3 +397,8 @@ export type NewPrompt = typeof prompts.$inferInsert;
 // Legacy types (for migration)
 export type UserKey = typeof userKeys.$inferSelect;
 export type NewUserKey = typeof userKeys.$inferInsert;
+
+// ============================================
+// TEE Enclave Management
+// ============================================
+export * from './schema/enclaves';
