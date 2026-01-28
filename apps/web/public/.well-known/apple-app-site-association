@@ -3,8 +3,10 @@
     "apps": [
       "X2662V5DT2.chat.onera",
       "X2662V5DT2.chat.onera.staging",
+      "X2662V5DT2.staging.app.onera",
       "FYS9RNAGTV.chat.onera",
-      "FYS9RNAGTV.chat.onera.staging"
+      "FYS9RNAGTV.chat.onera.staging",
+      "FYS9RNAGTV.staging.app.onera"
     ]
   }
 }
