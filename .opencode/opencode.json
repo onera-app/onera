@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "anthropic/claude-sonnet-4-20250514",
+  "formatter": {
+    "*.ts": "bunx prettier --write",
+    "*.tsx": "bunx prettier --write",
+    "*.json": "bunx prettier --write"
+  },
+  "command": {
+    "db": {
+      "description": "Database operations helper",
+      "prompt": "Help me with database operations using Drizzle ORM: $input"
+    },
+    "trpc": {
+      "description": "tRPC API development",
+      "prompt": "@backend-dev Help me create or modify a tRPC endpoint: $input"
+    },
+    "crypto": {
+      "description": "E2EE and cryptography help",
+      "prompt": "Help me with E2EE implementation using libsodium: $input. Load the e2ee-crypto skill for reference."
+    },
+    "deploy": {
+      "description": "Deployment assistance",
+      "prompt": "Help me with deployment: $input"
+    },
+    "migrate": {
+      "description": "Database migration helper",
+      "prompt": "Help me create a database migration: $input. Load the drizzle-db skill for reference."
+    }
+  }
+}
