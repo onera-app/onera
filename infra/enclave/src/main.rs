@@ -49,8 +49,8 @@ async fn main() -> anyhow::Result<()> {
     let public_key = noise_server.public_key();
     info!("Noise server initialized with public key: {}", hex::encode(&public_key));
 
-    // Initialize attestation service with the public key
-    let attestation = AttestationService::new(public_key);
+    // Initialize attestation service with the public key (async to detect Azure)
+    let attestation = AttestationService::new(public_key).await;
     info!("Attestation service initialized");
 
     // Initialize inference client
