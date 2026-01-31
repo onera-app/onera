@@ -18,6 +18,8 @@ import Noise from 'noise-protocol';
 import createCipherState from 'noise-protocol/cipher-state';
 // @ts-expect-error - noise-protocol/cipher is a CommonJS submodule without types
 import createCipher from 'noise-protocol/cipher';
+// Use buffer package explicitly for browser compatibility
+import { Buffer } from 'buffer';
 
 import { fromBase64 } from '../sodium/utils';
 
