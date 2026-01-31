@@ -14,13 +14,14 @@ import { fromBase64 } from '../sodium/utils';
 
 // Noise protocol constants
 const DHLEN = 32;     // X25519 key length
-const HASHLEN = 64;   // BLAKE2b-512 output
+const HASHLEN = 32;   // SHA-256 output (to match server)
 const KEYLEN = 32;    // ChaCha20-Poly1305 key length
 const NONCELEN = 12;  // ChaCha20-Poly1305 nonce length
 // const TAGLEN = 16; // Poly1305 tag length (included in libsodium output)
 
 // Protocol name for NK pattern with our cipher suite
-const PROTOCOL_NAME = 'Noise_NK_25519_ChaChaPoly_BLAKE2b';
+// MUST match server: Noise_NK_25519_ChaChaPoly_SHA256
+const PROTOCOL_NAME = 'Noise_NK_25519_ChaChaPoly_SHA256';
 
 /**
  * Cipher state for transport encryption after handshake
@@ -47,16 +48,23 @@ interface SymmetricState {
 }
 
 /**
- * HMAC-BLAKE2b implementation
+ * SHA-256 hash wrapper
  */
-function hmacBlake2b(key: Uint8Array, data: Uint8Array): Uint8Array {
+function sha256(data: Uint8Array): Uint8Array {
   const sodium = getSodium();
-  const BLOCKLEN = 128;
+  return sodium.crypto_hash_sha256(data);
+}
+
+/**
+ * HMAC-SHA256 implementation
+ */
+function hmacSha256(key: Uint8Array, data: Uint8Array): Uint8Array {
+  const BLOCKLEN = 64; // SHA-256 block size
 
   // Pad key to block size
   let keyBlock = new Uint8Array(BLOCKLEN);
   if (key.length > BLOCKLEN) {
-    keyBlock.set(sodium.crypto_generichash(BLOCKLEN, key));
+    keyBlock.set(sha256(key));
   } else {
     keyBlock.set(key);
   }
@@ -73,30 +81,30 @@ function hmacBlake2b(key: Uint8Array, data: Uint8Array): Uint8Array {
   const innerInput = new Uint8Array(BLOCKLEN + data.length);
   innerInput.set(ipad);
   innerInput.set(data, BLOCKLEN);
-  const innerHash = sodium.crypto_generichash(HASHLEN, innerInput);
+  const innerHash = sha256(innerInput);
 
   // Outer hash: H(opad || innerHash)
   const outerInput = new Uint8Array(BLOCKLEN + HASHLEN);
   outerInput.set(opad);
   outerInput.set(innerHash, BLOCKLEN);
 
-  return sodium.crypto_generichash(HASHLEN, outerInput);
+  return sha256(outerInput);
 }
 
 /**
- * HKDF using HMAC-BLAKE2b
+ * HKDF using HMAC-SHA256
  */
 function hkdf(chainingKey: Uint8Array, inputKeyMaterial: Uint8Array, numOutputs: 2 | 3): Uint8Array[] {
-  const tempKey = hmacBlake2b(chainingKey, inputKeyMaterial);
+  const tempKey = hmacSha256(chainingKey, inputKeyMaterial);
 
-  const output1 = hmacBlake2b(tempKey, new Uint8Array([0x01]));
-  const output2 = hmacBlake2b(tempKey, new Uint8Array([...output1, 0x02]));
+  const output1 = hmacSha256(tempKey, new Uint8Array([0x01]));
+  const output2 = hmacSha256(tempKey, new Uint8Array([...output1, 0x02]));
 
   if (numOutputs === 2) {
     return [output1.slice(0, HASHLEN), output2.slice(0, HASHLEN)];
   }
 
-  const output3 = hmacBlake2b(tempKey, new Uint8Array([...output2, 0x03]));
+  const output3 = hmacSha256(tempKey, new Uint8Array([...output2, 0x03]));
   return [output1.slice(0, HASHLEN), output2.slice(0, HASHLEN), output3.slice(0, HASHLEN)];
 }
 
@@ -104,7 +112,6 @@ function hkdf(chainingKey: Uint8Array, inputKeyMaterial: Uint8Array, numOutputs:
  * Initialize symmetric state with protocol name
  */
 function initializeSymmetric(protocolName: string): SymmetricState {
-  const sodium = getSodium();
   const nameBytes = new TextEncoder().encode(protocolName);
 
   let h: Uint8Array;
@@ -112,7 +119,7 @@ function initializeSymmetric(protocolName: string): SymmetricState {
     h = new Uint8Array(HASHLEN);
     h.set(nameBytes);
   } else {
-    h = sodium.crypto_generichash(HASHLEN, nameBytes);
+    h = sha256(nameBytes);
   }
 
   return {
@@ -128,11 +135,10 @@ function initializeSymmetric(protocolName: string): SymmetricState {
  * Mix hash with data
  */
 function mixHash(state: SymmetricState, data: Uint8Array): void {
-  const sodium = getSodium();
   const input = new Uint8Array(state.h.length + data.length);
   input.set(state.h);
   input.set(data, state.h.length);
-  state.h = sodium.crypto_generichash(HASHLEN, input);
+  state.h = sha256(input);
 }
 
 /**
