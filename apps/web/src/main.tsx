@@ -1,3 +1,9 @@
+// Polyfill Buffer globally for noise-protocol library
+import { Buffer } from 'buffer';
+if (typeof globalThis.Buffer === 'undefined') {
+  globalThis.Buffer = Buffer;
+}
+
 import { scan } from 'react-scan';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
