@@ -62,6 +62,25 @@ export interface AzureImdsVerificationResult {
 }
 
 /**
+ * Decode base64 with support for various formats Azure IMDS may return.
+ * Azure IMDS may return standard base64, URL-safe base64, or base64 with line breaks.
+ */
+function decodeAzureBase64(input: string): Uint8Array {
+  // Remove any whitespace/line breaks that Azure may include
+  let cleaned = input.replace(/\s/g, '');
+
+  // Convert URL-safe base64 to standard base64 if needed
+  cleaned = cleaned.replace(/-/g, '+').replace(/_/g, '/');
+
+  // Add padding if missing
+  while (cleaned.length % 4 !== 0) {
+    cleaned += '=';
+  }
+
+  return fromBase64(cleaned);
+}
+
+/**
  * Verify Azure IMDS PKCS7 attestation signature.
  *
  * @param rawQuoteBase64 - Base64-encoded PKCS7 signed data from Azure IMDS
@@ -79,8 +98,13 @@ export async function verifyAzureImdsPkcs7Signature(
     });
     pkijs.setEngine('WebCrypto', crypto as Crypto, cryptoEngine);
 
-    // Parse the PKCS7 signed data
-    const pkcs7Der = fromBase64(rawQuoteBase64);
+    // Parse the PKCS7 signed data (handle various Azure base64 formats)
+    let pkcs7Der: Uint8Array;
+    try {
+      pkcs7Der = decodeAzureBase64(rawQuoteBase64);
+    } catch (e) {
+      return { valid: false, error: `Failed to decode base64: ${e instanceof Error ? e.message : 'unknown error'}` };
+    }
     const asn1 = asn1js.fromBER(new Uint8Array(pkcs7Der).buffer);
     if (asn1.offset === -1) {
       return { valid: false, error: 'Failed to parse PKCS7 ASN.1 structure' };
