@@ -275,13 +275,18 @@ export async function performNKHandshake(
   message1.set(e);
   message1.set(payload1, DHLEN);
 
+  console.log('[Noise] Sending message1:', message1.length, 'bytes');
   await sendHandshakeMessage(message1);
 
   // Message 2: <- e, ee
   const message2 = await receiveHandshakeMessage();
+  console.log('[Noise] Received message2:', message2.length, 'bytes');
+  if (message2.length > 0) {
+    console.log('[Noise] message2 first 32 bytes (hex):', Array.from(message2.slice(0, 32)).map(b => b.toString(16).padStart(2, '0')).join(''));
+  }
 
   if (message2.length < DHLEN) {
-    throw new Error('Invalid handshake message 2: too short');
+    throw new Error(`Invalid handshake message 2: too short (got ${message2.length} bytes, need ${DHLEN})`);
   }
 
   // Extract server's ephemeral public key
