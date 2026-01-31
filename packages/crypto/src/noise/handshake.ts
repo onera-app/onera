@@ -262,6 +262,16 @@ export async function performNKHandshake(
 
   // Generate ephemeral keypair
   const ephemeralKeypair = sodium.crypto_box_keypair();
+  console.log('[Noise] ephemeral PRIVATE key:', toHex(ephemeralKeypair.privateKey));
+
+  // Verify the keypair is valid (public key should match private key derivation)
+  const derivedPub = sodium.crypto_scalarmult_base(ephemeralKeypair.privateKey);
+  const keypairValid = derivedPub.every((b: number, i: number) => b === ephemeralKeypair.publicKey[i]);
+  console.log('[Noise] ephemeral keypair valid:', keypairValid);
+  if (!keypairValid) {
+    console.log('[Noise] WARNING: Derived pub:', toHex(derivedPub));
+    console.log('[Noise] WARNING: Actual pub: ', toHex(ephemeralKeypair.publicKey));
+  }
   const e = ephemeralKeypair.publicKey;
   const ePrivate = ephemeralKeypair.privateKey;
 
@@ -274,6 +284,9 @@ export async function performNKHandshake(
   mixKey(ss, es);
 
   // Encrypt empty payload (NK has no payload in first message)
+  console.log('[Noise] h before encryption (AD for AEAD):', toHex(ss.h));
+  console.log('[Noise] k for encryption:', toHex(ss.k));
+  console.log('[Noise] n for encryption:', ss.n.toString());
   const payload1 = encryptAndHash(ss, new Uint8Array(0));
 
   // Build message 1: e || encrypted_payload

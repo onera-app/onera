@@ -11,7 +11,7 @@ rand = "0.8"
 
 # Web server
 tokio = { version = "1", features = ["full"] }
-tokio-tungstenite = "0.21"
+tokio-tungstenite = { version = "0.21", features = ["native-tls"] }
 futures-util = "0.3"
 axum = "0.7"
 tower = "0.4"
@@ -36,4 +36,34 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 # Error handling
 thiserror = "1"
 anyhow = "1"
+
+[[bin]]
+name = "noise_test"
+path = "src/bin/noise_test.rs"
+
+[[bin]]
+name = "test_client"
+path = "src/bin/test_client.rs"
+
+[[bin]]
+name = "crypto_compare"
+path = "src/bin/crypto_compare.rs"
+
+[[bin]]
+name = "verify_keypair"
+path = "src/bin/verify_keypair.rs"
+
+[[bin]]
+name = "send_js_msg"
+path = "src/bin/send_js_msg.rs"
+
+[dependencies.x25519-dalek]
+version = "2"
+features = ["static_secrets"]
+
+[dependencies.hmac]
+version = "0.12"
+
+[dependencies.chacha20poly1305]
+version = "0.10"
 
