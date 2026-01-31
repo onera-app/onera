@@ -36,6 +36,47 @@ interface ChatMessage {
   content: string;
 }
 
+/**
+ * Convert AI SDK v3 prompt format to simple ChatMessage array.
+ * The AI SDK prompt is an array of message parts that can include
+ * text, images, tool calls, etc. We extract just the text content.
+ */
+function convertPromptToMessages(prompt: unknown): ChatMessage[] {
+  if (!Array.isArray(prompt)) {
+    return [];
+  }
+
+  const messages: ChatMessage[] = [];
+
+  for (const part of prompt) {
+    if (typeof part !== 'object' || part === null) continue;
+
+    const p = part as Record<string, unknown>;
+    const role = p.role as string;
+
+    // Handle different content formats
+    let content = '';
+    if (typeof p.content === 'string') {
+      content = p.content;
+    } else if (Array.isArray(p.content)) {
+      // Content can be an array of parts (text, image, etc.)
+      content = p.content
+        .filter((c: unknown) => typeof c === 'object' && c !== null && (c as Record<string, unknown>).type === 'text')
+        .map((c: unknown) => (c as Record<string, unknown>).text as string)
+        .join('');
+    }
+
+    if (role && content) {
+      messages.push({
+        role: role as 'system' | 'user' | 'assistant',
+        content,
+      });
+    }
+  }
+
+  return messages;
+}
+
 // Generate unique IDs for stream parts
 function generateId(): string {
   return Math.random().toString(36).substring(2, 15);
@@ -97,13 +138,14 @@ export function createPrivateInferenceModel(
     ): Promise<LanguageModelV3GenerateResult> {
       const sess = await ensureSession();
 
+      // Convert AI SDK prompt format to server's expected format
+      const messages = convertPromptToMessages(options.prompt);
+
       const request = {
-        type: 'generate',
-        messages: options.prompt as ChatMessage[],
-        maxTokens: options.maxOutputTokens,
+        messages,
+        stream: false,
         temperature: options.temperature,
-        topP: options.topP,
-        stopSequences: options.stopSequences,
+        max_tokens: options.maxOutputTokens,
       };
 
       const requestBytes = new TextEncoder().encode(JSON.stringify(request));
@@ -151,13 +193,14 @@ export function createPrivateInferenceModel(
     ): Promise<LanguageModelV3StreamResult> {
       const sess = await ensureSession();
 
+      // Convert AI SDK prompt format to server's expected format
+      const messages = convertPromptToMessages(options.prompt);
+
       const request = {
-        type: 'stream',
-        messages: options.prompt as ChatMessage[],
-        maxTokens: options.maxOutputTokens,
+        messages,
+        stream: true,
         temperature: options.temperature,
-        topP: options.topP,
-        stopSequences: options.stopSequences,
+        max_tokens: options.maxOutputTokens,
       };
 
       const requestBytes = new TextEncoder().encode(JSON.stringify(request));
