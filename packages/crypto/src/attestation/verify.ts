@@ -132,9 +132,6 @@ export async function fetchAndVerifyAttestation(
     // The server generates a new keypair on each restart
     const response = await fetch(attestationEndpoint, {
       cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache',
-      },
     });
     if (!response.ok) {
       return {
