@@ -7,7 +7,6 @@
 
 import * as pkijs from 'pkijs';
 import * as asn1js from 'asn1js';
-import { fromBase64 } from '../sodium/utils';
 
 // Microsoft Azure Attestation root certificate (DigiCert Global Root G2)
 // This is the trust anchor for Azure attestation documents
@@ -36,6 +35,25 @@ bfE=
 -----END CERTIFICATE-----`;
 
 /**
+ * Decode base64 using native browser/Node.js functions.
+ * More lenient than libsodium and doesn't require initialization.
+ */
+function nativeBase64Decode(base64: string): Uint8Array {
+  if (typeof atob === 'function') {
+    // Browser environment
+    const binaryString = atob(base64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes;
+  } else {
+    // Node.js environment
+    return new Uint8Array(Buffer.from(base64, 'base64'));
+  }
+}
+
+/**
  * Parse PEM certificate to pkijs Certificate
  */
 function parsePemCertificate(pem: string): pkijs.Certificate {
@@ -43,7 +61,8 @@ function parsePemCertificate(pem: string): pkijs.Certificate {
     .replace(/-----BEGIN CERTIFICATE-----/g, '')
     .replace(/-----END CERTIFICATE-----/g, '')
     .replace(/\s/g, '');
-  const der = fromBase64(b64);
+  // Use native base64 decoding to avoid libsodium initialization issues
+  const der = nativeBase64Decode(b64);
   const asn1 = asn1js.fromBER(new Uint8Array(der).buffer);
   if (asn1.offset === -1) {
     throw new Error('Failed to parse certificate ASN.1');
@@ -78,20 +97,7 @@ function decodeAzureBase64(input: string): Uint8Array {
     cleaned += '=';
   }
 
-  // Use native base64 decoding (more lenient than libsodium)
-  // Works in both browser (atob) and Node.js (Buffer)
-  if (typeof atob === 'function') {
-    // Browser environment
-    const binaryString = atob(cleaned);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    return bytes;
-  } else {
-    // Node.js environment
-    return new Uint8Array(Buffer.from(cleaned, 'base64'));
-  }
+  return nativeBase64Decode(cleaned);
 }
 
 /**
