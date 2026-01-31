@@ -236,12 +236,19 @@ async fn handle_messages(
                     process_inference(&state.inference, request).await
                 };
 
+                debug!("Inference response: content_len={}, error={:?}",
+                       response.content.len(), response.error);
+
                 // Serialize and encrypt response
                 let response_json = serde_json::to_vec(&response)?;
+                debug!("Serialized response: {} bytes", response_json.len());
+
                 let len = transport.write_message(&response_json, &mut buf)?;
+                debug!("Encrypted response: {} bytes", len);
 
                 // Send encrypted response
                 write.send(Message::Binary(buf[..len].to_vec())).await?;
+                debug!("Response sent successfully");
             }
             Message::Close(_) => {
                 info!("Client requested close");
