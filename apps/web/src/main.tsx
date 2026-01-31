@@ -1,8 +1,6 @@
-// Polyfill Buffer globally for noise-protocol library
+// Polyfill Buffer globally with all static methods
 import { Buffer } from 'buffer';
-if (typeof globalThis.Buffer === 'undefined') {
-  globalThis.Buffer = Buffer;
-}
+(globalThis as unknown as { Buffer: typeof Buffer }).Buffer = Buffer;
 
 import { scan } from 'react-scan';
 import { StrictMode } from 'react';
