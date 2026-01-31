@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -35,10 +35,24 @@ export function HomePage() {
 
   const [isCreating, setIsCreating] = useState(false);
 
-  // Check if user has connections
+  // Check if user has connections or private models
   const credentials = useCredentials();
   const hasAnyConnections = credentials && credentials.length > 0;
   const isLoadingCredentials = credentials === undefined;
+
+  // Fetch private models
+  const { data: privateModels, isLoading: loadingPrivateModels } = trpc.enclaves.listModels.useQuery(
+    undefined,
+    { enabled: isUnlocked }
+  );
+  const hasPrivateModels = privateModels && privateModels.length > 0;
+
+  // User can chat if they have connections OR private models
+  const canChat = useMemo(() => {
+    return hasAnyConnections || hasPrivateModels;
+  }, [hasAnyConnections, hasPrivateModels]);
+
+  const isLoading = isLoadingCredentials || loadingPrivateModels;
 
   const handleSendMessage = useCallback(async (content: string) => {
     if (!isUnlocked) {
@@ -51,13 +65,13 @@ export function HomePage() {
       return;
     }
 
-    if (!hasAnyConnections) {
-      toast.error('Please add a connection first');
+    if (!canChat) {
+      toast.error('No models available');
       return;
     }
 
-    if (isLoadingCredentials) {
-      toast.error('Loading credentials...');
+    if (isLoading) {
+      toast.error('Loading...');
       return;
     }
 
@@ -114,7 +128,7 @@ export function HomePage() {
       toast.error(err instanceof Error ? err.message : 'Failed to create chat');
       setIsCreating(false);
     }
-  }, [hasAnyConnections, isLoadingCredentials, isUnlocked, selectedModelId, createChat, navigate, utils]);
+  }, [canChat, isLoading, isUnlocked, selectedModelId, createChat, navigate, utils]);
 
   // Show welcome screen
   return (
@@ -149,11 +163,11 @@ export function HomePage() {
             </p>
           </div>
 
-          {/* No connections warning */}
-          {!hasAnyConnections && isUnlocked && (
+          {/* No connections warning - only show if no private models either */}
+          {!canChat && !isLoading && isUnlocked && (
             <Alert className="mb-4 sm:mb-6 bg-card border-border">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
-              <AlertTitle className="text-foreground text-sm sm:text-base">No API Keys Connected</AlertTitle>
+              <AlertTitle className="text-foreground text-sm sm:text-base">No Models Available</AlertTitle>
               <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-muted-foreground text-sm">
                 <span>Add an API key to start chatting with AI models.</span>
                 <Button
@@ -171,11 +185,13 @@ export function HomePage() {
           <div className="mb-4 sm:mb-6">
             <MessageInput
               onSend={handleSendMessage}
-              disabled={!isUnlocked || isCreating || !hasAnyConnections}
+              disabled={!isUnlocked || isCreating || !canChat || isLoading}
               placeholder={
                 !isUnlocked
                   ? 'Unlock E2EE to start chatting'
-                  : !hasAnyConnections
+                  : isLoading
+                  ? 'Loading models...'
+                  : !canChat
                   ? 'Add an API key to start chatting'
                   : !selectedModelId
                   ? 'Select a model above to start'
@@ -185,7 +201,7 @@ export function HomePage() {
           </div>
 
           {/* Suggestion chips */}
-          {hasAnyConnections && selectedModelId && isUnlocked && !isCreating && (
+          {canChat && selectedModelId && isUnlocked && !isCreating && (
             <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
               {SUGGESTIONS.map((suggestion, index) => {
                 const Icon = suggestion.icon;

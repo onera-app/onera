@@ -4,9 +4,20 @@
  */
 
 import { generateText } from 'ai';
-import { getModelForCredential } from './providers';
+import { getModelForCredential, getPrivateInferenceModel } from './providers';
 import { getCredentialById, parseModelId } from './credentials';
 import type { ChatMessage } from '@onera/types';
+import type { EnclaveConfig } from './transport';
+
+// Store enclave config for private model tasks
+let currentEnclaveConfig: EnclaveConfig | null = null;
+
+/**
+ * Set the enclave config for private model title/follow-up generation
+ */
+export function setEnclaveConfigForTasks(config: EnclaveConfig | null): void {
+  currentEnclaveConfig = config;
+}
 
 /**
  * Default prompt for title generation
@@ -202,19 +213,38 @@ export async function generateChatTitle(
     return null;
   }
 
-  const { credentialId, modelName } = parseModelId(modelId);
-  if (!credentialId) {
-    console.warn('No credential ID for title generation');
-    return null;
+  const { credentialId, modelName, isPrivate } = parseModelId(modelId);
+
+  let model;
+
+  if (isPrivate) {
+    // Use private inference model
+    if (!currentEnclaveConfig) {
+      console.warn('No enclave config for private model title generation');
+      return null;
+    }
+    model = getPrivateInferenceModel({
+      endpoint: currentEnclaveConfig.endpoint,
+      wsEndpoint: currentEnclaveConfig.wsEndpoint,
+      attestationEndpoint: currentEnclaveConfig.attestationEndpoint,
+      expectedMeasurements: currentEnclaveConfig.expectedMeasurements,
+    });
+  } else {
+    // Use credential-based model
+    if (!credentialId) {
+      console.warn('No credential ID for title generation');
+      return null;
+    }
+
+    const credential = getCredentialById(credentialId);
+    if (!credential) {
+      console.warn('Credential not found for title generation');
+      return null;
+    }
+
+    model = getModelForCredential(credential, modelName);
   }
 
-  const credential = getCredentialById(credentialId);
-  if (!credential) {
-    console.warn('Credential not found for title generation');
-    return null;
-  }
-
-  const model = getModelForCredential(credential, modelName);
   const messagesText = formatMessagesForPrompt(messages, 4);
   const prompt = TITLE_GENERATION_PROMPT + messagesText;
 
@@ -245,19 +275,38 @@ export async function generateFollowUps(
     return [];
   }
 
-  const { credentialId, modelName } = parseModelId(modelId);
-  if (!credentialId) {
-    console.warn('No credential ID for follow-up generation');
-    return [];
+  const { credentialId, modelName, isPrivate } = parseModelId(modelId);
+
+  let model;
+
+  if (isPrivate) {
+    // Use private inference model
+    if (!currentEnclaveConfig) {
+      console.warn('No enclave config for private model follow-up generation');
+      return [];
+    }
+    model = getPrivateInferenceModel({
+      endpoint: currentEnclaveConfig.endpoint,
+      wsEndpoint: currentEnclaveConfig.wsEndpoint,
+      attestationEndpoint: currentEnclaveConfig.attestationEndpoint,
+      expectedMeasurements: currentEnclaveConfig.expectedMeasurements,
+    });
+  } else {
+    // Use credential-based model
+    if (!credentialId) {
+      console.warn('No credential ID for follow-up generation');
+      return [];
+    }
+
+    const credential = getCredentialById(credentialId);
+    if (!credential) {
+      console.warn('Credential not found for follow-up generation');
+      return [];
+    }
+
+    model = getModelForCredential(credential, modelName);
   }
 
-  const credential = getCredentialById(credentialId);
-  if (!credential) {
-    console.warn('Credential not found for follow-up generation');
-    return [];
-  }
-
-  const model = getModelForCredential(credential, modelName);
   const messagesText = formatMessagesForPrompt(messages, 6);
   const prompt = FOLLOW_UP_GENERATION_PROMPT + messagesText;
 

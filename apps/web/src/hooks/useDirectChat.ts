@@ -17,6 +17,7 @@ import {
   clearProviderCache,
   isPrivateModel,
   parseModelId,
+  setEnclaveConfigForTasks,
   type PartiallyDecryptedCredential,
   type EnclaveConfig,
 } from '@/lib/ai';
@@ -192,12 +193,14 @@ export function useDirectChat({
         { modelId: modelName, tier: 'shared', sessionId },
         {
           onSuccess: (data) => {
-            setEnclaveConfig({
+            const config = {
               endpoint: data.endpoint,
               wsEndpoint: data.wsEndpoint,
               attestationEndpoint: data.attestationEndpoint,
               expectedMeasurements: data.expectedMeasurements,
-            });
+            };
+            setEnclaveConfig(config);
+            setEnclaveConfigForTasks(config); // Enable title/follow-up generation for private models
             setEnclaveAssignmentId(data.assignmentId);
 
             // Start heartbeat interval (every 30 seconds)
@@ -222,6 +225,7 @@ export function useDirectChat({
         releaseEnclaveMutation.mutate({ assignmentId: enclaveAssignmentId });
         setEnclaveAssignmentId(null);
         setEnclaveConfig(null);
+        setEnclaveConfigForTasks(null); // Clear tasks config too
 
         if (heartbeatIntervalRef.current) {
           clearInterval(heartbeatIntervalRef.current);

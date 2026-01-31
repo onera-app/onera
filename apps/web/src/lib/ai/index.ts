@@ -54,6 +54,7 @@ export {
 export {
   generateChatTitle,
   generateFollowUps,
+  setEnclaveConfigForTasks,
 } from './tasks';
 
 /**
