@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { UserPlus, Key, Shield, MessageSquare } from "lucide-react";
+import { UserPlus, ShieldCheck, Lock, MessageSquare } from "lucide-react";
 
 const steps = [
   {
@@ -7,28 +7,28 @@ const steps = [
     icon: UserPlus,
     title: "Create your account",
     description:
-      "Sign up in seconds. We generate your unique encryption keys locally on your device.",
+      "Sign up in seconds. Your encryption keys are generated locally on your device — we never see them.",
   },
   {
     number: 2,
-    icon: Key,
-    title: "Add your API keys",
+    icon: ShieldCheck,
+    title: "Connect to a secure enclave",
     description:
-      "Connect your own OpenAI, Anthropic, or other provider keys. They're encrypted and never leave your device.",
+      "Your browser verifies the enclave's integrity through cryptographic attestation — proving the code matches what we published.",
   },
   {
     number: 3,
-    icon: Shield,
-    title: "End-to-end encryption kicks in",
+    icon: Lock,
+    title: "Your prompts stay in the vault",
     description:
-      "Every message is encrypted client-side before transmission. Your data hits our servers as unreadable ciphertext.",
+      "Messages are encrypted directly into the enclave. Processed in hardware isolation. Responses encrypted back to you.",
   },
   {
     number: 4,
     icon: MessageSquare,
-    title: "Chat with zero surveillance",
+    title: "Chat with true privacy",
     description:
-      "No logs. No training on your data. No third-party access. Just you and the AI.",
+      "No logs. No training on your data. No access — not even for us. Just you and the AI, inside a hardware vault.",
   },
 ];
 
@@ -49,7 +49,7 @@ export function HowItWorks() {
             Start Chatting Privately
           </h2>
           <p className="mt-3 sm:mt-4 text-base sm:text-lg text-muted-foreground max-w-md mx-auto">
-            Get started in under a minute. No technical setup required.
+            No API keys needed. Get started in under a minute.
           </p>
         </div>
 
