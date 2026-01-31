@@ -18,7 +18,7 @@ use axum::{
     Router,
 };
 use serde::Serialize;
-use tower_http::cors::{Any, CorsLayer};
+// CORS is handled by Caddy reverse proxy - don't add here to avoid duplicate headers
 use tokio::sync::RwLock;
 use tracing::{info, Level};
 use tracing_subscriber::EnvFilter;
@@ -68,18 +68,12 @@ async fn main() -> anyhow::Result<()> {
         inference,
     }));
 
-    // CORS layer for browser access
-    let cors = CorsLayer::new()
-        .allow_origin(Any)
-        .allow_methods(Any)
-        .allow_headers(Any);
-
     // Build HTTP router for attestation and models endpoints
+    // Note: CORS is handled by Caddy reverse proxy
     let http_app = Router::new()
         .route("/attestation", get(attestation::get_attestation))
         .route("/models", get(get_models))
         .route("/health", get(health_check))
-        .layer(cors)
         .with_state(state.clone());
 
     // Get bind addresses from env or use defaults
