@@ -61,18 +61,38 @@ export interface AzureImdsVerificationResult {
  * Uses native browser/Node.js base64 decoding which is more lenient than libsodium.
  */
 function decodeAzureBase64(input: string): Uint8Array {
+  // Log first 100 chars for debugging
+  console.log('[Azure IMDS] Base64 input preview:', input.substring(0, 100));
+  console.log('[Azure IMDS] Base64 input length:', input.length);
+
   // Remove any whitespace/line breaks that Azure may include
   let cleaned = input.replace(/\s/g, '');
 
   // Convert URL-safe base64 to standard base64 if needed
   cleaned = cleaned.replace(/-/g, '+').replace(/_/g, '/');
 
+  // Remove any characters that aren't valid base64
+  // Valid base64 chars: A-Z, a-z, 0-9, +, /, =
+  const invalidChars = cleaned.match(/[^A-Za-z0-9+/=]/g);
+  if (invalidChars) {
+    console.warn('[Azure IMDS] Found invalid base64 characters:', [...new Set(invalidChars)].join(''));
+    cleaned = cleaned.replace(/[^A-Za-z0-9+/=]/g, '');
+  }
+
   // Add padding if missing
   while (cleaned.length % 4 !== 0) {
     cleaned += '=';
   }
 
-  return nativeBase64Decode(cleaned);
+  console.log('[Azure IMDS] Cleaned base64 length:', cleaned.length);
+
+  try {
+    return nativeBase64Decode(cleaned);
+  } catch (e) {
+    // Log more details on failure
+    console.error('[Azure IMDS] Base64 decode failed. First 200 chars of cleaned input:', cleaned.substring(0, 200));
+    throw e;
+  }
 }
 
 /**
