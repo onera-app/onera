@@ -104,6 +104,10 @@ export async function verifyAzureImdsPkcs7Signature(
   rawQuoteBase64: string
 ): Promise<AzureImdsVerificationResult> {
   try {
+    console.log('[Azure IMDS] Starting PKCS7 verification');
+    console.log('[Azure IMDS] Input length:', rawQuoteBase64?.length);
+    console.log('[Azure IMDS] Input preview:', rawQuoteBase64?.substring(0, 100));
+
     // Set up crypto engine for pkijs
     const crypto = typeof window !== 'undefined' ? window.crypto : globalThis.crypto;
     const cryptoEngine = new pkijs.CryptoEngine({
@@ -115,17 +119,22 @@ export async function verifyAzureImdsPkcs7Signature(
     // Parse the PKCS7 signed data (handle various Azure base64 formats)
     let pkcs7Der: Uint8Array;
     try {
+      console.log('[Azure IMDS] Decoding base64 with native atob...');
       pkcs7Der = decodeAzureBase64(rawQuoteBase64);
+      console.log('[Azure IMDS] Base64 decode success, bytes:', pkcs7Der.length);
     } catch (e) {
+      console.error('[Azure IMDS] Base64 decode failed:', e);
       return { valid: false, error: `Failed to decode base64: ${e instanceof Error ? e.message : 'unknown error'}` };
     }
     const asn1 = asn1js.fromBER(new Uint8Array(pkcs7Der).buffer);
     if (asn1.offset === -1) {
       return { valid: false, error: 'Failed to parse PKCS7 ASN.1 structure' };
     }
+    console.log('[Azure IMDS] ASN.1 parse success');
 
     // Parse as ContentInfo (PKCS7 wrapper)
     const contentInfo = new pkijs.ContentInfo({ schema: asn1.result });
+    console.log('[Azure IMDS] ContentInfo parsed, type:', contentInfo.contentType);
 
     // Verify it's signed data
     if (contentInfo.contentType !== '1.2.840.113549.1.7.2') {
@@ -134,6 +143,7 @@ export async function verifyAzureImdsPkcs7Signature(
 
     // Parse the SignedData
     const signedData = new pkijs.SignedData({ schema: contentInfo.content });
+    console.log('[Azure IMDS] SignedData parsed, certs:', signedData.certificates?.length);
 
     // Get the embedded certificates
     if (!signedData.certificates || signedData.certificates.length === 0) {
@@ -141,20 +151,25 @@ export async function verifyAzureImdsPkcs7Signature(
     }
 
     // Parse the trusted root certificate
+    console.log('[Azure IMDS] Parsing trusted root certificate...');
     const trustedRoot = parsePemCertificate(MICROSOFT_ROOT_CERT_PEM);
+    console.log('[Azure IMDS] Trusted root parsed successfully');
 
     // Build certificate chain and find signer
     const certificates = signedData.certificates.filter(
       (cert): cert is pkijs.Certificate => cert instanceof pkijs.Certificate
     );
+    console.log('[Azure IMDS] Filtered certificates:', certificates.length);
 
     // Verify the signature
+    console.log('[Azure IMDS] Starting signature verification...');
     const verificationResult = await signedData.verify({
       signer: 0, // Verify first signer
       trustedCerts: [trustedRoot],
       checkChain: true,
       checkDate: new Date(),
     });
+    console.log('[Azure IMDS] Signature verification result:', verificationResult);
 
     if (!verificationResult) {
       return { valid: false, error: 'PKCS7 signature verification failed' };
@@ -175,6 +190,10 @@ export async function verifyAzureImdsPkcs7Signature(
       signerCertificate: certificates[0],
     };
   } catch (error) {
+    console.error('[Azure IMDS] Verification error:', error);
+    if (error instanceof Error) {
+      console.error('[Azure IMDS] Error stack:', error.stack);
+    }
     return {
       valid: false,
       error: error instanceof Error ? error.message : 'PKCS7 verification error',
