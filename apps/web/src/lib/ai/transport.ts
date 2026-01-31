@@ -27,6 +27,12 @@ export interface EnclaveConfig {
   wsEndpoint: string;
   attestationEndpoint: string;
   expectedMeasurements?: { launch_digest: string };
+  /**
+   * Allow unverified attestation (development only).
+   * WARNING: Setting this to true bypasses signature verification.
+   * This should NEVER be true in production.
+   */
+  allowUnverified?: boolean;
 }
 
 /**
@@ -120,6 +126,7 @@ export class DirectBrowserTransport {
         wsEndpoint: enclaveConfig.wsEndpoint,
         attestationEndpoint: enclaveConfig.attestationEndpoint,
         expectedMeasurements: enclaveConfig.expectedMeasurements,
+        allowUnverified: enclaveConfig.allowUnverified,
       });
 
       // Convert UIMessages to ModelMessages

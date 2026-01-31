@@ -21,6 +21,7 @@ import { NoiseWebSocketSession } from '@onera/crypto/noise';
 import {
   fetchAndVerifyAttestation,
   type KnownMeasurements,
+  type VerificationOptions,
 } from '@onera/crypto/attestation';
 import type { EnclaveEndpoint } from '@onera/types';
 
@@ -29,6 +30,12 @@ interface PrivateInferenceConfig {
   wsEndpoint: string;
   attestationEndpoint: string;
   expectedMeasurements?: KnownMeasurements;
+  /**
+   * Allow unverified attestation (development only).
+   * WARNING: Setting this to true bypasses signature verification.
+   * This should NEVER be true in production.
+   */
+  allowUnverified?: boolean;
 }
 
 interface ChatMessage {
@@ -99,9 +106,14 @@ export function createPrivateInferenceModel(
 
   const ensureSession = async (): Promise<NoiseWebSocketSession> => {
     if (!verified || !attestedPublicKey) {
+      const verificationOptions: VerificationOptions = {
+        knownMeasurements: config.expectedMeasurements,
+        allowUnverified: config.allowUnverified ?? false,
+      };
+
       const result = await fetchAndVerifyAttestation(
         config.attestationEndpoint,
-        config.expectedMeasurements
+        verificationOptions
       );
 
       if (!result.valid) {

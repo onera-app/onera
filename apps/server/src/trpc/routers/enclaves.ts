@@ -161,6 +161,11 @@ export const enclavesRouter = router({
         });
       }
 
+      // Allow unverified attestation only in development
+      // In production, this should always be false to enforce signature verification
+      const allowUnverified = process.env.NODE_ENV !== 'production' &&
+        process.env.ALLOW_UNVERIFIED_ATTESTATION === 'true';
+
       return {
         enclaveId: enclave.id,
         endpoint: {
@@ -174,6 +179,8 @@ export const enclavesRouter = router({
         // No expected measurements since models come from enclave directly
         // Attestation verification still happens but without pre-known digests
         expectedMeasurements: undefined as { launch_digest: string } | undefined,
+        // Allow unverified only in dev mode with explicit env var
+        allowUnverified,
         assignmentId,
       };
     }),

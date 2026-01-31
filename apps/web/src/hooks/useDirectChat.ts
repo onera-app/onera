@@ -198,6 +198,7 @@ export function useDirectChat({
               wsEndpoint: data.wsEndpoint,
               attestationEndpoint: data.attestationEndpoint,
               expectedMeasurements: data.expectedMeasurements,
+              allowUnverified: data.allowUnverified,
             };
             setEnclaveConfig(config);
             setEnclaveConfigForTasks(config); // Enable title/follow-up generation for private models

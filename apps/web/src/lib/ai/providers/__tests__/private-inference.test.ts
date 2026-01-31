@@ -130,7 +130,10 @@ describe('Private Inference Provider', () => {
 
     expect(mockFetchAndVerifyAttestation).toHaveBeenCalledWith(
       mockConfig.attestationEndpoint,
-      mockConfig.expectedMeasurements
+      {
+        knownMeasurements: mockConfig.expectedMeasurements,
+        allowUnverified: false,
+      }
     );
   });
 
@@ -188,7 +191,7 @@ describe('Private Inference Provider', () => {
       Promise.resolve(
         new TextEncoder().encode(
           JSON.stringify({
-            text: 'This is the AI response',
+            content: 'This is the AI response',
             finishReason: 'stop',
             usage: { promptTokens: 10, completionTokens: 6 },
           })
@@ -301,7 +304,7 @@ describe('Private Inference Provider', () => {
     } as any);
 
     expect(result.request?.body).toMatchObject({
-      type: 'generate',
+      stream: false,
       messages: [{ role: 'user', content: 'Hi' }],
     });
     expect(result.response?.id).toBe('response-123');
@@ -337,13 +340,11 @@ describe('Private Inference Provider', () => {
     const sentData = mockSession.sendAndReceive.mock.calls[0][0];
     const sentRequest = JSON.parse(new TextDecoder().decode(sentData));
 
-    expect(sentRequest).toEqual({
-      type: 'generate',
+    expect(sentRequest).toMatchObject({
+      stream: false,
       messages: [{ role: 'user', content: 'Test' }],
-      maxTokens: 1000,
+      max_tokens: 1000,
       temperature: 0.7,
-      topP: 0.9,
-      stopSequences: ['END'],
     });
   });
 
@@ -436,7 +437,7 @@ describe('Private Inference Provider', () => {
       } as any);
 
       expect(result.request?.body).toMatchObject({
-        type: 'stream',
+        stream: true,
         messages: [{ role: 'user', content: 'Test' }],
       });
     });
