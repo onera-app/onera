@@ -276,10 +276,17 @@ export async function performNKHandshake(
   message1.set(payload1, DHLEN);
 
   const toHex = (arr: Uint8Array) => [...arr].map(b => b.toString(16).padStart(2, '0')).join('');
-  console.log('[Noise] Sending message1:', message1.length, 'bytes');
-  console.log('[Noise] message1 hex:', toHex(message1));
-  console.log('[Noise] ephemeral pubkey hex:', toHex(e));
-  console.log('[Noise] server pubkey hex:', toHex(rs));
+  console.log('[Noise] === Handshake State ===');
+  console.log('[Noise] h (handshake hash):', toHex(ss.h));
+  console.log('[Noise] ck (chaining key):', toHex(ss.ck));
+  console.log('[Noise] k (cipher key):', toHex(ss.k));
+  console.log('[Noise] hasKey:', ss.hasKey);
+  console.log('[Noise] === Message 1 ===');
+  console.log('[Noise] message1 (' + message1.length + ' bytes):', toHex(message1));
+  console.log('[Noise] ephemeral pubkey:', toHex(e));
+  console.log('[Noise] server pubkey:', toHex(rs));
+  console.log('[Noise] es (DH result):', toHex(es));
+  console.log('[Noise] payload1 (' + payload1.length + ' bytes):', toHex(payload1));
   await sendHandshakeMessage(message1);
 
   // Message 2: <- e, ee
