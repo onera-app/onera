@@ -64,6 +64,7 @@ export interface AzureImdsVerificationResult {
 /**
  * Decode base64 with support for various formats Azure IMDS may return.
  * Azure IMDS may return standard base64, URL-safe base64, or base64 with line breaks.
+ * Uses native browser/Node.js base64 decoding which is more lenient than libsodium.
  */
 function decodeAzureBase64(input: string): Uint8Array {
   // Remove any whitespace/line breaks that Azure may include
@@ -77,7 +78,20 @@ function decodeAzureBase64(input: string): Uint8Array {
     cleaned += '=';
   }
 
-  return fromBase64(cleaned);
+  // Use native base64 decoding (more lenient than libsodium)
+  // Works in both browser (atob) and Node.js (Buffer)
+  if (typeof atob === 'function') {
+    // Browser environment
+    const binaryString = atob(cleaned);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes;
+  } else {
+    // Node.js environment
+    return new Uint8Array(Buffer.from(cleaned, 'base64'));
+  }
 }
 
 /**
