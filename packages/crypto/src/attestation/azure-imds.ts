@@ -11,28 +11,8 @@ import * as asn1js from 'asn1js';
 // Microsoft Azure Attestation root certificate (DigiCert Global Root G2)
 // This is the trust anchor for Azure attestation documents
 // Certificate valid until: 2038-01-15
-const MICROSOFT_ROOT_CERT_PEM = `-----BEGIN CERTIFICATE-----
-MIIDjjCCAnagAwIBAgIQAzrx5qcRqaC7KGSxHQn65TANBgkqhkiG9w0BAQsFADBh
-MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3
-d3cuZGlnaWNlcnQuY29tMSAwHgYDVQQDExdEaWdpQ2VydCBHbG9iYWwgUm9vdCBH
-MjAeFw0xMzA4MDExMjAwMDBaFw0zODAxMTUxMjAwMDBaMGExCzAJBgNVBAYTAlVT
-MRUwEwYDVQQKEwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5j
-b20xIDAeBgNVBAMTF0RpZ2lDZXJ0IEdsb2JhbCBSb290IEcyMIIBIjANBgkqhkiG
-9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuzfNNNx7a8myaJCtSnX/RrohCgiN9RlUyfuI
-2/Ou8jqJkTx65qsGGmvPrC3oXgkkRLpimn7Wo6h+4FR1IAWsULecYxpsMNzaHxmx
-1x7e/dfgy5SDN67sH0NO3Xss0r0upS/kqbitOtSZpLYl6ZtrAGCSYP9PIUkY92eQ
-q2EGnI/yuum06ZIya7XzV+hdG82MHauVBJVJ8zUtluNJbd134/tJS7SsVQepj5Wz
-tCO7TG1F8PapspUwtP1MVYwnSlcUfIKdzXOS0xZKBgyMUNGPHgm+F6HmIcr9g+UQ
-vIOlCsRnKPZzFBQ9RnbDhxSJITRNrw9FDKZJobq7nMWxM4MphQIDAQABo0IwQDAP
-BgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIBhjAdBgNVHQ4EFgQUTiJUIBiV
-5uNu5g/6+rkS7QYXjzkwDQYJKoZIhvcNAQELBQADggEBAGBnKJRvDkhj6zHd6mcY
-1Yl9PMCcit6E7qHvvKMWtoqdObzeyMhVQGBn1UE+oN0rK9K25yt7rQ0SHFrWTRMF
-NRIJjKmFGCfP8OOWZ0VZvAn0vjx6OTl4F+Cj1d7oLZQ4S/d3Vb4j8Ue5dfZzQ3P
-Pf3hgRKgQo+3lL/FZMhP2v7lYDfNTmFmNwzwMF85cVaT8NhVmQbcMbDHfNSomCAY
-QvZAMbQr5lQpzMqY6G4GYPspJ0xCB/kV4QCbQT2VKWDhYmNvNmTz0Aruk4G2K4Qc
-p1yTk8BbGZqT+G9fBHhIHbJGREHj31nlyL8C0IBe/9fMNJXHOA5MT+nxG0LH0pFX
-bfE=
------END CERTIFICATE-----`;
+// Pre-processed base64 (no PEM headers, no whitespace) to avoid bundling issues
+const MICROSOFT_ROOT_CERT_BASE64 = 'MIIDjjCCAnagAwIBAgIQAzrx5qcRqaC7KGSxHQn65TANBgkqhkiG9w0BAQsFADBhMQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3d3cuZGlnaWNlcnQuY29tMSAwHgYDVQQDExdEaWdpQ2VydCBHbG9iYWwgUm9vdCBHMjAeFw0xMzA4MDExMjAwMDBaFw0zODAxMTUxMjAwMDBaMGExCzAJBgNVBAYTAlVTMRUwEwYDVQQKEwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5jb20xIDAeBgNVBAMTF0RpZ2lDZXJ0IEdsb2JhbCBSb290IEcyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuzfNNNx7a8myaJCtSnX/RrohCgiN9RlUyfuI2/Ou8jqJkTx65qsGGmvPrC3oXgkkRLpimn7Wo6h+4FR1IAWsULecYxpsMNzaHxmx1x7e/dfgy5SDN67sH0NO3Xss0r0upS/kqbitOtSZpLYl6ZtrAGCSYP9PIUkY92eQq2EGnI/yuum06ZIya7XzV+hdG82MHauVBJVJ8zUtluNJbd134/tJS7SsVQepj5WztCO7TG1F8PapspUwtP1MVYwnSlcUfIKdzXOS0xZKBgyMUNGPHgm+F6HmIcr9g+UQvIOlCsRnKPZzFBQ9RnbDhxSJITRNrw9FDKZJobq7nMWxM4MphQIDAQABo0IwQDAPBgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIBhjAdBgNVHQ4EFgQUTiJUIBiV5uNu5g/6+rkS7QYXjzkwDQYJKoZIhvcNAQELBQADggEBAGBnKJRvDkhj6zHd6mcY1Yl9PMCcit6E7qHvvKMWtoqdObzeyMhVQGBn1UE+oN0rK9K25yt7rQ0SHFrWTRMFNRIJjKmFGCfP8OOWZ0VZvAn0vjx6OTl4F+Cj1d7oLZQ4S/d3Vb4j8Ue5dfZzQ3PPf3hgRKgQo+3lL/FZMhP2v7lYDfNTmFmNwzwMF85cVaT8NhVmQbcMbDHfNSomCAYQvZAMbQr5lQpzMqY6G4GYPspJ0xCB/kV4QCbQT2VKWDhYmNvNmTz0Aruk4G2K4Qcp1yTk8BbGZqT+G9fBHhIHbJGREHj31nlyL8C0IBe/9fMNJXHOA5MT+nxG0LH0pFXbfE=';
 
 /**
  * Decode base64 using native browser/Node.js functions.
@@ -54,15 +34,10 @@ function nativeBase64Decode(base64: string): Uint8Array {
 }
 
 /**
- * Parse PEM certificate to pkijs Certificate
+ * Parse base64-encoded DER certificate to pkijs Certificate
  */
-function parsePemCertificate(pem: string): pkijs.Certificate {
-  const b64 = pem
-    .replace(/-----BEGIN CERTIFICATE-----/g, '')
-    .replace(/-----END CERTIFICATE-----/g, '')
-    .replace(/\s/g, '');
-  // Use native base64 decoding to avoid libsodium initialization issues
-  const der = nativeBase64Decode(b64);
+function parseBase64Certificate(base64: string): pkijs.Certificate {
+  const der = nativeBase64Decode(base64);
   const asn1 = asn1js.fromBER(new Uint8Array(der).buffer);
   if (asn1.offset === -1) {
     throw new Error('Failed to parse certificate ASN.1');
@@ -110,10 +85,6 @@ export async function verifyAzureImdsPkcs7Signature(
   rawQuoteBase64: string
 ): Promise<AzureImdsVerificationResult> {
   try {
-    console.log('[Azure IMDS] Starting PKCS7 verification');
-    console.log('[Azure IMDS] Input length:', rawQuoteBase64?.length);
-    console.log('[Azure IMDS] Input preview:', rawQuoteBase64?.substring(0, 100));
-
     // Set up crypto engine for pkijs
     const crypto = typeof window !== 'undefined' ? window.crypto : globalThis.crypto;
     const cryptoEngine = new pkijs.CryptoEngine({
@@ -125,22 +96,17 @@ export async function verifyAzureImdsPkcs7Signature(
     // Parse the PKCS7 signed data (handle various Azure base64 formats)
     let pkcs7Der: Uint8Array;
     try {
-      console.log('[Azure IMDS] Decoding base64 with native atob...');
       pkcs7Der = decodeAzureBase64(rawQuoteBase64);
-      console.log('[Azure IMDS] Base64 decode success, bytes:', pkcs7Der.length);
     } catch (e) {
-      console.error('[Azure IMDS] Base64 decode failed:', e);
       return { valid: false, error: `Failed to decode base64: ${e instanceof Error ? e.message : 'unknown error'}` };
     }
     const asn1 = asn1js.fromBER(new Uint8Array(pkcs7Der).buffer);
     if (asn1.offset === -1) {
       return { valid: false, error: 'Failed to parse PKCS7 ASN.1 structure' };
     }
-    console.log('[Azure IMDS] ASN.1 parse success');
 
     // Parse as ContentInfo (PKCS7 wrapper)
     const contentInfo = new pkijs.ContentInfo({ schema: asn1.result });
-    console.log('[Azure IMDS] ContentInfo parsed, type:', contentInfo.contentType);
 
     // Verify it's signed data
     if (contentInfo.contentType !== '1.2.840.113549.1.7.2') {
@@ -149,7 +115,6 @@ export async function verifyAzureImdsPkcs7Signature(
 
     // Parse the SignedData
     const signedData = new pkijs.SignedData({ schema: contentInfo.content });
-    console.log('[Azure IMDS] SignedData parsed, certs:', signedData.certificates?.length);
 
     // Get the embedded certificates
     if (!signedData.certificates || signedData.certificates.length === 0) {
@@ -157,25 +122,20 @@ export async function verifyAzureImdsPkcs7Signature(
     }
 
     // Parse the trusted root certificate
-    console.log('[Azure IMDS] Parsing trusted root certificate...');
-    const trustedRoot = parsePemCertificate(MICROSOFT_ROOT_CERT_PEM);
-    console.log('[Azure IMDS] Trusted root parsed successfully');
+    const trustedRoot = parseBase64Certificate(MICROSOFT_ROOT_CERT_BASE64);
 
     // Build certificate chain and find signer
     const certificates = signedData.certificates.filter(
       (cert): cert is pkijs.Certificate => cert instanceof pkijs.Certificate
     );
-    console.log('[Azure IMDS] Filtered certificates:', certificates.length);
 
     // Verify the signature
-    console.log('[Azure IMDS] Starting signature verification...');
     const verificationResult = await signedData.verify({
       signer: 0, // Verify first signer
       trustedCerts: [trustedRoot],
       checkChain: true,
       checkDate: new Date(),
     });
-    console.log('[Azure IMDS] Signature verification result:', verificationResult);
 
     if (!verificationResult) {
       return { valid: false, error: 'PKCS7 signature verification failed' };
@@ -196,10 +156,6 @@ export async function verifyAzureImdsPkcs7Signature(
       signerCertificate: certificates[0],
     };
   } catch (error) {
-    console.error('[Azure IMDS] Verification error:', error);
-    if (error instanceof Error) {
-      console.error('[Azure IMDS] Error stack:', error.stack);
-    }
     return {
       valid: false,
       error: error instanceof Error ? error.message : 'PKCS7 verification error',

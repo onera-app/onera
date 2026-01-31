@@ -1,0 +1,55 @@
+# Caddyfile for Onera Enclave
+# Provides automatic HTTPS via Let's Encrypt
+#
+# Usage (standalone):
+#   ENCLAVE_DOMAIN=enclave.onera.chat caddy run --config Caddyfile --adapter caddyfile
+#
+# Usage (docker-compose):
+#   ENCLAVE_DOMAIN=enclave.onera.chat docker compose -f docker-compose.prod.yml up -d
+
+{$ENCLAVE_DOMAIN:enclave.example.com} {
+	# Automatic HTTPS with Let's Encrypt
+	# Caddy will automatically obtain and renew certificates
+
+	# CORS headers for browser requests
+	header {
+		Access-Control-Allow-Origin "https://staging.onera.chat"
+		Access-Control-Allow-Methods "GET, POST, OPTIONS"
+		Access-Control-Allow-Headers "Content-Type"
+		Access-Control-Max-Age "86400"
+	}
+
+	# Handle preflight requests
+	@options method OPTIONS
+	respond @options 204
+
+	# Attestation and models endpoints (HTTP)
+	# Use 'enclave' service name in Docker, 'localhost' for standalone
+	handle /attestation {
+		reverse_proxy {$ENCLAVE_HOST:enclave}:8080
+	}
+
+	handle /models {
+		reverse_proxy {$ENCLAVE_HOST:enclave}:8080
+	}
+
+	handle /health {
+		reverse_proxy {$ENCLAVE_HOST:enclave}:8080
+	}
+
+	# WebSocket endpoint for Noise protocol
+	handle /ws {
+		reverse_proxy {$ENCLAVE_HOST:enclave}:8081
+	}
+
+	# Default: proxy to HTTP server
+	handle {
+		reverse_proxy {$ENCLAVE_HOST:enclave}:8080
+	}
+
+	# Logging
+	log {
+		output stdout
+		format console
+	}
+}

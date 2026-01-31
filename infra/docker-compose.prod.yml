@@ -1,0 +1,77 @@
+version: '3.8'
+
+# Production docker-compose for Onera Enclave with TLS
+#
+# Prerequisites:
+#   - Set ENCLAVE_DOMAIN to your domain (e.g., enclave.onera.chat)
+#   - Domain must point to this server's IP
+#   - Ports 80 and 443 must be open for Let's Encrypt
+#
+# Usage:
+#   ENCLAVE_DOMAIN=enclave.onera.chat docker compose -f docker-compose.prod.yml up -d
+
+services:
+  # Caddy reverse proxy with automatic HTTPS
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"    # HTTP (redirects to HTTPS, used by Let's Encrypt)
+      - "443:443"  # HTTPS
+    environment:
+      - ENCLAVE_DOMAIN=${ENCLAVE_DOMAIN:?ENCLAVE_DOMAIN must be set}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data       # Certificates stored here
+      - caddy_config:/config
+    depends_on:
+      - enclave
+    networks:
+      - enclave-net
+
+  # vLLM server (production model)
+  vllm:
+    image: vllm/vllm-openai:latest
+    restart: unless-stopped
+    command:
+      - --model
+      - ${VLLM_MODEL:-meta-llama/Llama-3.1-8B-Instruct}
+      - --port
+      - "8000"
+      - --max-model-len
+      - "8192"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks:
+      - enclave-net
+
+  # Enclave runtime
+  enclave:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev  # TODO: Create Dockerfile.prod for release builds
+    restart: unless-stopped
+    environment:
+      - RUST_LOG=info
+      - VLLM_URL=http://vllm:8000
+    # Internal ports only - Caddy handles external traffic
+    expose:
+      - "8080"  # Attestation endpoint
+      - "8081"  # Noise WebSocket
+    depends_on:
+      - vllm
+    networks:
+      - enclave-net
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  enclave-net:
+    name: onera-enclave
