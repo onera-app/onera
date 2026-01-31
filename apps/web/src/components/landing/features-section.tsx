@@ -2,36 +2,36 @@
 
 import { motion } from "framer-motion";
 import {
-  Key,
+  Cpu,
+  CheckCircle,
   Lock,
-  Sparkles,
-  RefreshCw
+  Key,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const features = [
   {
-    title: "Bring Your Own API Keys",
-    description: "Use your own OpenAI, Anthropic, or other provider keys. They're stored encrypted on your device, never on our servers. We literally can't see them.",
-    icon: Key,
+    title: "Hardware-Isolated Inference",
+    description: "Your prompts are processed inside AMD SEV-SNP secure enclaves. The hardware itself prevents anyone — including us — from seeing your data. Not a policy. Physics.",
+    icon: Cpu,
     className: "md:col-span-2",
   },
   {
-    title: "Zero-Knowledge Architecture",
-    description: "Your master key never leaves your device. We can't decrypt your data, reset your password, or comply with data requests.",
+    title: "Cryptographically Verified",
+    description: "Every enclave proves its integrity through attestation. Your browser verifies the code running on our servers matches what we published. Trust, but verify — automatically.",
+    icon: CheckCircle,
+    className: "md:col-span-1",
+  },
+  {
+    title: "Zero-Knowledge Storage",
+    description: "Chat history encrypted client-side with keys only you control. We store ciphertext we can't decrypt. Your conversations remain private even from us.",
     icon: Lock,
     className: "md:col-span-1",
   },
   {
-    title: "Cloud or Local, Your Choice",
-    description: "Use GPT-4, Claude, or run Llama/Mistral locally. Switch between cloud speed and local privacy based on your needs. All with the same encrypted chat history.",
-    icon: Sparkles,
-    className: "md:col-span-1",
-  },
-  {
-    title: "Self-Host Privacy, Zero DevOps",
-    description: "Get the privacy of self-hosting without managing servers, updates, or backups. E2EE sync across devices, automatic encrypted backups, polished UI. Your data, our infrastructure.",
-    icon: RefreshCw,
+    title: "Power User Mode",
+    description: "Prefer your own API keys? Connect OpenAI, Anthropic, or run models locally with Ollama. Same encrypted chat history, your choice of inference provider.",
+    icon: Key,
     className: "md:col-span-2",
   },
 ];
@@ -48,10 +48,10 @@ export function FeaturesSection() {
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 sm:mb-6 px-2">
-              All the power. <span className="text-muted-foreground">None of the snooping.</span>
+              Private by design. <span className="text-muted-foreground">Not just by promise.</span>
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
-              Finally, an AI assistant that respects your privacy as much as you do.
+              Hardware-level protection that even we can't bypass.
             </p>
           </motion.div>
         </div>
