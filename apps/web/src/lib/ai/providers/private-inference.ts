@@ -54,8 +54,10 @@ export function createPrivateInferenceModel(
   let session: NoiseWebSocketSession | null = null;
   let verified = false;
 
+  let attestedPublicKey: string | null = null;
+
   const ensureSession = async (): Promise<NoiseWebSocketSession> => {
-    if (!verified) {
+    if (!verified || !attestedPublicKey) {
       const result = await fetchAndVerifyAttestation(
         config.attestationEndpoint,
         config.expectedMeasurements
@@ -64,13 +66,17 @@ export function createPrivateInferenceModel(
       if (!result.valid) {
         throw new Error(`Attestation verification failed: ${result.error}`);
       }
+
+      // Use the public key from the attestation result, NOT the pre-configured one
+      // The server generates a new keypair on each restart, so we must use the fresh key
+      attestedPublicKey = result.quote!.public_key;
       verified = true;
     }
 
     if (!session) {
       session = await NoiseWebSocketSession.connect(
         config.wsEndpoint,
-        config.endpoint.public_key
+        attestedPublicKey
       );
       sessionCache.set(config.endpoint.id, session);  // Track for cleanup
     }
