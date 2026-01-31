@@ -3,16 +3,13 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Key,
+  Cpu,
   Shield,
   Lock,
-  Server,
+  CheckCircle,
   ArrowRight,
   ArrowLeft,
   Sparkles,
-  Cloud,
-  HardDrive,
-  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -25,22 +22,17 @@ const steps = [
   {
     id: "welcome",
     title: "Welcome to Onera",
-    subtitle: "Private AI chat, built differently",
+    subtitle: "Private AI, powered by secure enclaves",
   },
   {
-    id: "api-keys",
-    title: "Bring Your Own API Keys",
-    subtitle: "You control which AI providers to use",
+    id: "protection",
+    title: "How We Protect You",
+    subtitle: "Your prompts never leave a hardware vault",
   },
   {
-    id: "encryption",
-    title: "End-to-End Encrypted",
-    subtitle: "Your conversations are cryptographically private",
-  },
-  {
-    id: "providers",
-    title: "Cloud or Local",
-    subtitle: "Choose your privacy level",
+    id: "verification",
+    title: "Verified Security",
+    subtitle: "Trust, but verify — automatically",
   },
   {
     id: "recovery",
@@ -104,9 +96,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             transition={{ duration: 0.3 }}
           >
             {step.id === "welcome" && <WelcomeStep />}
-            {step.id === "api-keys" && <ApiKeysStep />}
-            {step.id === "encryption" && <EncryptionStep />}
-            {step.id === "providers" && <ProvidersStep />}
+            {step.id === "protection" && <ProtectionStep />}
+            {step.id === "verification" && <VerificationStep />}
             {step.id === "recovery" && <RecoveryStep />}
           </motion.div>
         </AnimatePresence>
@@ -158,200 +149,136 @@ function WelcomeStep() {
         Welcome to Onera
       </h1>
       <p className="text-lg text-muted-foreground mb-8">
-        The AI assistant that keeps your conversations truly private.
+        The AI assistant that's private by design — not just by policy.
       </p>
       <div className="space-y-3 text-left">
-        <Feature icon={Key} text="Bring your own API keys" />
-        <Feature icon={Shield} text="End-to-end encrypted chats" />
-        <Feature icon={Server} text="Cloud or fully local AI" />
+        <Feature icon={Cpu} text="Hardware-isolated inference" />
+        <Feature icon={CheckCircle} text="Cryptographically verified" />
+        <Feature icon={Lock} text="Zero-knowledge storage" />
       </div>
     </div>
   );
 }
 
-function ApiKeysStep() {
-  return (
-    <div className="text-center">
-      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-transparent ring-1 ring-amber-500/20">
-        <Key className="h-10 w-10 text-amber-600 dark:text-amber-400" />
-      </div>
-      <h1 className="text-3xl font-bold tracking-tight mb-3">
-        Bring Your Own API Keys
-      </h1>
-      <p className="text-muted-foreground mb-8">
-        Connect your own OpenAI, Anthropic, or other provider keys. 
-        This is how Onera stays private.
-      </p>
-      
-      <div className="rounded-xl border bg-card p-4 text-left space-y-4">
-        <div className="flex gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
-            <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-          </div>
-          <div>
-            <p className="font-medium text-sm">Your keys, your control</p>
-            <p className="text-xs text-muted-foreground">
-              API keys are encrypted and stored only on your device
-            </p>
-          </div>
-        </div>
-        <div className="flex gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
-            <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-          </div>
-          <div>
-            <p className="font-medium text-sm">Pay providers directly</p>
-            <p className="text-xs text-muted-foreground">
-              We never see your keys or proxy your requests
-            </p>
-          </div>
-        </div>
-        <div className="flex gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
-            <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-          </div>
-          <div>
-            <p className="font-medium text-sm">Multiple providers supported</p>
-            <p className="text-xs text-muted-foreground">
-              OpenAI, Anthropic, and local Ollama
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <p className="mt-4 text-xs text-muted-foreground">
-        You'll add your API key after setup. Get one from{" "}
-        <a href="https://platform.openai.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-          OpenAI
-        </a>{" "}
-        or{" "}
-        <a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-          Anthropic
-        </a>.
-      </p>
-    </div>
-  );
-}
-
-function EncryptionStep() {
+function ProtectionStep() {
   return (
     <div className="text-center">
       <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/20 via-emerald-500/10 to-transparent ring-1 ring-emerald-500/20">
-        <Shield className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
+        <Cpu className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
       </div>
       <h1 className="text-3xl font-bold tracking-tight mb-3">
-        End-to-End Encrypted
+        Your Prompts Stay in a Vault
       </h1>
       <p className="text-muted-foreground mb-8">
-        Your conversations and API keys are encrypted before they leave your device.
-        We can't read them. Nobody can.
+        Unlike other AI services, your messages are processed inside secure enclaves — hardware-isolated environments that even our engineers can't access.
       </p>
-      
-      {/* Visual encryption flow */}
+
+      {/* Visual diagram */}
       <div className="rounded-xl border bg-card p-5">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex flex-col items-center gap-2">
             <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
-              <span className="text-xs font-medium">Your data</span>
+              <span className="text-xs font-medium">You</span>
             </div>
           </div>
-          
+
           <div className="flex-1 flex items-center">
-            <div className="h-0.5 flex-1 bg-gradient-to-r from-muted via-primary to-muted" />
+            <div className="h-0.5 flex-1 bg-gradient-to-r from-muted via-emerald-500 to-muted" />
           </div>
-          
+
           <div className="flex flex-col items-center gap-2">
-            <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center ring-2 ring-primary/30">
-              <Lock className="h-5 w-5 text-primary" />
+            <div className="h-12 w-12 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-2 ring-emerald-500/30">
+              <Cpu className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
           </div>
-          
+
           <div className="flex-1 flex items-center">
-            <div className="h-0.5 flex-1 bg-gradient-to-r from-muted via-primary to-muted" />
+            <div className="h-0.5 flex-1 bg-gradient-to-r from-muted via-emerald-500 to-muted" />
           </div>
-          
+
           <div className="flex flex-col items-center gap-2">
             <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
-              <span className="text-[10px] font-mono text-muted-foreground">#@!%</span>
+              <span className="text-xs font-medium">AI</span>
             </div>
           </div>
         </div>
-        <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-          <span>Plaintext</span>
-          <span>Encrypted</span>
-          <span>Ciphertext</span>
+        <div className="flex justify-center mt-3">
+          <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+            Secure Enclave — Isolated from everything
+          </span>
         </div>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-3 text-left">
         <div className="rounded-lg border p-3">
-          <p className="text-xs font-medium">AES-256-GCM</p>
-          <p className="text-[10px] text-muted-foreground">Military-grade encryption</p>
+          <p className="text-xs font-medium">AMD SEV-SNP</p>
+          <p className="text-[10px] text-muted-foreground">Hardware isolation</p>
         </div>
         <div className="rounded-lg border p-3">
-          <p className="text-xs font-medium">Argon2id</p>
-          <p className="text-[10px] text-muted-foreground">Secure key derivation</p>
+          <p className="text-xs font-medium">Encrypted Memory</p>
+          <p className="text-[10px] text-muted-foreground">Even RAM is protected</p>
         </div>
       </div>
     </div>
   );
 }
 
-function ProvidersStep() {
+function VerificationStep() {
   return (
     <div className="text-center">
       <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/20 via-blue-500/10 to-transparent ring-1 ring-blue-500/20">
-        <Server className="h-10 w-10 text-blue-600 dark:text-blue-400" />
+        <CheckCircle className="h-10 w-10 text-blue-600 dark:text-blue-400" />
       </div>
       <h1 className="text-3xl font-bold tracking-tight mb-3">
-        Cloud or Local
+        Trust, But Verify
       </h1>
-      <p className="text-muted-foreground mb-6">
-        Choose your privacy level based on your needs.
+      <p className="text-muted-foreground mb-8">
+        Every time you connect, your browser automatically verifies the enclave is running exactly the code we published. No blind trust required.
       </p>
-      
-      <div className="space-y-3">
-        {/* Cloud option */}
-        <div className="rounded-xl border bg-card p-4 text-left">
-          <div className="flex gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10">
-              <Cloud className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <p className="font-medium">Cloud Providers</p>
-              <p className="text-sm text-muted-foreground">
-                GPT-4, Claude, etc. via your own API keys
-              </p>
-              <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                Prompts are sent to provider for inference
-              </p>
-            </div>
-          </div>
-        </div>
 
-        {/* Local option */}
-        <div className="rounded-xl border bg-card p-4 text-left">
-          <div className="flex gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
-              <HardDrive className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+      {/* Visual flow */}
+      <div className="rounded-xl border bg-card p-5">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-col items-center gap-2">
+            <div className="h-12 w-14 rounded-xl bg-muted flex items-center justify-center">
+              <Cpu className="h-5 w-5" />
             </div>
-            <div>
-              <p className="font-medium">Local with Ollama</p>
-              <p className="text-sm text-muted-foreground">
-                Run Llama, Mistral, etc. on your own machine
-              </p>
-              <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
-                Fully air-gapped, prompts never leave your device
-              </p>
+            <span className="text-[10px] text-muted-foreground">Enclave</span>
+          </div>
+
+          <div className="flex-1 flex flex-col items-center gap-1">
+            <div className="h-0.5 w-full bg-gradient-to-r from-muted via-blue-500 to-muted" />
+            <span className="text-[9px] text-muted-foreground">"Here's my proof"</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-2">
+            <div className="h-12 w-14 rounded-xl bg-muted flex items-center justify-center">
+              <Shield className="h-5 w-5" />
+            </div>
+            <span className="text-[10px] text-muted-foreground">Browser</span>
+          </div>
+
+          <div className="flex-1 flex items-center justify-center">
+            <div className="px-2 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-medium">
+              ✓ Verified
             </div>
           </div>
         </div>
       </div>
 
-      <p className="mt-4 text-xs text-muted-foreground">
-        Both options keep your chat history encrypted. Local Ollama provides maximum privacy 
-        for sensitive conversations.
-      </p>
+      <div className="mt-6 rounded-xl border bg-card p-4 text-left">
+        <div className="flex gap-3">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-500/10">
+            <CheckCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div>
+            <p className="font-medium text-sm">Cryptographic Attestation</p>
+            <p className="text-xs text-muted-foreground">
+              Mathematical proof that the enclave is genuine and unmodified
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
