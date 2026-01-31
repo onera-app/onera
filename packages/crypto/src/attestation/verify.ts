@@ -128,7 +128,14 @@ export async function fetchAndVerifyAttestation(
   knownMeasurements?: KnownMeasurements
 ): Promise<VerificationResult> {
   try {
-    const response = await fetch(attestationEndpoint);
+    // Always fetch fresh attestation - never use cached response
+    // The server generates a new keypair on each restart
+    const response = await fetch(attestationEndpoint, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache',
+      },
+    });
     if (!response.ok) {
       return {
         valid: false,
@@ -146,14 +153,23 @@ export async function fetchAndVerifyAttestation(
     let publicKeyBase64: string;
     const publicKeyRaw = data.public_key || data.publicKey;
 
+    console.log('[Attestation] Raw public_key from server:', publicKeyRaw);
+    console.log('[Attestation] attestation_type:', attestationType);
+
     // Check if it's already base64 (contains non-hex chars)
     if (/[^0-9a-fA-F]/.test(publicKeyRaw)) {
       publicKeyBase64 = publicKeyRaw;
+      console.log('[Attestation] Detected base64 encoding');
     } else {
       // Convert hex to base64
       const bytes = fromHex(publicKeyRaw);
       publicKeyBase64 = toBase64(bytes);
+      console.log('[Attestation] Converted hex to base64');
     }
+
+    // Verify the decoded key is 32 bytes
+    const decodedKey = fromBase64(publicKeyBase64);
+    console.log('[Attestation] Decoded public key (' + decodedKey.length + ' bytes):', toHex(decodedKey));
 
     return verifyAttestation(
       rawQuote,

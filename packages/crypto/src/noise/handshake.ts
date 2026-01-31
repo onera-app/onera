@@ -250,9 +250,15 @@ export async function performNKHandshake(
   // Initialize symmetric state
   const ss = initializeSymmetric(PROTOCOL_NAME);
 
+  const toHex = (arr: Uint8Array) => [...arr].map(b => b.toString(16).padStart(2, '0')).join('');
+  console.log('[Noise] Protocol name:', PROTOCOL_NAME);
+  console.log('[Noise] Initial h (should be protocol name bytes):', toHex(ss.h));
+  console.log('[Noise] Initial ck:', toHex(ss.ck));
+
   // Pre-message pattern: <- s
   // Mix server's static public key into handshake hash
   mixHash(ss, rs);
+  console.log('[Noise] h after MixHash(server_pub):', toHex(ss.h));
 
   // Generate ephemeral keypair
   const ephemeralKeypair = sodium.crypto_box_keypair();
@@ -275,7 +281,6 @@ export async function performNKHandshake(
   message1.set(e);
   message1.set(payload1, DHLEN);
 
-  const toHex = (arr: Uint8Array) => [...arr].map(b => b.toString(16).padStart(2, '0')).join('');
   console.log('[Noise] === Handshake State ===');
   console.log('[Noise] h (handshake hash):', toHex(ss.h));
   console.log('[Noise] ck (chaining key):', toHex(ss.ck));
