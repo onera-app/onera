@@ -19,6 +19,7 @@
     "@ai-sdk/mistral": "3.0.6",
     "@ai-sdk/openai": "3.0.7",
     "@ai-sdk/openai-compatible": "2.0.9",
+    "@ai-sdk/provider": "3.0.6",
     "@ai-sdk/react": "3.0.25",
     "@ai-sdk/xai": "3.0.22",
     "@clerk/clerk-react": "^5.20.0",
