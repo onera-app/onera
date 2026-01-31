@@ -170,23 +170,9 @@ async fn handle_connection(
     };
 
     debug!("Received handshake message: {} bytes", client_data.len());
-    if client_data.len() >= 32 {
-        debug!("  Ephemeral key: {}", hex::encode(&client_data[..32]));
-        if client_data.len() > 32 {
-            debug!("  Auth tag: {}", hex::encode(&client_data[32..]));
-        }
-    }
 
     // Process client's message and generate response
-    match handshake.read_message(&client_data, &mut buf) {
-        Ok(_) => {}
-        Err(e) => {
-            error!("Handshake read_message failed: {:?}", e);
-            error!("  Message length: {} bytes", client_data.len());
-            error!("  Message hex: {}", hex::encode(&client_data));
-            return Err(anyhow::anyhow!("decrypt error"));
-        }
-    }
+    handshake.read_message(&client_data, &mut buf)?;
     let len = handshake.write_message(&[], &mut buf)?;
 
     // Send server's ephemeral key

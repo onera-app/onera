@@ -250,28 +250,16 @@ export async function performNKHandshake(
   // Initialize symmetric state
   const ss = initializeSymmetric(PROTOCOL_NAME);
 
-  const toHex = (arr: Uint8Array) => [...arr].map(b => b.toString(16).padStart(2, '0')).join('');
-  console.log('[Noise] Protocol name:', PROTOCOL_NAME);
-  console.log('[Noise] Initial h (should be protocol name bytes):', toHex(ss.h));
-  console.log('[Noise] Initial ck:', toHex(ss.ck));
+  // MixHash with empty prologue (required by Noise spec even when prologue is empty)
+  // This transforms h = HASH(h || "") = HASH(protocol_name)
+  mixHash(ss, new Uint8Array(0));
 
   // Pre-message pattern: <- s
   // Mix server's static public key into handshake hash
   mixHash(ss, rs);
-  console.log('[Noise] h after MixHash(server_pub):', toHex(ss.h));
 
   // Generate ephemeral keypair
   const ephemeralKeypair = sodium.crypto_box_keypair();
-  console.log('[Noise] ephemeral PRIVATE key:', toHex(ephemeralKeypair.privateKey));
-
-  // Verify the keypair is valid (public key should match private key derivation)
-  const derivedPub = sodium.crypto_scalarmult_base(ephemeralKeypair.privateKey);
-  const keypairValid = derivedPub.every((b: number, i: number) => b === ephemeralKeypair.publicKey[i]);
-  console.log('[Noise] ephemeral keypair valid:', keypairValid);
-  if (!keypairValid) {
-    console.log('[Noise] WARNING: Derived pub:', toHex(derivedPub));
-    console.log('[Noise] WARNING: Actual pub: ', toHex(ephemeralKeypair.publicKey));
-  }
   const e = ephemeralKeypair.publicKey;
   const ePrivate = ephemeralKeypair.privateKey;
 
@@ -284,9 +272,6 @@ export async function performNKHandshake(
   mixKey(ss, es);
 
   // Encrypt empty payload (NK has no payload in first message)
-  console.log('[Noise] h before encryption (AD for AEAD):', toHex(ss.h));
-  console.log('[Noise] k for encryption:', toHex(ss.k));
-  console.log('[Noise] n for encryption:', ss.n.toString());
   const payload1 = encryptAndHash(ss, new Uint8Array(0));
 
   // Build message 1: e || encrypted_payload
@@ -294,25 +279,10 @@ export async function performNKHandshake(
   message1.set(e);
   message1.set(payload1, DHLEN);
 
-  console.log('[Noise] === Handshake State ===');
-  console.log('[Noise] h (handshake hash):', toHex(ss.h));
-  console.log('[Noise] ck (chaining key):', toHex(ss.ck));
-  console.log('[Noise] k (cipher key):', toHex(ss.k));
-  console.log('[Noise] hasKey:', ss.hasKey);
-  console.log('[Noise] === Message 1 ===');
-  console.log('[Noise] message1 (' + message1.length + ' bytes):', toHex(message1));
-  console.log('[Noise] ephemeral pubkey:', toHex(e));
-  console.log('[Noise] server pubkey:', toHex(rs));
-  console.log('[Noise] es (DH result):', toHex(es));
-  console.log('[Noise] payload1 (' + payload1.length + ' bytes):', toHex(payload1));
   await sendHandshakeMessage(message1);
 
   // Message 2: <- e, ee
   const message2 = await receiveHandshakeMessage();
-  console.log('[Noise] Received message2:', message2.length, 'bytes');
-  if (message2.length > 0) {
-    console.log('[Noise] message2 first 32 bytes (hex):', [...message2.slice(0, 32)].map(b => b.toString(16).padStart(2, '0')).join(''));
-  }
 
   if (message2.length < DHLEN) {
     throw new Error(`Invalid handshake message 2: too short (got ${message2.length} bytes, need ${DHLEN})`);

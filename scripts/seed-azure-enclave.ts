@@ -9,11 +9,11 @@ import { enclaves, privateInferenceModels } from '../apps/server/src/db/schema';
 import { eq } from 'drizzle-orm';
 import { randomUUID } from 'crypto';
 
-const ENCLAVE_IP = process.env.ENCLAVE_IP || '20.115.43.15';
+const ENCLAVE_HOST = process.env.ENCLAVE_HOST || 'private.onera.chat';
 
 async function seedAzureEnclave() {
   console.log('Seeding Azure Confidential VM enclave...');
-  console.log(`Target IP: ${ENCLAVE_IP}`);
+  console.log(`Target host: ${ENCLAVE_HOST}`);
 
   // First, ensure the model exists
   const modelId = 'llama-3.1-8b-azure';
@@ -36,7 +36,7 @@ async function seedAzureEnclave() {
   const existing = await db
     .select()
     .from(enclaves)
-    .where(eq(enclaves.host, ENCLAVE_IP))
+    .where(eq(enclaves.host, ENCLAVE_HOST))
     .limit(1);
 
   if (existing.length > 0) {
@@ -46,8 +46,9 @@ async function seedAzureEnclave() {
       .update(enclaves)
       .set({
         status: 'ready',
-        wsEndpoint: `ws://${ENCLAVE_IP}:8081`,
-        attestationEndpoint: `http://${ENCLAVE_IP}:8080/attestation`,
+        wsEndpoint: `wss://${ENCLAVE_HOST}/ws`,
+        attestationEndpoint: `https://${ENCLAVE_HOST}/attestation`,
+        currentConnections: 0, // Reset connections on update
         updatedAt: new Date(),
       })
       .where(eq(enclaves.id, existing[0].id));
@@ -60,10 +61,10 @@ async function seedAzureEnclave() {
       modelId: modelId,
       tier: 'shared',
       status: 'ready',
-      host: ENCLAVE_IP,
-      port: 8081,
-      wsEndpoint: `ws://${ENCLAVE_IP}:8081`,
-      attestationEndpoint: `http://${ENCLAVE_IP}:8080/attestation`,
+      host: ENCLAVE_HOST,
+      port: 443, // HTTPS port
+      wsEndpoint: `wss://${ENCLAVE_HOST}/ws`,
+      attestationEndpoint: `https://${ENCLAVE_HOST}/attestation`,
       publicKey: null,
       launchDigest: null,
       currentConnections: 0,
@@ -74,8 +75,8 @@ async function seedAzureEnclave() {
 
   console.log('\nAzure enclave seeded successfully!');
   console.log(`  Model: ${modelId}`);
-  console.log(`  Attestation: http://${ENCLAVE_IP}:8080/attestation`);
-  console.log(`  WebSocket: ws://${ENCLAVE_IP}:8081`);
+  console.log(`  Attestation: https://${ENCLAVE_HOST}/attestation`);
+  console.log(`  WebSocket: wss://${ENCLAVE_HOST}/ws`);
 }
 
 seedAzureEnclave()
