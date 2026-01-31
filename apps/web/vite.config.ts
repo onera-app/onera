@@ -40,6 +40,8 @@ export default defineConfig({
       '@onera/crypto/attestation': path.resolve(__dirname, '../../packages/crypto/src/attestation'),
       '@onera/crypto': path.resolve(__dirname, '../../packages/crypto/src/sodium'),
       '@onera/types': path.resolve(__dirname, '../../packages/types/src'),
+      // Alias for node-polyfills shims to resolve from packages directory
+      'vite-plugin-node-polyfills/shims/buffer': 'buffer',
     },
   },
   optimizeDeps: {
