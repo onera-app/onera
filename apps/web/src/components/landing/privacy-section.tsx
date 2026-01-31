@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ShieldCheck, EyeOff, Lock, Ban, KeyRound } from "lucide-react";
+import { Cpu, Lock, Eye, Fingerprint } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 
@@ -20,24 +20,25 @@ export function PrivacySection() {
             className="order-2 lg:order-1"
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-sm font-medium mb-4 sm:mb-6">
-              <ShieldCheck className="size-4" />
-              <span>Zero-Knowledge Architecture</span>
+              <Cpu className="size-4" />
+              <span>Secure Enclave Technology</span>
             </div>
 
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 sm:mb-6">
-              Cryptographically private. <br className="hidden sm:block" />
-              <span className="text-neutral-500 dark:text-neutral-400">Not just a promise.</span>
+              Hardware-isolated. <br className="hidden sm:block" />
+              <span className="text-neutral-500 dark:text-neutral-400">Not just encrypted.</span>
             </h2>
 
             <p className="text-base sm:text-lg text-neutral-600 dark:text-neutral-300 mb-6 sm:mb-8 leading-relaxed">
-              Your data is encrypted client-side using AES-256-GCM with keys derived from your password via Argon2id. Your API keys and conversations hit our servers as indecipherable ciphertext.
+              Your prompts are processed inside AMD SEV-SNP secure enclaves — hardware-isolated environments where memory is encrypted and even the host operating system can't peek inside. Combined with end-to-end encrypted storage, your data is protected at every layer.
             </p>
 
             <ul className="space-y-3 sm:space-y-4 mb-8 sm:mb-10">
               {[
-                { icon: EyeOff, text: "End-to-end encryption for all stored data" },
-                { icon: Ban, text: "Zero access to your API keys or chat history" },
-                { icon: KeyRound, text: "Local Ollama support for fully offline AI" },
+                { icon: Cpu, text: "Hardware-isolated inference (AMD SEV-SNP)" },
+                { icon: Eye, text: "Even we can't see your prompts" },
+                { icon: Fingerprint, text: "Cryptographic attestation verifies enclave integrity" },
+                { icon: Lock, text: "End-to-end encrypted chat history" },
               ].map((item, i) => (
                 <li key={i} className="flex items-center gap-3">
                   <div className="flex-shrink-0 size-8 rounded-lg bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center text-neutral-900 dark:text-white">
@@ -73,7 +74,7 @@ export function PrivacySection() {
                   {/* Sender (You) */}
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/4 sm:-translate-x-1/2 z-10 flex flex-col items-center gap-2">
                     <div className="size-12 sm:size-16 rounded-xl sm:rounded-2xl bg-white flex items-center justify-center shadow-lg shadow-white/10">
-                      <span className="font-bold text-neutral-900 text-[10px] sm:text-xs">YOUR<br/>MESSAGE</span>
+                      <span className="font-bold text-neutral-900 text-[10px] sm:text-xs">YOUR<br/>PROMPT</span>
                     </div>
                   </div>
 
@@ -88,7 +89,7 @@ export function PrivacySection() {
                     transition={{ duration: 2, repeat: Infinity }}
                     className="relative z-20 size-16 sm:size-24 mx-auto rounded-full bg-neutral-800 border-4 border-emerald-500/50 flex items-center justify-center"
                   >
-                    <Lock className="size-7 sm:size-10 text-emerald-500" />
+                    <Cpu className="size-7 sm:size-10 text-emerald-500" />
                   </motion.div>
 
                   {/* Floating Particles */}
@@ -105,9 +106,9 @@ export function PrivacySection() {
 
                   {/* Server (Encrypted Blob) */}
                   <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/4 sm:translate-x-1/2 z-10 flex flex-col items-center gap-2">
-                    <div className="size-12 sm:size-16 rounded-xl sm:rounded-2xl bg-neutral-800 border border-neutral-700 flex items-center justify-center shadow-lg">
-                      <span className="font-mono text-neutral-400 text-[10px] sm:text-xs text-center p-1 break-all leading-none">
-                        #@!%<br/>*&amp;$!
+                    <div className="size-12 sm:size-16 rounded-xl sm:rounded-2xl bg-emerald-900 border border-emerald-700 flex items-center justify-center shadow-lg">
+                      <span className="font-mono text-emerald-400 text-[10px] sm:text-xs text-center p-1">
+                        SECURE<br/>ENCLAVE
                       </span>
                     </div>
                   </div>
@@ -122,12 +123,12 @@ export function PrivacySection() {
               transition={{ delay: 0.3 }}
               className="absolute -bottom-4 sm:-bottom-6 left-2 sm:-left-6 bg-white dark:bg-neutral-800 p-3 sm:p-4 rounded-xl shadow-xl border border-neutral-100 dark:border-neutral-700 flex items-center gap-2 sm:gap-3 max-w-[200px] sm:max-w-xs"
             >
-              <div className="size-8 sm:size-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 flex-shrink-0">
-                <ShieldCheck className="size-4 sm:size-5" />
+              <div className="size-8 sm:size-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 flex-shrink-0">
+                <Cpu className="size-4 sm:size-5" />
               </div>
               <div className="text-xs sm:text-sm">
-                <div className="font-semibold text-neutral-900 dark:text-white">Bank-Level Security</div>
-                <div className="text-neutral-600 dark:text-neutral-300">Your data is protected</div>
+                <div className="font-semibold text-neutral-900 dark:text-white">AMD SEV-SNP</div>
+                <div className="text-neutral-600 dark:text-neutral-300">Hardware isolation</div>
               </div>
             </motion.div>
           </motion.div>
