@@ -156,7 +156,7 @@ export function createPrivateInferenceModel(
         content: [
           {
             type: 'text',
-            text: response.text || '',
+            text: response.content || '',
           },
         ],
         finishReason: {
@@ -227,6 +227,7 @@ export function createPrivateInferenceModel(
             for await (const chunk of sess.sendAndStream(requestBytes)) {
               const decoded = JSON.parse(new TextDecoder().decode(chunk));
 
+              // Handle streaming chunks (type: 'text-delta')
               if (decoded.type === 'text-delta') {
                 controller.enqueue({
                   type: 'text-delta',
@@ -260,6 +261,47 @@ export function createPrivateInferenceModel(
                     outputTokens: {
                       total: totalCompletionTokens,
                       text: totalCompletionTokens,
+                      reasoning: undefined,
+                    },
+                  },
+                });
+
+                controller.close();
+                return;
+              } else if (decoded.content !== undefined) {
+                // Handle single response format (server returns InferenceResponse)
+                // Server currently doesn't stream, so we get one complete response
+                if (decoded.content) {
+                  controller.enqueue({
+                    type: 'text-delta',
+                    id: textId,
+                    delta: decoded.content,
+                  });
+                }
+
+                // Emit text-end
+                controller.enqueue({
+                  type: 'text-end',
+                  id: textId,
+                });
+
+                // Emit finish
+                controller.enqueue({
+                  type: 'finish',
+                  finishReason: {
+                    unified: decoded.finish_reason || 'stop',
+                    raw: undefined,
+                  },
+                  usage: {
+                    inputTokens: {
+                      total: 0,
+                      noCache: 0,
+                      cacheRead: undefined,
+                      cacheWrite: undefined,
+                    },
+                    outputTokens: {
+                      total: 0,
+                      text: 0,
                       reasoning: undefined,
                     },
                   },
