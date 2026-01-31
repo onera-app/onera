@@ -1,6 +1,9 @@
-// Polyfill Buffer globally with all static methods
-import { Buffer } from 'buffer';
-(globalThis as unknown as { Buffer: typeof Buffer }).Buffer = Buffer;
+// Ensure Buffer.isBuffer exists (some polyfills don't include it)
+if (typeof globalThis.Buffer !== 'undefined' && typeof globalThis.Buffer.isBuffer !== 'function') {
+  globalThis.Buffer.isBuffer = (obj: unknown): obj is Buffer => {
+    return obj != null && (obj as { _isBuffer?: boolean })._isBuffer === true;
+  };
+}
 
 import { scan } from 'react-scan';
 import { StrictMode } from 'react';

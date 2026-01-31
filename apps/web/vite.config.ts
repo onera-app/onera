@@ -19,15 +19,12 @@ export default defineConfig({
   plugins: [
     react(),
     nodePolyfills({
-      include: ['process'],  // Don't include buffer - we handle it manually
+      include: ['buffer', 'process'],
       globals: {
-        Buffer: false,  // We polyfill Buffer manually in main.tsx
+        Buffer: true,
         process: true,
       },
-      overrides: {
-        // Use the real buffer package instead of the polyfill shim
-        buffer: 'buffer',
-      },
+      protocolImports: true,  // Use node: protocol imports for better compatibility
     }),
   ],
   resolve: {
