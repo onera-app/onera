@@ -10,49 +10,49 @@ import {
 
 const faqs = [
   {
-    question: "Why do I need to bring my own API keys?",
+    question: "What is a secure enclave?",
     answer:
-      "This is core to our privacy model. By using your own API keys, your requests go directly from your browser to the AI provider (OpenAI, Anthropic, etc.). We never proxy your traffic or see your prompts. Your keys are encrypted client-side and stored locally. We couldn't access them even if compelled to.",
+      "A secure enclave is a hardware-isolated environment where code runs in complete isolation from the rest of the system. We use AMD SEV-SNP technology, which encrypts memory and prevents even the host operating system from accessing the enclave's contents. This means your prompts are processed in a 'vault' that even our engineers can't open.",
+  },
+  {
+    question: "How is this different from other private AI tools?",
+    answer:
+      "Most 'private' AI tools rely on policies and promises — they say they won't read your data. Onera uses hardware-level isolation where we physically can't access your prompts. Your data is processed inside secure enclaves with encrypted memory. Combined with cryptographic attestation, you can verify exactly what code is running.",
+  },
+  {
+    question: "How can I verify the enclave is genuine?",
+    answer:
+      "Every time you connect, your browser automatically performs attestation — a cryptographic verification that the enclave is running exactly the code we published. This happens transparently. For technical users, you can view attestation details in Settings to see the cryptographic proofs yourself.",
+  },
+  {
+    question: "Do I need API keys to use Onera?",
+    answer:
+      "No! With our secure enclave inference, you can start chatting immediately without any API keys. Your prompts are processed privately inside our hardware-isolated infrastructure. If you prefer to use your own API keys from OpenAI, Anthropic, or others, that option is available in Settings as 'Power User Mode'.",
+  },
+  {
+    question: "Why would I use my own API keys instead?",
+    answer:
+      "Some power users prefer direct access to specific models or have existing API credits they want to use. With BYOK (bring your own keys), your requests go directly from your browser to the AI provider. Your keys are encrypted and stored locally. Both options keep your chat history end-to-end encrypted.",
   },
   {
     question: "Does my data still go to OpenAI/Anthropic?",
     answer:
-      "Yes, when using cloud providers, your prompts are sent to their inference servers. We encrypt your chat history and API keys, but the AI provider processes your requests in plaintext to generate responses. For complete local privacy, you can connect a local Ollama server. Your prompts never leave your machine, and all inference happens on your own hardware.",
-  },
-  {
-    question: "What is Ollama and how do I use it?",
-    answer:
-      "Ollama lets you run open-source AI models (Llama, Mistral, etc.) locally on your own computer. When configured with Onera, your prompts never leave your device. Combined with our E2EE storage, this gives you fully air-gapped AI conversations. Install Ollama, pull a model, and add your local endpoint in Onera settings.",
-  },
-  {
-    question: "How is this different from ChatGPT or Claude directly?",
-    answer:
-      "When you use ChatGPT or Claude directly, your conversations are stored on their servers and may be used for training. With Onera, your chat history is end-to-end encrypted. We store only ciphertext. Additionally, you get a unified interface across multiple AI providers with organized conversations, prompt templates, and cross-device sync.",
-  },
-  {
-    question: "Why not just self-host?",
-    answer:
-      "You could run Open WebUI or LibreChat on your own server, but then you're responsible for infrastructure, updates, security patches, backups, and uptime. Onera gives you the same privacy guarantees with zero DevOps: E2EE sync across devices, automatic encrypted backups, a polished mobile-friendly UI, and multi-provider support out of the box. Your data is still yours (export anytime), but we handle the infrastructure.",
+      "When using our secure enclave inference (the default), your prompts go to our hardware-isolated servers running open-source models — not to OpenAI or Anthropic. If you choose Power User Mode with your own API keys, requests go directly to your chosen provider. Either way, your chat history is end-to-end encrypted.",
   },
   {
     question: "What encryption do you use?",
     answer:
-      "We use AES-256-GCM for symmetric encryption and X25519 for key exchange. Your master key is derived from your password using Argon2id with secure parameters. All encryption happens client-side in your browser using libsodium. We implement a zero-knowledge architecture where your plaintext data never touches our servers.",
-  },
-  {
-    question: "Where do I get API keys?",
-    answer:
-      "You can get API keys from OpenAI (platform.openai.com), Anthropic (console.anthropic.com), or other supported providers. Most offer free credits to start. You pay the provider directly based on your usage, often at lower rates than subscription plans. For fully local inference, use Ollama instead.",
-  },
-  {
-    question: "Is it really free?",
-    answer:
-      "Onera is free during beta. You only pay your AI provider for API usage (or nothing if using local Ollama). We plan to introduce optional paid tiers for power features, but the core private chat functionality will remain accessible. Beta users will receive special treatment when paid plans launch.",
+      "We use multiple layers of protection: AMD SEV-SNP for hardware-isolated inference, Noise Protocol for encrypted transport to enclaves, and AES-256-GCM with Argon2id key derivation for stored data. All encryption happens client-side using libsodium. We implement a zero-knowledge architecture.",
   },
   {
     question: "What if I lose my recovery key?",
     answer:
-      "Your recovery key is the only way to restore access to your encrypted data on a new device. We cannot reset it or recover your data without it. This is intentional: it means nobody, including us, can access your data. Store it somewhere safe, like a password manager.",
+      "Your recovery key is the only way to restore access to your encrypted chat history on a new device. We cannot reset it or recover your data without it. This is intentional: it means nobody, including us, can access your stored conversations. Store it somewhere safe, like a password manager.",
+  },
+  {
+    question: "Is it really free?",
+    answer:
+      "Onera is free during beta, including secure enclave inference. We plan to introduce optional paid tiers for power features like dedicated enclaves and larger models, but core private chat functionality will remain accessible. Beta users will receive special treatment when paid plans launch.",
   },
 ];
 
