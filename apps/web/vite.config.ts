@@ -21,7 +21,7 @@ export default defineConfig({
     nodePolyfills({
       include: ['buffer', 'process'],
       globals: {
-        Buffer: false,  // Don't inject Buffer global - we import explicitly
+        Buffer: true,
         process: true,
       },
     }),

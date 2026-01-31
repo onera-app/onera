@@ -1,10 +1,7 @@
 /**
- * Noise Protocol NK Handshake Implementation
+ * Noise Protocol NK Handshake Implementation (Browser-Compatible)
  *
- * Uses the NK (Known Key) pattern where:
- * - Client knows server's static public key (from attestation)
- * - Server authenticates to client
- * - Client is anonymous to server
+ * Uses libsodium-wrappers for all crypto operations (works in browser).
  *
  * NK Pattern:
  *   <- s (pre-message: client knows server's static key)
@@ -12,33 +9,219 @@
  *   <- e, ee (server sends ephemeral, performs DH)
  */
 
-// @ts-expect-error - noise-protocol is a CommonJS module without types
-import Noise from 'noise-protocol';
-// @ts-expect-error - noise-protocol/cipher-state is a CommonJS submodule without types
-import createCipherState from 'noise-protocol/cipher-state';
-// @ts-expect-error - noise-protocol/cipher is a CommonJS submodule without types
-import createCipher from 'noise-protocol/cipher';
-// Use buffer package explicitly for browser compatibility
-import { Buffer } from 'buffer';
-
+import { getSodium } from '../sodium/init';
 import { fromBase64 } from '../sodium/utils';
 
-// Initialize cipher state module with cipher primitives
-const cipher = createCipher();
-const cipherState = createCipherState({ cipher });
+// Noise protocol constants
+const DHLEN = 32;     // X25519 key length
+const HASHLEN = 64;   // BLAKE2b-512 output
+const KEYLEN = 32;    // ChaCha20-Poly1305 key length
+const NONCELEN = 12;  // ChaCha20-Poly1305 nonce length
+// const TAGLEN = 16; // Poly1305 tag length (included in libsodium output)
 
-const MACLEN = 16; // Authentication tag length
+// Protocol name for NK pattern with our cipher suite
+const PROTOCOL_NAME = 'Noise_NK_25519_ChaChaPoly_BLAKE2b';
 
 /**
  * Cipher state for transport encryption after handshake
  */
 export interface CipherState {
-  state: Uint8Array;
+  key: Uint8Array;
+  nonce: bigint;
 }
 
 export interface HandshakeResult {
   sendCipher: CipherState;
   recvCipher: CipherState;
+}
+
+/**
+ * Internal symmetric state used during handshake
+ */
+interface SymmetricState {
+  h: Uint8Array;  // Handshake hash
+  ck: Uint8Array; // Chaining key
+  hasKey: boolean;
+  k: Uint8Array;  // Cipher key (if hasKey)
+  n: bigint;      // Nonce counter
+}
+
+/**
+ * HMAC-BLAKE2b implementation
+ */
+function hmacBlake2b(key: Uint8Array, data: Uint8Array): Uint8Array {
+  const sodium = getSodium();
+  const BLOCKLEN = 128;
+
+  // Pad key to block size
+  let keyBlock = new Uint8Array(BLOCKLEN);
+  if (key.length > BLOCKLEN) {
+    keyBlock.set(sodium.crypto_generichash(BLOCKLEN, key));
+  } else {
+    keyBlock.set(key);
+  }
+
+  // Inner and outer padding
+  const ipad = new Uint8Array(BLOCKLEN);
+  const opad = new Uint8Array(BLOCKLEN);
+  for (let i = 0; i < BLOCKLEN; i++) {
+    ipad[i] = keyBlock[i] ^ 0x36;
+    opad[i] = keyBlock[i] ^ 0x5c;
+  }
+
+  // Inner hash: H(ipad || data)
+  const innerInput = new Uint8Array(BLOCKLEN + data.length);
+  innerInput.set(ipad);
+  innerInput.set(data, BLOCKLEN);
+  const innerHash = sodium.crypto_generichash(HASHLEN, innerInput);
+
+  // Outer hash: H(opad || innerHash)
+  const outerInput = new Uint8Array(BLOCKLEN + HASHLEN);
+  outerInput.set(opad);
+  outerInput.set(innerHash, BLOCKLEN);
+
+  return sodium.crypto_generichash(HASHLEN, outerInput);
+}
+
+/**
+ * HKDF using HMAC-BLAKE2b
+ */
+function hkdf(chainingKey: Uint8Array, inputKeyMaterial: Uint8Array, numOutputs: 2 | 3): Uint8Array[] {
+  const tempKey = hmacBlake2b(chainingKey, inputKeyMaterial);
+
+  const output1 = hmacBlake2b(tempKey, new Uint8Array([0x01]));
+  const output2 = hmacBlake2b(tempKey, new Uint8Array([...output1, 0x02]));
+
+  if (numOutputs === 2) {
+    return [output1.slice(0, HASHLEN), output2.slice(0, HASHLEN)];
+  }
+
+  const output3 = hmacBlake2b(tempKey, new Uint8Array([...output2, 0x03]));
+  return [output1.slice(0, HASHLEN), output2.slice(0, HASHLEN), output3.slice(0, HASHLEN)];
+}
+
+/**
+ * Initialize symmetric state with protocol name
+ */
+function initializeSymmetric(protocolName: string): SymmetricState {
+  const sodium = getSodium();
+  const nameBytes = new TextEncoder().encode(protocolName);
+
+  let h: Uint8Array;
+  if (nameBytes.length <= HASHLEN) {
+    h = new Uint8Array(HASHLEN);
+    h.set(nameBytes);
+  } else {
+    h = sodium.crypto_generichash(HASHLEN, nameBytes);
+  }
+
+  return {
+    h: h,
+    ck: new Uint8Array(h), // Copy h to ck
+    hasKey: false,
+    k: new Uint8Array(KEYLEN),
+    n: BigInt(0),
+  };
+}
+
+/**
+ * Mix hash with data
+ */
+function mixHash(state: SymmetricState, data: Uint8Array): void {
+  const sodium = getSodium();
+  const input = new Uint8Array(state.h.length + data.length);
+  input.set(state.h);
+  input.set(data, state.h.length);
+  state.h = sodium.crypto_generichash(HASHLEN, input);
+}
+
+/**
+ * Mix key material into chaining key
+ */
+function mixKey(state: SymmetricState, inputKeyMaterial: Uint8Array): void {
+  const [ck, tempK] = hkdf(state.ck, inputKeyMaterial, 2);
+  state.ck = ck;
+  state.k = tempK.slice(0, KEYLEN);
+  state.n = BigInt(0);
+  state.hasKey = true;
+}
+
+/**
+ * Encrypt with associated data (the hash)
+ */
+function encryptAndHash(state: SymmetricState, plaintext: Uint8Array): Uint8Array {
+  const sodium = getSodium();
+
+  if (!state.hasKey) {
+    mixHash(state, plaintext);
+    return plaintext;
+  }
+
+  // Create nonce from counter
+  const nonce = new Uint8Array(NONCELEN);
+  const nonceView = new DataView(nonce.buffer);
+  nonceView.setBigUint64(4, state.n, true); // Little-endian, offset 4
+
+  // Encrypt with ChaCha20-Poly1305
+  const ciphertext = sodium.crypto_aead_chacha20poly1305_ietf_encrypt(
+    plaintext,
+    state.h, // AD
+    null,    // nsec (unused)
+    nonce,
+    state.k
+  );
+
+  mixHash(state, ciphertext);
+  state.n += BigInt(1);
+
+  return ciphertext;
+}
+
+/**
+ * Decrypt with associated data (the hash)
+ */
+function decryptAndHash(state: SymmetricState, ciphertext: Uint8Array): Uint8Array {
+  const sodium = getSodium();
+
+  if (!state.hasKey) {
+    mixHash(state, ciphertext);
+    return ciphertext;
+  }
+
+  // Create nonce from counter
+  const nonce = new Uint8Array(NONCELEN);
+  const nonceView = new DataView(nonce.buffer);
+  nonceView.setBigUint64(4, state.n, true);
+
+  // Decrypt with ChaCha20-Poly1305
+  const plaintext = sodium.crypto_aead_chacha20poly1305_ietf_decrypt(
+    null,       // nsec (unused)
+    ciphertext,
+    state.h,    // AD
+    nonce,
+    state.k
+  );
+
+  if (!plaintext) {
+    throw new Error('Decryption failed - authentication error');
+  }
+
+  mixHash(state, ciphertext);
+  state.n += BigInt(1);
+
+  return plaintext;
+}
+
+/**
+ * Split symmetric state into two cipher states for transport
+ */
+function split(state: SymmetricState): [CipherState, CipherState] {
+  const [tempK1, tempK2] = hkdf(state.ck, new Uint8Array(0), 2);
+
+  return [
+    { key: tempK1.slice(0, KEYLEN), nonce: BigInt(0) },
+    { key: tempK2.slice(0, KEYLEN), nonce: BigInt(0) },
+  ];
 }
 
 /**
@@ -55,47 +238,73 @@ export async function performNKHandshake(
   sendHandshakeMessage: (message: Uint8Array) => Promise<void>,
   receiveHandshakeMessage: () => Promise<Uint8Array>
 ): Promise<HandshakeResult> {
-  const serverPubKeyBytes = fromBase64(serverPublicKey);
+  const sodium = getSodium();
+  const rs = fromBase64(serverPublicKey); // Remote static public key
 
-  // Initialize handshake state for NK pattern as initiator
-  // Parameters: pattern, initiator, prologue, staticKeypair, ephemeralKeypair, remoteStaticKey, remoteEphemeralKey
-  const handshakeState = Noise.initialize(
-    'NK',
-    true, // initiator
-    Buffer.alloc(0), // prologue (empty)
-    null, // no local static keypair needed for NK initiator
-    null, // ephemeral keypair will be generated
-    serverPubKeyBytes, // remote static public key (known from attestation)
-    null // no remote ephemeral key yet
-  );
+  // Initialize symmetric state
+  const ss = initializeSymmetric(PROTOCOL_NAME);
 
-  try {
-    // NK pattern message 1: -> e, es
-    // Client generates ephemeral key, sends it, performs DH with server's static
-    const message1Buffer = Buffer.alloc(64); // Enough for ephemeral public key + MAC
-    Noise.writeMessage(handshakeState, Buffer.alloc(0), message1Buffer);
-    const message1Len = Noise.writeMessage.bytes;
-    await sendHandshakeMessage(new Uint8Array(message1Buffer.subarray(0, message1Len)));
+  // Pre-message pattern: <- s
+  // Mix server's static public key into handshake hash
+  mixHash(ss, rs);
 
-    // NK pattern message 2: <- e, ee
-    // Server sends ephemeral key, both sides compute shared secret
-    const response = await receiveHandshakeMessage();
-    const payloadBuffer = Buffer.alloc(response.length);
-    const split = Noise.readMessage(handshakeState, Buffer.from(response), payloadBuffer);
+  // Generate ephemeral keypair
+  const ephemeralKeypair = sodium.crypto_box_keypair();
+  const e = ephemeralKeypair.publicKey;
+  const ePrivate = ephemeralKeypair.privateKey;
 
-    if (!split) {
-      throw new Error('Handshake did not complete - expected split');
-    }
+  // Message 1: -> e, es
+  // Send ephemeral public key
+  mixHash(ss, e);
 
-    // split.tx is our send cipher, split.rx is our receive cipher
-    return {
-      sendCipher: { state: new Uint8Array(split.tx) },
-      recvCipher: { state: new Uint8Array(split.rx) },
-    };
-  } finally {
-    // Always destroy handshake state to prevent memory leaks
-    Noise.destroy(handshakeState);
+  // Perform DH: es = DH(e, rs)
+  const es = sodium.crypto_scalarmult(ePrivate, rs);
+  mixKey(ss, es);
+
+  // Encrypt empty payload (NK has no payload in first message)
+  const payload1 = encryptAndHash(ss, new Uint8Array(0));
+
+  // Build message 1: e || encrypted_payload
+  const message1 = new Uint8Array(DHLEN + payload1.length);
+  message1.set(e);
+  message1.set(payload1, DHLEN);
+
+  await sendHandshakeMessage(message1);
+
+  // Message 2: <- e, ee
+  const message2 = await receiveHandshakeMessage();
+
+  if (message2.length < DHLEN) {
+    throw new Error('Invalid handshake message 2: too short');
   }
+
+  // Extract server's ephemeral public key
+  const re = message2.slice(0, DHLEN);
+  mixHash(ss, re);
+
+  // Perform DH: ee = DH(e, re)
+  const ee = sodium.crypto_scalarmult(ePrivate, re);
+  mixKey(ss, ee);
+
+  // Decrypt payload (may be empty)
+  const encryptedPayload2 = message2.slice(DHLEN);
+  if (encryptedPayload2.length > 0) {
+    decryptAndHash(ss, encryptedPayload2);
+  }
+
+  // Split into transport cipher states
+  // Initiator sends with first key, receives with second
+  const [c1, c2] = split(ss);
+
+  // Clear sensitive data
+  sodium.memzero(ePrivate);
+  sodium.memzero(es);
+  sodium.memzero(ee);
+
+  return {
+    sendCipher: c1,
+    recvCipher: c2,
+  };
 }
 
 /**
@@ -106,15 +315,26 @@ export async function performNKHandshake(
  * @param plaintext - Data to encrypt
  * @returns Encrypted data with authentication tag
  */
-export function encryptMessage(cipherObj: CipherState, plaintext: Uint8Array): Uint8Array {
-  const ciphertext = Buffer.alloc(plaintext.length + MACLEN);
-  cipherState.encryptWithAd(
-    cipherObj.state,
-    ciphertext,
-    Buffer.alloc(0), // no associated data
-    Buffer.from(plaintext)
+export function encryptMessage(cipher: CipherState, plaintext: Uint8Array): Uint8Array {
+  const sodium = getSodium();
+
+  // Create nonce from counter
+  const nonce = new Uint8Array(NONCELEN);
+  const nonceView = new DataView(nonce.buffer);
+  nonceView.setBigUint64(4, cipher.nonce, true);
+
+  // Encrypt with ChaCha20-Poly1305 (no AD for transport)
+  const ciphertext = sodium.crypto_aead_chacha20poly1305_ietf_encrypt(
+    plaintext,
+    null,  // No AD
+    null,  // nsec (unused)
+    nonce,
+    cipher.key
   );
-  return new Uint8Array(ciphertext.subarray(0, cipherState.encryptWithAd.bytesWritten));
+
+  cipher.nonce += BigInt(1);
+
+  return ciphertext;
 }
 
 /**
@@ -126,13 +346,28 @@ export function encryptMessage(cipherObj: CipherState, plaintext: Uint8Array): U
  * @returns Decrypted plaintext
  * @throws If authentication fails
  */
-export function decryptMessage(cipherObj: CipherState, ciphertext: Uint8Array): Uint8Array {
-  const plaintext = Buffer.alloc(ciphertext.length - MACLEN);
-  cipherState.decryptWithAd(
-    cipherObj.state,
-    plaintext,
-    Buffer.alloc(0), // no associated data
-    Buffer.from(ciphertext)
+export function decryptMessage(cipher: CipherState, ciphertext: Uint8Array): Uint8Array {
+  const sodium = getSodium();
+
+  // Create nonce from counter
+  const nonce = new Uint8Array(NONCELEN);
+  const nonceView = new DataView(nonce.buffer);
+  nonceView.setBigUint64(4, cipher.nonce, true);
+
+  // Decrypt with ChaCha20-Poly1305 (no AD for transport)
+  const plaintext = sodium.crypto_aead_chacha20poly1305_ietf_decrypt(
+    null,       // nsec (unused)
+    ciphertext,
+    null,       // No AD
+    nonce,
+    cipher.key
   );
-  return new Uint8Array(plaintext.subarray(0, cipherState.decryptWithAd.bytesWritten));
+
+  if (!plaintext) {
+    throw new Error('Decryption failed - authentication error');
+  }
+
+  cipher.nonce += BigInt(1);
+
+  return plaintext;
 }

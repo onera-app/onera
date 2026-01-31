@@ -246,8 +246,8 @@ export class NoiseWebSocketSession implements NoiseSession {
     }
     // Securely clear cipher states
     if (this.ciphers) {
-      secureZero(this.ciphers.sendCipher.state);
-      secureZero(this.ciphers.recvCipher.state);
+      secureZero(this.ciphers.sendCipher.key);
+      secureZero(this.ciphers.recvCipher.key);
       this.ciphers = null;
     }
     // Clear queues

@@ -13,8 +13,7 @@ import {
 } from 'ai';
 import { google } from '@ai-sdk/google';
 import { xai } from '@ai-sdk/xai';
-import { getModelForCredential } from './providers';
-import { getPrivateInferenceModel } from './providers/private-inference';
+import { getModelForCredential, getPrivateInferenceModel } from './providers';
 import { getCredentialById, parseModelId } from './credentials';
 import type { NativeSearchSettings, NativeSearchProvider } from '@/stores/toolsStore';
 import type { ProviderSettings } from '@/stores/modelParamsStore';
