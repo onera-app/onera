@@ -36,6 +36,8 @@ export default defineConfig({
       '@onera/crypto/sharding': path.resolve(__dirname, '../../packages/crypto/src/sharding'),
       '@onera/crypto/session': path.resolve(__dirname, '../../packages/crypto/src/session'),
       '@onera/crypto/password': path.resolve(__dirname, '../../packages/crypto/src/password'),
+      '@onera/crypto/noise': path.resolve(__dirname, '../../packages/crypto/src/noise'),
+      '@onera/crypto/attestation': path.resolve(__dirname, '../../packages/crypto/src/attestation'),
       '@onera/crypto': path.resolve(__dirname, '../../packages/crypto/src/sodium'),
       '@onera/types': path.resolve(__dirname, '../../packages/types/src'),
     },
