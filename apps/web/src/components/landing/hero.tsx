@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Lock, Shield, Key, ShieldCheck } from "lucide-react";
+import { ArrowRight, Cpu, Lock, Shield, Key } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
 
@@ -39,8 +39,8 @@ export function Hero() {
             variant="outline"
             className="mb-6 sm:mb-8 px-4 py-1.5 text-sm font-medium bg-neutral-100/80 dark:bg-white/5 backdrop-blur-md border-neutral-200 dark:border-white/10 shadow-lg rounded-full text-neutral-700 dark:text-white/90"
           >
-            <ShieldCheck className="size-3.5 mr-2 text-neutral-700 dark:text-white" />
-            <span>Your conversations stay private</span>
+            <Cpu className="size-3.5 mr-2 text-neutral-700 dark:text-white" />
+            <span>Hardware-Isolated AI</span>
           </Badge>
         </motion.div>
 
@@ -53,7 +53,7 @@ export function Hero() {
         >
           Chat with AI. <br className="hidden sm:block" />
           <span className="text-neutral-500 dark:text-white/75">
-            Keep your privacy.
+            Inside a vault.
           </span>
         </motion.h1>
 
@@ -64,7 +64,7 @@ export function Hero() {
           transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
           className="mt-6 sm:mt-8 text-lg sm:text-xl text-muted-foreground max-w-xl leading-relaxed px-2"
         >
-          Bring your own API keys or run models locally with Ollama. Your chats are end-to-end encrypted. We can't read them. Nobody can.
+          Your prompts are processed inside secure enclaves — hardware-isolated environments where even we can't see your data. No API keys needed. Just private AI that works.
         </motion.p>
 
         {/* CTA Buttons */}
@@ -77,7 +77,7 @@ export function Hero() {
           {!isAuthenticated ? (
             <Link to="/auth" className="w-full sm:w-auto">
               <Button size="lg" className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-8 rounded-full text-base sm:text-lg font-semibold shadow-xl transition-all hover:scale-105 active:scale-95">
-                Try It Free
+                Start Chatting Free
                 <ArrowRight className="ml-2 size-4 sm:size-5" />
               </Button>
             </Link>
@@ -178,8 +178,8 @@ export function Hero() {
                       <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">LLM</span>
                     </div>
                     <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800">
-                      <Lock className="size-2.5 text-emerald-600 dark:text-emerald-500" />
-                      <span className="text-[10px] font-medium text-emerald-700 dark:text-emerald-400">Encrypted</span>
+                      <Cpu className="size-2.5 text-emerald-600 dark:text-emerald-500" />
+                      <span className="text-[10px] font-medium text-emerald-700 dark:text-emerald-400">Private Enclave</span>
                     </div>
                   </div>
 
