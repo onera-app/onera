@@ -74,6 +74,9 @@ export function useModelSelection({
     if (connectionFilter !== 'all') {
       if (connectionFilter === 'pinned') {
         results = results.filter((m) => pinnedModelIds.includes(m.id));
+      } else if (connectionFilter === 'private') {
+        // Private filter matches 'onera-private' provider
+        results = results.filter((m) => m.provider.toLowerCase() === 'onera-private');
       } else {
         results = results.filter(
           (m) => m.provider.toLowerCase() === connectionFilter.toLowerCase()

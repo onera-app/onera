@@ -14,16 +14,28 @@ import {
 import { google } from '@ai-sdk/google';
 import { xai } from '@ai-sdk/xai';
 import { getModelForCredential } from './providers';
+import { getPrivateInferenceModel } from './providers/private-inference';
 import { getCredentialById, parseModelId } from './credentials';
 import type { NativeSearchSettings, NativeSearchProvider } from '@/stores/toolsStore';
 import type { ProviderSettings } from '@/stores/modelParamsStore';
+import type { EnclaveEndpoint } from '@onera/types';
+
+/**
+ * Enclave configuration for private inference
+ */
+export interface EnclaveConfig {
+  endpoint: EnclaveEndpoint;
+  wsEndpoint: string;
+  attestationEndpoint: string;
+  expectedMeasurements?: { launch_digest: string };
+}
 
 /**
  * Options for DirectBrowserTransport
  */
 export interface DirectBrowserTransportOptions {
   /**
-   * Selected model ID in format: credentialId:modelName
+   * Selected model ID in format: credentialId:modelName or private:modelId
    */
   modelId: string;
 
@@ -49,6 +61,11 @@ export interface DirectBrowserTransportOptions {
    * Provider-specific settings (reasoning, extended thinking, etc.)
    */
   providerSettings?: ProviderSettings;
+
+  /**
+   * Enclave configuration for private inference (set when using private models)
+   */
+  enclaveConfig?: EnclaveConfig;
 }
 
 /**
@@ -87,11 +104,43 @@ export class DirectBrowserTransport {
     abortSignal: AbortSignal | undefined;
   }): Promise<ReadableStream<UIMessageChunk>> {
     const { messages, abortSignal } = options;
-    const { modelId, maxTokens, systemPrompt, nativeSearch, providerSettings } = this.options;
+    const { modelId, maxTokens, systemPrompt, nativeSearch, providerSettings, enclaveConfig } = this.options;
 
     // Parse the model ID to get credential and model name
-    const { credentialId, modelName } = parseModelId(modelId);
+    const { credentialId, modelName, isPrivate } = parseModelId(modelId);
 
+    // Handle private inference models
+    if (isPrivate) {
+      if (!enclaveConfig) {
+        throw new Error('Enclave configuration required for private inference');
+      }
+
+      // Use private inference provider
+      const privateModel = getPrivateInferenceModel({
+        endpoint: enclaveConfig.endpoint,
+        wsEndpoint: enclaveConfig.wsEndpoint,
+        attestationEndpoint: enclaveConfig.attestationEndpoint,
+        expectedMeasurements: enclaveConfig.expectedMeasurements,
+      });
+
+      // Convert UIMessages to ModelMessages
+      const modelMessages = await convertToModelMessages(messages);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = streamText({
+        model: privateModel as any,
+        system: systemPrompt,
+        messages: modelMessages,
+        maxOutputTokens: maxTokens ?? 4096,
+        abortSignal,
+      });
+
+      return result.toUIMessageStream({
+        sendReasoning: true,
+      }) as unknown as ReadableStream<UIMessageChunk>;
+    }
+
+    // Handle credential-based models
     if (!credentialId) {
       throw new Error('No credential ID in model selection');
     }

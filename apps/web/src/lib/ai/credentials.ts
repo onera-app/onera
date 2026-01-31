@@ -127,19 +127,41 @@ export function getCachedCredentials(): DecryptedCredential[] {
 }
 
 /**
- * Parse model ID to extract credential ID and model name
- * Format: credentialId:modelName
+ * Prefix for private inference model IDs
  */
-export function parseModelId(modelId: string): { credentialId: string; modelName: string } {
+export const PRIVATE_MODEL_PREFIX = 'private:';
+
+/**
+ * Check if a model ID is a private inference model
+ */
+export function isPrivateModel(modelId: string): boolean {
+  return modelId.startsWith(PRIVATE_MODEL_PREFIX);
+}
+
+/**
+ * Parse model ID to extract credential ID and model name
+ * Format: credentialId:modelName or private:modelId
+ */
+export function parseModelId(modelId: string): { credentialId: string; modelName: string; isPrivate: boolean } {
+  // Check for private model prefix
+  if (modelId.startsWith(PRIVATE_MODEL_PREFIX)) {
+    return {
+      credentialId: '',
+      modelName: modelId.slice(PRIVATE_MODEL_PREFIX.length),
+      isPrivate: true,
+    };
+  }
+
   const colonIndex = modelId.indexOf(':');
   if (colonIndex === -1) {
     // No credential ID prefix, treat entire string as model name
-    return { credentialId: '', modelName: modelId };
+    return { credentialId: '', modelName: modelId, isPrivate: false };
   }
 
   return {
     credentialId: modelId.slice(0, colonIndex),
     modelName: modelId.slice(colonIndex + 1),
+    isPrivate: false,
   };
 }
 

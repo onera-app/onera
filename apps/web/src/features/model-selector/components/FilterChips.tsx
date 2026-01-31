@@ -16,6 +16,7 @@ const FILTER_LABELS: Record<string, string> = {
   anthropic: 'Anthropic',
   ollama: 'Ollama',
   azure: 'Azure',
+  private: 'Private',
   pinned: 'Pinned',
 };
 
@@ -27,6 +28,9 @@ export const FilterChips = memo(function FilterChips({
 }: FilterChipsProps) {
   // Build filter options based on available providers
   const filters: ModelConnectionFilter[] = ['all'];
+
+  // Add private filter first if private models exist (most important)
+  if (availableProviders.includes('onera-private')) filters.push('private');
 
   // Add provider filters that exist in the models
   if (availableProviders.includes('openai')) filters.push('openai');

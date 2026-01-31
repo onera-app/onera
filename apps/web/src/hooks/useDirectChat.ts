@@ -4,7 +4,7 @@
  */
 
 import { useChat, type UseChatHelpers } from '@ai-sdk/react';
-import { useMemo, useCallback, useEffect, useRef } from 'react';
+import { useMemo, useCallback, useEffect, useRef, useState } from 'react';
 import type { UIMessage, ChatInit } from 'ai';
 import { useE2EE } from '@/providers/E2EEProvider';
 import { useModelStore } from '@/stores/modelStore';
@@ -15,8 +15,12 @@ import {
   setCredentialCache,
   clearCredentialCache,
   clearProviderCache,
+  isPrivateModel,
+  parseModelId,
   type PartiallyDecryptedCredential,
+  type EnclaveConfig,
 } from '@/lib/ai';
+import { trpc } from '@/lib/trpc';
 import type { NativeSearchSettings } from '@/stores/toolsStore';
 import { useModelParamsStore } from '@/stores/modelParamsStore';
 
@@ -122,6 +126,16 @@ export function useDirectChat({
   const { providerSettings } = useModelParamsStore();
   const transportRef = useRef<DirectBrowserTransport | null>(null);
 
+  // Enclave state for private inference
+  const [enclaveConfig, setEnclaveConfig] = useState<EnclaveConfig | null>(null);
+  const [enclaveAssignmentId, setEnclaveAssignmentId] = useState<string | null>(null);
+  const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // tRPC mutations for enclave lifecycle
+  const requestEnclaveMutation = trpc.enclaves.requestEnclave.useMutation();
+  const releaseEnclaveMutation = trpc.enclaves.releaseEnclave.useMutation();
+  const heartbeatMutation = trpc.enclaves.heartbeat.useMutation();
+
   // Stable refs for callbacks to avoid recreating chatOptions on every render
   const onFinishRef = useRef(onFinish);
   const onErrorRef = useRef(onError);
@@ -162,10 +176,94 @@ export function useDirectChat({
     }
   }, [credentials]);
 
+  // Request enclave when a private model is selected
+  useEffect(() => {
+    if (!selectedModelId || !isUnlocked) {
+      return;
+    }
+
+    const isPrivate = isPrivateModel(selectedModelId);
+
+    if (isPrivate) {
+      const { modelName } = parseModelId(selectedModelId);
+      const sessionId = crypto.randomUUID();
+
+      requestEnclaveMutation.mutate(
+        { modelId: modelName, tier: 'shared', sessionId },
+        {
+          onSuccess: (data) => {
+            setEnclaveConfig({
+              endpoint: data.endpoint,
+              wsEndpoint: data.wsEndpoint,
+              attestationEndpoint: data.attestationEndpoint,
+              expectedMeasurements: data.expectedMeasurements,
+            });
+            setEnclaveAssignmentId(data.assignmentId);
+
+            // Start heartbeat interval (every 30 seconds)
+            if (heartbeatIntervalRef.current) {
+              clearInterval(heartbeatIntervalRef.current);
+            }
+            heartbeatIntervalRef.current = setInterval(() => {
+              if (data.assignmentId) {
+                heartbeatMutation.mutate({ assignmentId: data.assignmentId });
+              }
+            }, 30000);
+          },
+          onError: (error) => {
+            console.error('Failed to request enclave:', error);
+            onErrorRef.current?.(new Error(`Failed to connect to private inference: ${error.message}`));
+          },
+        }
+      );
+    } else {
+      // Release enclave if switching away from private model
+      if (enclaveAssignmentId) {
+        releaseEnclaveMutation.mutate({ assignmentId: enclaveAssignmentId });
+        setEnclaveAssignmentId(null);
+        setEnclaveConfig(null);
+
+        if (heartbeatIntervalRef.current) {
+          clearInterval(heartbeatIntervalRef.current);
+          heartbeatIntervalRef.current = null;
+        }
+      }
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (heartbeatIntervalRef.current) {
+        clearInterval(heartbeatIntervalRef.current);
+      }
+    };
+  }, [selectedModelId, isUnlocked]);
+
+  // Cleanup enclave on unmount
+  useEffect(() => {
+    return () => {
+      if (enclaveAssignmentId) {
+        releaseEnclaveMutation.mutate({ assignmentId: enclaveAssignmentId });
+      }
+      if (heartbeatIntervalRef.current) {
+        clearInterval(heartbeatIntervalRef.current);
+      }
+    };
+  }, []);
+
   // Check if transport is ready
   const isReady = useMemo(() => {
-    return isUnlocked && !!selectedModelId && credentials.length > 0;
-  }, [isUnlocked, selectedModelId, credentials.length]);
+    if (!isUnlocked || !selectedModelId) {
+      return false;
+    }
+
+    // For private models, need enclave config
+    if (isPrivateModel(selectedModelId)) {
+      return !!enclaveConfig;
+    }
+
+    // For credential models, need credentials
+    return credentials.length > 0;
+  }, [isUnlocked, selectedModelId, credentials.length, enclaveConfig]);
 
   // Create transport on mount (always have one to prevent useChat from using default API)
   useEffect(() => {
@@ -176,11 +274,12 @@ export function useDirectChat({
         systemPrompt,
         nativeSearch,
         providerSettings,
+        enclaveConfig: enclaveConfig || undefined,
       });
     }
   }, []);
 
-  // Update transport when model or settings change
+  // Update transport when model, settings, or enclave config changes
   useEffect(() => {
     if (transportRef.current && selectedModelId) {
       transportRef.current.setOptions({
@@ -189,9 +288,10 @@ export function useDirectChat({
         systemPrompt,
         nativeSearch,
         providerSettings,
+        enclaveConfig: enclaveConfig || undefined,
       });
     }
-  }, [selectedModelId, maxTokens, systemPrompt, nativeSearch, providerSettings]);
+  }, [selectedModelId, maxTokens, systemPrompt, nativeSearch, providerSettings, enclaveConfig]);
 
   // Create chat options with our transport - ALWAYS provide transport
   // Uses refs for callbacks to avoid recreating on every render
@@ -204,6 +304,7 @@ export function useDirectChat({
         systemPrompt,
         nativeSearch,
         providerSettings,
+        enclaveConfig: enclaveConfig || undefined,
       });
     }
 
@@ -214,7 +315,7 @@ export function useDirectChat({
       onFinish: ({ message }) => onFinishRef.current?.(message),
       onError: (error) => onErrorRef.current?.(error),
     };
-  }, [chatId, initialMessages, selectedModelId, maxTokens, systemPrompt, nativeSearch, providerSettings]);
+  }, [chatId, initialMessages, selectedModelId, maxTokens, systemPrompt, nativeSearch, providerSettings, enclaveConfig]);
   // REMOVED: onFinish, onError from dependencies - using refs instead
 
   // Use AI SDK's useChat with our transport
@@ -224,13 +325,17 @@ export function useDirectChat({
   const sendMessage = useCallback(
     async (content: SendMessageInput) => {
       if (!isReady) {
-        const error = new Error(
-          !isUnlocked
-            ? 'E2EE not unlocked'
-            : !selectedModelId
-              ? 'No model selected'
-              : 'No credentials available'
-        );
+        let errorMessage = 'Unable to send message';
+        if (!isUnlocked) {
+          errorMessage = 'E2EE not unlocked';
+        } else if (!selectedModelId) {
+          errorMessage = 'No model selected';
+        } else if (selectedModelId && isPrivateModel(selectedModelId) && !enclaveConfig) {
+          errorMessage = 'Connecting to private inference...';
+        } else {
+          errorMessage = 'No credentials available';
+        }
+        const error = new Error(errorMessage);
         onErrorRef.current?.(error);
         throw error;
       }
@@ -264,13 +369,17 @@ export function useDirectChat({
   const regenerate = useCallback(
     async (options?: { modifier?: string }) => {
       if (!isReady) {
-        const error = new Error(
-          !isUnlocked
-            ? 'E2EE not unlocked'
-            : !selectedModelId
-              ? 'No model selected'
-              : 'No credentials available'
-        );
+        let errorMessage = 'Unable to regenerate';
+        if (!isUnlocked) {
+          errorMessage = 'E2EE not unlocked';
+        } else if (!selectedModelId) {
+          errorMessage = 'No model selected';
+        } else if (selectedModelId && isPrivateModel(selectedModelId) && !enclaveConfig) {
+          errorMessage = 'Connecting to private inference...';
+        } else {
+          errorMessage = 'No credentials available';
+        }
+        const error = new Error(errorMessage);
         onErrorRef.current?.(error);
         throw error;
       }

@@ -27,6 +27,8 @@ export {
   parseModelId,
   createModelId,
   getAvailableModelsFromCredentials,
+  isPrivateModel,
+  PRIVATE_MODEL_PREFIX,
   type ModelOption,
   type PartiallyDecryptedCredential,
 } from './credentials';
@@ -45,6 +47,7 @@ export {
   supportsNativeSearch,
   getProviderFromModelId,
   type DirectBrowserTransportOptions,
+  type EnclaveConfig,
 } from './transport';
 
 // Tasks (title generation, follow-ups)

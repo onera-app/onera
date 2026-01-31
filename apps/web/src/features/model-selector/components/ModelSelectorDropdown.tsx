@@ -5,9 +5,11 @@ import { useCredentials } from '@/hooks/queries/useCredentials';
 import {
   decryptCredentialsWithMetadata,
   getAvailableModelsFromCredentials,
+  PRIVATE_MODEL_PREFIX,
   type ModelOption,
   type PartiallyDecryptedCredential,
 } from '@/lib/ai';
+import { trpc } from '@/lib/trpc';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,6 +57,12 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
   const checkingConnections = rawCredentials === undefined;
   const hasAnyConnections = rawCredentials && rawCredentials.length > 0;
 
+  // Fetch private inference models from server
+  const { data: privateModels, isLoading: loadingPrivateModels } = trpc.enclaves.listModels.useQuery(
+    undefined,
+    { enabled: isUnlocked }
+  );
+
   // Use the model selection hook
   const {
     filteredModels,
@@ -70,26 +78,40 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
     searchQuery,
   });
 
-  // Fetch available models when credentials change
+  // Fetch available models when credentials or private models change
   useEffect(() => {
     async function loadModels() {
-      if (!rawCredentials || rawCredentials.length === 0 || !isUnlocked) {
+      if (!isUnlocked) {
         setModels([]);
         return;
       }
 
       setLoadingModels(true);
       try {
-        const partial: PartiallyDecryptedCredential[] = rawCredentials.map((c) => ({
-          id: c.id,
-          provider: c.provider,
-          name: c.name,
-          encryptedData: c.encryptedData,
-          iv: c.iv,
+        // Fetch credential-based models
+        let credentialModels: ModelOption[] = [];
+        if (rawCredentials && rawCredentials.length > 0) {
+          const partial: PartiallyDecryptedCredential[] = rawCredentials.map((c) => ({
+            id: c.id,
+            provider: c.provider,
+            name: c.name,
+            encryptedData: c.encryptedData,
+            iv: c.iv,
+          }));
+          const decrypted = decryptCredentialsWithMetadata(partial);
+          credentialModels = await getAvailableModelsFromCredentials(decrypted);
+        }
+
+        // Convert private models to ModelOption format
+        const privateModelOptions: ModelOption[] = (privateModels || []).map((m) => ({
+          id: `${PRIVATE_MODEL_PREFIX}${m.id}`,
+          name: m.displayName,
+          provider: m.provider, // 'onera-private'
+          credentialId: '', // No credential needed for private models
         }));
-        const decrypted = decryptCredentialsWithMetadata(partial);
-        const availableModels = await getAvailableModelsFromCredentials(decrypted);
-        setModels(availableModels);
+
+        // Merge: private models first, then credential models
+        setModels([...privateModelOptions, ...credentialModels]);
       } catch (err) {
         console.error('Failed to load models:', err);
         setModels([]);
@@ -99,7 +121,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
     }
 
     loadModels();
-  }, [rawCredentials, isUnlocked]);
+  }, [rawCredentials, isUnlocked, privateModels]);
 
   // Auto-select first model if none selected
   useEffect(() => {
@@ -192,10 +214,11 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
   );
 
   const selectedModel = models.find((m) => m.id === value);
-  const isLoading = checkingConnections || loadingModels;
+  const isLoading = checkingConnections || loadingModels || loadingPrivateModels;
 
-  // No connections configured
-  if (!checkingConnections && !hasAnyConnections) {
+  // No connections and no private models
+  const hasPrivateModels = privateModels && privateModels.length > 0;
+  if (!checkingConnections && !loadingPrivateModels && !hasAnyConnections && !hasPrivateModels) {
     return (
       <Button
         variant="outline"

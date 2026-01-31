@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 // Filter types for model selector
-export type ModelConnectionFilter = 'all' | 'openai' | 'anthropic' | 'ollama' | 'azure' | 'pinned';
+export type ModelConnectionFilter = 'all' | 'openai' | 'anthropic' | 'ollama' | 'azure' | 'private' | 'pinned';
 
 interface ModelState {
   // Currently selected model ID (format: credentialId:modelName)
