@@ -21,10 +21,10 @@ export default defineConfig({
     nodePolyfills({
       include: ['buffer', 'process'],
       globals: {
-        Buffer: true,
+        Buffer: false,  // We handle Buffer in polyfills.ts
         process: true,
       },
-      protocolImports: true,  // Use node: protocol imports for better compatibility
+      protocolImports: true,
     }),
   ],
   resolve: {
@@ -47,6 +47,7 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['libsodium-wrappers-sumo', 'libsodium-sumo'],
+    include: ['buffer'],  // Pre-bundle buffer to ensure it's available
     esbuildOptions: {
       target: 'esnext',
       define: {
