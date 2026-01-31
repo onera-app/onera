@@ -16,17 +16,17 @@ async function seedAzureEnclave() {
   console.log(`Target host: ${ENCLAVE_HOST}`);
 
   // First, ensure the model exists
-  const modelId = 'llama-3.1-8b-azure';
+  const modelId = 'qwen-2.5-7b-azure';
   await db
     .insert(privateInferenceModels)
     .values({
       id: modelId,
-      name: 'meta-llama/Llama-3.1-8B-Instruct',
-      displayName: 'Llama 3.1 8B (Azure TEE)',
-      contextLength: 128000,
-      weightsPath: '/models/llama-3.1-8b',
-      minGpuMemoryGb: 16,
-      recommendedGpuMemoryGb: 24,
+      name: 'Qwen/Qwen2.5-7B-Instruct',
+      displayName: 'Qwen 2.5 7B (Private)',
+      contextLength: 8192,
+      weightsPath: '/models/qwen2.5-7b-instruct-q4_k_m.gguf',
+      minGpuMemoryGb: 0, // Running on CPU via llama.cpp
+      recommendedGpuMemoryGb: 8,
       expectedLaunchDigest: null, // No verification in Phase 1
       enabled: true,
     })
