@@ -14,8 +14,11 @@ use std::sync::Arc;
 
 use axum::{
     routing::get,
+    Json,
     Router,
 };
+use serde::Serialize;
+use tower_http::cors::{Any, CorsLayer};
 use tokio::sync::RwLock;
 use tracing::{info, Level};
 use tracing_subscriber::EnvFilter;
@@ -65,10 +68,18 @@ async fn main() -> anyhow::Result<()> {
         inference,
     }));
 
-    // Build HTTP router for attestation endpoint
+    // CORS layer for browser access
+    let cors = CorsLayer::new()
+        .allow_origin(Any)
+        .allow_methods(Any)
+        .allow_headers(Any);
+
+    // Build HTTP router for attestation and models endpoints
     let http_app = Router::new()
         .route("/attestation", get(attestation::get_attestation))
+        .route("/models", get(get_models))
         .route("/health", get(health_check))
+        .layer(cors)
         .with_state(state.clone());
 
     // Get bind addresses from env or use defaults
@@ -116,4 +127,55 @@ async fn main() -> anyhow::Result<()> {
 /// Health check endpoint
 async fn health_check() -> &'static str {
     "OK"
+}
+
+/// Model info returned by /models endpoint
+#[derive(Serialize)]
+struct ModelInfo {
+    id: String,
+    name: String,
+    #[serde(rename = "displayName")]
+    display_name: String,
+    provider: String,
+    #[serde(rename = "contextLength")]
+    context_length: u32,
+}
+
+/// Models endpoint - returns available models from the underlying LLM server
+async fn get_models(
+    axum::extract::State(state): axum::extract::State<Arc<RwLock<AppState>>>,
+) -> Json<Vec<ModelInfo>> {
+    let state = state.read().await;
+
+    // Try to get models from the underlying LLM server
+    match state.inference.list_models().await {
+        Ok(models) => {
+            let model_infos: Vec<ModelInfo> = models
+                .into_iter()
+                .map(|id| {
+                    // Parse model name for display
+                    let display_name = id
+                        .split('/')
+                        .last()
+                        .unwrap_or(&id)
+                        .replace(".gguf", "")
+                        .replace("-", " ")
+                        .replace("_", " ");
+
+                    ModelInfo {
+                        id: id.clone(),
+                        name: id.clone(),
+                        display_name: format!("{} (Private)", display_name),
+                        provider: "onera-private".to_string(),
+                        context_length: 8192, // Default, could be queried
+                    }
+                })
+                .collect();
+            Json(model_infos)
+        }
+        Err(_) => {
+            // Return empty list on error
+            Json(vec![])
+        }
+    }
 }

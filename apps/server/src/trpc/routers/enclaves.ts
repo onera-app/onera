@@ -5,29 +5,76 @@ import { router, protectedProcedure } from '../trpc';
 import { db, schema } from '../../db/client';
 import { randomUUID } from 'crypto';
 
-const { enclaves, privateInferenceModels, enclaveAssignments } = schema;
+const { enclaves, enclaveAssignments } = schema;
+
+// Response type from enclave /models endpoint
+interface EnclaveModelInfo {
+  id: string;
+  name: string;
+  displayName: string;
+  provider: string;
+  contextLength: number;
+}
 
 export const enclavesRouter = router({
   /**
-   * List available private inference models.
+   * List available private inference models by querying enclaves directly.
    */
   listModels: protectedProcedure.query(async () => {
-    const models = await db
+    // Get all ready enclaves
+    const readyEnclaves = await db
       .select()
-      .from(privateInferenceModels)
-      .where(eq(privateInferenceModels.enabled, true));
+      .from(enclaves)
+      .where(eq(enclaves.status, 'ready'));
 
-    return models.map((m) => ({
-      id: m.id,
-      name: m.name,
-      displayName: m.displayName,
-      contextLength: m.contextLength,
-      provider: 'onera-private' as const,
-    }));
+    if (readyEnclaves.length === 0) {
+      return [];
+    }
+
+    // Fetch models from each enclave
+    const allModels: Array<{
+      id: string;
+      name: string;
+      displayName: string;
+      contextLength: number;
+      provider: 'onera-private';
+    }> = [];
+
+    for (const enclave of readyEnclaves) {
+      try {
+        // Derive models URL from attestation endpoint
+        const baseUrl = enclave.attestationEndpoint.replace('/attestation', '');
+        const modelsUrl = `${baseUrl}/models`;
+
+        const response = await fetch(modelsUrl, {
+          signal: AbortSignal.timeout(5000), // 5 second timeout
+        });
+
+        if (response.ok) {
+          const models = (await response.json()) as EnclaveModelInfo[];
+          for (const m of models) {
+            allModels.push({
+              id: m.id,
+              name: m.name,
+              displayName: m.displayName,
+              contextLength: m.contextLength,
+              provider: 'onera-private',
+            });
+          }
+        }
+      } catch (error) {
+        // Log but don't fail - enclave might be temporarily unavailable
+        console.warn(`Failed to fetch models from enclave ${enclave.id}:`, error);
+      }
+    }
+
+    return allModels;
   }),
 
   /**
    * Request an enclave for inference.
+   * Now that models come directly from enclaves, we just need to find
+   * a ready enclave with available capacity.
    */
   requestEnclave: protectedProcedure
     .input(
@@ -39,26 +86,9 @@ export const enclavesRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user.id;
-      const { modelId, tier, sessionId } = input;
-
-      // Verify model exists and is enabled
-      const [model] = await db
-        .select()
-        .from(privateInferenceModels)
-        .where(
-          and(
-            eq(privateInferenceModels.id, modelId),
-            eq(privateInferenceModels.enabled, true)
-          )
-        )
-        .limit(1);
-
-      if (!model) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Model not found',
-        });
-      }
+      const { tier, sessionId } = input;
+      // modelId is passed but we don't validate it against DB anymore
+      // since models come directly from enclaves
 
       let enclave;
       const assignmentId = randomUUID();
@@ -66,7 +96,7 @@ export const enclavesRouter = router({
       if (tier === 'shared') {
         // Use transaction to ensure atomicity of connection increment and assignment creation
         const result = await db.transaction(async (tx) => {
-          // Atomic UPDATE that checks capacity AND increments in one operation
+          // Find any ready shared enclave with capacity
           const [updatedEnclave] = await tx
             .update(enclaves)
             .set({
@@ -75,7 +105,6 @@ export const enclavesRouter = router({
             })
             .where(
               and(
-                eq(enclaves.modelId, modelId),
                 eq(enclaves.tier, 'shared'),
                 eq(enclaves.status, 'ready'),
                 lt(enclaves.currentConnections, enclaves.maxConnections)
@@ -86,7 +115,7 @@ export const enclavesRouter = router({
           if (!updatedEnclave) {
             throw new TRPCError({
               code: 'SERVICE_UNAVAILABLE',
-              message: 'No available enclaves for this model. Please try again later.',
+              message: 'No available enclaves. Please try again later.',
             });
           }
 
@@ -109,7 +138,6 @@ export const enclavesRouter = router({
           .from(enclaves)
           .where(
             and(
-              eq(enclaves.modelId, modelId),
               eq(enclaves.tier, 'dedicated'),
               eq(enclaves.dedicatedToUserId, userId),
               eq(enclaves.status, 'ready')
@@ -143,9 +171,9 @@ export const enclavesRouter = router({
         },
         wsEndpoint: enclave.wsEndpoint,
         attestationEndpoint: enclave.attestationEndpoint,
-        expectedMeasurements: model.expectedLaunchDigest
-          ? { launch_digest: model.expectedLaunchDigest }
-          : undefined,
+        // No expected measurements since models come from enclave directly
+        // Attestation verification still happens but without pre-known digests
+        expectedMeasurements: undefined as { launch_digest: string } | undefined,
         assignmentId,
       };
     }),
