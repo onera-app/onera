@@ -1,8 +1,7 @@
-import { pgTable, text, timestamp, integer, boolean, index } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, integer, index } from 'drizzle-orm/pg-core';
 
 export const enclaves = pgTable('enclaves', {
   id: text('id').primaryKey(),
-  modelId: text('model_id').notNull().references(() => privateInferenceModels.id),
   tier: text('tier').notNull().$type<'shared' | 'dedicated'>(),
   status: text('status').notNull().$type<'provisioning' | 'ready' | 'draining' | 'terminated'>(),
 
@@ -33,33 +32,9 @@ export const enclaves = pgTable('enclaves', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   lastHealthCheckAt: timestamp('last_health_check_at'),
 }, (table) => [
-  index('idx_enclaves_model_id').on(table.modelId),
   index('idx_enclaves_status').on(table.status),
   index('idx_enclaves_tier').on(table.tier),
 ]);
-
-export const privateInferenceModels = pgTable('private_inference_models', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  displayName: text('display_name').notNull(),
-  contextLength: integer('context_length').notNull(),
-
-  // Model weights location
-  weightsPath: text('weights_path').notNull(),
-
-  // Resource requirements
-  minGpuMemoryGb: integer('min_gpu_memory_gb').notNull(),
-  recommendedGpuMemoryGb: integer('recommended_gpu_memory_gb').notNull(),
-
-  // Known good measurements for this model's enclave
-  expectedLaunchDigest: text('expected_launch_digest'),
-
-  // Availability
-  enabled: boolean('enabled').default(true),
-
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
 
 export const enclaveAssignments = pgTable('enclave_assignments', {
   id: text('id').primaryKey(),
@@ -80,7 +55,5 @@ export const enclaveAssignments = pgTable('enclave_assignments', {
 // Type exports
 export type Enclave = typeof enclaves.$inferSelect;
 export type NewEnclave = typeof enclaves.$inferInsert;
-export type PrivateInferenceModel = typeof privateInferenceModels.$inferSelect;
-export type NewPrivateInferenceModel = typeof privateInferenceModels.$inferInsert;
 export type EnclaveAssignment = typeof enclaveAssignments.$inferSelect;
 export type NewEnclaveAssignment = typeof enclaveAssignments.$inferInsert;
