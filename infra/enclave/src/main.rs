@@ -135,6 +135,42 @@ struct ModelInfo {
     context_length: u32,
 }
 
+/// Format model ID to human-readable display name
+fn format_model_display_name(id: &str) -> String {
+    // Extract model name from path (e.g., "meta-llama/Llama-3.3-70B-Instruct" -> "Llama-3.3-70B-Instruct")
+    let name = id.split('/').last().unwrap_or(id);
+
+    // Remove common suffixes
+    let name = name
+        .replace(".gguf", "")
+        .replace("-GGUF", "")
+        .replace("-AWQ", "")
+        .replace("-GPTQ", "");
+
+    // Format the name nicely
+    let formatted = name
+        .replace("-", " ")
+        .replace("_", " ")
+        // Capitalize version markers properly
+        .replace(" v0 ", " v0.")
+        .replace(" v1 ", " v1.")
+        .replace(" v2 ", " v2.")
+        .replace(" v3 ", " v3.")
+        // Clean up common model name patterns
+        .replace("Llama ", "Llama ")
+        .replace("Mistral ", "Mistral ")
+        .replace("Qwen ", "Qwen ")
+        // Clean up size indicators
+        .replace(" 70b ", " 70B ")
+        .replace(" 8b ", " 8B ")
+        .replace(" 7b ", " 7B ")
+        .replace(" 13b ", " 13B ")
+        .replace(" 34b ", " 34B ")
+        .replace(" 72b ", " 72B ");
+
+    format!("{} (Private)", formatted.trim())
+}
+
 /// Models endpoint - returns available models from the underlying LLM server
 async fn get_models(
     axum::extract::State(state): axum::extract::State<Arc<RwLock<AppState>>>,
@@ -147,19 +183,10 @@ async fn get_models(
             let model_infos: Vec<ModelInfo> = models
                 .into_iter()
                 .map(|id| {
-                    // Parse model name for display
-                    let display_name = id
-                        .split('/')
-                        .last()
-                        .unwrap_or(&id)
-                        .replace(".gguf", "")
-                        .replace("-", " ")
-                        .replace("_", " ");
-
                     ModelInfo {
+                        display_name: format_model_display_name(&id),
                         id: id.clone(),
-                        name: id.clone(),
-                        display_name: format!("{} (Private)", display_name),
+                        name: id,
                         provider: "onera-private".to_string(),
                         context_length: 8192, // Default, could be queried
                     }
