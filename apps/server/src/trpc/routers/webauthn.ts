@@ -267,6 +267,14 @@ export const webauthnRouter = router({
       // Generate PRF salt for this registration
       const prfSalt = generatePRFSalt();
 
+      // Clean up any stale registration challenges for this user before creating a new one
+      // This handles cases where user cancels and retries
+      for (const [challenge, data] of challengeStore.entries()) {
+        if (data.userId === ctx.user.id && data.type === "registration") {
+          challengeStore.delete(challenge);
+        }
+      }
+
       const options = await generateRegistrationOptions({
         rpName,
         rpID,
@@ -329,16 +337,34 @@ export const webauthnRouter = router({
     .mutation(async ({ ctx, input }) => {
       const response = input.response as RegistrationResponseJSON;
 
-      // Find the challenge from stored challenges
+      // Extract the challenge from clientDataJSON to match the actual challenge used
+      // This handles cases where user cancels and retries (generating a new challenge)
       let expectedChallenge: string | undefined;
-      for (const [challenge, data] of challengeStore.entries()) {
-        if (data.userId === ctx.user.id && data.type === "registration") {
-          expectedChallenge = challenge;
-          break;
-        }
+      try {
+        const clientDataJson = Buffer.from(
+          response.response.clientDataJSON,
+          "base64"
+        ).toString("utf8");
+        const clientData = JSON.parse(clientDataJson) as { challenge?: string };
+        expectedChallenge = clientData.challenge;
+      } catch (error) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid clientDataJSON",
+        });
       }
 
-      if (!expectedChallenge) {
+      // Validate the challenge exists in our store and belongs to this user
+      const challengeEntry = expectedChallenge
+        ? challengeStore.get(expectedChallenge)
+        : undefined;
+
+      if (
+        !expectedChallenge ||
+        !challengeEntry ||
+        challengeEntry.userId !== ctx.user.id ||
+        challengeEntry.type !== "registration"
+      ) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "No pending registration challenge found",
