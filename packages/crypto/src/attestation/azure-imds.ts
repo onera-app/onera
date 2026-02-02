@@ -15,47 +15,30 @@ import * as asn1js from 'asn1js';
 const MICROSOFT_ROOT_CERT_BASE64 = 'MIIDjjCCAnagAwIBAgIQAzrx5qcRqaC7KGSxHQn65TANBgkqhkiG9w0BAQsFADBhMQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3d3cuZGlnaWNlcnQuY29tMSAwHgYDVQQDExdEaWdpQ2VydCBHbG9iYWwgUm9vdCBHMjAeFw0xMzA4MDExMjAwMDBaFw0zODAxMTUxMjAwMDBaMGExCzAJBgNVBAYTAlVTMRUwEwYDVQQKEwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5jb20xIDAeBgNVBAMTF0RpZ2lDZXJ0IEdsb2JhbCBSb290IEcyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuzfNNNx7a8myaJCtSnX/RrohCgiN9RlUyfuI2/Ou8jqJkTx65qsGGmvPrC3oXgkkRLpimn7Wo6h+4FR1IAWsULecYxpsMNzaHxmx1x7e/dfgy5SDN67sH0NO3Xss0r0upS/kqbitOtSZpLYl6ZtrAGCSYP9PIUkY92eQq2EGnI/yuum06ZIya7XzV+hdG82MHauVBJVJ8zUtluNJbd134/tJS7SsVQepj5WztCO7TG1F8PapspUwtP1MVYwnSlcUfIKdzXOS0xZKBgyMUNGPHgm+F6HmIcr9g+UQvIOlCsRnKPZzFBQ9RnbDhxSJITRNrw9FDKZJobq7nMWxM4MphQIDAQABo0IwQDAPBgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIBhjAdBgNVHQ4EFgQUTiJUIBiV5uNu5g/6+rkS7QYXjzkwDQYJKoZIhvcNAQELBQADggEBAGBnKJRvDkhj6zHd6mcY1Yl9PMCcit6E7qHvvKMWtoqdObzeyMhVQGBn1UE+oN0rK9K25yt7rQ0SHFrWTRMFNRIJjKmFGCfP8OOWZ0VZvAn0vjx6OTl4F+Cj1d7oLZQ4S/d3Vb4j8Ue5dfZzQ3PPf3hgRKgQo+3lL/FZMhP2v7lYDfNTmFmNwzwMF85cVaT8NhVmQbcMbDHfNSomCAYQvZAMbQr5lQpzMqY6G4GYPspJ0xCB/kV4QCbQT2VKWDhYmNvNmTz0Aruk4G2K4Qcp1yTk8BbGZqT+G9fBHhIHbJGREHj31nlyL8C0IBe/9fMNJXHOA5MT+nxG0LH0pFXbfE=';
 
 /**
- * Decode base64 using native browser/Node.js functions.
- * More lenient than libsodium and doesn't require initialization.
+ * Decode base64 to Uint8Array.
+ * Uses a simple, reliable implementation that works in all environments.
  */
-function nativeBase64Decode(base64: string): Uint8Array {
-  // Standard base64 alphabet lookup
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-  const lookup = new Uint8Array(256);
-  for (let i = 0; i < chars.length; i++) {
-    lookup[chars.charCodeAt(i)] = i;
-  }
-  lookup['='.charCodeAt(0)] = 0; // Padding character
+function base64ToBytes(base64: string): Uint8Array {
+  // Remove whitespace and normalize
+  let str = base64.replace(/\s/g, '');
 
-  // Remove any whitespace
-  const cleaned = base64.replace(/\s/g, '');
-
-  // Calculate output length
-  let len = cleaned.length;
-  let paddingLength = 0;
-  if (cleaned.endsWith('==')) paddingLength = 2;
-  else if (cleaned.endsWith('=')) paddingLength = 1;
-
-  const bufferLength = Math.floor((len * 3) / 4) - paddingLength;
-  const bytes = new Uint8Array(bufferLength);
-
-  let p = 0;
-  for (let i = 0; i < len; i += 4) {
-    const c1 = cleaned.charCodeAt(i);
-    const c2 = cleaned.charCodeAt(i + 1);
-    const c3 = i + 2 < len ? cleaned.charCodeAt(i + 2) : '='.charCodeAt(0);
-    const c4 = i + 3 < len ? cleaned.charCodeAt(i + 3) : '='.charCodeAt(0);
-
-    const encoded1 = lookup[c1];
-    const encoded2 = lookup[c2];
-    const encoded3 = lookup[c3];
-    const encoded4 = lookup[c4];
-
-    if (p < bufferLength) bytes[p++] = (encoded1 << 2) | (encoded2 >> 4);
-    if (p < bufferLength) bytes[p++] = ((encoded2 & 15) << 4) | (encoded3 >> 2);
-    if (p < bufferLength) bytes[p++] = ((encoded3 & 3) << 6) | (encoded4 & 63);
+  // Add padding if needed
+  while (str.length % 4 !== 0) {
+    str += '=';
   }
 
+  // Use built-in decoding where available
+  if (typeof globalThis.Buffer !== 'undefined') {
+    // Node.js
+    return new Uint8Array(globalThis.Buffer.from(str, 'base64'));
+  }
+
+  // Browser - use atob with proper binary conversion
+  const binaryStr = atob(str);
+  const bytes = new Uint8Array(binaryStr.length);
+  for (let i = 0; i < binaryStr.length; i++) {
+    bytes[i] = binaryStr.charCodeAt(i);
+  }
   return bytes;
 }
 
@@ -63,7 +46,7 @@ function nativeBase64Decode(base64: string): Uint8Array {
  * Parse base64-encoded DER certificate to pkijs Certificate
  */
 function parseBase64Certificate(base64: string): pkijs.Certificate {
-  const der = nativeBase64Decode(base64);
+  const der = base64ToBytes(base64);
   const asn1 = asn1js.fromBER(new Uint8Array(der).buffer);
   if (asn1.offset === -1) {
     throw new Error('Failed to parse certificate ASN.1');
@@ -113,7 +96,7 @@ function decodeAzureBase64(input: string): Uint8Array {
   console.log('[Azure IMDS] Cleaned base64 length:', cleaned.length);
 
   try {
-    return nativeBase64Decode(cleaned);
+    return base64ToBytes(cleaned);
   } catch (e) {
     // Log more details on failure
     console.error('[Azure IMDS] Base64 decode failed. First 200 chars of cleaned input:', cleaned.substring(0, 200));
