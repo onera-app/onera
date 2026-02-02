@@ -249,17 +249,92 @@ export async function verifyAzureImdsPkcs7Signature(
     }).join(', ');
     console.log('[PKCS7] Trusted root subject:', rootSubject);
 
-    // Verify the signature (skip chain verification - PKCS7 doesn't include full chain)
-    // The signature verification still ensures data integrity and authenticity
-    const verificationResult = await signedData.verify({
-      signer: 0, // Verify first signer
-      checkChain: false,
-      checkDate: new Date(),
-    });
+    // Manually verify the signature since pkijs has issues with algorithm resolution
+    const signerInfo = signedData.signerInfos[0];
+    if (!signerInfo) {
+      return { valid: false, error: 'No signer info in PKCS7' };
+    }
+
+    // Get the signer certificate
+    const signerCert = certificates[0];
+    if (!signerCert) {
+      return { valid: false, error: 'No signer certificate found' };
+    }
+
+    // Log signature algorithm for debugging
+    const sigAlgOid = signerInfo.signatureAlgorithm.algorithmId;
+    console.log('[PKCS7] Signature algorithm OID:', sigAlgOid);
+
+    // Map OID to WebCrypto algorithm
+    // 1.2.840.113549.1.1.11 = sha256WithRSAEncryption
+    // 1.2.840.113549.1.1.12 = sha384WithRSAEncryption
+    // 1.2.840.113549.1.1.13 = sha512WithRSAEncryption
+    let hashAlgorithm: string;
+    if (sigAlgOid === '1.2.840.113549.1.1.11') {
+      hashAlgorithm = 'SHA-256';
+    } else if (sigAlgOid === '1.2.840.113549.1.1.12') {
+      hashAlgorithm = 'SHA-384';
+    } else if (sigAlgOid === '1.2.840.113549.1.1.13') {
+      hashAlgorithm = 'SHA-512';
+    } else if (sigAlgOid === '1.2.840.113549.1.1.5') {
+      hashAlgorithm = 'SHA-1';
+    } else {
+      return { valid: false, error: `Unsupported signature algorithm: ${sigAlgOid}` };
+    }
+
+    console.log('[PKCS7] Hash algorithm:', hashAlgorithm);
+
+    // Import the public key from the certificate
+    const publicKeyInfo = signerCert.subjectPublicKeyInfo;
+    const publicKeyDer = publicKeyInfo.toSchema().toBER(false);
+
+    const cryptoKey = await crypto.subtle.importKey(
+      'spki',
+      publicKeyDer,
+      { name: 'RSASSA-PKCS1-v1_5', hash: { name: hashAlgorithm } },
+      false,
+      ['verify']
+    );
+
+    // Get the data that was signed (SignedAttributes or content)
+    let dataToVerify: ArrayBuffer;
+    if (signerInfo.signedAttrs) {
+      // When SignedAttrs are present, they are what's signed (with EXPLICIT tag changed to SET)
+      const signedAttrsSchema = signerInfo.signedAttrs.toSchema();
+      // Change the tag from EXPLICIT [0] to SET
+      signedAttrsSchema.idBlock.tagClass = 1; // UNIVERSAL
+      signedAttrsSchema.idBlock.tagNumber = 17; // SET
+      dataToVerify = signedAttrsSchema.toBER(false);
+    } else if (signedData.encapContentInfo?.eContent) {
+      // If no SignedAttrs, the content itself is signed
+      const content = signedData.encapContentInfo.eContent;
+      if (content instanceof asn1js.OctetString) {
+        dataToVerify = content.valueBlock.valueHexView.slice().buffer;
+      } else {
+        return { valid: false, error: 'Unexpected content type' };
+      }
+    } else {
+      return { valid: false, error: 'No data to verify' };
+    }
+
+    // Get the signature (copy to new ArrayBuffer to satisfy TypeScript)
+    const signatureView = signerInfo.signature.valueBlock.valueHexView;
+    const signatureBuffer = new ArrayBuffer(signatureView.length);
+    new Uint8Array(signatureBuffer).set(signatureView);
+
+    // Verify the signature
+    const verificationResult = await crypto.subtle.verify(
+      { name: 'RSASSA-PKCS1-v1_5' },
+      cryptoKey,
+      signatureBuffer,
+      dataToVerify
+    );
 
     if (!verificationResult) {
       return { valid: false, error: 'PKCS7 signature verification failed' };
     }
+
+    console.log('[PKCS7] Signature verification succeeded');
 
     // Extract the signed content
     let signedContent: Uint8Array | undefined;
