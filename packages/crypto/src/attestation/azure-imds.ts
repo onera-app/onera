@@ -285,17 +285,23 @@ export async function verifyAzureImdsPkcs7Signature(
       // rsaEncryption - get hash from digestAlgorithm
       const digestAlgOid = signerInfo.digestAlgorithm.algorithmId;
       console.log('[PKCS7] Digest algorithm OID:', digestAlgOid);
+      // Pure hash algorithm OIDs:
       // 2.16.840.1.101.3.4.2.1 = SHA-256
       // 2.16.840.1.101.3.4.2.2 = SHA-384
       // 2.16.840.1.101.3.4.2.3 = SHA-512
       // 1.3.14.3.2.26 = SHA-1
-      if (digestAlgOid === '2.16.840.1.101.3.4.2.1') {
+      // RSA signature algorithm OIDs (also valid here, extract hash):
+      // 1.2.840.113549.1.1.11 = sha256WithRSAEncryption
+      // 1.2.840.113549.1.1.12 = sha384WithRSAEncryption
+      // 1.2.840.113549.1.1.13 = sha512WithRSAEncryption
+      // 1.2.840.113549.1.1.5 = sha1WithRSAEncryption
+      if (digestAlgOid === '2.16.840.1.101.3.4.2.1' || digestAlgOid === '1.2.840.113549.1.1.11') {
         hashAlgorithm = 'SHA-256';
-      } else if (digestAlgOid === '2.16.840.1.101.3.4.2.2') {
+      } else if (digestAlgOid === '2.16.840.1.101.3.4.2.2' || digestAlgOid === '1.2.840.113549.1.1.12') {
         hashAlgorithm = 'SHA-384';
-      } else if (digestAlgOid === '2.16.840.1.101.3.4.2.3') {
+      } else if (digestAlgOid === '2.16.840.1.101.3.4.2.3' || digestAlgOid === '1.2.840.113549.1.1.13') {
         hashAlgorithm = 'SHA-512';
-      } else if (digestAlgOid === '1.3.14.3.2.26') {
+      } else if (digestAlgOid === '1.3.14.3.2.26' || digestAlgOid === '1.2.840.113549.1.1.5') {
         hashAlgorithm = 'SHA-1';
       } else {
         return { valid: false, error: `Unsupported digest algorithm: ${digestAlgOid}` };
