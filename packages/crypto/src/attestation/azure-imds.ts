@@ -19,17 +19,53 @@ const MICROSOFT_ROOT_CERT_BASE64 = 'MIIDjjCCAnagAwIBAgIQAzrx5qcRqaC7KGSxHQn65TAN
  * More lenient than libsodium and doesn't require initialization.
  */
 function nativeBase64Decode(base64: string): Uint8Array {
-  if (typeof atob === 'function') {
-    // Browser environment
-    const binaryString = atob(base64);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
+  // Use a more robust approach that handles edge cases
+  try {
+    if (typeof atob === 'function') {
+      // Browser environment
+      const binaryString = atob(base64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      return bytes;
+    } else {
+      // Node.js environment
+      return new Uint8Array(Buffer.from(base64, 'base64'));
     }
+  } catch (e) {
+    // If native decode fails, try a manual approach
+    console.warn('[Base64] Native decode failed, trying manual decode:', e);
+
+    // Manual base64 decode as fallback
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    const lookup = new Uint8Array(256);
+    for (let i = 0; i < chars.length; i++) {
+      lookup[chars.charCodeAt(i)] = i;
+    }
+
+    // Remove padding for calculation
+    let paddingLength = 0;
+    if (base64.endsWith('==')) paddingLength = 2;
+    else if (base64.endsWith('=')) paddingLength = 1;
+
+    const len = base64.length;
+    const bufferLength = (len * 3) / 4 - paddingLength;
+    const bytes = new Uint8Array(bufferLength);
+
+    let p = 0;
+    for (let i = 0; i < len; i += 4) {
+      const encoded1 = lookup[base64.charCodeAt(i)];
+      const encoded2 = lookup[base64.charCodeAt(i + 1)];
+      const encoded3 = lookup[base64.charCodeAt(i + 2)];
+      const encoded4 = lookup[base64.charCodeAt(i + 3)];
+
+      bytes[p++] = (encoded1 << 2) | (encoded2 >> 4);
+      if (p < bufferLength) bytes[p++] = ((encoded2 & 15) << 4) | (encoded3 >> 2);
+      if (p < bufferLength) bytes[p++] = ((encoded3 & 3) << 6) | (encoded4 & 63);
+    }
+
     return bytes;
-  } else {
-    // Node.js environment
-    return new Uint8Array(Buffer.from(base64, 'base64'));
   }
 }
 
