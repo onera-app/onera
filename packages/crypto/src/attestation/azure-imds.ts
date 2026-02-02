@@ -223,6 +223,32 @@ export async function verifyAzureImdsPkcs7Signature(
       (cert): cert is pkijs.Certificate => cert instanceof pkijs.Certificate
     );
 
+    // Debug: Log certificate info
+    console.log('[PKCS7] Number of certificates in PKCS7:', certificates.length);
+    for (let i = 0; i < certificates.length; i++) {
+      const cert = certificates[i];
+      const subject = cert.subject.typesAndValues.map(tv => {
+        const type = tv.type;
+        const value = tv.value.valueBlock.value;
+        return `${type}=${value}`;
+      }).join(', ');
+      const issuer = cert.issuer.typesAndValues.map(tv => {
+        const type = tv.type;
+        const value = tv.value.valueBlock.value;
+        return `${type}=${value}`;
+      }).join(', ');
+      console.log(`[PKCS7] Cert ${i}: Subject: ${subject}`);
+      console.log(`[PKCS7] Cert ${i}: Issuer: ${issuer}`);
+    }
+
+    // Also log the trusted root info
+    const rootSubject = trustedRoot.subject.typesAndValues.map(tv => {
+      const type = tv.type;
+      const value = tv.value.valueBlock.value;
+      return `${type}=${value}`;
+    }).join(', ');
+    console.log('[PKCS7] Trusted root subject:', rootSubject);
+
     // Verify the signature
     const verificationResult = await signedData.verify({
       signer: 0, // Verify first signer
