@@ -10,6 +10,7 @@ import {
 } from '@onera/crypto';
 import type { DecryptedCredential } from './types';
 import type { LLMProvider } from '@onera/types';
+import { formatModelName } from '../utils';
 
 // In-memory credential cache
 let cachedCredentials: DecryptedCredential[] | null = null;
@@ -205,7 +206,8 @@ const PROVIDER_ENDPOINTS: Record<string, ProviderEndpointConfig> = {
       'Authorization': `Bearer ${apiKey}`,
       ...(orgId && { 'OpenAI-Organization': orgId }),
     }),
-    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || []).map((m) => ({ id: m.id, name: m.id })),
+    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || [])
+      .map((m) => ({ id: m.id, name: formatModelName(m.id) })),
     filterModels: (models) => models.filter((m) => !OPENAI_EXCLUDED_PATTERNS.some((p) => m.id.includes(p))),
   },
 
@@ -217,7 +219,7 @@ const PROVIDER_ENDPOINTS: Record<string, ProviderEndpointConfig> = {
       'anthropic-dangerous-direct-browser-access': 'true',
     }),
     parseResponse: (data) => ((data as { data?: { id: string; display_name?: string }[] }).data || [])
-      .map((m) => ({ id: m.id, name: m.display_name || m.id })),
+      .map((m) => ({ id: m.id, name: m.display_name || formatModelName(m.id) })),
     filterModels: (models) => models.filter((m) => m.id.includes('claude')),
   },
 
@@ -226,38 +228,42 @@ const PROVIDER_ENDPOINTS: Record<string, ProviderEndpointConfig> = {
     getHeaders: () => ({}), // Auth is in URL
     parseResponse: (data) => ((data as { models?: { name: string; displayName?: string; supportedGenerationMethods?: string[] }[] }).models || [])
       .filter((m) => m.supportedGenerationMethods?.includes('generateContent'))
-      .map((m) => ({ id: m.name.replace('models/', ''), name: m.displayName || m.name.replace('models/', '') })),
+      .map((m) => ({ id: m.name.replace('models/', ''), name: m.displayName || formatModelName(m.name.replace('models/', '')) })),
   },
 
   xai: {
     getUrl: (baseUrl) => `${baseUrl || 'https://api.x.ai/v1'}/models`,
     getHeaders: (apiKey) => ({ 'Authorization': `Bearer ${apiKey}` }),
-    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || []).map((m) => ({ id: m.id, name: m.id })),
+    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || [])
+      .map((m) => ({ id: m.id, name: formatModelName(m.id) })),
   },
 
   groq: {
     getUrl: (baseUrl) => `${baseUrl || 'https://api.groq.com/openai/v1'}/models`,
     getHeaders: (apiKey) => ({ 'Authorization': `Bearer ${apiKey}` }),
-    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || []).map((m) => ({ id: m.id, name: m.id })),
+    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || [])
+      .map((m) => ({ id: m.id, name: formatModelName(m.id) })),
   },
 
   mistral: {
     getUrl: (baseUrl) => `${baseUrl || 'https://api.mistral.ai/v1'}/models`,
     getHeaders: (apiKey) => ({ 'Authorization': `Bearer ${apiKey}` }),
-    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || []).map((m) => ({ id: m.id, name: m.id })),
+    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || [])
+      .map((m) => ({ id: m.id, name: formatModelName(m.id) })),
   },
 
   deepseek: {
     getUrl: (baseUrl) => `${baseUrl || 'https://api.deepseek.com'}/models`,
     getHeaders: (apiKey) => ({ 'Authorization': `Bearer ${apiKey}` }),
-    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || []).map((m) => ({ id: m.id, name: m.id })),
+    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || [])
+      .map((m) => ({ id: m.id, name: formatModelName(m.id) })),
   },
 
   openrouter: {
     getUrl: () => 'https://openrouter.ai/api/v1/models',
     getHeaders: (apiKey) => ({ 'Authorization': `Bearer ${apiKey}` }),
     parseResponse: (data) => ((data as { data?: { id: string; name?: string }[] }).data || [])
-      .map((m) => ({ id: m.id, name: m.name || m.id })),
+      .map((m) => ({ id: m.id, name: m.name || formatModelName(m.id) })),
   },
 
   together: {
@@ -265,27 +271,28 @@ const PROVIDER_ENDPOINTS: Record<string, ProviderEndpointConfig> = {
     getHeaders: (apiKey) => ({ 'Authorization': `Bearer ${apiKey}` }),
     parseResponse: (data) => (Array.isArray(data) ? data : [])
       .filter((m: { type?: string }) => m.type === 'chat' || !m.type)
-      .map((m: { id: string; display_name?: string }) => ({ id: m.id, name: m.display_name || m.id })),
+      .map((m: { id: string; display_name?: string }) => ({ id: m.id, name: m.display_name || formatModelName(m.id) })),
   },
 
   fireworks: {
     getUrl: () => 'https://api.fireworks.ai/inference/v1/models',
     getHeaders: (apiKey) => ({ 'Authorization': `Bearer ${apiKey}` }),
     parseResponse: (data) => ((data as { data?: { id: string }[] }).data || [])
-      .map((m) => ({ id: m.id, name: m.id.split('/').pop() || m.id })),
+      .map((m) => ({ id: m.id, name: formatModelName(m.id.split('/').pop() || m.id) })),
   },
 
   ollama: {
     getUrl: (baseUrl) => `${(baseUrl || 'http://localhost:11434').replace('/v1', '')}/api/tags`,
     getHeaders: () => ({}), // No auth needed
     parseResponse: (data) => ((data as { models?: { name: string; model?: string }[] }).models || [])
-      .map((m) => ({ id: m.model || m.name, name: m.name })),
+      .map((m) => ({ id: m.model || m.name, name: formatModelName(m.name) })),
   },
 
   lmstudio: {
     getUrl: (baseUrl) => `${baseUrl || 'http://localhost:1234/v1'}/models`,
     getHeaders: () => ({}), // No auth needed
-    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || []).map((m) => ({ id: m.id, name: m.id })),
+    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || [])
+      .map((m) => ({ id: m.id, name: formatModelName(m.id) })),
   },
 
   custom: {
@@ -297,7 +304,8 @@ const PROVIDER_ENDPOINTS: Record<string, ProviderEndpointConfig> = {
       }
       return headers;
     },
-    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || []).map((m) => ({ id: m.id, name: m.id })),
+    parseResponse: (data) => ((data as { data?: { id: string }[] }).data || [])
+      .map((m) => ({ id: m.id, name: formatModelName(m.id) })),
   },
 };
 

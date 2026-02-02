@@ -150,22 +150,68 @@ export function getProviderStyle(modelOrProvider?: string): ProviderStyle {
 
 /**
  * Format model name for display
- * Converts model IDs like "claude-3-opus" to "Claude 3 Opus"
+ * Converts model IDs like "claude-3-opus-20240229" to "Claude 3 Opus"
  */
 export function formatModelName(model?: string): string {
   if (!model) return 'Assistant';
 
   // Handle provider:model format
   const parts = model.split(':');
-  const modelPart = parts.length > 1 ? parts[1] : parts[0];
+  let name = parts.length > 1 ? parts[1] : parts[0];
 
-  return modelPart
-    .replace('claude-', 'Claude ')
-    .replace('gpt-', 'GPT-')
-    .replace('-turbo', ' Turbo')
-    .replace('-preview', ' Preview')
-    .replace('-latest', '')
-    .replace(/-/g, ' ')
-    .replace(/\b\w/g, (l) => l.toUpperCase())
-    .trim();
+  // Remove date suffixes (e.g., -20240229, -2024-01-01)
+  name = name.replace(/-\d{8}$/, '').replace(/-\d{4}-\d{2}-\d{2}$/, '');
+
+  // Handle specific model families
+  name = name
+    // Claude models
+    .replace(/^claude-(\d+)-(\d+)-/, 'Claude $1.$2 ')
+    .replace(/^claude-(\d+)-/, 'Claude $1 ')
+    .replace(/^claude-/, 'Claude ')
+    // GPT models
+    .replace(/^gpt-(\d+)o/, 'GPT-$1o')
+    .replace(/^gpt-(\d+)-/, 'GPT-$1 ')
+    .replace(/^gpt-/, 'GPT-')
+    .replace(/^o(\d+)-/, 'o$1 ')
+    // Llama models
+    .replace(/^llama-(\d+)/, 'Llama $1')
+    .replace(/^llama(\d+)/, 'Llama $1')
+    // Mistral models
+    .replace(/^mistral-/, 'Mistral ')
+    .replace(/^mixtral-/, 'Mixtral ')
+    // Gemini models
+    .replace(/^gemini-(\d+)\.(\d+)/, 'Gemini $1.$2')
+    .replace(/^gemini-/, 'Gemini ')
+    // Common suffixes
+    .replace(/-turbo/gi, ' Turbo')
+    .replace(/-preview/gi, ' Preview')
+    .replace(/-latest/gi, '')
+    .replace(/-instruct/gi, ' Instruct')
+    .replace(/-chat/gi, '')
+    .replace(/-vision/gi, ' Vision')
+    .replace(/-mini/gi, ' Mini')
+    .replace(/-pro/gi, ' Pro')
+    .replace(/-flash/gi, ' Flash')
+    .replace(/-sonnet/gi, ' Sonnet')
+    .replace(/-opus/gi, ' Opus')
+    .replace(/-haiku/gi, ' Haiku');
+
+  // Replace remaining dashes/underscores with spaces
+  name = name.replace(/[-_]/g, ' ');
+
+  // Capitalize words, but preserve known acronyms
+  name = name
+    .split(' ')
+    .map(word => {
+      const upper = word.toUpperCase();
+      // Preserve version numbers and known acronyms
+      if (/^\d+(\.\d+)?[a-z]?$/i.test(word)) return word; // e.g., "3.5", "4o"
+      if (['GPT', 'AI', 'LLM', 'API'].includes(upper)) return upper;
+      if (word.length === 0) return word;
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(' ');
+
+  // Clean up multiple spaces
+  return name.replace(/\s+/g, ' ').trim();
 }
