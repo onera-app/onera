@@ -21,9 +21,9 @@ import { usePasskeySupport } from '@/hooks/useWebAuthnSupport';
 import { usePasskeyRegistration } from '@/hooks/useWebAuthn';
 import { usePasswordSetup } from '@/hooks/usePasswordUnlock';
 import { RecoveryPhraseDisplay } from '@/components/e2ee/RecoveryPhraseDisplay';
-import { OnboardingFlow, AddApiKeyPrompt } from '@/components/onboarding';
+import { OnboardingFlow } from '@/components/onboarding';
 
-type CallbackStep = 'processing' | 'onboarding' | 'recovery' | 'passkey' | 'password' | 'add-api-key' | 'error';
+type CallbackStep = 'processing' | 'onboarding' | 'recovery' | 'passkey' | 'password' | 'error';
 
 function getDeviceName(): string {
   const ua = navigator.userAgent;
@@ -366,8 +366,12 @@ export function SSOCallbackPage() {
             <CardContent className="p-4 sm:p-6">
               <RecoveryPhraseDisplay
                 recoveryInfo={recoveryInfo}
-                onContinue={() => setStep('add-api-key')}
-                continueLabel="Continue"
+                onContinue={() => {
+                  // Invalidate onboarding status before navigating
+                  trpcUtils.keyShares.getOnboardingStatus.invalidate();
+                  navigate({ to: '/app' });
+                }}
+                continueLabel="Start Chatting"
               />
             </CardContent>
           </Card>
@@ -559,15 +563,6 @@ export function SSOCallbackPage() {
           </Card>
         </div>
       </div>
-    );
-  }
-
-  // Add API key prompt step
-  if (step === 'add-api-key') {
-    return (
-      <AddApiKeyPrompt
-        onSkip={() => navigate({ to: '/app' })}
-      />
     );
   }
 
