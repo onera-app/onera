@@ -46,11 +46,17 @@ function base64ToBytes(base64: string): Uint8Array {
  * Parse base64-encoded DER certificate to pkijs Certificate
  */
 function parseBase64Certificate(base64: string): pkijs.Certificate {
+  console.log('[Cert] Parsing certificate, base64 length:', base64.length);
   const der = base64ToBytes(base64);
-  const asn1 = asn1js.fromBER(new Uint8Array(der).buffer);
+  console.log('[Cert] Decoded DER length:', der.length, 'first bytes:', Array.from(der.slice(0, 10)));
+  // Use slice to get the exact ArrayBuffer for this view (der might be a view into a larger buffer)
+  const buffer = der.buffer.slice(der.byteOffset, der.byteOffset + der.byteLength) as ArrayBuffer;
+  const asn1 = asn1js.fromBER(buffer);
   if (asn1.offset === -1) {
+    console.error('[Cert] ASN.1 parse failed');
     throw new Error('Failed to parse certificate ASN.1');
   }
+  console.log('[Cert] ASN.1 parse succeeded');
   return new pkijs.Certificate({ schema: asn1.result });
 }
 
@@ -126,10 +132,11 @@ export async function verifyAzureImdsPkcs7Signature(
     let pkcs7Der: Uint8Array;
     try {
       pkcs7Der = decodeAzureBase64(rawQuoteBase64);
+      console.log('[PKCS7] Decoded PKCS7 length:', pkcs7Der.length, 'first bytes:', Array.from(pkcs7Der.slice(0, 10)));
     } catch (e) {
       return { valid: false, error: `Failed to decode base64: ${e instanceof Error ? e.message : 'unknown error'}` };
     }
-    const asn1 = asn1js.fromBER(new Uint8Array(pkcs7Der).buffer);
+    const asn1 = asn1js.fromBER(pkcs7Der.buffer.slice(pkcs7Der.byteOffset, pkcs7Der.byteOffset + pkcs7Der.byteLength) as ArrayBuffer);
     if (asn1.offset === -1) {
       return { valid: false, error: 'Failed to parse PKCS7 ASN.1 structure' };
     }
