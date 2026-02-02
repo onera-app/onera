@@ -11,26 +11,26 @@ import { cn } from "@/lib/utils";
 
 const features = [
   {
-    title: "Hardware-Isolated Inference",
-    description: "Your prompts are processed inside AMD SEV-SNP secure enclaves. The hardware itself prevents anyone — including us — from seeing your data. Not a policy. Physics.",
+    title: "We can't read your chats",
+    description: "Your messages are processed inside special hardware that keeps them locked away. Even our own engineers can't peek inside.",
     icon: Cpu,
     className: "md:col-span-2",
   },
   {
-    title: "Cryptographically Verified",
-    description: "Every enclave proves its integrity through attestation. Your browser verifies the code running on our servers matches what we published. Trust, but verify — automatically.",
+    title: "You can verify it",
+    description: "Your browser automatically checks that our servers are running the exact code we published. No blind trust required.",
     icon: CheckCircle,
     className: "md:col-span-1",
   },
   {
-    title: "Zero-Knowledge Storage",
-    description: "Chat history encrypted client-side with keys only you control. We store ciphertext we can't decrypt. Your conversations remain private even from us.",
+    title: "Encrypted history",
+    description: "Your chat history is encrypted with a key only you have. We store scrambled data we can't unscramble.",
     icon: Lock,
     className: "md:col-span-1",
   },
   {
-    title: "Power User Mode",
-    description: "Prefer your own API keys? Connect OpenAI, Anthropic, or run models locally with Ollama. Same encrypted chat history, your choice of inference provider.",
+    title: "Bring your own keys",
+    description: "Prefer to use your own OpenAI or Anthropic account? You can do that too. Your chat history stays encrypted either way.",
     icon: Key,
     className: "md:col-span-2",
   },
@@ -48,10 +48,10 @@ export function FeaturesSection() {
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 sm:mb-6 px-2">
-              Private by design. <span className="text-muted-foreground">Not just by promise.</span>
+              Private by design.
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
-              Hardware-level protection that even we can't bypass.
+              Not just a promise — we built it so we can't access your data.
             </p>
           </motion.div>
         </div>

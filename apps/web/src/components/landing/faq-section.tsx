@@ -10,49 +10,39 @@ import {
 
 const faqs = [
   {
-    question: "What is a secure enclave?",
+    question: "How is this different from ChatGPT?",
     answer:
-      "A secure enclave is a hardware-isolated environment where code runs in complete isolation from the rest of the system. We use AMD SEV-SNP technology, which encrypts memory and prevents even the host operating system from accessing the enclave's contents. This means your prompts are processed in a 'vault' that even our engineers can't open.",
+      "ChatGPT can see everything you type. Onera is built so we physically cannot access your conversations — it's not just a policy, it's how the technology works.",
   },
   {
-    question: "How is this different from other private AI tools?",
+    question: "Do I need API keys?",
     answer:
-      "Most 'private' AI tools rely on policies and promises — they say they won't read your data. Onera uses hardware-level isolation where we physically can't access your prompts. Your data is processed inside secure enclaves with encrypted memory. Combined with cryptographic attestation, you can verify exactly what code is running.",
+      "Nope. Just sign up and start chatting. If you want to use your own OpenAI or Anthropic keys, that's optional.",
   },
   {
-    question: "How can I verify the enclave is genuine?",
+    question: "How do I know you really can't see my chats?",
     answer:
-      "Every time you connect, your browser automatically performs attestation — a cryptographic verification that the enclave is running exactly the code we published. This happens transparently. For technical users, you can view attestation details in Settings to see the cryptographic proofs yourself.",
+      "Your browser automatically verifies our servers before every session. For the technical details, check Settings → Security.",
   },
   {
-    question: "Do I need API keys to use Onera?",
+    question: "What happens to my chat history?",
     answer:
-      "No! With our secure enclave inference, you can start chatting immediately without any API keys. Your prompts are processed privately inside our hardware-isolated infrastructure. If you prefer to use your own API keys from OpenAI, Anthropic, or others, that option is available in Settings as 'Power User Mode'.",
-  },
-  {
-    question: "Why would I use my own API keys instead?",
-    answer:
-      "Some power users prefer direct access to specific models or have existing API credits they want to use. With BYOK (bring your own keys), your requests go directly from your browser to the AI provider. Your keys are encrypted and stored locally. Both options keep your chat history end-to-end encrypted.",
-  },
-  {
-    question: "Does my data still go to OpenAI/Anthropic?",
-    answer:
-      "When using our secure enclave inference (the default), your prompts go to our hardware-isolated servers running open-source models — not to OpenAI or Anthropic. If you choose Power User Mode with your own API keys, requests go directly to your chosen provider. Either way, your chat history is end-to-end encrypted.",
-  },
-  {
-    question: "What encryption do you use?",
-    answer:
-      "We use multiple layers of protection: AMD SEV-SNP for hardware-isolated inference, Noise Protocol for encrypted transport to enclaves, and AES-256-GCM with Argon2id key derivation for stored data. All encryption happens client-side using libsodium. We implement a zero-knowledge architecture.",
+      "It's encrypted with a key only you have. We store scrambled data we can't read.",
   },
   {
     question: "What if I lose my recovery key?",
     answer:
-      "Your recovery key is the only way to restore access to your encrypted chat history on a new device. We cannot reset it or recover your data without it. This is intentional: it means nobody, including us, can access your stored conversations. Store it somewhere safe, like a password manager.",
+      "We can't help you recover it — that's the point. Only you can access your data. Store your recovery key somewhere safe, like a password manager.",
+  },
+  {
+    question: "What encryption do you use?",
+    answer:
+      "Industry-standard encryption (AES-256) for your stored chats, plus special hardware protection for processing. Happy to nerd out — email us.",
   },
   {
     question: "Is it really free?",
     answer:
-      "Onera is free during beta, including secure enclave inference. We plan to introduce optional paid tiers for power features like dedicated enclaves and larger models, but core private chat functionality will remain accessible. Beta users will receive special treatment when paid plans launch.",
+      "Yes, during beta. We'll add paid options later for power features, but basic private chat will stay accessible.",
   },
 ];
 

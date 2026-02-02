@@ -5,30 +5,30 @@ const steps = [
   {
     number: 1,
     icon: UserPlus,
-    title: "Create your account",
+    title: "Create an account",
     description:
-      "Sign up in seconds. Your encryption keys are generated locally on your device — we never see them.",
+      "Sign up in seconds. We generate your encryption keys on your device — we never see them.",
   },
   {
     number: 2,
     icon: ShieldCheck,
-    title: "Connect to a secure enclave",
+    title: "We verify the connection",
     description:
-      "Your browser verifies the enclave's integrity through cryptographic attestation — proving the code matches what we published.",
+      "Your browser automatically checks that you're connected to a secure, unmodified server.",
   },
   {
     number: 3,
     icon: Lock,
-    title: "Your prompts stay in the vault",
+    title: "Chat privately",
     description:
-      "Messages are encrypted directly into the enclave. Processed in hardware isolation. Responses encrypted back to you.",
+      "Your messages go into a locked box, get processed, and come back — without anyone else seeing them.",
   },
   {
     number: 4,
     icon: MessageSquare,
-    title: "Chat with true privacy",
+    title: "Your history, encrypted",
     description:
-      "No logs. No training on your data. No access — not even for us. Just you and the AI, inside a hardware vault.",
+      "Everything is saved with encryption only you can unlock. Not even us.",
   },
 ];
 
@@ -46,10 +46,10 @@ export function HowItWorks() {
         {/* Heading */}
         <div className="text-center mb-10 sm:mb-16 px-2">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
-            Start Chatting Privately
+            Start chatting privately
           </h2>
           <p className="mt-3 sm:mt-4 text-base sm:text-lg text-muted-foreground max-w-md mx-auto">
-            No API keys needed. Get started in under a minute.
+            No API keys. No complicated setup. Just sign up and go.
           </p>
         </div>
 

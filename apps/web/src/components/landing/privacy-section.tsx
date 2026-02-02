@@ -20,25 +20,25 @@ export function PrivacySection() {
             className="order-2 lg:order-1"
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-sm font-medium mb-4 sm:mb-6">
-              <Cpu className="size-4" />
-              <span>Secure Enclave Technology</span>
+              <Lock className="size-4" />
+              <span>How We Protect You</span>
             </div>
 
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 sm:mb-6">
-              Hardware-isolated. <br className="hidden sm:block" />
-              <span className="text-neutral-500 dark:text-neutral-400">Not just encrypted.</span>
+              Locked away. <br className="hidden sm:block" />
+              <span className="text-neutral-500 dark:text-neutral-400">Not just locked up.</span>
             </h2>
 
             <p className="text-base sm:text-lg text-neutral-600 dark:text-neutral-300 mb-6 sm:mb-8 leading-relaxed">
-              Your prompts are processed inside AMD SEV-SNP secure enclaves — hardware-isolated environments where memory is encrypted and even the host operating system can't peek inside. Combined with end-to-end encrypted storage, your data is protected at every layer.
+              Your conversations are processed inside special protected hardware — a locked room that even we can't enter. Combined with encryption, your data is protected at every step.
             </p>
 
             <ul className="space-y-3 sm:space-y-4 mb-8 sm:mb-10">
               {[
-                { icon: Cpu, text: "Hardware-isolated inference (AMD SEV-SNP)" },
-                { icon: Eye, text: "Even we can't see your prompts" },
-                { icon: Fingerprint, text: "Cryptographic attestation verifies enclave integrity" },
-                { icon: Lock, text: "End-to-end encrypted chat history" },
+                { icon: Cpu, text: "Processed in protected hardware" },
+                { icon: Eye, text: "Even we can't see your chats" },
+                { icon: Fingerprint, text: "Your browser verifies every connection" },
+                { icon: Lock, text: "Chat history encrypted with your key" },
               ].map((item, i) => (
                 <li key={i} className="flex items-center gap-3">
                   <div className="flex-shrink-0 size-8 rounded-lg bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center text-neutral-900 dark:text-white">
@@ -124,11 +124,11 @@ export function PrivacySection() {
               className="absolute -bottom-4 sm:-bottom-6 left-2 sm:-left-6 bg-white dark:bg-neutral-800 p-3 sm:p-4 rounded-xl shadow-xl border border-neutral-100 dark:border-neutral-700 flex items-center gap-2 sm:gap-3 max-w-[200px] sm:max-w-xs"
             >
               <div className="size-8 sm:size-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 flex-shrink-0">
-                <Cpu className="size-4 sm:size-5" />
+                <Lock className="size-4 sm:size-5" />
               </div>
               <div className="text-xs sm:text-sm">
-                <div className="font-semibold text-neutral-900 dark:text-white">AMD SEV-SNP</div>
-                <div className="text-neutral-600 dark:text-neutral-300">Hardware isolation</div>
+                <div className="font-semibold text-neutral-900 dark:text-white">Protected Hardware</div>
+                <div className="text-neutral-600 dark:text-neutral-300">Your data stays locked</div>
               </div>
             </motion.div>
           </motion.div>

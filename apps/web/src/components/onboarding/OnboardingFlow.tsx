@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Cpu,
   Shield,
   Lock,
   CheckCircle,
@@ -22,17 +21,17 @@ const steps = [
   {
     id: "welcome",
     title: "Welcome to Onera",
-    subtitle: "Private AI, powered by secure enclaves",
+    subtitle: "Private AI chat that actually keeps your chats private",
   },
   {
     id: "protection",
-    title: "How We Protect You",
-    subtitle: "Your prompts never leave a hardware vault",
+    title: "Your chats stay locked away",
+    subtitle: "Protected by special hardware we can't access",
   },
   {
     id: "verification",
-    title: "Verified Security",
-    subtitle: "Trust, but verify — automatically",
+    title: "You don't have to trust us",
+    subtitle: "Your browser verifies every connection",
   },
   {
     id: "recovery",
@@ -149,12 +148,12 @@ function WelcomeStep() {
         Welcome to Onera
       </h1>
       <p className="text-lg text-muted-foreground mb-8">
-        The AI assistant that's private by design — not just by policy.
+        Private AI chat that actually keeps your chats private.
       </p>
       <div className="space-y-3 text-left">
-        <Feature icon={Cpu} text="Hardware-isolated inference" />
-        <Feature icon={CheckCircle} text="Cryptographically verified" />
-        <Feature icon={Lock} text="Zero-knowledge storage" />
+        <Feature icon={Lock} text="We can't read your chats" />
+        <Feature icon={CheckCircle} text="Your browser verifies every connection" />
+        <Feature icon={Shield} text="Encrypted chat history" />
       </div>
     </div>
   );
@@ -164,13 +163,13 @@ function ProtectionStep() {
   return (
     <div className="text-center">
       <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/20 via-emerald-500/10 to-transparent ring-1 ring-emerald-500/20">
-        <Cpu className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
+        <Lock className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
       </div>
       <h1 className="text-3xl font-bold tracking-tight mb-3">
-        Your Prompts Stay in a Vault
+        Your chats stay locked away
       </h1>
       <p className="text-muted-foreground mb-8">
-        Unlike other AI services, your messages are processed inside secure enclaves — hardware-isolated environments that even our engineers can't access.
+        Your messages are processed inside protected hardware — a locked room that even our engineers can't enter.
       </p>
 
       {/* Visual diagram */}
@@ -188,7 +187,7 @@ function ProtectionStep() {
 
           <div className="flex flex-col items-center gap-2">
             <div className="h-12 w-12 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-2 ring-emerald-500/30">
-              <Cpu className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              <Lock className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
           </div>
 
@@ -204,19 +203,19 @@ function ProtectionStep() {
         </div>
         <div className="flex justify-center mt-3">
           <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-            Secure Enclave — Isolated from everything
+            Protected hardware — we can't peek inside
           </span>
         </div>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-3 text-left">
         <div className="rounded-lg border p-3">
-          <p className="text-xs font-medium">AMD SEV-SNP</p>
-          <p className="text-[10px] text-muted-foreground">Hardware isolation</p>
+          <p className="text-xs font-medium">Locked away</p>
+          <p className="text-[10px] text-muted-foreground">Not just encrypted</p>
         </div>
         <div className="rounded-lg border p-3">
-          <p className="text-xs font-medium">Encrypted Memory</p>
-          <p className="text-[10px] text-muted-foreground">Even RAM is protected</p>
+          <p className="text-xs font-medium">No access</p>
+          <p className="text-[10px] text-muted-foreground">Not even for us</p>
         </div>
       </div>
     </div>
@@ -230,10 +229,10 @@ function VerificationStep() {
         <CheckCircle className="h-10 w-10 text-blue-600 dark:text-blue-400" />
       </div>
       <h1 className="text-3xl font-bold tracking-tight mb-3">
-        Trust, But Verify
+        You don't have to trust us
       </h1>
       <p className="text-muted-foreground mb-8">
-        Every time you connect, your browser automatically verifies the enclave is running exactly the code we published. No blind trust required.
+        Every time you connect, your browser checks that our servers haven't been tampered with. Automatic and invisible.
       </p>
 
       {/* Visual flow */}
@@ -241,14 +240,14 @@ function VerificationStep() {
         <div className="flex items-center justify-between gap-2">
           <div className="flex flex-col items-center gap-2">
             <div className="h-12 w-14 rounded-xl bg-muted flex items-center justify-center">
-              <Cpu className="h-5 w-5" />
+              <Lock className="h-5 w-5" />
             </div>
-            <span className="text-[10px] text-muted-foreground">Enclave</span>
+            <span className="text-[10px] text-muted-foreground">Server</span>
           </div>
 
           <div className="flex-1 flex flex-col items-center gap-1">
             <div className="h-0.5 w-full bg-gradient-to-r from-muted via-blue-500 to-muted" />
-            <span className="text-[9px] text-muted-foreground">"Here's my proof"</span>
+            <span className="text-[9px] text-muted-foreground">"Check me"</span>
           </div>
 
           <div className="flex flex-col items-center gap-2">
@@ -272,9 +271,9 @@ function VerificationStep() {
             <CheckCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <p className="font-medium text-sm">Cryptographic Attestation</p>
+            <p className="font-medium text-sm">Automatic verification</p>
             <p className="text-xs text-muted-foreground">
-              Mathematical proof that the enclave is genuine and unmodified
+              Your browser confirms the server is running exactly what we published
             </p>
           </div>
         </div>
