@@ -51,9 +51,9 @@ export function Hero() {
           transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
           className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-foreground"
         >
-          Your AI. <br className="hidden sm:block" />
+          Chat with AI. <br className="hidden sm:block" />
           <span className="text-neutral-500 dark:text-white/75">
-            Your privacy.
+            Keep your privacy.
           </span>
         </motion.h1>
 
