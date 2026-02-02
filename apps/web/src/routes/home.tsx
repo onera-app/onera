@@ -41,18 +41,21 @@ export function HomePage() {
   const isLoadingCredentials = credentials === undefined;
 
   // Fetch private models
-  const { data: privateModels, isLoading: loadingPrivateModels } = trpc.enclaves.listModels.useQuery(
+  const { data: privateModels, isLoading: loadingPrivateModels, isFetching: fetchingPrivateModels } = trpc.enclaves.listModels.useQuery(
     undefined,
     { enabled: isUnlocked }
   );
   const hasPrivateModels = privateModels && privateModels.length > 0;
+
+  // Query is pending if not yet enabled (waiting for unlock) OR actively loading
+  const privateModelsQueryPending = !isUnlocked || loadingPrivateModels || fetchingPrivateModels;
 
   // User can chat if they have connections OR private models
   const canChat = useMemo(() => {
     return hasAnyConnections || hasPrivateModels;
   }, [hasAnyConnections, hasPrivateModels]);
 
-  const isLoading = isLoadingCredentials || loadingPrivateModels;
+  const isLoading = isLoadingCredentials || privateModelsQueryPending;
 
   const handleSendMessage = useCallback(async (content: string) => {
     if (!isUnlocked) {

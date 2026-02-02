@@ -58,10 +58,13 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
   const hasAnyConnections = rawCredentials && rawCredentials.length > 0;
 
   // Fetch private inference models from server
-  const { data: privateModels, isLoading: loadingPrivateModels } = trpc.enclaves.listModels.useQuery(
+  const { data: privateModels, isLoading: loadingPrivateModels, isFetching: fetchingPrivateModels } = trpc.enclaves.listModels.useQuery(
     undefined,
     { enabled: isUnlocked }
   );
+
+  // Query is pending if not yet enabled (waiting for unlock) OR actively loading
+  const privateModelsQueryPending = !isUnlocked || loadingPrivateModels || fetchingPrivateModels;
 
   // Use the model selection hook
   const {
@@ -214,11 +217,11 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
   );
 
   const selectedModel = models.find((m) => m.id === value);
-  const isLoading = checkingConnections || loadingModels || loadingPrivateModels;
+  const isLoading = checkingConnections || loadingModels || privateModelsQueryPending;
 
-  // No connections and no private models
+  // No connections and no private models - only show after all queries complete
   const hasPrivateModels = privateModels && privateModels.length > 0;
-  if (!checkingConnections && !loadingPrivateModels && !hasAnyConnections && !hasPrivateModels) {
+  if (!checkingConnections && !privateModelsQueryPending && !hasAnyConnections && !hasPrivateModels) {
     return (
       <Button
         variant="outline"
