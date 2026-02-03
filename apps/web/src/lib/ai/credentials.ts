@@ -15,6 +15,10 @@ import { formatModelName } from '../utils';
 // In-memory credential cache
 let cachedCredentials: DecryptedCredential[] | null = null;
 
+// In-memory model cache (per-credential)
+const modelCache = new Map<string, { models: { id: string; name: string }[]; fetchedAt: number }>();
+const MODEL_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
 /**
  * Credential with pre-decrypted metadata (name/provider already decrypted by useCredentials hook)
  * Used by components that receive credentials from useCredentials()
@@ -111,6 +115,18 @@ export function clearCredentialCache(): void {
  */
 export function invalidateCredentialCache(): void {
   clearCredentialCache();
+  modelCache.clear();
+}
+
+/**
+ * Clear model cache for a specific credential
+ */
+export function invalidateModelCache(credentialId?: string): void {
+  if (credentialId) {
+    modelCache.delete(credentialId);
+  } else {
+    modelCache.clear();
+  }
 }
 
 /**
@@ -312,8 +328,10 @@ const PROVIDER_ENDPOINTS: Record<string, ProviderEndpointConfig> = {
 /**
  * Unified model fetching function
  * Fetches models from any supported provider using provider-specific configuration
+ * Results are cached for 5 minutes per credential
  */
 async function fetchModelsForProvider(
+  credentialId: string,
   provider: string,
   apiKey: string,
   baseUrl?: string,
@@ -325,6 +343,13 @@ async function fetchModelsForProvider(
     return [];
   }
 
+  // Check cache first
+  const cacheKey = credentialId;
+  const cached = modelCache.get(cacheKey);
+  if (cached && Date.now() - cached.fetchedAt < MODEL_CACHE_TTL_MS) {
+    return cached.models;
+  }
+
   try {
     const url = config.getUrl(baseUrl, apiKey);
     const headers = config.getHeaders(apiKey, orgId);
@@ -332,7 +357,8 @@ async function fetchModelsForProvider(
     const response = await fetch(url, { headers });
     if (!response.ok) {
       console.warn(`Failed to fetch ${provider} models: ${response.status}`);
-      return [];
+      // Return cached data if available, even if stale
+      return cached?.models || [];
     }
 
     const data = await response.json();
@@ -343,10 +369,16 @@ async function fetchModelsForProvider(
       models = config.filterModels(models);
     }
 
-    return models.sort((a, b) => a.id.localeCompare(b.id));
+    const sortedModels = models.sort((a, b) => a.id.localeCompare(b.id));
+
+    // Cache the results
+    modelCache.set(cacheKey, { models: sortedModels, fetchedAt: Date.now() });
+
+    return sortedModels;
   } catch (error) {
     console.warn(`Error fetching ${provider} models:`, error);
-    return [];
+    // Return cached data if available, even if stale
+    return cached?.models || [];
   }
 }
 
@@ -363,6 +395,7 @@ export async function getAvailableModelsFromCredentials(credentials: DecryptedCr
   // Fetch models from all credentials in parallel
   const modelPromises = credentials.map(async (cred) => {
     const models = await fetchModelsForProvider(
+      cred.id,
       cred.provider,
       cred.apiKey,
       cred.baseUrl,

@@ -4,7 +4,7 @@
  */
 
 // Import for local use
-import { clearCredentialCache as _clearCredentialCache } from './credentials';
+import { clearCredentialCache as _clearCredentialCache, invalidateModelCache as _invalidateModelCache } from './credentials';
 import { clearProviderCache as _clearProviderCache, clearPrivateInferenceCache as _clearPrivateInferenceCache } from './providers';
 
 // Types
@@ -22,6 +22,7 @@ export {
   getCredentialById,
   clearCredentialCache,
   invalidateCredentialCache,
+  invalidateModelCache,
   hasCredentialsCache,
   getCachedCredentials,
   parseModelId,
@@ -65,4 +66,5 @@ export function clearAllAICaches(): void {
   _clearCredentialCache();
   _clearProviderCache();
   _clearPrivateInferenceCache();
+  _invalidateModelCache();
 }
