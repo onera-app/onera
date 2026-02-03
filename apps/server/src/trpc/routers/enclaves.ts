@@ -5,9 +5,9 @@ import { router, protectedProcedure } from '../trpc';
 import { db, schema } from '../../db/client';
 import { randomUUID } from 'crypto';
 
-const { enclaves, enclaveAssignments } = schema;
+const { enclaves, enclaveAssignments, modelServers, serverModels } = schema;
 
-// Response type from enclave /models endpoint
+// Response type from enclave /models endpoint (used for fallback)
 interface EnclaveModelInfo {
   id: string;
   name: string;
@@ -16,12 +16,86 @@ interface EnclaveModelInfo {
   contextLength: number;
 }
 
+// Response type from enclave /attestation endpoint
+interface AttestationResponse {
+  public_key: string; // Base64-encoded
+  attestation_type?: string;
+}
+
+// Cache for enclave public keys (enclaveId -> hex key)
+const publicKeyCache = new Map<string, { key: string; fetchedAt: number }>();
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * Fetch public key from enclave's attestation endpoint.
+ * Caches the result for 5 minutes.
+ */
+async function fetchEnclavePublicKey(enclaveId: string, attestationEndpoint: string): Promise<string> {
+  // Check cache
+  const cached = publicKeyCache.get(enclaveId);
+  if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
+    return cached.key;
+  }
+
+  try {
+    const response = await fetch(attestationEndpoint, {
+      signal: AbortSignal.timeout(5000),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Attestation endpoint returned ${response.status}`);
+    }
+
+    const attestation = (await response.json()) as AttestationResponse;
+
+    // Decode base64 to hex
+    const keyBytes = Buffer.from(attestation.public_key, 'base64');
+    if (keyBytes.length !== 32) {
+      throw new Error(`Invalid public key length: ${keyBytes.length}`);
+    }
+    const hexKey = keyBytes.toString('hex');
+
+    // Cache it
+    publicKeyCache.set(enclaveId, { key: hexKey, fetchedAt: Date.now() });
+
+    return hexKey;
+  } catch (error) {
+    console.error(`Failed to fetch public key from ${attestationEndpoint}:`, error);
+    throw error;
+  }
+}
+
 export const enclavesRouter = router({
   /**
-   * List available private inference models by querying enclaves directly.
+   * List available private inference models.
+   * First tries to get models from server_models table,
+   * falls back to querying enclaves directly if no servers configured.
    */
   listModels: protectedProcedure.query(async () => {
-    // Get all ready enclaves
+    // Try to get models from server_models table first
+    const dbModels = await db
+      .select({
+        modelId: serverModels.modelId,
+        modelName: serverModels.modelName,
+        displayName: serverModels.displayName,
+        contextLength: serverModels.contextLength,
+        serverStatus: modelServers.status,
+      })
+      .from(serverModels)
+      .innerJoin(modelServers, eq(serverModels.serverId, modelServers.id))
+      .where(eq(modelServers.status, 'ready'));
+
+    if (dbModels.length > 0) {
+      return dbModels.map(m => ({
+        id: m.modelId,
+        name: m.modelName,
+        displayName: m.displayName,
+        contextLength: m.contextLength || 8192,
+        provider: 'onera-private' as const,
+      }));
+    }
+
+    // Fallback: Get models directly from enclaves (legacy mode)
     const readyEnclaves = await db
       .select()
       .from(enclaves)
@@ -31,7 +105,6 @@ export const enclavesRouter = router({
       return [];
     }
 
-    // Fetch models from each enclave
     const allModels: Array<{
       id: string;
       name: string;
@@ -42,12 +115,11 @@ export const enclavesRouter = router({
 
     for (const enclave of readyEnclaves) {
       try {
-        // Derive models URL from attestation endpoint
         const baseUrl = enclave.attestationEndpoint.replace('/attestation', '');
         const modelsUrl = `${baseUrl}/models`;
 
         const response = await fetch(modelsUrl, {
-          signal: AbortSignal.timeout(5000), // 5 second timeout
+          signal: AbortSignal.timeout(5000),
         });
 
         if (response.ok) {
@@ -63,12 +135,28 @@ export const enclavesRouter = router({
           }
         }
       } catch (error) {
-        // Log but don't fail - enclave might be temporarily unavailable
         console.warn(`Failed to fetch models from enclave ${enclave.id}:`, error);
       }
     }
 
     return allModels;
+  }),
+
+  /**
+   * List all model servers (for admin/debug).
+   */
+  listModelServers: protectedProcedure.query(async () => {
+    const servers = await db
+      .select()
+      .from(modelServers)
+      .where(eq(modelServers.status, 'ready'));
+
+    const models = await db.select().from(serverModels);
+
+    return servers.map(server => ({
+      ...server,
+      models: models.filter(m => m.serverId === server.id),
+    }));
   }),
 
   /**
@@ -166,13 +254,25 @@ export const enclavesRouter = router({
       const allowUnverified = process.env.NODE_ENV !== 'production' &&
         process.env.ALLOW_UNVERIFIED_ATTESTATION === 'true';
 
+      // Fetch public key dynamically from enclave's attestation endpoint
+      let publicKey: string;
+      try {
+        publicKey = await fetchEnclavePublicKey(enclave.id, enclave.attestationEndpoint);
+      } catch (error) {
+        console.error(`Failed to fetch public key for ${enclave.id}:`, error);
+        throw new TRPCError({
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'Unable to retrieve enclave public key',
+        });
+      }
+
       return {
         enclaveId: enclave.id,
         endpoint: {
           id: enclave.id,
           host: enclave.host,
           port: enclave.port,
-          public_key: enclave.publicKey || '',
+          public_key: publicKey,
         },
         wsEndpoint: enclave.wsEndpoint,
         attestationEndpoint: enclave.attestationEndpoint,

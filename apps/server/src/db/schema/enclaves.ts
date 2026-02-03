@@ -1,9 +1,12 @@
-import { pgTable, text, timestamp, integer, index } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, integer, boolean, index } from 'drizzle-orm/pg-core';
 
 export const enclaves = pgTable('enclaves', {
   id: text('id').primaryKey(),
   tier: text('tier').notNull().$type<'shared' | 'dedicated'>(),
   status: text('status').notNull().$type<'provisioning' | 'ready' | 'draining' | 'terminated'>(),
+
+  // Router mode: routes to model servers instead of local vLLM
+  isRouter: boolean('is_router').default(false).notNull(),
 
   // Connection info
   host: text('host').notNull(),
@@ -12,7 +15,6 @@ export const enclaves = pgTable('enclaves', {
   attestationEndpoint: text('attestation_endpoint').notNull(),
 
   // Attestation data (cached)
-  publicKey: text('public_key'),
   launchDigest: text('launch_digest'),
   lastAttestationAt: timestamp('last_attestation_at'),
 

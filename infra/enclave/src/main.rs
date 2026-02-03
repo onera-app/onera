@@ -1,13 +1,17 @@
 //! Onera Enclave Runtime
 //!
-//! Private inference enclave that:
-//! - Establishes encrypted channels via Noise NK protocol
-//! - Provides attestation quotes with bound public keys
-//! - Forwards inference requests to local vLLM server
+//! Private inference enclave that can run in two modes:
+//! - Server mode: Forwards requests to local vLLM/llama.cpp server
+//! - Router mode: Routes requests to model server enclaves
+//!
+//! Both modes:
+//! - Establish encrypted channels via Noise NK protocol
+//! - Provide attestation quotes with bound public keys
 
 mod attestation;
 mod inference;
 mod noise;
+mod router;
 
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -20,18 +24,32 @@ use axum::{
 use serde::Serialize;
 // CORS is handled by Caddy reverse proxy - don't add here to avoid duplicate headers
 use tokio::sync::RwLock;
-use tracing::{info, Level};
+use tracing::{info, warn, Level};
 use tracing_subscriber::EnvFilter;
 
 use crate::attestation::AttestationService;
 use crate::inference::InferenceClient;
 use crate::noise::NoiseServer;
+use crate::router::{Router as EnclaveRouter, RouterConfig};
+
+/// Operating mode
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum OperatingMode {
+    /// Server mode: forward to local vLLM
+    Server,
+    /// Router mode: route to model server enclaves
+    Router,
+}
 
 /// Shared application state
 pub struct AppState {
     pub noise_server: NoiseServer,
     pub attestation: AttestationService,
-    pub inference: InferenceClient,
+    pub mode: OperatingMode,
+    /// Inference client (server mode only)
+    pub inference: Option<InferenceClient>,
+    /// Router (router mode only)
+    pub router: Option<Arc<EnclaveRouter>>,
 }
 
 #[tokio::main]
@@ -45,7 +63,18 @@ async fn main() -> anyhow::Result<()> {
         )
         .init();
 
-    info!("Starting Onera Enclave Runtime");
+    // Determine operating mode
+    let router_mode = std::env::var("ROUTER_MODE")
+        .map(|v| v == "true" || v == "1")
+        .unwrap_or(false);
+
+    let mode = if router_mode {
+        OperatingMode::Router
+    } else {
+        OperatingMode::Server
+    };
+
+    info!("Starting Onera Enclave Runtime in {:?} mode", mode);
 
     // Initialize Noise server (generates keypair)
     let noise_server = NoiseServer::new()?;
@@ -56,16 +85,33 @@ async fn main() -> anyhow::Result<()> {
     let attestation = AttestationService::new(public_key).await;
     info!("Attestation service initialized");
 
-    // Initialize inference client
-    let vllm_url = std::env::var("VLLM_URL").unwrap_or_else(|_| "http://localhost:8000".to_string());
-    let inference = InferenceClient::new(&vllm_url)?;
-    info!("Inference client initialized, targeting: {}", vllm_url);
+    // Initialize based on mode
+    let (inference, router) = match mode {
+        OperatingMode::Server => {
+            let vllm_url = std::env::var("VLLM_URL")
+                .unwrap_or_else(|_| "http://localhost:8000".to_string());
+            let inference = InferenceClient::new(&vllm_url)?;
+            info!("Inference client initialized, targeting: {}", vllm_url);
+            (Some(inference), None)
+        }
+        OperatingMode::Router => {
+            let config = RouterConfig::from_env()?;
+            info!("Router config loaded with {} server(s)", config.servers.len());
+            for server in &config.servers {
+                info!("  - {} at {} (models: {:?})", server.id, server.ws_endpoint, server.models);
+            }
+            let router = Arc::new(EnclaveRouter::new(config));
+            (None, Some(router))
+        }
+    };
 
     // Create shared state
     let state = Arc::new(RwLock::new(AppState {
         noise_server,
         attestation,
+        mode,
         inference,
+        router,
     }));
 
     // Build HTTP router for attestation and models endpoints
@@ -209,31 +255,43 @@ fn title_case(s: &str) -> String {
     }
 }
 
-/// Models endpoint - returns available models from the underlying LLM server
+/// Models endpoint - returns available models from underlying LLM server or model servers
 async fn get_models(
     axum::extract::State(state): axum::extract::State<Arc<RwLock<AppState>>>,
 ) -> Json<Vec<ModelInfo>> {
     let state = state.read().await;
 
-    // Try to get models from the underlying LLM server
-    match state.inference.list_models().await {
-        Ok(models) => {
-            let model_infos: Vec<ModelInfo> = models
-                .into_iter()
-                .map(|id| {
-                    ModelInfo {
-                        display_name: format_model_display_name(&id),
-                        id: id.clone(),
-                        name: id,
-                        provider: "onera-private".to_string(),
-                        context_length: 8192, // Default, could be queried
+    match state.mode {
+        OperatingMode::Server => {
+            // Server mode: get models from local vLLM
+            if let Some(ref inference) = state.inference {
+                match inference.list_models().await {
+                    Ok(models) => {
+                        let model_infos: Vec<ModelInfo> = models
+                            .into_iter()
+                            .map(|id| {
+                                ModelInfo {
+                                    display_name: format_model_display_name(&id),
+                                    id: id.clone(),
+                                    name: id,
+                                    provider: "onera-private".to_string(),
+                                    context_length: 8192,
+                                }
+                            })
+                            .collect();
+                        return Json(model_infos);
                     }
-                })
-                .collect();
-            Json(model_infos)
+                    Err(e) => {
+                        warn!("Failed to fetch models from vLLM: {}", e);
+                    }
+                }
+            }
+            Json(vec![])
         }
-        Err(_) => {
-            // Return empty list on error
+        OperatingMode::Router => {
+            // Router mode: aggregate models from all configured servers
+            // For now, return empty - models will be fetched from server_models table
+            // TODO: Optionally query model servers for their available models
             Json(vec![])
         }
     }

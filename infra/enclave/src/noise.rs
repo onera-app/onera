@@ -77,7 +77,7 @@ impl NoiseServer {
 }
 
 /// Request from client (after decryption)
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InferenceRequest {
     pub model: Option<String>,
     pub messages: Vec<ChatMessage>,
@@ -88,14 +88,14 @@ pub struct InferenceRequest {
 }
 
 /// Chat message format
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChatMessage {
     pub role: String,
     pub content: String,
 }
 
 /// Response to client (before encryption)
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InferenceResponse {
     pub content: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -230,10 +230,37 @@ async fn handle_messages(
                     request.stream
                 );
 
-                // Process inference
+                // Process inference based on mode
                 let response = {
-                    let state = state.read().await;
-                    process_inference(&state.inference, request).await
+                    let state_guard = state.read().await;
+                    match state_guard.mode {
+                        crate::OperatingMode::Server => {
+                            // Server mode: forward to local vLLM
+                            if let Some(ref inference) = state_guard.inference {
+                                process_inference_local(inference, request).await
+                            } else {
+                                InferenceResponse {
+                                    content: String::new(),
+                                    finish_reason: None,
+                                    error: Some("Inference client not configured".to_string()),
+                                }
+                            }
+                        }
+                        crate::OperatingMode::Router => {
+                            // Router mode: forward to model server enclave
+                            if let Some(ref router) = state_guard.router {
+                                let router = router.clone();
+                                drop(state_guard); // Release lock before async call
+                                process_inference_routed(&router, request).await
+                            } else {
+                                InferenceResponse {
+                                    content: String::new(),
+                                    finish_reason: None,
+                                    error: Some("Router not configured".to_string()),
+                                }
+                            }
+                        }
+                    }
                 };
 
                 debug!("Inference response: content_len={}, error={:?}",
@@ -266,8 +293,8 @@ async fn handle_messages(
     Ok(())
 }
 
-/// Process an inference request
-async fn process_inference(
+/// Process inference request locally (server mode)
+async fn process_inference_local(
     client: &crate::inference::InferenceClient,
     request: InferenceRequest,
 ) -> InferenceResponse {
@@ -278,7 +305,25 @@ async fn process_inference(
             error: None,
         },
         Err(e) => {
-            error!("Inference error: {}", e);
+            error!("Local inference error: {}", e);
+            InferenceResponse {
+                content: String::new(),
+                finish_reason: None,
+                error: Some(e.to_string()),
+            }
+        }
+    }
+}
+
+/// Process inference request via router (router mode)
+async fn process_inference_routed(
+    router: &crate::router::Router,
+    request: InferenceRequest,
+) -> InferenceResponse {
+    match router.forward_request(request).await {
+        Ok(response) => response,
+        Err(e) => {
+            error!("Routed inference error: {}", e);
             InferenceResponse {
                 content: String::new(),
                 finish_reason: None,
