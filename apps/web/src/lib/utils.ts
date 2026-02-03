@@ -155,6 +155,11 @@ export function getProviderStyle(modelOrProvider?: string): ProviderStyle {
 export function formatModelName(model?: string): string {
   if (!model) return 'Assistant';
 
+  // Handle private models (e.g., "private:qwen2.5-7b-instruct-q4_k_m.gguf")
+  if (model.startsWith('private:')) {
+    return formatPrivateModelName(model.slice(8));
+  }
+
   // Handle provider:model format
   const parts = model.split(':');
   let name = parts.length > 1 ? parts[1] : parts[0];
@@ -214,4 +219,42 @@ export function formatModelName(model?: string): string {
 
   // Clean up multiple spaces
   return name.replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Format private model name for display
+ * Converts IDs like "qwen2.5-7b-instruct-q4_k_m.gguf" to "Qwen 2.5 7B Instruct (Private)"
+ */
+function formatPrivateModelName(id: string): string {
+  // Remove file extension
+  let name = id.replace(/\.gguf$/i, '');
+
+  // Remove quantization suffixes (q4_k_m, q5_k_s, etc.)
+  name = name.replace(/[-_][qQ]\d+[-_][kK][-_]?[sSmMlL]$/i, '');
+
+  // Split into parts
+  const parts = name.split(/[-_]/);
+
+  const formatted = parts
+    .filter(part => part.length > 0)
+    .map(part => {
+      // Handle model names with versions (qwen2.5 -> Qwen 2.5, llama3.1 -> Llama 3.1)
+      const versionMatch = part.match(/^([a-zA-Z]+)(\d+\.?\d*)$/);
+      if (versionMatch) {
+        const [, namePart, versionPart] = versionMatch;
+        return `${namePart.charAt(0).toUpperCase() + namePart.slice(1).toLowerCase()} ${versionPart}`;
+      }
+
+      // Handle size indicators (7b -> 7B, 70b -> 70B)
+      const sizeMatch = part.match(/^(\d+\.?\d*)([bB])$/);
+      if (sizeMatch) {
+        return `${sizeMatch[1]}B`;
+      }
+
+      // Title case other words
+      return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+    })
+    .join(' ');
+
+  return `${formatted} (Private)`;
 }
