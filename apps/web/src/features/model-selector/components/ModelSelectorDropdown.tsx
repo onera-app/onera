@@ -67,8 +67,8 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
     }
   );
 
-  // Query is pending if not yet enabled (waiting for unlock) OR actively loading
-  const privateModelsQueryPending = !isUnlocked || loadingPrivateModels || fetchingPrivateModels;
+  // Only block on initial load, not background refetches (show stale data while refetching)
+  const privateModelsQueryPending = !isUnlocked || (loadingPrivateModels && !privateModels);
 
   // Use the model selection hook
   const {

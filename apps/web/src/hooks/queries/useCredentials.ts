@@ -1,25 +1,29 @@
 import { useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { clearAllAICaches } from "@/lib/ai";
+import { useE2EE } from "@/providers/E2EEProvider";
 import {
   encryptCredentialName,
   decryptCredentialName,
   encryptCredentialProvider,
   decryptCredentialProvider,
-  isUnlocked,
 } from "@onera/crypto";
 
 export function useCredentials() {
-  const query = trpc.credentials.list.useQuery();
+  const { isUnlocked } = useE2EE();
+  const query = trpc.credentials.list.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+  });
 
   const decryptedCredentials = useMemo(() => {
-    if (!query.data || !isUnlocked()) return undefined;
+    if (!query.data || !isUnlocked) return undefined;
     return query.data.map((credential) => ({
       ...credential,
       name: decryptCredentialName(credential.encryptedName!, credential.nameNonce!),
       provider: decryptCredentialProvider(credential.encryptedProvider!, credential.providerNonce!),
     }));
-  }, [query.data]);
+  }, [query.data, isUnlocked]);
 
   return decryptedCredentials;
 }
