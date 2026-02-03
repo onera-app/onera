@@ -58,7 +58,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
   const hasAnyConnections = rawCredentials && rawCredentials.length > 0;
 
   // Fetch private inference models from server (cached for 5 minutes)
-  const { data: privateModels, isLoading: loadingPrivateModels, isFetching: fetchingPrivateModels } = trpc.enclaves.listModels.useQuery(
+  const { data: privateModels, isLoading: loadingPrivateModels } = trpc.enclaves.listModels.useQuery(
     undefined,
     {
       enabled: isUnlocked,
