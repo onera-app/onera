@@ -1,5 +1,6 @@
 import { trpc } from "@/lib/trpc";
-import { decryptDeviceName, isUnlocked } from "@onera/crypto";
+import { useE2EE } from "@/providers/E2EEProvider";
+import { decryptDeviceName } from "@onera/crypto";
 import { useMemo } from "react";
 
 /**
@@ -21,7 +22,11 @@ interface DecryptedDevice {
  * Device names are decrypted client-side
  */
 export function useDevices() {
-  const query = trpc.devices.list.useQuery();
+  const { isUnlocked } = useE2EE();
+  const query = trpc.devices.list.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
 
   // Decrypt device names client-side
   const devices = useMemo<DecryptedDevice[] | undefined>(() => {
@@ -31,7 +36,7 @@ export function useDevices() {
       let deviceName: string | null = null;
 
       // Decrypt device name (plaintext columns have been dropped)
-      if (device.encryptedDeviceName && device.deviceNameNonce && isUnlocked()) {
+      if (device.encryptedDeviceName && device.deviceNameNonce && isUnlocked) {
         try {
           deviceName = decryptDeviceName(device.encryptedDeviceName, device.deviceNameNonce);
         } catch (error) {
@@ -51,7 +56,7 @@ export function useDevices() {
         createdAt: device.createdAt,
       };
     });
-  }, [query.data]);
+  }, [query.data, isUnlocked]);
 
   return {
     devices,

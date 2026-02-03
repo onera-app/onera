@@ -1,17 +1,22 @@
 import { useMemo } from "react";
 import { trpc } from "@/lib/trpc";
-import { encryptFolderName, decryptFolderName, isUnlocked } from "@onera/crypto";
+import { useE2EE } from "@/providers/E2EEProvider";
+import { encryptFolderName, decryptFolderName } from "@onera/crypto";
 
 export function useFolders() {
-  const query = trpc.folders.list.useQuery();
+  const { isUnlocked } = useE2EE();
+  const query = trpc.folders.list.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
 
   const decryptedFolders = useMemo(() => {
-    if (!query.data || !isUnlocked()) return [];
+    if (!query.data || !isUnlocked) return [];
     return query.data.map((folder) => ({
       ...folder,
       name: decryptFolderName(folder.encryptedName!, folder.nameNonce!),
     }));
-  }, [query.data]);
+  }, [query.data, isUnlocked]);
 
   return {
     data: decryptedFolders,
@@ -20,18 +25,19 @@ export function useFolders() {
 }
 
 export function useFolder(id: string) {
+  const { isUnlocked } = useE2EE();
   const query = trpc.folders.get.useQuery(
     { folderId: id },
     { enabled: !!id }
   );
 
   const decryptedFolder = useMemo(() => {
-    if (!query.data || !isUnlocked()) return undefined;
+    if (!query.data || !isUnlocked) return undefined;
     return {
       ...query.data,
       name: decryptFolderName(query.data.encryptedName!, query.data.nameNonce!),
     };
-  }, [query.data]);
+  }, [query.data, isUnlocked]);
 
   return {
     data: decryptedFolder,

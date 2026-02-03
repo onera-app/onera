@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { trpc } from "@/lib/trpc";
+import { useE2EE } from "@/providers/E2EEProvider";
 import {
   encryptPromptName,
   decryptPromptName,
@@ -7,14 +8,17 @@ import {
   decryptPromptDescription,
   encryptPromptContent,
   decryptPromptContent,
-  isUnlocked,
 } from "@onera/crypto";
 
 export function usePrompts() {
-  const query = trpc.prompts.list.useQuery();
+  const { isUnlocked } = useE2EE();
+  const query = trpc.prompts.list.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
 
   const decryptedPrompts = useMemo(() => {
-    if (!query.data || !isUnlocked()) return [];
+    if (!query.data || !isUnlocked) return [];
     return query.data.map((prompt) => ({
       ...prompt,
       name: decryptPromptName(prompt.encryptedName!, prompt.nameNonce!),
@@ -23,7 +27,7 @@ export function usePrompts() {
         : null,
       content: decryptPromptContent(prompt.encryptedContent!, prompt.contentNonce!),
     }));
-  }, [query.data]);
+  }, [query.data, isUnlocked]);
 
   return {
     data: decryptedPrompts,
@@ -32,13 +36,14 @@ export function usePrompts() {
 }
 
 export function usePrompt(id: string) {
+  const { isUnlocked } = useE2EE();
   const query = trpc.prompts.get.useQuery(
     { promptId: id },
     { enabled: !!id }
   );
 
   const decryptedPrompt = useMemo(() => {
-    if (!query.data || !isUnlocked()) return undefined;
+    if (!query.data || !isUnlocked) return undefined;
     return {
       ...query.data,
       name: decryptPromptName(query.data.encryptedName!, query.data.nameNonce!),
@@ -47,7 +52,7 @@ export function usePrompt(id: string) {
         : null,
       content: decryptPromptContent(query.data.encryptedContent!, query.data.contentNonce!),
     };
-  }, [query.data]);
+  }, [query.data, isUnlocked]);
 
   return {
     data: decryptedPrompt,
