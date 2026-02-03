@@ -402,4 +402,3 @@ export type NewUserKey = typeof userKeys.$inferInsert;
 // TEE Enclave Management
 // ============================================
 export * from './schema/enclaves';
-export * from './schema/modelServers';

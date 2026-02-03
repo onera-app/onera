@@ -5,7 +5,7 @@ import { router, protectedProcedure } from '../trpc';
 import { db, schema } from '../../db/client';
 import { randomUUID } from 'crypto';
 
-const { enclaves, enclaveAssignments, modelServers, serverModels } = schema;
+const { enclaves, enclaveAssignments } = schema;
 
 // Response type from enclave /models endpoint (used for fallback)
 interface EnclaveModelInfo {
@@ -68,34 +68,9 @@ async function fetchEnclavePublicKey(enclaveId: string, attestationEndpoint: str
 export const enclavesRouter = router({
   /**
    * List available private inference models.
-   * First tries to get models from server_models table,
-   * falls back to querying enclaves directly if no servers configured.
+   * Queries enclaves directly for their available models.
    */
   listModels: protectedProcedure.query(async () => {
-    // Try to get models from server_models table first
-    const dbModels = await db
-      .select({
-        modelId: serverModels.modelId,
-        modelName: serverModels.modelName,
-        displayName: serverModels.displayName,
-        contextLength: serverModels.contextLength,
-        serverStatus: modelServers.status,
-      })
-      .from(serverModels)
-      .innerJoin(modelServers, eq(serverModels.serverId, modelServers.id))
-      .where(eq(modelServers.status, 'ready'));
-
-    if (dbModels.length > 0) {
-      return dbModels.map(m => ({
-        id: m.modelId,
-        name: m.modelName,
-        displayName: m.displayName,
-        contextLength: m.contextLength || 8192,
-        provider: 'onera-private' as const,
-      }));
-    }
-
-    // Fallback: Get models directly from enclaves (legacy mode)
     const readyEnclaves = await db
       .select()
       .from(enclaves)
@@ -140,23 +115,6 @@ export const enclavesRouter = router({
     }
 
     return allModels;
-  }),
-
-  /**
-   * List all model servers (for admin/debug).
-   */
-  listModelServers: protectedProcedure.query(async () => {
-    const servers = await db
-      .select()
-      .from(modelServers)
-      .where(eq(modelServers.status, 'ready'));
-
-    const models = await db.select().from(serverModels);
-
-    return servers.map(server => ({
-      ...server,
-      models: models.filter(m => m.serverId === server.id),
-    }));
   }),
 
   /**
