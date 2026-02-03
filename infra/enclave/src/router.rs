@@ -161,9 +161,9 @@ impl Router {
     }
 
     /// Get the server ID for a given model
-    fn get_server_for_model(&self, model_id: &str) -> Option<String> {
+    async fn get_server_for_model(&self, model_id: &str) -> Option<String> {
         // Check explicit mapping first
-        if let Some(server_id) = self.model_to_server.blocking_read().get(model_id) {
+        if let Some(server_id) = self.model_to_server.read().await.get(model_id) {
             return Some(server_id.clone());
         }
 
@@ -319,7 +319,7 @@ impl Router {
 
     /// Ensure we have a connection to the server for the given model
     async fn ensure_connection(&self, model_id: &str) -> Result<String> {
-        let server_id = self.get_server_for_model(model_id)
+        let server_id = self.get_server_for_model(model_id).await
             .ok_or_else(|| anyhow!("No server configured for model: {}", model_id))?;
 
         // Check if already connected
