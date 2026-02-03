@@ -20,6 +20,7 @@ use tokio_tungstenite::{accept_async, tungstenite::Message};
 use tracing::{debug, error, info, warn};
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
+use crate::inference::StreamChunk;
 use crate::AppState;
 
 /// Noise protocol pattern: NK (Known server key)
@@ -231,52 +232,82 @@ async fn handle_messages(
                 );
 
                 // Process inference based on mode
-                let response = {
-                    let state_guard = state.read().await;
-                    info!("Processing in {:?} mode", state_guard.mode);
-                    match state_guard.mode {
-                        crate::OperatingMode::Server => {
-                            // Server mode: forward to local vLLM
-                            if let Some(ref inference) = state_guard.inference {
-                                process_inference_local(inference, request).await
-                            } else {
-                                InferenceResponse {
-                                    content: String::new(),
-                                    finish_reason: None,
-                                    error: Some("Inference client not configured".to_string()),
+                let state_guard = state.read().await;
+                info!("Processing in {:?} mode", state_guard.mode);
+
+                match state_guard.mode {
+                    crate::OperatingMode::Server => {
+                        // Server mode: forward to local vLLM
+                        if let Some(ref inference) = state_guard.inference {
+                            if request.stream {
+                                // Streaming mode
+                                drop(state_guard); // Release lock before async streaming
+                                let inference = {
+                                    let s = state.read().await;
+                                    s.inference.as_ref().unwrap().clone()
+                                };
+                                match inference.chat_completion_stream(request).await {
+                                    Ok(mut rx) => {
+                                        while let Some(chunk) = rx.recv().await {
+                                            let chunk_json = serde_json::to_vec(&chunk)?;
+                                            let len = transport.write_message(&chunk_json, &mut buf)?;
+                                            write.send(Message::Binary(buf[..len].to_vec())).await?;
+                                            debug!("Sent stream chunk: {:?}", chunk);
+                                        }
+                                    }
+                                    Err(e) => {
+                                        error!("Streaming error: {}", e);
+                                        let response = InferenceResponse {
+                                            content: String::new(),
+                                            finish_reason: None,
+                                            error: Some(e.to_string()),
+                                        };
+                                        let response_json = serde_json::to_vec(&response)?;
+                                        let len = transport.write_message(&response_json, &mut buf)?;
+                                        write.send(Message::Binary(buf[..len].to_vec())).await?;
+                                    }
                                 }
-                            }
-                        }
-                        crate::OperatingMode::Router => {
-                            // Router mode: forward to model server enclave
-                            info!("Router mode: forwarding to model server");
-                            if let Some(ref router) = state_guard.router {
-                                let router = router.clone();
-                                drop(state_guard); // Release lock before async call
-                                process_inference_routed(&router, request).await
                             } else {
-                                InferenceResponse {
-                                    content: String::new(),
-                                    finish_reason: None,
-                                    error: Some("Router not configured".to_string()),
-                                }
+                                // Non-streaming mode
+                                let response = process_inference_local(inference, request).await;
+                                info!("Inference response: content_len={}, error={:?}",
+                                       response.content.len(), response.error);
+                                let response_json = serde_json::to_vec(&response)?;
+                                let len = transport.write_message(&response_json, &mut buf)?;
+                                write.send(Message::Binary(buf[..len].to_vec())).await?;
                             }
+                        } else {
+                            let response = InferenceResponse {
+                                content: String::new(),
+                                finish_reason: None,
+                                error: Some("Inference client not configured".to_string()),
+                            };
+                            let response_json = serde_json::to_vec(&response)?;
+                            let len = transport.write_message(&response_json, &mut buf)?;
+                            write.send(Message::Binary(buf[..len].to_vec())).await?;
                         }
                     }
-                };
-
-                info!("Inference response: content_len={}, error={:?}",
-                       response.content.len(), response.error);
-
-                // Serialize and encrypt response
-                let response_json = serde_json::to_vec(&response)?;
-                debug!("Serialized response: {} bytes", response_json.len());
-
-                let len = transport.write_message(&response_json, &mut buf)?;
-                debug!("Encrypted response: {} bytes", len);
-
-                // Send encrypted response
-                write.send(Message::Binary(buf[..len].to_vec())).await?;
+                    crate::OperatingMode::Router => {
+                        // Router mode: forward to model server enclave (no streaming yet)
+                        info!("Router mode: forwarding to model server");
+                        let response = if let Some(ref router) = state_guard.router {
+                            let router = router.clone();
+                            drop(state_guard); // Release lock before async call
+                            process_inference_routed(&router, request).await
+                        } else {
+                            InferenceResponse {
+                                content: String::new(),
+                                finish_reason: None,
+                                error: Some("Router not configured".to_string()),
+                            }
+                        };
+                        info!("Inference response: content_len={}, error={:?}",
+                               response.content.len(), response.error);
+                        let response_json = serde_json::to_vec(&response)?;
+                        let len = transport.write_message(&response_json, &mut buf)?;
+                        write.send(Message::Binary(buf[..len].to_vec())).await?;
+                    }
+                }
                 debug!("Response sent successfully");
             }
             Message::Close(_) => {

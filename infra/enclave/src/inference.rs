@@ -4,13 +4,16 @@
 //! Supports both synchronous and streaming responses.
 
 use anyhow::{anyhow, Result};
+use futures_util::StreamExt;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
+use tokio::sync::mpsc;
 use tracing::{debug, error};
 
 use crate::noise::InferenceRequest;
 
 /// Client for communicating with vLLM server
+#[derive(Clone)]
 pub struct InferenceClient {
     /// HTTP client
     client: Client,
@@ -31,7 +34,7 @@ impl InferenceClient {
         })
     }
 
-    /// Send a chat completion request to vLLM
+    /// Send a chat completion request to vLLM (non-streaming)
     pub async fn chat_completion(&self, request: InferenceRequest) -> Result<String> {
         let url = format!("{}/v1/chat/completions", self.base_url);
 
@@ -48,7 +51,7 @@ impl InferenceClient {
                 .collect(),
             temperature: request.temperature,
             max_tokens: request.max_tokens,
-            stream: false, // For now, always use non-streaming
+            stream: false,
         };
 
         debug!("Sending request to vLLM at {}", url);
@@ -89,6 +92,128 @@ impl InferenceClient {
         Ok(content)
     }
 
+    /// Send a streaming chat completion request to vLLM
+    /// Returns a channel receiver that yields StreamChunk messages
+    pub async fn chat_completion_stream(
+        &self,
+        request: InferenceRequest,
+    ) -> Result<mpsc::Receiver<StreamChunk>> {
+        let url = format!("{}/v1/chat/completions", self.base_url);
+
+        let vllm_request = VllmChatRequest {
+            model: request.model.unwrap_or_else(|| "default".to_string()),
+            messages: request
+                .messages
+                .into_iter()
+                .map(|m| VllmMessage {
+                    role: m.role,
+                    content: m.content,
+                })
+                .collect(),
+            temperature: request.temperature,
+            max_tokens: request.max_tokens,
+            stream: true,
+        };
+
+        debug!("Sending streaming request to vLLM at {}", url);
+
+        let response = self
+            .client
+            .post(&url)
+            .json(&vllm_request)
+            .send()
+            .await
+            .map_err(|e| anyhow!("Failed to send request to vLLM: {}", e))?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let body = response
+                .text()
+                .await
+                .unwrap_or_else(|_| "Unknown error".to_string());
+            error!("vLLM streaming error: {} - {}", status, body);
+            return Err(anyhow!("vLLM returned error: {} - {}", status, body));
+        }
+
+        let (tx, rx) = mpsc::channel(32);
+
+        // Spawn task to process SSE stream
+        let mut stream = response.bytes_stream();
+        tokio::spawn(async move {
+            let mut buffer = String::new();
+
+            while let Some(chunk_result) = stream.next().await {
+                match chunk_result {
+                    Ok(bytes) => {
+                        buffer.push_str(&String::from_utf8_lossy(&bytes));
+
+                        // Process complete SSE events
+                        while let Some(pos) = buffer.find("\n\n") {
+                            let event = buffer[..pos].to_string();
+                            buffer = buffer[pos + 2..].to_string();
+
+                            // Parse SSE data line
+                            for line in event.lines() {
+                                if let Some(data) = line.strip_prefix("data: ") {
+                                    if data == "[DONE]" {
+                                        let _ = tx
+                                            .send(StreamChunk::Finish {
+                                                finish_reason: "stop".to_string(),
+                                            })
+                                            .await;
+                                        return;
+                                    }
+
+                                    if let Ok(chunk) =
+                                        serde_json::from_str::<VllmStreamChunk>(data)
+                                    {
+                                        if let Some(choice) = chunk.choices.first() {
+                                            if let Some(content) = &choice.delta.content {
+                                                if !content.is_empty() {
+                                                    let _ = tx
+                                                        .send(StreamChunk::Delta {
+                                                            text: content.clone(),
+                                                        })
+                                                        .await;
+                                                }
+                                            }
+                                            if let Some(reason) = &choice.finish_reason {
+                                                let _ = tx
+                                                    .send(StreamChunk::Finish {
+                                                        finish_reason: reason.clone(),
+                                                    })
+                                                    .await;
+                                                return;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        error!("Stream error: {}", e);
+                        let _ = tx
+                            .send(StreamChunk::Error {
+                                message: e.to_string(),
+                            })
+                            .await;
+                        return;
+                    }
+                }
+            }
+
+            // Stream ended without explicit finish
+            let _ = tx
+                .send(StreamChunk::Finish {
+                    finish_reason: "stop".to_string(),
+                })
+                .await;
+        });
+
+        Ok(rx)
+    }
+
     /// Check if vLLM server is healthy
     pub async fn health_check(&self) -> Result<bool> {
         let url = format!("{}/health", self.base_url);
@@ -125,6 +250,18 @@ impl InferenceClient {
 
         Ok(models_response.data.into_iter().map(|m| m.id).collect())
     }
+}
+
+/// Streaming chunk types
+#[derive(Debug, Clone, Serialize)]
+#[serde(tag = "type")]
+pub enum StreamChunk {
+    #[serde(rename = "text-delta")]
+    Delta { text: String },
+    #[serde(rename = "finish")]
+    Finish { finish_reason: String },
+    #[serde(rename = "error")]
+    Error { message: String },
 }
 
 /// vLLM chat completion request format
@@ -183,6 +320,25 @@ struct VllmModelsResponse {
 #[derive(Debug, Deserialize)]
 struct VllmModel {
     id: String,
+}
+
+/// vLLM streaming chunk format
+#[derive(Debug, Deserialize)]
+struct VllmStreamChunk {
+    choices: Vec<VllmStreamChoice>,
+}
+
+/// vLLM streaming choice
+#[derive(Debug, Deserialize)]
+struct VllmStreamChoice {
+    delta: VllmStreamDelta,
+    finish_reason: Option<String>,
+}
+
+/// vLLM streaming delta
+#[derive(Debug, Deserialize)]
+struct VllmStreamDelta {
+    content: Option<String>,
 }
 
 #[cfg(test)]
