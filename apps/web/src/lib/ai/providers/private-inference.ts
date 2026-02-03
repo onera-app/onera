@@ -130,7 +130,7 @@ export function createPrivateInferenceModel(
       verified = true;
     }
 
-    if (!session) {
+    if (!session || session.isClosed) {
       session = await NoiseWebSocketSession.connect(
         config.wsEndpoint,
         attestedPublicKey

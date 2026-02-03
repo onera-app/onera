@@ -26,9 +26,16 @@ export class NoiseWebSocketSession implements NoiseSession {
   private ws: WebSocket | null = null;
   private messageQueue: Uint8Array[] = [];
   private messageResolvers: ((data: Uint8Array) => void)[] = [];
-  private closed = false;
+  private _closed = false;
 
   private constructor() {}
+
+  /**
+   * Check if the session is closed.
+   */
+  get isClosed(): boolean {
+    return this._closed;
+  }
 
   /**
    * Establish an encrypted WebSocket session to a TEE endpoint.
@@ -75,7 +82,7 @@ export class NoiseWebSocketSession implements NoiseSession {
     };
 
     session.ws.onclose = () => {
-      session.closed = true;
+      session._closed = true;
       // Reject any pending resolvers
       while (session.messageResolvers.length > 0) {
         const resolver = session.messageResolvers.shift();
@@ -85,7 +92,7 @@ export class NoiseWebSocketSession implements NoiseSession {
     };
 
     session.ws.onerror = () => {
-      session.closed = true;
+      session._closed = true;
     };
 
     // Perform Noise NK handshake
@@ -102,7 +109,7 @@ export class NoiseWebSocketSession implements NoiseSession {
           return session.messageQueue.shift()!;
         }
         return new Promise<Uint8Array>((resolve, reject) => {
-          if (session.closed) {
+          if (session._closed) {
             reject(new Error('Session closed during handshake'));
             return;
           }
@@ -125,7 +132,7 @@ export class NoiseWebSocketSession implements NoiseSession {
     if (!this.ciphers) {
       throw new Error('Session not established');
     }
-    if (this.closed) {
+    if (this._closed) {
       throw new Error('Session closed');
     }
     return encryptMessage(this.ciphers.sendCipher, plaintext);
@@ -142,7 +149,7 @@ export class NoiseWebSocketSession implements NoiseSession {
     if (!this.ciphers) {
       throw new Error('Session not established');
     }
-    if (this.closed) {
+    if (this._closed) {
       throw new Error('Session closed');
     }
     return decryptMessage(this.ciphers.recvCipher, ciphertext);
@@ -159,7 +166,7 @@ export class NoiseWebSocketSession implements NoiseSession {
    * @throws If session is closed or communication fails
    */
   async sendAndReceive(plaintext: Uint8Array): Promise<Uint8Array> {
-    if (!this.ws || this.closed) {
+    if (!this.ws || this._closed) {
       throw new Error('Session closed');
     }
 
@@ -171,7 +178,7 @@ export class NoiseWebSocketSession implements NoiseSession {
         resolve(this.messageQueue.shift()!);
         return;
       }
-      if (this.closed) {
+      if (this._closed) {
         reject(new Error('Session closed'));
         return;
       }
@@ -193,14 +200,14 @@ export class NoiseWebSocketSession implements NoiseSession {
    * @yields Decrypted response chunks
    */
   async *sendAndStream(plaintext: Uint8Array): AsyncIterable<Uint8Array> {
-    if (!this.ws || this.closed) {
+    if (!this.ws || this._closed) {
       throw new Error('Session closed');
     }
 
     const encrypted = this.encrypt(plaintext);
     this.ws.send(encrypted);
 
-    while (!this.closed) {
+    while (!this._closed) {
       const response = await new Promise<Uint8Array | null>((resolve) => {
         if (this.messageQueue.length > 0) {
           const msg = this.messageQueue.shift()!;
@@ -212,7 +219,7 @@ export class NoiseWebSocketSession implements NoiseSession {
           }
           return;
         }
-        if (this.closed) {
+        if (this._closed) {
           resolve(null);
           return;
         }
@@ -235,7 +242,7 @@ export class NoiseWebSocketSession implements NoiseSession {
    * After closing, the session cannot be reused.
    */
   close(): void {
-    this.closed = true;
+    this._closed = true;
     if (this.ws) {
       try {
         this.ws.close();
