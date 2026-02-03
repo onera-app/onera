@@ -127,6 +127,7 @@ export class DirectBrowserTransport {
         attestationEndpoint: enclaveConfig.attestationEndpoint,
         expectedMeasurements: enclaveConfig.expectedMeasurements,
         allowUnverified: enclaveConfig.allowUnverified,
+        modelId: modelName, // Pass the actual model ID (e.g., 'qwen2.5-7b-instruct-q4_k_m.gguf')
       });
 
       // Convert UIMessages to ModelMessages

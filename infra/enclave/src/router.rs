@@ -346,11 +346,16 @@ impl Router {
     /// Forward an inference request to the appropriate model server
     pub async fn forward_request(&self, request: InferenceRequest) -> Result<InferenceResponse> {
         let model_id = request.model.as_deref().unwrap_or("default");
+        info!("forward_request: model={}, messages={}", model_id, request.messages.len());
+
         let server_id = self.ensure_connection(model_id).await?;
+        info!("forward_request: server_id={}", server_id);
 
         let mut connections = self.connections.write().await;
         let conn = connections.get_mut(&server_id)
             .ok_or_else(|| anyhow!("Connection not found"))?;
+
+        info!("forward_request: got connection, serializing request");
 
         // Serialize and encrypt request
         let request_json = serde_json::to_vec(&request)?;
@@ -359,7 +364,7 @@ impl Router {
 
         // Send encrypted request
         conn.ws.send(Message::Binary(buf[..len].to_vec())).await?;
-        debug!("Sent encrypted request to {}: {} bytes", server_id, len);
+        info!("forward_request: sent encrypted request to {}: {} bytes", server_id, len);
 
         // Receive encrypted response with timeout
         let msg = timeout(REQUEST_TIMEOUT, conn.ws.next())

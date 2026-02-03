@@ -225,14 +225,15 @@ async fn handle_messages(
                 // Parse request with sanitized error handling to prevent plaintext leakage
                 let request: InferenceRequest = serde_json::from_slice(plaintext)
                     .map_err(|_| anyhow!("Failed to parse request: invalid JSON format"))?;
-                debug!(
-                    "Received inference request, stream={}",
-                    request.stream
+                info!(
+                    "Received inference request: model={:?}, messages={}, stream={}",
+                    request.model, request.messages.len(), request.stream
                 );
 
                 // Process inference based on mode
                 let response = {
                     let state_guard = state.read().await;
+                    info!("Processing in {:?} mode", state_guard.mode);
                     match state_guard.mode {
                         crate::OperatingMode::Server => {
                             // Server mode: forward to local vLLM
@@ -248,6 +249,7 @@ async fn handle_messages(
                         }
                         crate::OperatingMode::Router => {
                             // Router mode: forward to model server enclave
+                            info!("Router mode: forwarding to model server");
                             if let Some(ref router) = state_guard.router {
                                 let router = router.clone();
                                 drop(state_guard); // Release lock before async call
@@ -263,7 +265,7 @@ async fn handle_messages(
                     }
                 };
 
-                debug!("Inference response: content_len={}, error={:?}",
+                info!("Inference response: content_len={}, error={:?}",
                        response.content.len(), response.error);
 
                 // Serialize and encrypt response

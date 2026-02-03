@@ -31,6 +31,10 @@ interface PrivateInferenceConfig {
   attestationEndpoint: string;
   expectedMeasurements?: KnownMeasurements;
   /**
+   * The model ID to use for inference (e.g., 'qwen2.5-7b-instruct-q4_k_m.gguf')
+   */
+  modelId?: string;
+  /**
    * Allow unverified attestation (development only).
    * WARNING: Setting this to true bypasses signature verification.
    * This should NEVER be true in production.
@@ -154,6 +158,7 @@ export function createPrivateInferenceModel(
       const messages = convertPromptToMessages(options.prompt);
 
       const request = {
+        model: config.modelId,
         messages,
         stream: false,
         temperature: options.temperature,
@@ -209,6 +214,7 @@ export function createPrivateInferenceModel(
       const messages = convertPromptToMessages(options.prompt);
 
       const request = {
+        model: config.modelId,
         messages,
         stream: true,
         temperature: options.temperature,
@@ -377,7 +383,8 @@ const providerCache = new Map<string, LanguageModelV3>();
 export function getPrivateInferenceModel(
   config: PrivateInferenceConfig
 ): LanguageModelV3 {
-  const cacheKey = config.endpoint.id;
+  // Include modelId in cache key so different models get separate providers
+  const cacheKey = `${config.endpoint.id}:${config.modelId || 'default'}`;
 
   if (!providerCache.has(cacheKey)) {
     providerCache.set(cacheKey, createPrivateInferenceModel(config));
