@@ -44,8 +44,8 @@ app.get("/.well-known/apple-app-site-association", (c) => {
   const aasa = {
     webcredentials: {
       apps: [
-        "J4J5Y4K647.chat.onera",
-        "J4J5Y4K647.chat.onera.staging",
+        "FYS9RNAGTV.chat.onera",
+        "FYS9RNAGTV.chat.onera.staging",
       ],
     },
   };
