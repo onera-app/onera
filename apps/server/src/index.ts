@@ -45,7 +45,7 @@ app.get("/.well-known/apple-app-site-association", (c) => {
     webcredentials: {
       apps: [
         "FYS9RNAGTV.chat.onera",
-        "FYS9RNAGTV.chat.onera.beta",
+        "FYS9RNAGTV.chat.onera.staging",
       ],
     },
   };
