@@ -43,7 +43,10 @@ app.get("/health", (c) => {
 app.get("/.well-known/apple-app-site-association", (c) => {
   const aasa = {
     webcredentials: {
-      apps: ["J3LH4H9AA4.chat.onera.mobile"],
+      apps: [
+        "J4J5Y4K647.chat.onera",
+        "J4J5Y4K647.chat.onera.staging",
+      ],
     },
   };
   return c.json(aasa, 200, {
