@@ -153,6 +153,11 @@ async fn handle_connection(
     // Create responder handshake state
     let mut handshake = {
         let state = state.read().await;
+        debug!(
+            "Created Noise responder for {}, server pubkey: {}",
+            peer_addr,
+            hex::encode(state.noise_server.public_key())
+        );
         state.noise_server.create_responder()?
     };
 
@@ -170,10 +175,31 @@ async fn handle_connection(
         _ => return Err(anyhow!("Expected binary message for handshake")),
     };
 
-    debug!("Received handshake message: {} bytes", client_data.len());
+    debug!(
+        "Received handshake message: {} bytes, hex: {}",
+        client_data.len(),
+        hex::encode(&client_data)
+    );
 
     // Process client's message and generate response
-    handshake.read_message(&client_data, &mut buf)?;
+    // Expected: 48 bytes (32-byte ephemeral key + 16-byte auth tag for empty payload)
+    let _payload_len = match handshake.read_message(&client_data, &mut buf) {
+        Ok(len) => {
+            debug!("Handshake read_message success, payload: {} bytes", len);
+            len
+        }
+        Err(e) => {
+            error!("Handshake FAILED for {}: {:?}", peer_addr, e);
+            error!(
+                "  Expected: 48 bytes (32 ephemeral + 16 tag), received: {} bytes",
+                client_data.len()
+            );
+            if client_data.len() >= 32 {
+                error!("  Ephemeral key (first 32 bytes): {}", hex::encode(&client_data[..32]));
+            }
+            return Err(anyhow!("Noise handshake failed: {}", e));
+        }
+    };
     let len = handshake.write_message(&[], &mut buf)?;
 
     // Send server's ephemeral key
@@ -254,6 +280,9 @@ async fn handle_messages(
                                             write.send(Message::Binary(buf[..len].to_vec())).await?;
                                             debug!("Sent stream chunk: {:?}", chunk);
                                         }
+                                        // Send empty message to signal end of stream
+                                        write.send(Message::Binary(vec![])).await?;
+                                        debug!("Sent end-of-stream signal");
                                     }
                                     Err(e) => {
                                         error!("Streaming error: {}", e);
@@ -265,6 +294,8 @@ async fn handle_messages(
                                         let response_json = serde_json::to_vec(&response)?;
                                         let len = transport.write_message(&response_json, &mut buf)?;
                                         write.send(Message::Binary(buf[..len].to_vec())).await?;
+                                        // Send empty message to signal end of stream after error
+                                        write.send(Message::Binary(vec![])).await?;
                                     }
                                 }
                             } else {
@@ -275,6 +306,9 @@ async fn handle_messages(
                                 let response_json = serde_json::to_vec(&response)?;
                                 let len = transport.write_message(&response_json, &mut buf)?;
                                 write.send(Message::Binary(buf[..len].to_vec())).await?;
+                                // Send empty message to signal end of stream
+                                write.send(Message::Binary(vec![])).await?;
+                                debug!("Sent end-of-stream signal");
                             }
                         } else {
                             let response = InferenceResponse {
@@ -285,6 +319,8 @@ async fn handle_messages(
                             let response_json = serde_json::to_vec(&response)?;
                             let len = transport.write_message(&response_json, &mut buf)?;
                             write.send(Message::Binary(buf[..len].to_vec())).await?;
+                            // Send empty message to signal end of stream
+                            write.send(Message::Binary(vec![])).await?;
                         }
                     }
                     crate::OperatingMode::Router => {
@@ -306,6 +342,9 @@ async fn handle_messages(
                         let response_json = serde_json::to_vec(&response)?;
                         let len = transport.write_message(&response_json, &mut buf)?;
                         write.send(Message::Binary(buf[..len].to_vec())).await?;
+                        // Send empty message to signal end of stream
+                        write.send(Message::Binary(vec![])).await?;
+                        debug!("Sent end-of-stream signal");
                     }
                 }
                 debug!("Response sent successfully");

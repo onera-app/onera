@@ -228,6 +228,8 @@ export async function generateChatTitle(
       wsEndpoint: currentEnclaveConfig.wsEndpoint,
       attestationEndpoint: currentEnclaveConfig.attestationEndpoint,
       expectedMeasurements: currentEnclaveConfig.expectedMeasurements,
+      modelId: modelName,
+      allowUnverified: currentEnclaveConfig.allowUnverified,
     });
   } else {
     // Use credential-based model
@@ -290,6 +292,8 @@ export async function generateFollowUps(
       wsEndpoint: currentEnclaveConfig.wsEndpoint,
       attestationEndpoint: currentEnclaveConfig.attestationEndpoint,
       expectedMeasurements: currentEnclaveConfig.expectedMeasurements,
+      modelId: modelName,
+      allowUnverified: currentEnclaveConfig.allowUnverified,
     });
   } else {
     // Use credential-based model
