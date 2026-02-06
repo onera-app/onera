@@ -17,11 +17,16 @@ target/
 
 # Database
 *.db
+*.db-shm
+*.db-wal
 *.sqlite
+apps/server/data/
 
-# IDE
+# IDE & AI agent configs
 .idea/
 .vscode/
+.cursor/
+.opencode/
 *.swp
 *.swo
 .DS_Store
