@@ -216,7 +216,7 @@ describe('Private Inference Provider', () => {
     expect(result.usage.outputTokens.total).toBe(6);
   });
 
-  it('should cache the session and reuse for subsequent calls', async () => {
+  it('should cache attestation but create fresh session per request', async () => {
     const model = createPrivateInferenceModel(mockConfig);
 
     mockSession.sendAndReceive.mockImplementation(() =>
@@ -245,13 +245,13 @@ describe('Private Inference Provider', () => {
       inputFormat: 'messages',
     } as any);
 
-    // Attestation and session should only be established once
+    // Attestation should be cached (called once), but each request gets a fresh session
     expect(mockFetchAndVerifyAttestation).toHaveBeenCalledTimes(1);
-    expect(mockNoiseConnect).toHaveBeenCalledTimes(1);
+    expect(mockNoiseConnect).toHaveBeenCalledTimes(2);
     expect(mockSession.sendAndReceive).toHaveBeenCalledTimes(2);
   });
 
-  it('should clear cache and close sessions on clearPrivateInferenceCache', async () => {
+  it('should close session after each doGenerate call', async () => {
     const model = createPrivateInferenceModel(mockConfig);
 
     mockSession.sendAndReceive.mockImplementation(() =>
@@ -266,18 +266,13 @@ describe('Private Inference Provider', () => {
       )
     );
 
-    // First call establishes session
     await model.doGenerate({
       prompt: [{ role: 'user', content: 'Test' }],
       mode: { type: 'regular' },
       inputFormat: 'messages',
     } as any);
 
-    expect(mockSession.close).not.toHaveBeenCalled();
-
-    // Clear cache
-    clearPrivateInferenceCache();
-
+    // Session should be closed after the request completes
     expect(mockSession.close).toHaveBeenCalledTimes(1);
   });
 

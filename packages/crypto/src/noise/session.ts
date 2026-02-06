@@ -170,10 +170,10 @@ export class NoiseWebSocketSession implements NoiseSession {
       throw new Error('Session closed');
     }
 
-    // Drain any leftover end-of-stream signals from previous streaming requests
-    while (this.messageQueue.length > 0 && this.messageQueue[0].length === 0) {
-      this.messageQueue.shift();
-    }
+    // Drain any stale messages from previous requests (e.g., unconsumed
+    // streaming chunks or end-of-stream signals). Each drained encrypted
+    // message must still be decrypted to keep the Noise nonce in sync.
+    this.drainStaleMessages();
 
     const encrypted = this.encrypt(plaintext);
     this.ws.send(encrypted);
@@ -194,11 +194,9 @@ export class NoiseWebSocketSession implements NoiseSession {
       });
 
       if (response.length === 0) {
-        // Empty message could be a stale end-of-stream signal or a real close
         if (this._closed) {
           throw new Error('Connection closed by server');
         }
-        // Skip stale end-of-stream signal and wait for the actual response
         continue;
       }
 
@@ -217,6 +215,9 @@ export class NoiseWebSocketSession implements NoiseSession {
     if (!this.ws || this._closed) {
       throw new Error('Session closed');
     }
+
+    // Drain stale messages from previous requests
+    this.drainStaleMessages();
 
     const encrypted = this.encrypt(plaintext);
     this.ws.send(encrypted);
@@ -248,6 +249,23 @@ export class NoiseWebSocketSession implements NoiseSession {
 
       if (response === null) break;
       yield this.decrypt(response);
+    }
+  }
+
+  /**
+   * Drain stale messages from the queue. Encrypted messages are decrypted
+   * to keep the Noise cipher nonce counter in sync with the server.
+   */
+  private drainStaleMessages(): void {
+    while (this.messageQueue.length > 0) {
+      const msg = this.messageQueue.shift()!;
+      if (msg.length > 0 && this.ciphers) {
+        try {
+          decryptMessage(this.ciphers.recvCipher, msg);
+        } catch {
+          // Decryption failure on stale data is expected if nonces diverged
+        }
+      }
     }
   }
 

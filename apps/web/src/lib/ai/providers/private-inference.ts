@@ -93,9 +93,6 @@ function generateId(): string {
   return Math.random().toString(36).substring(2, 15);
 }
 
-// Track sessions separately for cleanup
-const sessionCache = new Map<string, NoiseWebSocketSession>();
-
 /**
  * Creates a Vercel AI SDK v6-compatible language model that communicates
  * with a TEE via Noise protocol.
@@ -103,12 +100,15 @@ const sessionCache = new Map<string, NoiseWebSocketSession>();
 export function createPrivateInferenceModel(
   config: PrivateInferenceConfig
 ): LanguageModelV3 {
-  let session: NoiseWebSocketSession | null = null;
   let verified = false;
-
   let attestedPublicKey: string | null = null;
 
-  const ensureSession = async (): Promise<NoiseWebSocketSession> => {
+  /**
+   * Ensure attestation is verified and return the server's public key.
+   * Attestation is cached across requests since the server key doesn't
+   * change between restarts.
+   */
+  const ensureAttestation = async (): Promise<string> => {
     if (!verified || !attestedPublicKey) {
       const verificationOptions: VerificationOptions = {
         knownMeasurements: config.expectedMeasurements,
@@ -130,15 +130,18 @@ export function createPrivateInferenceModel(
       verified = true;
     }
 
-    if (!session || session.isClosed) {
-      session = await NoiseWebSocketSession.connect(
-        config.wsEndpoint,
-        attestedPublicKey
-      );
-      sessionCache.set(config.endpoint.id, session);  // Track for cleanup
-    }
+    return attestedPublicKey;
+  };
 
-    return session;
+  /**
+   * Create a fresh WebSocket session for a single request.
+   * Each request gets its own session to prevent stale messages from
+   * previous requests (especially interrupted streams) from contaminating
+   * subsequent requests.
+   */
+  const createSession = async (): Promise<NoiseWebSocketSession> => {
+    const publicKey = await ensureAttestation();
+    return NoiseWebSocketSession.connect(config.wsEndpoint, publicKey);
   };
 
   return {
@@ -152,63 +155,67 @@ export function createPrivateInferenceModel(
     async doGenerate(
       options: LanguageModelV3CallOptions
     ): Promise<LanguageModelV3GenerateResult> {
-      const sess = await ensureSession();
+      const sess = await createSession();
 
-      // Convert AI SDK prompt format to server's expected format
-      const messages = convertPromptToMessages(options.prompt);
+      try {
+        // Convert AI SDK prompt format to server's expected format
+        const messages = convertPromptToMessages(options.prompt);
 
-      const request = {
-        model: config.modelId,
-        messages,
-        stream: false,
-        temperature: options.temperature,
-        max_tokens: options.maxOutputTokens,
-      };
+        const request = {
+          model: config.modelId,
+          messages,
+          stream: false,
+          temperature: options.temperature,
+          max_tokens: options.maxOutputTokens,
+        };
 
-      const requestBytes = new TextEncoder().encode(JSON.stringify(request));
-      const responseBytes = await sess.sendAndReceive(requestBytes);
-      const response = JSON.parse(new TextDecoder().decode(responseBytes));
+        const requestBytes = new TextEncoder().encode(JSON.stringify(request));
+        const responseBytes = await sess.sendAndReceive(requestBytes);
+        const response = JSON.parse(new TextDecoder().decode(responseBytes));
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: response.content || '',
+        return {
+          content: [
+            {
+              type: 'text',
+              text: response.content || '',
+            },
+          ],
+          finishReason: {
+            unified: response.finishReason || 'stop',
+            raw: response.rawFinishReason,
           },
-        ],
-        finishReason: {
-          unified: response.finishReason || 'stop',
-          raw: response.rawFinishReason,
-        },
-        usage: {
-          inputTokens: {
-            total: response.usage?.promptTokens || 0,
-            noCache: response.usage?.promptTokens || 0,
-            cacheRead: undefined,
-            cacheWrite: undefined,
+          usage: {
+            inputTokens: {
+              total: response.usage?.promptTokens || 0,
+              noCache: response.usage?.promptTokens || 0,
+              cacheRead: undefined,
+              cacheWrite: undefined,
+            },
+            outputTokens: {
+              total: response.usage?.completionTokens || 0,
+              text: response.usage?.completionTokens || 0,
+              reasoning: undefined,
+            },
           },
-          outputTokens: {
-            total: response.usage?.completionTokens || 0,
-            text: response.usage?.completionTokens || 0,
-            reasoning: undefined,
+          warnings: [],
+          request: {
+            body: request,
           },
-        },
-        warnings: [],
-        request: {
-          body: request,
-        },
-        response: {
-          id: response.id || generateId(),
-          timestamp: new Date(),
-          modelId: config.endpoint.id,
-        },
-      };
+          response: {
+            id: response.id || generateId(),
+            timestamp: new Date(),
+            modelId: config.endpoint.id,
+          },
+        };
+      } finally {
+        sess.close();
+      }
     },
 
     async doStream(
       options: LanguageModelV3CallOptions
     ): Promise<LanguageModelV3StreamResult> {
-      const sess = await ensureSession();
+      const sess = await createSession();
 
       // Convert AI SDK prompt format to server's expected format
       const messages = convertPromptToMessages(options.prompt);
@@ -364,6 +371,8 @@ export function createPrivateInferenceModel(
               error,
             });
             controller.close();
+          } finally {
+            sess.close();
           }
         },
       });
@@ -394,10 +403,5 @@ export function getPrivateInferenceModel(
 }
 
 export function clearPrivateInferenceCache(): void {
-  // Close all sessions before clearing
-  for (const session of sessionCache.values()) {
-    session.close();
-  }
-  sessionCache.clear();
   providerCache.clear();
 }
