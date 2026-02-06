@@ -192,19 +192,49 @@ export const enclavesRouter = router({
           .limit(1);
 
         if (!enclave) {
-          throw new TRPCError({
-            code: 'NOT_IMPLEMENTED',
-            message: 'Dedicated enclave provisioning not yet implemented',
+          // Try to claim an unassigned dedicated enclave from the pool
+          const result = await db.transaction(async (tx) => {
+            const [available] = await tx
+              .update(enclaves)
+              .set({
+                dedicatedToUserId: userId,
+                updatedAt: new Date(),
+              })
+              .where(
+                and(
+                  eq(enclaves.tier, 'dedicated'),
+                  eq(enclaves.status, 'ready'),
+                  isNull(enclaves.dedicatedToUserId)
+                )
+              )
+              .returning();
+
+            if (!available) {
+              throw new TRPCError({
+                code: 'SERVICE_UNAVAILABLE',
+                message: 'No dedicated enclaves available. Please try again later.',
+              });
+            }
+
+            await tx.insert(enclaveAssignments).values({
+              id: assignmentId,
+              enclaveId: available.id,
+              userId,
+              sessionId,
+            });
+
+            return available;
+          });
+          enclave = result;
+        } else {
+          // User already has a dedicated enclave, create assignment
+          await db.insert(enclaveAssignments).values({
+            id: assignmentId,
+            enclaveId: enclave.id,
+            userId,
+            sessionId,
           });
         }
-
-        // Create assignment record for dedicated tier
-        await db.insert(enclaveAssignments).values({
-          id: assignmentId,
-          enclaveId: enclave.id,
-          userId,
-          sessionId,
-        });
       }
 
       // Allow unverified attestation only in development
@@ -289,6 +319,31 @@ export const enclavesRouter = router({
             updatedAt: new Date(),
           })
           .where(eq(enclaves.id, enclave.id));
+      }
+
+      if (enclave?.tier === 'dedicated') {
+        // Check if this was the last active assignment
+        const [activeAssignment] = await db
+          .select()
+          .from(enclaveAssignments)
+          .where(
+            and(
+              eq(enclaveAssignments.enclaveId, enclave.id),
+              isNull(enclaveAssignments.releasedAt)
+            )
+          )
+          .limit(1);
+
+        if (!activeAssignment) {
+          // No more active sessions, release the dedicated enclave back to pool
+          await db
+            .update(enclaves)
+            .set({
+              dedicatedToUserId: null,
+              updatedAt: new Date(),
+            })
+            .where(eq(enclaves.id, enclave.id));
+        }
       }
 
       return { success: true };
