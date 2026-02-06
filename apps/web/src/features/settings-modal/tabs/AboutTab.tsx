@@ -52,7 +52,7 @@ export function AboutTab() {
         <div className="grid gap-2">
           <Button variant="outline" className="justify-start" asChild>
             <a
-              href="https://github.com/your-org/onera"
+              href="https://github.com/onera-app/onera"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -110,7 +110,7 @@ export function AboutTab() {
       <div className="space-y-3">
         <h4 className="text-sm font-medium">License</h4>
         <p className="text-sm text-muted-foreground">
-          Onera is open-source software licensed under the MIT License.
+          Onera is open-source software licensed under the GNU Affero General Public License v3.0.
         </p>
       </div>
 

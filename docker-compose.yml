@@ -40,8 +40,7 @@ services:
     environment:
       # PostgreSQL connection string
       DATABASE_URL: postgresql://onera:${POSTGRES_PASSWORD}@postgres:5432/onera
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
-      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
+      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY:?CLERK_SECRET_KEY is required}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
       PORT: 3000
       NODE_ENV: production

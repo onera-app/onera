@@ -1,163 +1,166 @@
-# Onera
+<div align="center">
+  <img src="onera-logo.svg" alt="Onera" width="80" />
+  <h1>Onera</h1>
+  <p>End-to-end encrypted AI chat. Your keys, your data.</p>
 
-End-to-End Encrypted AI Chat Application
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue.svg" alt="License" /></a>
+</div>
 
-## Overview
+---
 
-Onera is a privacy-focused AI chat application that provides true end-to-end encryption for all conversations. Your messages, prompts, and responses are encrypted before leaving your browser - the server never sees your plaintext data.
+## What is Onera?
 
-## Features
+Onera is a privacy-first AI chat application with true end-to-end encryption. Messages, prompts, and API keys are encrypted client-side before reaching the server -- the server never sees plaintext data. Unlike conventional AI chat apps that trust the backend with your conversations, Onera ensures that only you hold the keys to your data.
 
-- **End-to-End Encryption**: All chat data is encrypted client-side using libsodium
-- **Direct LLM Connections**: Connect directly to OpenAI, Anthropic, or Ollama from your browser
-- **Recovery Keys**: BIP39 mnemonic phrases for account recovery
-- **Multi-Provider Support**: Use multiple LLM providers with encrypted credential storage
-- **Modern Stack**: Built with Svelte 5, SvelteKit 2, and TanStack Query
+It supports multiple LLM providers (OpenAI, Anthropic, Google, Groq, Deepseek, Mistral, xAI, OpenRouter, Ollama) and features WebAuthn/passkey authentication, BIP39 recovery phrases, and a 3-share key management system inspired by [Privy](https://www.privy.io/).
+
+Onera also supports private inference through Rust-based enclaves with Noise protocol encryption for running models in trusted execution environments.
+
+## Key Features
+
+- **End-to-end encryption** -- all chat data encrypted client-side with libsodium
+- **Multi-provider LLM support** -- 8+ providers including OpenAI, Anthropic, Google, Groq, Deepseek, Mistral, xAI, OpenRouter, and Ollama
+- **Direct browser-to-LLM connections** -- API keys never touch the server
+- **WebAuthn/passkey authentication** -- passwordless login via Clerk and SimpleWebAuthn
+- **BIP39 mnemonic recovery phrases** -- human-readable backup for your encryption keys
+- **3-share key management** -- master key split across auth share, device share, and recovery share
+- **Private inference enclaves** -- Rust-based TEEs with Noise protocol encryption
+- **Real-time streaming** -- WebSocket-based message streaming via Socket.io
+- **Rich text editor** -- TipTap-powered message composition
+- **Internationalization** -- multi-language support via i18next
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                       Browser                                │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │  Svelte UI  │  │  TanStack   │  │  E2EE Crypto Layer  │  │
-│  │             │──│   Query     │──│   (libsodium)       │  │
-│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
-│                           │                    │             │
-│                           ▼                    ▼             │
-│                   ┌─────────────┐      ┌──────────────┐     │
-│                   │ Encrypted   │      │ Direct LLM   │     │
-│                   │   Storage   │      │ Connections  │     │
-│                   └─────────────┘      └──────────────┘     │
-└───────────────────────────┼────────────────────┼────────────┘
-                            │                    │
-                            ▼                    ▼
-                    ┌───────────────┐    ┌──────────────┐
-                    │ Onera Server  │    │ LLM Provider │
-                    │ (encrypted    │    │ (OpenAI,     │
-                    │  blob store)  │    │  Anthropic,  │
-                    └───────────────┘    │  Ollama)     │
-                                         └──────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                        Browser                                │
+│  ┌────────────┐  ┌──────────────┐  ┌───────────────────────┐ │
+│  │  React 19  │  │  TanStack    │  │  E2EE Crypto Layer    │ │
+│  │  + Vite    │──│  Router/Query│──│  (@onera/crypto)      │ │
+│  └────────────┘  └──────────────┘  └───────────────────────┘ │
+│         │                │                     │              │
+│         ▼                ▼                     ▼              │
+│  ┌────────────┐  ┌──────────────┐  ┌───────────────────────┐ │
+│  │ Zustand    │  │ tRPC Client  │  │  Direct LLM           │ │
+│  │ State      │  │ + Socket.io  │  │  Connections           │ │
+│  └────────────┘  └──────────────┘  └───────────────────────┘ │
+└──────────────────────────┼─────────────────────┼─────────────┘
+                           │                     │
+                           ▼                     ▼
+                   ┌───────────────┐     ┌──────────────┐
+                   │  Hono Server  │     │ LLM Provider │
+                   │  + tRPC       │     │ (OpenAI,     │
+                   │  + Drizzle    │     │  Anthropic,  │
+                   │  (encrypted   │     │  Google, ... │
+                   │   blob store) │     │  Ollama)     │
+                   └───────────────┘     └──────────────┘
+                          │
+                          ▼
+                   ┌───────────────┐
+                   │  PostgreSQL   │
+                   └───────────────┘
 ```
 
-## Getting Started
+## Quick Start
 
 ### Prerequisites
 
-- [Bun](https://bun.sh) (v1.1+)
-- Docker & Docker Compose (for containerized deployment)
+- [Bun](https://bun.sh) v1.2+
+- [Node.js](https://nodejs.org) v20+ (for production server)
+- PostgreSQL 16+ (or use Docker)
+- A [Clerk](https://clerk.com) account (for authentication)
 
-### Development Setup
+### Setup
 
 ```bash
-# Navigate to project
+git clone https://github.com/onera-app/onera.git
 cd onera
-
-# Install dependencies
 bun install
 
-# Start all services (web + server)
-bun run dev
+# Configure environment
+cp .env.example .env
+cp apps/web/.env.example apps/web/.env
+cp apps/server/.env.example apps/server/.env
+# Edit the .env files with your values (see Environment Variables below)
 
-# Or start individually
-bun run dev:web     # Frontend only
-bun run dev:server  # Backend only
-```
-
-### Database Setup
-
-```bash
-# Generate migrations
+# Set up database
 bun run db:generate
-
-# Run migrations
 bun run db:migrate
+
+# Start development
+bun run dev
 ```
 
-### Docker Setup
+### Docker
 
 ```bash
-# Build and run all containers
-bun run docker:up
-
-# Stop containers
-bun run docker:down
+# Copy and configure .env files first (see above)
+docker compose up -d
 ```
+
+The web client runs at `http://localhost:5173` and the API at `http://localhost:3000`.
 
 ## Environment Variables
 
-Create a `.env` file in the root directory.
+> See [`.env.example`](.env.example), [`apps/web/.env.example`](apps/web/.env.example), and [`apps/server/.env.example`](apps/server/.env.example) for all configuration options.
 
-Required (any mode):
+| Variable | Location | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | Root / Server | PostgreSQL connection string |
+| `CLERK_SECRET_KEY` | Server | Clerk secret key ([dashboard.clerk.com](https://dashboard.clerk.com)) |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Web | Clerk publishable key |
+| `FRONTEND_URL` | Root / Server | Frontend URL for CORS |
+| `VITE_API_URL` | Root / Web | Backend API URL |
+| `VITE_WS_URL` | Root / Web | WebSocket URL |
 
-- `BETTER_AUTH_SECRET` (32+ chars)
+## Project Structure
 
-Optional (defaults shown):
+```
+onera/
+├── apps/
+│   ├── web/              # React 19 web client
+│   ├── server/           # Hono + tRPC backend
+│   └── docs/             # Documentation site (Fumadocs + Next.js)
+├── packages/
+│   ├── crypto/           # E2EE implementation (libsodium)
+│   └── types/            # Shared TypeScript types
+└── infra/
+    └── enclave/          # Rust private inference enclave
+```
 
-- `DATABASE_URL` = `file:./data/onera.db`
-- `BETTER_AUTH_URL` = `http://localhost:3000`
-- `FRONTEND_URL` = `http://localhost:5173`
-- `VITE_API_URL` = `http://localhost:3000`
-- `VITE_WS_URL` = `http://localhost:3000` (falls back to `VITE_API_URL` if unset)
+## Tech Stack
 
-Docker-only:
-
-- `POSTGRES_PASSWORD` (required by `docker-compose.yml`)
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 19, TypeScript, Vite, TanStack Router, Zustand, Tailwind CSS 4, Radix UI |
+| Backend | Hono, tRPC, Drizzle ORM, PostgreSQL, Socket.io, Bun |
+| Auth | Clerk, WebAuthn (SimpleWebAuthn) |
+| Encryption | libsodium (E2EE), BIP39, Noise Protocol |
+| AI | Vercel AI SDK, multi-provider (OpenAI, Anthropic, Google, Groq, etc.) |
+| Infra | Docker, Nginx, Rust (Tokio + Axum) for enclaves |
 
 ## Security Model
 
-### Encryption
+- **All chat data is E2EE** -- encrypted client-side with libsodium before reaching the server.
+- **3-share key management** -- master key split across auth share (Clerk), device share (browser), and recovery share (BIP39 mnemonic).
+- **Zero-knowledge server** -- the server stores only encrypted blobs and never sees plaintext.
+- **LLM API keys** -- encrypted and stored in the browser, sent directly to providers.
 
-- **Master Key**: 256-bit random key, encrypted with a key derived from your passphrase using Argon2id
-- **Chat Keys**: Each chat has a unique 256-bit key encrypted with your master key
-- **Credentials**: LLM API keys are encrypted with your master key
-- **Key Exchange**: X25519 sealed boxes for sharing chats (future feature)
+For the full cryptographic specification, see the [whitepaper](apps/docs/content/docs/whitepaper/).
 
-### What the Server Sees
+## Contributing
 
-- Encrypted blobs only
-- Public keys for sharing
-- No plaintext content, titles, or credentials
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, code style, and PR guidelines.
 
-### What the Server Cannot Do
+## Security
 
-- Read your messages
-- Access your LLM API keys
-- Decrypt your data without your passphrase or recovery phrase
-
-## Technology Stack
-
-### Frontend
-- Svelte 5 with SvelteKit 2
-- TanStack Query for state management
-- Tailwind CSS 4
-- libsodium-wrappers-sumo for encryption
-- BIP39 for recovery phrases
-
-### Backend
-- Hono server with tRPC
-- SQLite with Drizzle ORM
-- Better Auth for authentication
-- Bun runtime
-
-## Development
-
-```bash
-# Run frontend tests
-bun test
-
-# Type checking
-bun run check
-
-# Build for production
-bun run build
-```
+To report security vulnerabilities, see [SECURITY.md](SECURITY.md).
 
 ## License
 
-MIT
+This project is licensed under the [GNU Affero General Public License v3.0](LICENSE).
 
 ## Acknowledgments
 
-- Ported E2EE implementation from [Open WebUI](https://github.com/open-webui/open-webui)
-- Encryption patterns inspired by [Ente](https://ente.io)
+- E2EE architecture inspired by [Ente](https://ente.io) and [Privy](https://www.privy.io/)
+- Key sharding patterns from the original [Open WebUI](https://github.com/open-webui/open-webui) E2EE implementation
