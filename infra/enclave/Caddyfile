@@ -11,17 +11,18 @@
 	# Automatic HTTPS with Let's Encrypt
 	# Caddy will automatically obtain and renew certificates
 
-	# CORS headers for browser requests
-	header {
-		Access-Control-Allow-Origin "https://staging.onera.chat"
-		Access-Control-Allow-Methods "GET, POST, OPTIONS"
-		Access-Control-Allow-Headers "Content-Type"
-		Access-Control-Max-Age "86400"
-	}
+	# CORS: reflect Origin for allowed domains only
+	@cors header_regexp origin Origin ^https://(onera\.chat|staging\.onera\.chat)$
+	header @cors Access-Control-Allow-Origin {http.request.header.Origin}
+	header @cors Access-Control-Allow-Methods "GET, POST, OPTIONS"
+	header @cors Access-Control-Allow-Headers "Content-Type"
+	header @cors Access-Control-Max-Age "86400"
 
 	# Handle preflight requests
 	@options method OPTIONS
-	respond @options 204
+	handle @options {
+		respond 204
+	}
 
 	# Attestation and models endpoints (HTTP)
 	# Use 'enclave' service name in Docker, 'localhost' for standalone

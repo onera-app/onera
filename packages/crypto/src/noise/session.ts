@@ -170,26 +170,40 @@ export class NoiseWebSocketSession implements NoiseSession {
       throw new Error('Session closed');
     }
 
+    // Drain any leftover end-of-stream signals from previous streaming requests
+    while (this.messageQueue.length > 0 && this.messageQueue[0].length === 0) {
+      this.messageQueue.shift();
+    }
+
     const encrypted = this.encrypt(plaintext);
     this.ws.send(encrypted);
 
-    const response = await new Promise<Uint8Array>((resolve, reject) => {
-      if (this.messageQueue.length > 0) {
-        resolve(this.messageQueue.shift()!);
-        return;
-      }
-      if (this._closed) {
-        reject(new Error('Session closed'));
-        return;
-      }
-      this.messageResolvers.push(resolve);
-    });
+    // Wait for a non-empty response, skipping any end-of-stream signals
+    // that may arrive from a previously interrupted stream
+    while (true) {
+      const response = await new Promise<Uint8Array>((resolve, reject) => {
+        if (this.messageQueue.length > 0) {
+          resolve(this.messageQueue.shift()!);
+          return;
+        }
+        if (this._closed) {
+          reject(new Error('Session closed'));
+          return;
+        }
+        this.messageResolvers.push(resolve);
+      });
 
-    if (response.length === 0) {
-      throw new Error('Connection closed by server');
+      if (response.length === 0) {
+        // Empty message could be a stale end-of-stream signal or a real close
+        if (this._closed) {
+          throw new Error('Connection closed by server');
+        }
+        // Skip stale end-of-stream signal and wait for the actual response
+        continue;
+      }
+
+      return this.decrypt(response);
     }
-
-    return this.decrypt(response);
   }
 
   /**

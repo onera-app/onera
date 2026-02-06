@@ -299,16 +299,13 @@ async fn handle_messages(
                                     }
                                 }
                             } else {
-                                // Non-streaming mode
+                                // Non-streaming mode: send single response, no end-of-stream signal
                                 let response = process_inference_local(inference, request).await;
                                 info!("Inference response: content_len={}, error={:?}",
                                        response.content.len(), response.error);
                                 let response_json = serde_json::to_vec(&response)?;
                                 let len = transport.write_message(&response_json, &mut buf)?;
                                 write.send(Message::Binary(buf[..len].to_vec())).await?;
-                                // Send empty message to signal end of stream
-                                write.send(Message::Binary(vec![])).await?;
-                                debug!("Sent end-of-stream signal");
                             }
                         } else {
                             let response = InferenceResponse {
