@@ -1,5 +1,3 @@
-[[servers]]
-id = "llm-cpu-1"
-ws_endpoint = "ws://40.87.105.18:8081"
-# public_key is fetched dynamically from attestation endpoint
-models = ["*"]
+# Router mode server configuration
+# Only used when ROUTER_MODE=true
+# Add model server enclaves here
