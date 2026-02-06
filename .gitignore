@@ -45,6 +45,9 @@ coverage/
 # Turbo
 .turbo/
 
+# Worktrees
+.worktrees/
+
 # Misc
 *.pem
 *.key
