@@ -32,6 +32,12 @@ const CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
 /// Request timeout
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(300);
 
+/// Health check interval
+const HEALTH_CHECK_INTERVAL: Duration = Duration::from_secs(30);
+
+/// Ping timeout
+const PING_TIMEOUT: Duration = Duration::from_secs(5);
+
 /// Attestation fetch timeout
 const ATTESTATION_TIMEOUT: Duration = Duration::from_secs(5);
 
@@ -388,6 +394,49 @@ impl Router {
 
         debug!("Received response from {}: {} bytes content", server_id, response.content.len());
         Ok(response)
+    }
+
+    /// Run periodic health checks on all connected servers.
+    /// Removes dead connections so they get re-established on next request.
+    pub async fn run_health_checks(self: Arc<Self>) {
+        let mut interval = tokio::time::interval(HEALTH_CHECK_INTERVAL);
+        loop {
+            interval.tick().await;
+
+            let server_ids: Vec<String> = {
+                let connections = self.connections.read().await;
+                connections.keys().cloned().collect()
+            };
+
+            if server_ids.is_empty() {
+                continue;
+            }
+
+            for server_id in server_ids {
+                let mut connections = self.connections.write().await;
+                if let Some(conn) = connections.get_mut(&server_id) {
+                    let ping_result = timeout(
+                        PING_TIMEOUT,
+                        conn.ws.send(Message::Ping(vec![]))
+                    ).await;
+
+                    match ping_result {
+                        Ok(Ok(())) => {
+                            debug!("Health check OK: {}", server_id);
+                        }
+                        _ => {
+                            warn!("Health check FAILED for {}, removing connection", server_id);
+                            if let Some(mut dead) = connections.remove(&server_id) {
+                                let _ = dead.ws.close(None).await;
+                            }
+                            // Invalidate cached public key so it's re-fetched on reconnect
+                            drop(connections);
+                            self.invalidate_public_key(&server_id).await;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /// Close all connections

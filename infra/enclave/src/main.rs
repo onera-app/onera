@@ -101,6 +101,13 @@ async fn main() -> anyhow::Result<()> {
                 info!("  - {} at {} (models: {:?})", server.id, server.ws_endpoint, server.models);
             }
             let router = Arc::new(EnclaveRouter::new(config));
+
+            // Start health check background task
+            let router_for_health = Arc::clone(&router);
+            tokio::spawn(async move {
+                router_for_health.run_health_checks().await;
+            });
+
             (None, Some(router))
         }
     };
