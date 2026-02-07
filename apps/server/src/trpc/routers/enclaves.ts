@@ -5,7 +5,7 @@ import { router, protectedProcedure } from '../trpc';
 import { db, schema } from '../../db/client';
 import { randomUUID } from 'crypto';
 
-const { enclaves, enclaveAssignments } = schema;
+const { enclaves, enclaveAssignments, serverModels, modelServers } = schema;
 
 // Response type from enclave /models endpoint (used for fallback)
 interface EnclaveModelInfo {
@@ -71,6 +71,31 @@ export const enclavesRouter = router({
    * Queries enclaves directly for their available models.
    */
   listModels: protectedProcedure.query(async () => {
+    // First try: get models from server_models table (preferred, avoids network calls)
+    const dbModels = await db
+      .select({
+        id: serverModels.modelId,
+        name: serverModels.modelName,
+        displayName: serverModels.displayName,
+        contextLength: serverModels.contextLength,
+      })
+      .from(serverModels)
+      .innerJoin(
+        modelServers,
+        and(
+          eq(serverModels.serverId, modelServers.id),
+          eq(modelServers.status, 'ready')
+        )
+      );
+
+    if (dbModels.length > 0) {
+      return dbModels.map((m) => ({
+        ...m,
+        provider: 'onera-private' as const,
+      }));
+    }
+
+    // Fallback: query enclaves directly (existing behavior)
     const readyEnclaves = await db
       .select()
       .from(enclaves)
