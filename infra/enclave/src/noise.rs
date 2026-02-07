@@ -321,27 +321,77 @@ async fn handle_messages(
                         }
                     }
                     crate::OperatingMode::Router => {
-                        // Router mode: forward to model server enclave (no streaming yet)
-                        info!("Router mode: forwarding to model server");
-                        let response = if let Some(ref router) = state_guard.router {
+                        // Router mode: forward to model server enclave
+                        info!("Router mode: forwarding to model server (stream={})", request.stream);
+                        if let Some(ref router) = state_guard.router {
                             let router = router.clone();
                             drop(state_guard); // Release lock before async call
-                            process_inference_routed(&router, request).await
+
+                            if request.stream {
+                                // Streaming mode: relay chunks from model server
+                                match router.forward_request_streaming(request).await {
+                                    Ok(mut rx) => {
+                                        while let Some(chunk_result) = rx.recv().await {
+                                            match chunk_result {
+                                                Ok(chunk) => {
+                                                    let chunk_json = serde_json::to_vec(&chunk)?;
+                                                    let len = transport.write_message(&chunk_json, &mut buf)?;
+                                                    write.send(Message::Binary(buf[..len].to_vec())).await?;
+                                                }
+                                                Err(e) => {
+                                                    error!("Streaming error from model server: {}", e);
+                                                    let err_response = InferenceResponse {
+                                                        content: String::new(),
+                                                        finish_reason: None,
+                                                        error: Some(e.to_string()),
+                                                    };
+                                                    let err_json = serde_json::to_vec(&err_response)?;
+                                                    let len = transport.write_message(&err_json, &mut buf)?;
+                                                    write.send(Message::Binary(buf[..len].to_vec())).await?;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        // Send empty message to signal end of stream
+                                        write.send(Message::Binary(vec![])).await?;
+                                        debug!("Sent end-of-stream signal (streaming)");
+                                    }
+                                    Err(e) => {
+                                        error!("Failed to start streaming: {}", e);
+                                        let response = InferenceResponse {
+                                            content: String::new(),
+                                            finish_reason: None,
+                                            error: Some(e.to_string()),
+                                        };
+                                        let response_json = serde_json::to_vec(&response)?;
+                                        let len = transport.write_message(&response_json, &mut buf)?;
+                                        write.send(Message::Binary(buf[..len].to_vec())).await?;
+                                        write.send(Message::Binary(vec![])).await?;
+                                    }
+                                }
+                            } else {
+                                // Non-streaming mode
+                                let response = process_inference_routed(&router, request).await;
+                                info!("Inference response: content_len={}, error={:?}",
+                                       response.content.len(), response.error);
+                                let response_json = serde_json::to_vec(&response)?;
+                                let len = transport.write_message(&response_json, &mut buf)?;
+                                write.send(Message::Binary(buf[..len].to_vec())).await?;
+                                // Send empty message to signal end of stream
+                                write.send(Message::Binary(vec![])).await?;
+                                debug!("Sent end-of-stream signal");
+                            }
                         } else {
-                            InferenceResponse {
+                            let response = InferenceResponse {
                                 content: String::new(),
                                 finish_reason: None,
                                 error: Some("Router not configured".to_string()),
-                            }
-                        };
-                        info!("Inference response: content_len={}, error={:?}",
-                               response.content.len(), response.error);
-                        let response_json = serde_json::to_vec(&response)?;
-                        let len = transport.write_message(&response_json, &mut buf)?;
-                        write.send(Message::Binary(buf[..len].to_vec())).await?;
-                        // Send empty message to signal end of stream
-                        write.send(Message::Binary(vec![])).await?;
-                        debug!("Sent end-of-stream signal");
+                            };
+                            let response_json = serde_json::to_vec(&response)?;
+                            let len = transport.write_message(&response_json, &mut buf)?;
+                            write.send(Message::Binary(buf[..len].to_vec())).await?;
+                            write.send(Message::Binary(vec![])).await?;
+                        }
                     }
                 }
                 debug!("Response sent successfully");

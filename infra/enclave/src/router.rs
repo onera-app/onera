@@ -18,6 +18,8 @@ use tokio::time::timeout;
 use tokio_tungstenite::{connect_async, tungstenite::Message, MaybeTlsStream, WebSocketStream};
 use tracing::{debug, info, warn};
 
+use tokio::sync::mpsc;
+
 use crate::noise::{InferenceRequest, InferenceResponse};
 
 /// Noise protocol pattern (same as server)
@@ -394,6 +396,92 @@ impl Router {
 
         debug!("Received response from {}: {} bytes content", server_id, response.content.len());
         Ok(response)
+    }
+
+    /// Forward a streaming inference request to the appropriate model server.
+    /// Returns a channel receiver that yields response chunks as they arrive.
+    pub async fn forward_request_streaming(
+        &self,
+        request: InferenceRequest,
+    ) -> Result<mpsc::Receiver<Result<InferenceResponse>>> {
+        let model_id = request.model.as_deref().unwrap_or("default");
+        info!("forward_request_streaming: model={}, messages={}", model_id, request.messages.len());
+
+        let server_id = self.ensure_connection(model_id).await?;
+
+        let mut connections = self.connections.write().await;
+        let conn = connections.get_mut(&server_id)
+            .ok_or_else(|| anyhow!("Connection not found"))?;
+
+        // Mark request as streaming
+        let mut streaming_request = request;
+        streaming_request.stream = true;
+
+        // Serialize and encrypt request
+        let request_json = serde_json::to_vec(&streaming_request)?;
+        let mut buf = vec![0u8; MAX_MESSAGE_SIZE];
+        let len = conn.transport.write_message(&request_json, &mut buf)?;
+        conn.ws.send(Message::Binary(buf[..len].to_vec())).await?;
+
+        // Create channel for streaming responses
+        let (tx, rx) = mpsc::channel(32);
+
+        // Read responses until we get an empty end-of-stream signal
+        loop {
+            let msg = match timeout(REQUEST_TIMEOUT, conn.ws.next()).await {
+                Ok(Some(Ok(msg))) => msg,
+                Ok(Some(Err(e))) => {
+                    let _ = tx.send(Err(anyhow!("WebSocket error: {}", e))).await;
+                    break;
+                }
+                Ok(None) => {
+                    connections.remove(&server_id);
+                    let _ = tx.send(Err(anyhow!("Connection closed"))).await;
+                    break;
+                }
+                Err(_) => {
+                    let _ = tx.send(Err(anyhow!("Request timeout"))).await;
+                    break;
+                }
+            };
+
+            match msg {
+                Message::Binary(d) if d.is_empty() => {
+                    // Empty binary message = end of stream signal
+                    debug!("Received end-of-stream signal from {}", server_id);
+                    break;
+                }
+                Message::Binary(ciphertext) => {
+                    match conn.transport.read_message(&ciphertext, &mut buf) {
+                        Ok(len) => {
+                            match serde_json::from_slice::<InferenceResponse>(&buf[..len]) {
+                                Ok(response) => {
+                                    if tx.send(Ok(response)).await.is_err() {
+                                        break; // Receiver dropped
+                                    }
+                                }
+                                Err(e) => {
+                                    let _ = tx.send(Err(anyhow!("Failed to parse response: {}", e))).await;
+                                    break;
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            let _ = tx.send(Err(anyhow!("Decryption error: {}", e))).await;
+                            break;
+                        }
+                    }
+                }
+                Message::Close(_) => {
+                    connections.remove(&server_id);
+                    break;
+                }
+                Message::Pong(_) => continue,
+                _ => continue,
+            }
+        }
+
+        Ok(rx)
     }
 
     /// Run periodic health checks on all connected servers.
