@@ -6,6 +6,7 @@ import { Server as HttpServer } from "http";
 import { appRouter } from "./trpc";
 import { createContext } from "./trpc/context";
 import { initWebSocket } from "./websocket";
+import { startStaleAssignmentCleanup } from "./jobs/cleanupStaleAssignments";
 
 const app = new Hono();
 
@@ -84,5 +85,8 @@ const server = serve(
 
 // Initialize WebSocket on the HTTP server
 initWebSocket(server as HttpServer);
+
+// Start background cleanup of stale enclave assignments
+startStaleAssignmentCleanup();
 
 export type { AppRouter } from "./trpc";
