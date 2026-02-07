@@ -1,0 +1,31 @@
+# Router mode server configuration
+# Only used when ROUTER_MODE=true
+#
+# Each [[servers]] block defines a model server enclave that this router
+# can forward inference requests to. The router establishes Noise NK
+# encrypted channels to each server using keys from their attestation
+# endpoints.
+#
+# Copy this file to servers.toml and adjust for your deployment.
+
+[[servers]]
+id = "cpu-1"
+ws_endpoint = "ws://10.0.0.1:8081"
+# attestation_endpoint is optional - derived from ws_endpoint if omitted
+# (ws://host:8081 -> http://host:8080/attestation)
+# attestation_endpoint = "http://10.0.0.1:8080/attestation"
+
+# public_key is optional - fetched from attestation endpoint if omitted
+# Provide it for faster startup or if attestation endpoint is not available
+# public_key = "hex-encoded-32-byte-x25519-key"
+
+# Wildcard: this server accepts any model
+models = ["*"]
+
+[[servers]]
+id = "gpu-1"
+ws_endpoint = "ws://10.0.0.2:8081"
+attestation_endpoint = "http://10.0.0.2:8080/attestation"
+
+# Only route specific models to this GPU server
+models = ["llama-3.1-70b", "qwen-72b"]
