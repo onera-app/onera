@@ -6,6 +6,7 @@ import {
   extractVcekLookupParams,
   fetchVcekCertificate,
 } from './sevsnp-verify';
+import { queryTransparencyLog } from './transparency-log';
 import { toBase64, fromHex, fromBase64, toHex } from '../sodium/utils';
 import { getSodium } from '../sodium/init';
 
@@ -38,6 +39,12 @@ export interface VerificationOptions {
    * This should NEVER be true in production.
    */
   allowUnverified?: boolean;
+
+  /**
+   * Verify measurements against transparency log (Sigstore Rekor).
+   * Requires network access to rekor.sigstore.dev.
+   */
+  verifyTransparencyLog?: boolean;
 }
 
 /**
@@ -56,7 +63,7 @@ export async function verifyAttestation(
   reportData?: string,
   options: VerificationOptions = {}
 ): Promise<VerificationResult> {
-  const { knownMeasurements, vcekCertPem, allowUnverified = false } = options;
+  const { knownMeasurements, vcekCertPem, allowUnverified = false, verifyTransparencyLog: checkTLog = false } = options;
 
   // Log warning if running without signature verification
   if (allowUnverified) {
@@ -75,7 +82,8 @@ export async function verifyAttestation(
         publicKeyBase64,
         knownMeasurements,
         vcekCertPem,
-        allowUnverified
+        allowUnverified,
+        checkTLog
       );
     }
   } catch (error) {
@@ -164,7 +172,8 @@ async function verifySevSnpAttestation(
   publicKeyBase64: string,
   knownMeasurements?: KnownMeasurements,
   vcekCertPem?: string,
-  allowUnverified = false
+  allowUnverified = false,
+  verifyTransparencyLog = false
 ): Promise<VerificationResult> {
   // Step 1: Parse the quote structure
   const quote = parseSevSnpQuote(rawQuoteBase64);
@@ -228,6 +237,21 @@ async function verifySevSnpAttestation(
       '[SEV-SNP] WARNING: No knownMeasurements provided. Launch digest not verified. ' +
         'Consider providing expected measurements for production use.'
     );
+  }
+
+  // Step 5: Verify against transparency log (if requested)
+  if (verifyTransparencyLog && quote.measurements.launch_digest) {
+    const logResult = await queryTransparencyLog(quote.measurements.launch_digest);
+    if (!logResult.verified) {
+      if (!allowUnverified) {
+        return {
+          valid: false,
+          quote,
+          error: `Transparency log verification failed: ${logResult.error}`,
+        };
+      }
+      console.warn('[SEV-SNP] Transparency log check failed but allowUnverified=true');
+    }
   }
 
   return { valid: true, quote };

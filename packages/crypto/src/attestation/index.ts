@@ -18,3 +18,7 @@ export {
   AMD_ARK_MILAN_PEM,
 } from './sevsnp-verify';
 export type { SevSnpSignatureResult } from './sevsnp-verify';
+
+// Transparency log (Sigstore Rekor)
+export { queryTransparencyLog, publishToTransparencyLog } from './transparency-log';
+export type { TransparencyLogEntry, TransparencyLogVerification } from './transparency-log';
