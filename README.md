@@ -26,7 +26,7 @@ Onera also supports private inference through Rust-based enclaves with Noise pro
 - **3-share key management** -- master key split across auth share, device share, and recovery share
 - **Private inference enclaves** -- Rust-based TEEs with Noise protocol encryption
 - **Reproducible enclave builds** -- Nix flake ensures bit-for-bit identical builds for trust verification
-- **Transparency log verification** -- enclave build measurements published to Sigstore Rekor for public auditability
+- **Transparency log verification** -- client verifies enclave build measurements against Sigstore Rekor
 - **Real-time streaming** -- WebSocket-based message streaming via Socket.io
 - **Rich text editor** -- TipTap-powered message composition
 - **Internationalization** -- multi-language support via i18next
@@ -151,7 +151,7 @@ onera/
 - **Zero-knowledge server** -- the server stores only encrypted blobs and never sees plaintext.
 - **LLM API keys** -- encrypted and stored in the browser, sent directly to providers.
 - **Reproducible enclave builds** -- the enclave binary is built with Nix (`nix build`) for bit-for-bit reproducibility. Anyone can rebuild and verify the binary matches what's running in the TEE.
-- **Transparency log** -- enclave build measurements (launch digests) are published to [Sigstore Rekor](https://rekor.sigstore.dev), providing a tamper-evident public record. Clients query Rekor to verify that the enclave they're connecting to runs a known, audited build.
+- **Transparency log** -- clients can verify enclave launch digests against [Sigstore Rekor](https://rekor.sigstore.dev), a tamper-evident public log. Publishing build measurements to Rekor during CI is planned but not yet wired up.
 
 For the full cryptographic specification, see the [whitepaper](apps/docs/content/docs/whitepaper/).
 
