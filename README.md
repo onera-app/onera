@@ -25,6 +25,8 @@ Onera also supports private inference through Rust-based enclaves with Noise pro
 - **BIP39 mnemonic recovery phrases** -- human-readable backup for your encryption keys
 - **3-share key management** -- master key split across auth share, device share, and recovery share
 - **Private inference enclaves** -- Rust-based TEEs with Noise protocol encryption
+- **Reproducible enclave builds** -- Nix flake ensures bit-for-bit identical builds for trust verification
+- **Transparency log verification** -- enclave build measurements published to Sigstore Rekor for public auditability
 - **Real-time streaming** -- WebSocket-based message streaming via Socket.io
 - **Rich text editor** -- TipTap-powered message composition
 - **Internationalization** -- multi-language support via i18next
@@ -123,9 +125,11 @@ onera/
 │   └── docs/             # Documentation site (Fumadocs + Next.js)
 ├── packages/
 │   ├── crypto/           # E2EE implementation (libsodium)
+│   │   └── src/attestation/  # Transparency log (Rekor) verification
 │   └── types/            # Shared TypeScript types
 └── infra/
     └── enclave/          # Rust private inference enclave
+        └── flake.nix     # Nix flake for reproducible builds
 ```
 
 ## Tech Stack
@@ -137,7 +141,8 @@ onera/
 | Auth | Clerk, WebAuthn (SimpleWebAuthn) |
 | Encryption | libsodium (E2EE), BIP39, Noise Protocol |
 | AI | Vercel AI SDK, multi-provider (OpenAI, Anthropic, Google, Groq, etc.) |
-| Infra | Docker, Nginx, Rust (Tokio + Axum) for enclaves |
+| Infra | Docker, Nginx, Nix (reproducible builds), Rust (Tokio + Axum) for enclaves |
+| Trust | Sigstore Rekor (transparency log), Nix (reproducible builds) |
 
 ## Security Model
 
@@ -145,6 +150,8 @@ onera/
 - **3-share key management** -- master key split across auth share (Clerk), device share (browser), and recovery share (BIP39 mnemonic).
 - **Zero-knowledge server** -- the server stores only encrypted blobs and never sees plaintext.
 - **LLM API keys** -- encrypted and stored in the browser, sent directly to providers.
+- **Reproducible enclave builds** -- the enclave binary is built with Nix (`nix build`) for bit-for-bit reproducibility. Anyone can rebuild and verify the binary matches what's running in the TEE.
+- **Transparency log** -- enclave build measurements (launch digests) are published to [Sigstore Rekor](https://rekor.sigstore.dev), providing a tamper-evident public record. Clients query Rekor to verify that the enclave they're connecting to runs a known, audited build.
 
 For the full cryptographic specification, see the [whitepaper](apps/docs/content/docs/whitepaper/).
 
