@@ -96,7 +96,7 @@ export async function queryTransparencyLog(
 export async function publishToTransparencyLog(
   launchDigest: string,
   buildManifest: string,
-  version: string,
+  _version: string,
   signingKey: string
 ): Promise<{ logIndex: number; uuid: string } | null> {
   try {
