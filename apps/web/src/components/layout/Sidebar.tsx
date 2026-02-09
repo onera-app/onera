@@ -591,11 +591,17 @@ export function Sidebar() {
               <span className="text-xs text-muted-foreground">Current plan</span>
               <span className={cn(
                 "text-xs font-medium px-2 py-0.5 rounded-full",
-                subData?.plan?.id === "enterprise"
+                subData?.plan?.id === "privacy_max"
                   ? "bg-purple-500/10 text-purple-600 dark:text-purple-400"
                   : subData?.plan?.id === "pro"
                     ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
-                    : "bg-secondary text-muted-foreground"
+                    : subData?.plan?.id === "starter"
+                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                      : subData?.plan?.id === "team"
+                        ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                        : subData?.plan?.id === "enterprise"
+                          ? "bg-purple-500/10 text-purple-600 dark:text-purple-400"
+                          : "bg-secondary text-muted-foreground"
               )}>
                 {subData?.plan?.name || "Free"}
               </span>
