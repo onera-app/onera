@@ -1,6 +1,7 @@
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { useMemo, useState, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
+import { useUser } from '@clerk/clerk-react';
 import { useUIStore } from '@/stores/uiStore';
 import { useE2EE } from '@/providers/E2EEProvider';
 import { useAuth } from '@/hooks/useAuth';
@@ -41,6 +42,7 @@ import {
   Plus,
   Pin,
   Settings,
+  Shield,
   LogOut,
 } from 'lucide-react';
 import { OneraLogo } from '@/components/ui/onera-logo';
@@ -71,6 +73,8 @@ export function Sidebar() {
   const { sidebarOpen, sidebarWidth, toggleSidebar, openSettingsModal } = useUIStore();
   const { isUnlocked } = useE2EE();
   const { user, signOut } = useAuth();
+  const { user: clerkUser } = useUser();
+  const isAdmin = (clerkUser?.publicMetadata as Record<string, unknown>)?.role === 'admin';
 
   // Fetch chats and folders
   const rawChats = useChats();
@@ -387,6 +391,17 @@ export function Sidebar() {
               <FileText className="h-4 w-4 text-muted-foreground group-hover:text-sidebar-foreground transition-colors" />
               <span className="text-[14px]">Notes</span>
             </Link>
+
+            {/* Admin */}
+            {isAdmin && (
+              <Link
+                to="/app/admin"
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-sidebar-accent active:scale-[0.98] active:bg-sidebar-accent/80 transition-all duration-150 text-sidebar-foreground/90 group"
+              >
+                <Shield className="h-4 w-4 text-muted-foreground group-hover:text-sidebar-foreground transition-colors" />
+                <span className="text-[14px]">Admin</span>
+              </Link>
+            )}
           </div>
 
           {/* Scrollable Content */}
