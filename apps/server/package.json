@@ -19,6 +19,7 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:seed-tee": "bun run src/db/seed-tee.ts",
+    "db:seed-plans": "bun run src/db/seed-plans.ts",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
