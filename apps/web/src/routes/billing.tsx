@@ -94,7 +94,19 @@ export function BillingPage() {
               </p>
             </div>
             {subscription?.status && (
-              <span className="inline-flex rounded-full bg-green-500/10 px-3 py-1 text-sm font-medium text-green-600">
+              <span
+                className={cn(
+                  "inline-flex rounded-full px-3 py-1 text-sm font-medium",
+                  subscription.status === "active"
+                    ? "bg-green-500/10 text-green-600"
+                    : subscription.status === "on_hold"
+                      ? "bg-yellow-500/10 text-yellow-600"
+                      : subscription.status === "cancelled" ||
+                          subscription.status === "expired"
+                        ? "bg-red-500/10 text-red-600"
+                        : "bg-secondary text-muted-foreground"
+                )}
+              >
                 {subscription.status}
               </span>
             )}

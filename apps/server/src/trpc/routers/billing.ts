@@ -1,15 +1,15 @@
 import { z } from "zod";
-import { router, protectedProcedure } from "../trpc";
+import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { db } from "../../db/client";
 import { plans, subscriptions, invoices, usageRecords } from "../../db/schema";
-import { eq, and, desc, sql, gte, lte } from "drizzle-orm";
+import { eq, and, desc, sql, gte, lt } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { requireDodoClient } from "../../billing/dodo";
 import { randomUUID } from "crypto";
 
 export const billingRouter = router({
-  // List available plans
-  getPlans: protectedProcedure.query(async () => {
+  // List available plans (public — pricing page is unauthenticated) (#4)
+  getPlans: publicProcedure.query(async () => {
     return db.select().from(plans).orderBy(plans.monthlyPrice);
   }),
 
@@ -113,15 +113,10 @@ export const billingRouter = router({
         payment_link: true,
       });
 
-      // Create a pending subscription record
-      const existingSub = await db
-        .select()
-        .from(subscriptions)
-        .where(eq(subscriptions.userId, ctx.user.id))
-        .limit(1);
-
-      if (existingSub.length === 0) {
-        await db.insert(subscriptions).values({
+      // Upsert subscription record to handle race conditions (#3)
+      await db
+        .insert(subscriptions)
+        .values({
           id: randomUUID(),
           userId: ctx.user.id,
           planId: plan.id,
@@ -129,19 +124,17 @@ export const billingRouter = router({
           dodoCustomerId: checkout.customer?.customer_id ?? null,
           status: "trialing",
           billingInterval: input.billingInterval,
-        });
-      } else {
-        await db
-          .update(subscriptions)
-          .set({
+        })
+        .onConflictDoUpdate({
+          target: subscriptions.userId,
+          set: {
             planId: plan.id,
             dodoSubscriptionId: checkout.subscription_id,
             dodoCustomerId: checkout.customer?.customer_id ?? null,
             billingInterval: input.billingInterval,
             updatedAt: new Date(),
-          })
-          .where(eq(subscriptions.userId, ctx.user.id));
-      }
+          },
+        });
 
       return {
         url: checkout.payment_link,
@@ -230,9 +223,10 @@ export const billingRouter = router({
     const periodStart =
       sub?.currentPeriodStart ||
       new Date(now.getFullYear(), now.getMonth(), 1);
+    // Use first day of next month for exclusive upper bound (#10)
     const periodEnd =
       sub?.currentPeriodEnd ||
-      new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
     const usage = await db
       .select({
@@ -244,7 +238,7 @@ export const billingRouter = router({
         and(
           eq(usageRecords.userId, ctx.user.id),
           gte(usageRecords.periodStart, periodStart),
-          lte(usageRecords.periodEnd, periodEnd)
+          lt(usageRecords.periodEnd, periodEnd)
         )
       )
       .groupBy(usageRecords.type);
@@ -291,7 +285,7 @@ export const billingRouter = router({
       }));
     }),
 
-  // Cancel subscription
+  // Cancel subscription (#7: don't set "cancelled" locally — let the webhook handle it)
   cancelSubscription: protectedProcedure.mutation(async ({ ctx }) => {
     const dodo = requireDodoClient();
 
@@ -313,10 +307,8 @@ export const billingRouter = router({
       cancel_at_next_billing_date: true,
     });
 
-    await db
-      .update(subscriptions)
-      .set({ status: "cancelled", updatedAt: new Date() })
-      .where(eq(subscriptions.userId, ctx.user.id));
+    // Don't set status to "cancelled" — subscription remains active until period end.
+    // The subscription.cancelled webhook will update the status when Dodo actually cancels.
 
     return { success: true };
   }),

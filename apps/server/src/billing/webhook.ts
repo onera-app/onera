@@ -12,10 +12,18 @@ interface WebhookPayload {
   data: Record<string, any>;
 }
 
+const VALID_SUBSCRIPTION_STATUSES = new Set([
+  "active",
+  "on_hold",
+  "cancelled",
+  "trialing",
+  "expired",
+]);
+
 webhookApp.post("/dodo", async (c) => {
   const rawBody = await c.req.text();
 
-  // Verify webhook signature
+  // Verify webhook signature — reject if not configured in production
   if (dodoClient && DODO_WEBHOOK_KEY) {
     const webhookHeaders = {
       "webhook-id": c.req.header("webhook-id") || "",
@@ -29,6 +37,15 @@ webhookApp.post("/dodo", async (c) => {
       console.error("Webhook verification failed:", error);
       return c.json({ error: "Invalid signature" }, 401);
     }
+  } else if (process.env.NODE_ENV === "production") {
+    console.error(
+      "DODO_PAYMENTS_WEBHOOK_SECRET not configured, rejecting webhook in production"
+    );
+    return c.json({ error: "Webhook not configured" }, 503);
+  } else {
+    console.warn(
+      "Webhook signature verification skipped — DODO_PAYMENTS_WEBHOOK_SECRET not set"
+    );
   }
 
   let payload: WebhookPayload;
@@ -111,7 +128,10 @@ async function handleSubscriptionUpdated(data: Record<string, any>) {
 
   const updates: Record<string, any> = { updatedAt: new Date() };
 
-  if (data.status) updates.status = data.status;
+  // Validate status against known values before writing (#6)
+  if (data.status && VALID_SUBSCRIPTION_STATUSES.has(data.status)) {
+    updates.status = data.status;
+  }
   if (data.current_period_start)
     updates.currentPeriodStart = new Date(data.current_period_start * 1000);
   if (data.current_period_end)
@@ -161,6 +181,14 @@ async function handlePayment(
 ) {
   const dodoPaymentId = data.payment_id || data.id;
   if (!dodoPaymentId) return;
+
+  // Idempotency check: skip if invoice already exists for this payment (#2)
+  const [existing] = await db
+    .select({ id: invoices.id })
+    .from(invoices)
+    .where(eq(invoices.dodoPaymentId, dodoPaymentId))
+    .limit(1);
+  if (existing) return;
 
   // Find the subscription for this payment
   const dodoSubId = data.subscription_id;

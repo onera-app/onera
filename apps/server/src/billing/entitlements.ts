@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { db } from "../db/client";
 import { subscriptions, plans } from "../db/schema";
 
@@ -11,48 +11,78 @@ export interface Entitlements {
   features: Record<string, boolean>;
 }
 
-// Default free plan entitlements (when no subscription exists)
-const FREE_ENTITLEMENTS: Entitlements = {
-  planId: "free",
-  planName: "Free",
-  inferenceRequestsLimit: 50,
-  storageLimitMb: 100,
-  maxEnclaves: 0,
-  features: {
-    voiceCalls: false,
-    prioritySupport: false,
-    dedicatedEnclaves: false,
-    customModels: false,
-  },
-};
-
 export async function getEntitlements(userId: string): Promise<Entitlements> {
-  const [sub] = await db
-    .select()
+  // Single JOIN query instead of two sequential queries (#14)
+  const [result] = await db
+    .select({
+      planId: plans.id,
+      planName: plans.name,
+      inferenceRequestsLimit: plans.inferenceRequestsLimit,
+      storageLimitMb: plans.storageLimitMb,
+      maxEnclaves: plans.maxEnclaves,
+      features: plans.features,
+    })
     .from(subscriptions)
-    .where(eq(subscriptions.userId, userId))
+    .innerJoin(plans, eq(subscriptions.planId, plans.id))
+    .where(
+      and(
+        eq(subscriptions.userId, userId),
+        eq(subscriptions.status, "active")
+      )
+    )
     .limit(1);
 
-  if (!sub || sub.status !== "active") {
-    return FREE_ENTITLEMENTS;
-  }
-
-  const [plan] = await db
-    .select()
-    .from(plans)
-    .where(eq(plans.id, sub.planId))
-    .limit(1);
-
-  if (!plan) {
-    return FREE_ENTITLEMENTS;
+  if (!result) {
+    // Fall back to the free plan from the database (#13)
+    return getFreePlanEntitlements();
   }
 
   return {
-    planId: plan.id,
-    planName: plan.name,
-    inferenceRequestsLimit: plan.inferenceRequestsLimit,
-    storageLimitMb: plan.storageLimitMb,
-    maxEnclaves: plan.maxEnclaves,
-    features: (plan.features as Record<string, boolean>) || {},
+    planId: result.planId,
+    planName: result.planName,
+    inferenceRequestsLimit: result.inferenceRequestsLimit,
+    storageLimitMb: result.storageLimitMb,
+    maxEnclaves: result.maxEnclaves,
+    features: (result.features as Record<string, boolean>) || {},
+  };
+}
+
+// Cache the free plan entitlements to avoid repeated DB queries
+let cachedFreeEntitlements: Entitlements | null = null;
+
+async function getFreePlanEntitlements(): Promise<Entitlements> {
+  if (cachedFreeEntitlements) return cachedFreeEntitlements;
+
+  const [freePlan] = await db
+    .select()
+    .from(plans)
+    .where(eq(plans.id, "free"))
+    .limit(1);
+
+  if (freePlan) {
+    cachedFreeEntitlements = {
+      planId: freePlan.id,
+      planName: freePlan.name,
+      inferenceRequestsLimit: freePlan.inferenceRequestsLimit,
+      storageLimitMb: freePlan.storageLimitMb,
+      maxEnclaves: freePlan.maxEnclaves,
+      features: (freePlan.features as Record<string, boolean>) || {},
+    };
+    return cachedFreeEntitlements;
+  }
+
+  // Hardcoded fallback only if the free plan doesn't exist in the database yet
+  return {
+    planId: "free",
+    planName: "Free",
+    inferenceRequestsLimit: 50,
+    storageLimitMb: 100,
+    maxEnclaves: 0,
+    features: {
+      voiceCalls: false,
+      prioritySupport: false,
+      dedicatedEnclaves: false,
+      customModels: false,
+    },
   };
 }

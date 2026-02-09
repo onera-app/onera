@@ -120,7 +120,7 @@ export function PlanCard({
           ? "Current Plan"
           : monthlyPrice === 0
             ? "Get Started"
-            : "Upgrade"}
+            : "Select Plan"}
       </Button>
     </div>
   );

@@ -4,22 +4,24 @@ import { Button } from "@/components/ui/button";
 import { InvoiceTable } from "@/components/billing/InvoiceTable";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const statusOptions = [
+type InvoiceStatus = "succeeded" | "failed" | "refunded";
+
+const statusOptions: { value: InvoiceStatus | undefined; label: string }[] = [
   { value: undefined, label: "All" },
-  { value: "succeeded" as const, label: "Succeeded" },
-  { value: "failed" as const, label: "Failed" },
-  { value: "refunded" as const, label: "Refunded" },
+  { value: "succeeded", label: "Succeeded" },
+  { value: "failed", label: "Failed" },
+  { value: "refunded", label: "Refunded" },
 ];
 
 export function AdminInvoicesPage() {
-  const [statusFilter, setStatusFilter] = useState<string | undefined>();
+  const [statusFilter, setStatusFilter] = useState<InvoiceStatus | undefined>();
   const [page, setPage] = useState(0);
   const limit = 20;
 
   const { data, isLoading } = trpc.admin.listInvoices.useQuery({
     limit,
     offset: page * limit,
-    status: statusFilter as any,
+    status: statusFilter,
   });
 
   const totalPages = data ? Math.ceil(data.totalCount / limit) : 0;

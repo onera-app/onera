@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -7,13 +7,24 @@ import { cn } from "@/lib/utils";
 
 export function AdminUsersPage() {
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(0);
   const limit = 20;
+  const debounceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // Debounce search input (#17)
+  useEffect(() => {
+    debounceTimer.current = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(0);
+    }, 300);
+    return () => clearTimeout(debounceTimer.current);
+  }, [search]);
 
   const { data, isLoading } = trpc.admin.listUsers.useQuery({
     limit,
     offset: page * limit,
-    search: search || undefined,
+    search: debouncedSearch || undefined,
   });
 
   const totalPages = data ? Math.ceil(data.totalCount / limit) : 0;
@@ -31,10 +42,7 @@ export function AdminUsersPage() {
           type="text"
           placeholder="Search by name or email..."
           value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(0);
-          }}
+          onChange={(e) => setSearch(e.target.value)}
           className="w-full rounded-lg border border-border bg-background pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
@@ -78,7 +86,7 @@ export function AdminUsersPage() {
                           />
                         ) : (
                           <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center text-xs font-medium">
-                            {user.name[0]}
+                            {user.name?.[0] || "?"}
                           </div>
                         )}
                         <div>

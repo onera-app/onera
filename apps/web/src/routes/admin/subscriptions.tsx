@@ -4,23 +4,26 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const statusOptions = [
+type SubscriptionStatus = "active" | "on_hold" | "cancelled" | "trialing" | "expired";
+
+const statusOptions: { value: SubscriptionStatus | undefined; label: string }[] = [
   { value: undefined, label: "All" },
-  { value: "active" as const, label: "Active" },
-  { value: "on_hold" as const, label: "On Hold" },
-  { value: "cancelled" as const, label: "Cancelled" },
-  { value: "trialing" as const, label: "Trialing" },
+  { value: "active", label: "Active" },
+  { value: "on_hold", label: "On Hold" },
+  { value: "cancelled", label: "Cancelled" },
+  { value: "trialing", label: "Trialing" },
+  { value: "expired", label: "Expired" },
 ];
 
 export function AdminSubscriptionsPage() {
-  const [statusFilter, setStatusFilter] = useState<string | undefined>();
+  const [statusFilter, setStatusFilter] = useState<SubscriptionStatus | undefined>();
   const [page, setPage] = useState(0);
   const limit = 20;
 
   const { data, isLoading } = trpc.admin.listSubscriptions.useQuery({
     limit,
     offset: page * limit,
-    status: statusFilter as any,
+    status: statusFilter,
   });
 
   const totalPages = data ? Math.ceil(data.totalCount / limit) : 0;

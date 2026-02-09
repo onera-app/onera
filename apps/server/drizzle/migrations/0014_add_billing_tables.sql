@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS "invoices" (
 
 CREATE INDEX IF NOT EXISTS "idx_invoices_user_id" ON "invoices" USING btree ("user_id");
 CREATE INDEX IF NOT EXISTS "idx_invoices_subscription_id" ON "invoices" USING btree ("subscription_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "idx_invoices_dodo_payment_id" ON "invoices" USING btree ("dodo_payment_id") WHERE "dodo_payment_id" IS NOT NULL;
 
 -- Usage Records table
 CREATE TABLE IF NOT EXISTS "usage_records" (

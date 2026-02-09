@@ -7,7 +7,7 @@ import {
   invoices,
   usageRecords,
 } from "../../db/schema";
-import { eq, desc, sql, and, gte, lte, inArray } from "drizzle-orm";
+import { eq, desc, sql, and, gte, lt, inArray } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { clerkClient } from "../../auth/clerk";
 import { randomUUID } from "crypto";
@@ -101,9 +101,10 @@ export const adminRouter = router({
       const periodStart =
         sub?.currentPeriodStart ||
         new Date(now.getFullYear(), now.getMonth(), 1);
+      // Use first day of next month for exclusive upper bound (#10)
       const periodEnd =
         sub?.currentPeriodEnd ||
-        new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
       const usage = await db
         .select({
@@ -115,7 +116,7 @@ export const adminRouter = router({
           and(
             eq(usageRecords.userId, input.userId),
             gte(usageRecords.periodStart, periodStart),
-            lte(usageRecords.periodEnd, periodEnd)
+            lt(usageRecords.periodEnd, periodEnd)
           )
         )
         .groupBy(usageRecords.type);
@@ -166,6 +167,16 @@ export const adminRouter = router({
       })
     )
     .mutation(async ({ input }) => {
+      // Validate that the user exists in Clerk (#8)
+      try {
+        await clerkClient.users.getUser(input.userId);
+      } catch {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found in Clerk",
+        });
+      }
+
       const [plan] = await db
         .select()
         .from(plans)
