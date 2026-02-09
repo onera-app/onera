@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import { db } from "../db/client";
 import { subscriptions, plans } from "../db/schema";
 
@@ -27,7 +27,7 @@ export async function getEntitlements(userId: string): Promise<Entitlements> {
     .where(
       and(
         eq(subscriptions.userId, userId),
-        eq(subscriptions.status, "active")
+        inArray(subscriptions.status, ["active", "trialing"])
       )
     )
     .limit(1);

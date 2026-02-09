@@ -137,6 +137,9 @@ export function useDirectChat({
   const releaseEnclaveMutation = trpc.enclaves.releaseEnclave.useMutation();
   const heartbeatMutation = trpc.enclaves.heartbeat.useMutation();
 
+  // Pre-flight inference allowance check
+  const checkAllowance = trpc.billing.checkInferenceAllowance.useMutation();
+
   // Stable refs for callbacks to avoid recreating chatOptions on every render
   const onFinishRef = useRef(onFinish);
   const onErrorRef = useRef(onError);
@@ -326,6 +329,30 @@ export function useDirectChat({
   // Use AI SDK's useChat with our transport
   const chat = useChat(chatOptions);
 
+  // Pre-flight: check inference allowance before sending/regenerating
+  const checkAllowanceRef = useRef(checkAllowance);
+  useEffect(() => { checkAllowanceRef.current = checkAllowance; });
+
+  const enforceAllowance = useCallback(async () => {
+    try {
+      const allowance = await checkAllowanceRef.current.mutateAsync();
+      if (!allowance.allowed) {
+        const error = new Error(
+          allowance.remaining === 0
+            ? `You've reached your ${allowance.limit} inference request limit for this period. Upgrade your plan for more.`
+            : 'Inference not available on your current plan.'
+        );
+        (error as any).upgradeRequired = true;
+        onErrorRef.current?.(error);
+        throw error;
+      }
+    } catch (err) {
+      if ((err as any).upgradeRequired) throw err;
+      // Network/server errors should not block inference — fail open
+      console.warn('Allowance check failed, proceeding:', err);
+    }
+  }, []);
+
   // Custom sendMessage that validates state and supports multimodal content
   const sendMessage = useCallback(
     async (content: SendMessageInput) => {
@@ -344,6 +371,8 @@ export function useDirectChat({
         onErrorRef.current?.(error);
         throw error;
       }
+
+      await enforceAllowance();
 
       // Handle string input (text only)
       if (typeof content === 'string') {
@@ -367,7 +396,7 @@ export function useDirectChat({
         }),
       });
     },
-    [isReady, isUnlocked, selectedModelId, chat.sendMessage]
+    [isReady, isUnlocked, selectedModelId, chat.sendMessage, enforceAllowance]
   );
 
   // Regenerate the last assistant message
@@ -388,6 +417,8 @@ export function useDirectChat({
         onErrorRef.current?.(error);
         throw error;
       }
+
+      await enforceAllowance();
 
       const messages = chat.messages;
       if (messages.length === 0) {
@@ -430,7 +461,7 @@ export function useDirectChat({
       // Re-send the user message to get a new response
       await chat.sendMessage({ text: userContent });
     },
-    [isReady, isUnlocked, selectedModelId, chat]
+    [isReady, isUnlocked, selectedModelId, chat, enforceAllowance]
   );
 
   return {

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { eq, and, isNull, lt, sql } from 'drizzle-orm';
-import { router, protectedProcedure } from '../trpc';
+import { router, protectedProcedure, entitledProcedure } from '../trpc';
 import { db, schema } from '../../db/client';
 import { randomUUID } from 'crypto';
 
@@ -70,7 +70,11 @@ export const enclavesRouter = router({
    * List available private inference models.
    * Queries enclaves directly for their available models.
    */
-  listModels: protectedProcedure.query(async () => {
+  listModels: entitledProcedure.query(async ({ ctx }) => {
+    // Filter large models if plan doesn't include them
+    const largeModelPattern = /\b(70b|72b|110b|180b|405b|671b)\b/i;
+    const filterLarge = !ctx.entitlements.features.largeModels;
+
     // First try: get models from server_models table (preferred, avoids network calls)
     const dbModels = await db
       .select({
@@ -89,10 +93,14 @@ export const enclavesRouter = router({
       );
 
     if (dbModels.length > 0) {
-      return dbModels.map((m) => ({
+      const models = dbModels.map((m) => ({
         ...m,
         provider: 'onera-private' as const,
       }));
+      if (filterLarge) {
+        return models.filter((m) => !largeModelPattern.test(m.name) && !largeModelPattern.test(m.displayName));
+      }
+      return models;
     }
 
     // Fallback: query enclaves directly (existing behavior)
@@ -139,6 +147,10 @@ export const enclavesRouter = router({
       }
     }
 
+    if (filterLarge) {
+      return allModels.filter((m) => !largeModelPattern.test(m.name) && !largeModelPattern.test(m.displayName));
+    }
+
     return allModels;
   }),
 
@@ -147,7 +159,7 @@ export const enclavesRouter = router({
    * Now that models come directly from enclaves, we just need to find
    * a ready enclave with available capacity.
    */
-  requestEnclave: protectedProcedure
+  requestEnclave: entitledProcedure
     .input(
       z.object({
         modelId: z.string(),
@@ -158,8 +170,34 @@ export const enclavesRouter = router({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user.id;
       const { tier, sessionId } = input;
-      // modelId is passed but we don't validate it against DB anymore
-      // since models come directly from enclaves
+
+      // Check feature entitlement for dedicated enclaves
+      if (tier === 'dedicated' && !ctx.entitlements.features.dedicatedEnclaves) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Dedicated enclaves require a Pro plan or higher. Please upgrade.',
+        });
+      }
+
+      // Check maxEnclaves limit for dedicated tier
+      if (tier === 'dedicated' && ctx.entitlements.maxEnclaves !== -1) {
+        const activeAssignments = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(enclaveAssignments)
+          .where(
+            and(
+              eq(enclaveAssignments.userId, userId),
+              isNull(enclaveAssignments.releasedAt)
+            )
+          );
+        const currentCount = Number(activeAssignments[0]?.count) || 0;
+        if (currentCount >= ctx.entitlements.maxEnclaves) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: `You've reached your limit of ${ctx.entitlements.maxEnclaves} dedicated enclaves.`,
+          });
+        }
+      }
 
       let enclave;
       const assignmentId = randomUUID();
