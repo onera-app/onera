@@ -14,6 +14,7 @@ import { LandingPage } from './routes/landing';
 import { PrivacyPage } from './routes/privacy';
 import { TermsPage } from './routes/terms';
 import { PricingPage } from './routes/pricing';
+import { BillingPage } from './routes/billing';
 
 // Root route with layout
 const rootRoute = createRootRoute({
@@ -101,6 +102,13 @@ const promptsRoute = createRoute({
   component: PromptsPage,
 });
 
+// Billing settings route - /app/billing
+const billingRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/billing',
+  component: BillingPage,
+});
+
 // Build the route tree
 export const routeTree = rootRoute.addChildren([
   landingRoute,
@@ -109,5 +117,5 @@ export const routeTree = rootRoute.addChildren([
   pricingRoute,
   authRoute,
   ssoCallbackRoute,
-  appRoute.addChildren([homeRoute, chatRoute, notesRoute, promptsRoute]),
+  appRoute.addChildren([homeRoute, chatRoute, notesRoute, promptsRoute, billingRoute]),
 ]);
