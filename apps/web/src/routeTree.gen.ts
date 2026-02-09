@@ -15,6 +15,11 @@ import { PrivacyPage } from './routes/privacy';
 import { TermsPage } from './routes/terms';
 import { PricingPage } from './routes/pricing';
 import { BillingPage } from './routes/billing';
+import { AdminLayout } from './components/admin/AdminLayout';
+import { AdminDashboard } from './routes/admin/index';
+import { AdminUsersPage } from './routes/admin/users';
+import { AdminSubscriptionsPage } from './routes/admin/subscriptions';
+import { AdminInvoicesPage } from './routes/admin/invoices';
 
 // Root route with layout
 const rootRoute = createRootRoute({
@@ -109,6 +114,41 @@ const billingRoute = createRoute({
   component: BillingPage,
 });
 
+// Admin layout route - /app/admin
+const adminLayoutRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/admin',
+  component: AdminLayout,
+});
+
+// Admin dashboard route - /app/admin/
+const adminDashboardRoute = createRoute({
+  getParentRoute: () => adminLayoutRoute,
+  path: '/',
+  component: AdminDashboard,
+});
+
+// Admin users route - /app/admin/users
+const adminUsersRoute = createRoute({
+  getParentRoute: () => adminLayoutRoute,
+  path: '/users',
+  component: AdminUsersPage,
+});
+
+// Admin subscriptions route - /app/admin/subscriptions
+const adminSubscriptionsRoute = createRoute({
+  getParentRoute: () => adminLayoutRoute,
+  path: '/subscriptions',
+  component: AdminSubscriptionsPage,
+});
+
+// Admin invoices route - /app/admin/invoices
+const adminInvoicesRoute = createRoute({
+  getParentRoute: () => adminLayoutRoute,
+  path: '/invoices',
+  component: AdminInvoicesPage,
+});
+
 // Build the route tree
 export const routeTree = rootRoute.addChildren([
   landingRoute,
@@ -117,5 +157,17 @@ export const routeTree = rootRoute.addChildren([
   pricingRoute,
   authRoute,
   ssoCallbackRoute,
-  appRoute.addChildren([homeRoute, chatRoute, notesRoute, promptsRoute, billingRoute]),
+  appRoute.addChildren([
+    homeRoute,
+    chatRoute,
+    notesRoute,
+    promptsRoute,
+    billingRoute,
+    adminLayoutRoute.addChildren([
+      adminDashboardRoute,
+      adminUsersRoute,
+      adminSubscriptionsRoute,
+      adminInvoicesRoute,
+    ]),
+  ]),
 ]);
