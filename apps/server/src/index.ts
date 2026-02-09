@@ -7,6 +7,7 @@ import { appRouter } from "./trpc";
 import { createContext } from "./trpc/context";
 import { initWebSocket } from "./websocket";
 import { startStaleAssignmentCleanup } from "./jobs/cleanupStaleAssignments";
+import { webhookApp } from "./billing/webhook";
 
 const app = new Hono();
 
@@ -54,6 +55,9 @@ app.get("/.well-known/apple-app-site-association", (c) => {
     "Content-Type": "application/json",
   });
 });
+
+// Dodo Payments webhook endpoint (no auth — uses signature verification)
+app.route("/webhooks", webhookApp);
 
 // Note: Authentication is handled by Clerk (https://clerk.com)
 // JWT tokens are verified in the tRPC context via the Authorization header
