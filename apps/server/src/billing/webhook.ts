@@ -1,7 +1,7 @@
 import { Hono } from "hono";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import { db } from "../db/client";
-import { subscriptions, invoices } from "../db/schema";
+import { subscriptions, invoices, plans } from "../db/schema";
 import { dodoClient, DODO_WEBHOOK_KEY } from "./dodo";
 import { randomUUID } from "crypto";
 
@@ -18,6 +18,7 @@ const VALID_SUBSCRIPTION_STATUSES = new Set([
   "cancelled",
   "trialing",
   "expired",
+  "pending",
 ]);
 
 webhookApp.post("/dodo", async (c) => {
@@ -107,18 +108,28 @@ async function handleSubscriptionActive(data: Record<string, any>) {
   const dodoSubId = data.subscription_id || data.id;
   if (!dodoSubId) return;
 
+  const updates: Record<string, any> = {
+    status: "active",
+    updatedAt: new Date(),
+  };
+
+  // Set planId from metadata — this is where the plan actually upgrades
+  if (data.metadata?.planId) {
+    updates.planId = data.metadata.planId;
+  }
+  if (data.metadata?.billingInterval) {
+    updates.billingInterval = data.metadata.billingInterval;
+  }
+  if (data.current_period_start) {
+    updates.currentPeriodStart = new Date(data.current_period_start * 1000);
+  }
+  if (data.current_period_end) {
+    updates.currentPeriodEnd = new Date(data.current_period_end * 1000);
+  }
+
   await db
     .update(subscriptions)
-    .set({
-      status: "active",
-      currentPeriodStart: data.current_period_start
-        ? new Date(data.current_period_start * 1000)
-        : undefined,
-      currentPeriodEnd: data.current_period_end
-        ? new Date(data.current_period_end * 1000)
-        : undefined,
-      updatedAt: new Date(),
-    })
+    .set(updates)
     .where(eq(subscriptions.dodoSubscriptionId, dodoSubId));
 }
 
@@ -136,6 +147,16 @@ async function handleSubscriptionUpdated(data: Record<string, any>) {
     updates.currentPeriodStart = new Date(data.current_period_start * 1000);
   if (data.current_period_end)
     updates.currentPeriodEnd = new Date(data.current_period_end * 1000);
+
+  // Resolve planId from metadata or product_id (for plan changes)
+  if (data.metadata?.planId) {
+    updates.planId = data.metadata.planId;
+  } else if (data.product_id) {
+    const plan = await lookupPlanByDodoProductId(data.product_id);
+    if (plan) {
+      updates.planId = plan.id;
+    }
+  }
 
   await db
     .update(subscriptions)
@@ -230,4 +251,22 @@ async function handlePayment(
     description: data.description || `Payment ${status}`,
     paidAt: status === "succeeded" ? new Date() : null,
   });
+}
+
+/**
+ * Reverse-lookup a plan by its Dodo price ID (monthly or yearly).
+ * Used by webhooks after plan changes where metadata isn't available.
+ */
+async function lookupPlanByDodoProductId(productId: string) {
+  const [plan] = await db
+    .select({ id: plans.id })
+    .from(plans)
+    .where(
+      or(
+        eq(plans.dodoPriceIdMonthly, productId),
+        eq(plans.dodoPriceIdYearly, productId)
+      )
+    )
+    .limit(1);
+  return plan || null;
 }

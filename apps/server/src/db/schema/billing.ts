@@ -41,7 +41,7 @@ export const subscriptions = pgTable(
     dodoCustomerId: text("dodo_customer_id"),
     status: text("status")
       .notNull()
-      .$type<"active" | "on_hold" | "cancelled" | "trialing" | "expired">(),
+      .$type<"active" | "on_hold" | "cancelled" | "trialing" | "expired" | "pending">(),
     billingInterval: text("billing_interval")
       .notNull()
       .$type<"monthly" | "yearly" | "none">(),

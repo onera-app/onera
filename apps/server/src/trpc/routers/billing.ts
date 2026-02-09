@@ -110,6 +110,8 @@ export const billingRouter = router({
         });
       }
 
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+
       // Create Dodo subscription checkout
       // Billing address is collected on the Dodo checkout page; we pass a minimal default
       const checkout = await dodo.subscriptions.create({
@@ -128,24 +130,25 @@ export const billingRouter = router({
           billingInterval: input.billingInterval,
         },
         payment_link: true,
+        return_url: `${frontendUrl}/app/billing`,
       });
 
-      // Upsert subscription record to handle race conditions (#3)
+      // Store the Dodo subscription ID so the webhook can find this user,
+      // but do NOT update planId — that happens on subscription.active webhook
       await db
         .insert(subscriptions)
         .values({
           id: randomUUID(),
           userId: ctx.user.id,
-          planId: plan.id,
+          planId: "free",
           dodoSubscriptionId: checkout.subscription_id,
           dodoCustomerId: checkout.customer?.customer_id ?? null,
-          status: "trialing",
+          status: "pending",
           billingInterval: input.billingInterval,
         })
         .onConflictDoUpdate({
           target: subscriptions.userId,
           set: {
-            planId: plan.id,
             dodoSubscriptionId: checkout.subscription_id,
             dodoCustomerId: checkout.customer?.customer_id ?? null,
             billingInterval: input.billingInterval,
@@ -208,21 +211,12 @@ export const billingRouter = router({
       }
 
       // Use Dodo's changePlan API for plan upgrades/downgrades
+      // The actual planId update happens via the subscription.updated webhook
       await dodo.subscriptions.changePlan(currentSub.dodoSubscriptionId, {
         product_id: priceId,
         quantity: 1,
         proration_billing_mode: "prorated_immediately",
       });
-
-      // Update local record
-      await db
-        .update(subscriptions)
-        .set({
-          planId: targetPlan.id,
-          billingInterval: input.billingInterval,
-          updatedAt: new Date(),
-        })
-        .where(eq(subscriptions.userId, ctx.user.id));
 
       return { success: true };
     }),
