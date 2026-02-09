@@ -14,6 +14,7 @@ import { promptsRouter } from "./routers/prompts";
 import { enclavesRouter } from "./routers/enclaves";
 import { modelServersRouter } from "./routers/modelServers";
 import { billingRouter } from "./routers/billing";
+import { adminRouter } from "./routers/admin";
 
 // Main app router
 export const appRouter = router({
@@ -30,6 +31,7 @@ export const appRouter = router({
   enclaves: enclavesRouter,
   modelServers: modelServersRouter,
   billing: billingRouter,
+  admin: adminRouter,
 });
 
 export type AppRouter = typeof appRouter;
