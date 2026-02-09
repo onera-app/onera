@@ -21,6 +21,7 @@ export const plans = pgTable("plans", {
   storageLimitMb: integer("storage_limit_mb").notNull(),
   maxEnclaves: integer("max_enclaves").notNull(),
   features: jsonb("features").$type<Record<string, boolean>>().notNull(),
+  tier: integer("tier").notNull().default(0), // 0=free, 1=starter, 2=pro, 3=privacy_max, 4=team
   dodoPriceIdMonthly: text("dodo_price_id_monthly"),
   dodoPriceIdYearly: text("dodo_price_id_yearly"),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),

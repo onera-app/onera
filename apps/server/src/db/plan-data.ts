@@ -3,6 +3,7 @@ export const planData = [
     id: "free",
     name: "Free",
     description: "Try encrypted AI chat",
+    tier: 0,
     monthlyPrice: 0,
     yearlyPrice: 0,
     inferenceRequestsLimit: 25,
@@ -26,6 +27,7 @@ export const planData = [
     id: "starter",
     name: "Starter",
     description: "Private AI for everyday use",
+    tier: 1,
     monthlyPrice: 1200, // $12/mo
     yearlyPrice: 12000, // $120/yr ($10/mo)
     inferenceRequestsLimit: 500,
@@ -49,6 +51,7 @@ export const planData = [
     id: "pro",
     name: "Pro",
     description: "Serious privacy for serious work",
+    tier: 2,
     monthlyPrice: 2900, // $29/mo
     yearlyPrice: 27600, // $276/yr ($23/mo)
     inferenceRequestsLimit: 5000,
@@ -72,6 +75,7 @@ export const planData = [
     id: "privacy_max",
     name: "Privacy Max",
     description: "Maximum privacy, zero compromise",
+    tier: 3,
     monthlyPrice: 4900, // $49/mo
     yearlyPrice: 46800, // $468/yr ($39/mo)
     inferenceRequestsLimit: -1, // unlimited
@@ -95,6 +99,7 @@ export const planData = [
     id: "team",
     name: "Team",
     description: "Encrypted AI for your organization",
+    tier: 4,
     monthlyPrice: 3500, // $35/user/mo
     yearlyPrice: 39600, // $396/user/yr ($33/user/mo)
     inferenceRequestsLimit: 5000, // per user, pooled

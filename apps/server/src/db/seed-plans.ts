@@ -14,6 +14,7 @@ async function seed() {
         set: {
           name: plan.name,
           description: plan.description,
+          tier: plan.tier,
           monthlyPrice: plan.monthlyPrice,
           yearlyPrice: plan.yearlyPrice,
           inferenceRequestsLimit: plan.inferenceRequestsLimit,

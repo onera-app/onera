@@ -120,6 +120,13 @@
       "when": 1739232000000,
       "tag": "0016_add_pending_downgrade_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1739318400000,
+      "tag": "0017_add_plan_tier",
+      "breakpoints": true
     }
   ]
 }

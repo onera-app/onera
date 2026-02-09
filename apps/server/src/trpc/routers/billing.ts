@@ -244,9 +244,9 @@ export const billingRouter = router({
         .where(eq(plans.id, currentSub.planId))
         .limit(1);
 
-      const currentPrice = currentPlan?.monthlyPrice ?? 0;
-      const targetPrice = targetPlan.monthlyPrice;
-      const isDowngrade = targetPrice < currentPrice;
+      const currentTier = currentPlan?.tier ?? 0;
+      const targetTier = targetPlan.tier;
+      const isDowngrade = targetTier < currentTier;
 
       if (isDowngrade) {
         // Downgrade: schedule for end of billing period, don't change Dodo plan yet
