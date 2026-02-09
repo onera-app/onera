@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@clerk/clerk-react";
 import { trpc } from "@/lib/trpc";
 import { PlanCard } from "@/components/billing/PlanCard";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -48,7 +49,7 @@ export function PricingPage() {
 
   return (
     <div className="min-h-screen bg-background px-4 py-16 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-7xl">
         <div className="text-center mb-12">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
             Simple, transparent pricing
@@ -85,28 +86,63 @@ export function PricingPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {plans?.map((plan) => (
-            <PlanCard
-              key={plan.id}
-              name={plan.name}
-              description={plan.description}
-              monthlyPrice={plan.monthlyPrice}
-              yearlyPrice={plan.yearlyPrice}
-              features={plan.features as Record<string, boolean>}
-              limits={{
-                inferenceRequests: plan.inferenceRequestsLimit,
-                storageMb: plan.storageLimitMb,
-                maxEnclaves: plan.maxEnclaves,
-              }}
-              isCurrentPlan={currentSub?.plan?.id === plan.id}
-              isPopular={plan.id === "pro"}
-              billingInterval={billingInterval}
-              onSelect={() => handleSelectPlan(plan.id)}
-              loading={createCheckout.isPending}
-            />
-          ))}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {plans
+            ?.filter((plan) => plan.id !== "team")
+            .map((plan) => (
+              <PlanCard
+                key={plan.id}
+                name={plan.name}
+                description={plan.description}
+                monthlyPrice={plan.monthlyPrice}
+                yearlyPrice={plan.yearlyPrice}
+                features={plan.features as Record<string, boolean>}
+                limits={{
+                  inferenceRequests: plan.inferenceRequestsLimit,
+                  storageMb: plan.storageLimitMb,
+                  maxEnclaves: plan.maxEnclaves,
+                }}
+                isCurrentPlan={currentSub?.plan?.id === plan.id}
+                isPopular={plan.id === "pro"}
+                billingInterval={billingInterval}
+                onSelect={() => handleSelectPlan(plan.id)}
+                loading={createCheckout.isPending}
+              />
+            ))}
         </div>
+
+        {/* Team plan callout */}
+        {plans?.find((p) => p.id === "team") && (
+          <div className="mt-10 rounded-2xl border border-border p-6 sm:p-8 text-center max-w-2xl mx-auto">
+            <h3 className="text-xl font-semibold">Team</h3>
+            <p className="mt-2 text-muted-foreground">
+              Encrypted AI for your organization. SSO, admin controls, pooled usage.
+            </p>
+            <p className="mt-3">
+              <span className="text-3xl font-bold">
+                {billingInterval === "yearly" ? "$33" : "$35"}
+              </span>
+              <span className="text-muted-foreground">/user/mo</span>
+              {billingInterval === "yearly" && (
+                <span className="ml-2 text-sm text-muted-foreground">
+                  billed yearly
+                </span>
+              )}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Minimum 5 seats
+            </p>
+            <Button
+              className="mt-4"
+              variant="outline"
+              onClick={() => {
+                window.location.href = "mailto:team@onera.chat?subject=Team Plan Inquiry";
+              }}
+            >
+              Contact Us
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
