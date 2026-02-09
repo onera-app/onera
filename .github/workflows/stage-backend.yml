@@ -114,3 +114,15 @@ jobs:
               WEBAUTHN_RP_ID="${{ env.WEBAUTHN_RP_ID }}" \
               WEBAUTHN_ORIGIN="${{ env.WEBAUTHN_ORIGIN }}" \
               WEBAUTHN_RP_NAME="${{ env.WEBAUTHN_RP_NAME }}"
+
+      - name: Configure Dodo Payments settings
+        env:
+          DODO_API_KEY: ${{ secrets.DODO_PAYMENTS_API_KEY_STAGE }}
+          DODO_WEBHOOK_SECRET: ${{ secrets.DODO_PAYMENTS_WEBHOOK_SECRET_STAGE }}
+        run: |
+          az webapp config appsettings set \
+            --name onera-backend-stage \
+            --resource-group onera \
+            --settings \
+              DODO_PAYMENTS_API_KEY="$DODO_API_KEY" \
+              DODO_PAYMENTS_WEBHOOK_SECRET="$DODO_WEBHOOK_SECRET"
