@@ -35,8 +35,8 @@ const seedPlans = [
       dedicatedEnclaves: true,
       customModels: false,
     },
-    dodoPriceIdMonthly: null, // Set after creating products in Dodo dashboard
-    dodoPriceIdYearly: null,
+    dodoPriceIdMonthly: "pdt_0NY6NccyasPmnImIkbocM",
+    dodoPriceIdYearly: "pdt_0NY6Nj9gnxfrsiUrxrlI1",
   },
   {
     id: "enterprise",
@@ -53,8 +53,8 @@ const seedPlans = [
       dedicatedEnclaves: true,
       customModels: true,
     },
-    dodoPriceIdMonthly: null,
-    dodoPriceIdYearly: null,
+    dodoPriceIdMonthly: "pdt_0NY6Nqvklb7ueLbSB4FCz",
+    dodoPriceIdYearly: "pdt_0NY6O27jrS1W7Xfz9PLma",
   },
 ];
 
@@ -76,6 +76,8 @@ async function seed() {
           storageLimitMb: plan.storageLimitMb,
           maxEnclaves: plan.maxEnclaves,
           features: plan.features,
+          dodoPriceIdMonthly: plan.dodoPriceIdMonthly,
+          dodoPriceIdYearly: plan.dodoPriceIdYearly,
           updatedAt: new Date(),
         },
       });
