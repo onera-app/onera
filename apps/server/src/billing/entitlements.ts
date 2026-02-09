@@ -75,14 +75,18 @@ async function getFreePlanEntitlements(): Promise<Entitlements> {
   return {
     planId: "free",
     planName: "Free",
-    inferenceRequestsLimit: 50,
+    inferenceRequestsLimit: 25,
     storageLimitMb: 100,
     maxEnclaves: 0,
     features: {
       voiceCalls: false,
+      voiceInput: false,
       prioritySupport: false,
       dedicatedEnclaves: false,
       customModels: false,
+      customEndpoints: false,
+      largeModels: false,
+      priorityQueue: false,
     },
   };
 }
