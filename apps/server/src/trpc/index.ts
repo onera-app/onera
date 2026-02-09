@@ -1,4 +1,4 @@
-export { router, publicProcedure, protectedProcedure } from "./trpc";
+export { router, publicProcedure, protectedProcedure, adminProcedure } from "./trpc";
 
 // Import routers
 import { router } from "./trpc";
@@ -13,6 +13,7 @@ import { credentialsRouter } from "./routers/credentials";
 import { promptsRouter } from "./routers/prompts";
 import { enclavesRouter } from "./routers/enclaves";
 import { modelServersRouter } from "./routers/modelServers";
+import { billingRouter } from "./routers/billing";
 
 // Main app router
 export const appRouter = router({
@@ -28,6 +29,7 @@ export const appRouter = router({
   prompts: promptsRouter,
   enclaves: enclavesRouter,
   modelServers: modelServersRouter,
+  billing: billingRouter,
 });
 
 export type AppRouter = typeof appRouter;
