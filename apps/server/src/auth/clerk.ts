@@ -131,18 +131,36 @@ export async function authenticateRequest(
     return null;
   }
 
-  // For most operations, we can use the JWT claims directly
-  // Only fetch full user if we need metadata
+  // If JWT has email, use claims directly (fast path)
+  if (payload.email) {
+    return {
+      id: payload.sub,
+      email: payload.email,
+      firstName: payload.first_name || null,
+      lastName: payload.last_name || null,
+      name: [payload.first_name, payload.last_name].filter(Boolean).join(" ") ||
+            payload.email.split("@")[0] ||
+            "User",
+      imageUrl: payload.image_url || null,
+      emailVerified: payload.email_verified || false,
+    };
+  }
+
+  // JWT missing email claim — fetch full user from Clerk API
+  const fullUser = await getClerkUser(payload.sub);
+  if (fullUser) {
+    return fullUser;
+  }
+
+  // Last resort: return user without email (non-billing operations will still work)
   return {
     id: payload.sub,
-    email: payload.email || "",
+    email: "",
     firstName: payload.first_name || null,
     lastName: payload.last_name || null,
-    name: [payload.first_name, payload.last_name].filter(Boolean).join(" ") ||
-          payload.email?.split("@")[0] ||
-          "User",
+    name: [payload.first_name, payload.last_name].filter(Boolean).join(" ") || "User",
     imageUrl: payload.image_url || null,
-    emailVerified: payload.email_verified || false,
+    emailVerified: false,
   };
 }
 

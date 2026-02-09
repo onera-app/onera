@@ -60,11 +60,12 @@ export function BillingPage() {
   const subscription = subData?.subscription;
   const hasActiveSubscription =
     subscription && (subscription.status === "active" || subscription.status === "trialing");
+  const hasDodoSubscription = hasActiveSubscription && !!subscription.dodoSubscriptionId;
 
   const handlePlanAction = (planId: string) => {
     if (planId === "free") return;
 
-    if (hasActiveSubscription) {
+    if (hasDodoSubscription) {
       changePlan.mutate({ planId, billingInterval });
     } else {
       createCheckout.mutate({ planId, billingInterval });

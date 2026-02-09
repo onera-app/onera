@@ -91,6 +91,13 @@ export const billingRouter = router({
         });
       }
 
+      if (!ctx.user.email) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "No email address found on your account. Please add an email in your profile settings.",
+        });
+      }
+
       const priceId =
         input.billingInterval === "monthly"
           ? plan.dodoPriceIdMonthly
