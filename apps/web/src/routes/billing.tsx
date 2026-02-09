@@ -73,7 +73,7 @@ export function BillingPage() {
 
   return (
     <div className="h-full overflow-y-auto">
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-10">
+    <div className="px-6 sm:px-8 lg:px-12 py-8 space-y-10">
       <div>
         <h1 className="text-2xl font-bold">Billing</h1>
         <p className="text-muted-foreground mt-1">
