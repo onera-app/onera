@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware';
 export type Theme = 'light' | 'dark' | 'oled-dark' | 'system';
 export type ChatDensity = 'compact' | 'normal' | 'comfortable';
 
-export type SettingsTab = 'general' | 'interface' | 'connections' | 'tools' | 'audio' | 'data' | 'account' | 'encryption' | 'about';
+export type SettingsTab = 'general' | 'interface' | 'connections' | 'tools' | 'audio' | 'data' | 'account' | 'billing' | 'encryption' | 'about';
 
 interface UIState {
   // Theme & appearance

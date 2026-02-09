@@ -16,6 +16,7 @@ import {
   Volume2,
   Database,
   User,
+  CreditCard,
   Lock,
   Info,
   Wrench,
@@ -34,6 +35,7 @@ import { DataTab } from '../tabs/DataTab';
 import { AccountTab } from '../tabs/AccountTab';
 import { DevicesTab } from '../tabs/DevicesTab';
 import { EncryptionTab } from '../tabs/EncryptionTab';
+import { BillingTab } from '../tabs/BillingTab';
 import { AboutTab } from '../tabs/AboutTab';
 
 type TabId =
@@ -44,6 +46,7 @@ type TabId =
   | 'audio'
   | 'data'
   | 'account'
+  | 'billing'
   | 'devices'
   | 'encryption'
   | 'about';
@@ -105,6 +108,13 @@ const tabs: Tab[] = [
     icon: User,
     keywords: ['profile', 'name', 'email', 'password', 'avatar'],
     component: AccountTab,
+  },
+  {
+    id: 'billing',
+    label: 'Billing',
+    icon: CreditCard,
+    keywords: ['billing', 'subscription', 'plan', 'upgrade', 'invoice', 'payment'],
+    component: BillingTab,
   },
   {
     id: 'devices',

@@ -5,6 +5,7 @@ import { useUser } from '@clerk/clerk-react';
 import { useUIStore } from '@/stores/uiStore';
 import { useE2EE } from '@/providers/E2EEProvider';
 import { useAuth } from '@/hooks/useAuth';
+import { trpc } from '@/lib/trpc';
 import { useChats, useDeleteChat, useUpdateChat } from '@/hooks/queries/useChats';
 import { useFolders, useCreateFolder, useUpdateFolder, useDeleteFolder } from '@/hooks/queries/useFolders';
 import { decryptChatTitle } from '@onera/crypto';
@@ -36,6 +37,7 @@ import {
   FileText,
   MessageSquare,
   ChevronRight,
+  CreditCard,
   Pencil,
   PanelLeftClose,
   PanelLeftOpen,
@@ -75,6 +77,7 @@ export function Sidebar() {
   const { user, signOut } = useAuth();
   const { user: clerkUser } = useUser();
   const isAdmin = (clerkUser?.publicMetadata as Record<string, unknown>)?.role === 'admin';
+  const { data: subData } = trpc.billing.getSubscription.useQuery(undefined, { enabled: !!user });
 
   // Fetch chats and folders
   const rawChats = useChats();
@@ -392,6 +395,15 @@ export function Sidebar() {
               <span className="text-[14px]">Notes</span>
             </Link>
 
+            {/* Billing */}
+            <Link
+              to="/app/billing"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-sidebar-accent active:scale-[0.98] active:bg-sidebar-accent/80 transition-all duration-150 text-sidebar-foreground/90 group"
+            >
+              <CreditCard className="h-4 w-4 text-muted-foreground group-hover:text-sidebar-foreground transition-colors" />
+              <span className="text-[14px]">Billing</span>
+            </Link>
+
             {/* Admin */}
             {isAdmin && (
               <Link
@@ -569,6 +581,26 @@ export function Sidebar() {
               )}
             </div>
           </div>
+
+          {/* Plan Badge */}
+          {user && (
+            <Link
+              to="/app/billing"
+              className="mx-3 mb-1 flex items-center justify-between px-3 py-2 rounded-lg hover:bg-sidebar-accent transition-all duration-150 text-sidebar-foreground/80 group"
+            >
+              <span className="text-xs text-muted-foreground">Current plan</span>
+              <span className={cn(
+                "text-xs font-medium px-2 py-0.5 rounded-full",
+                subData?.plan?.id === "enterprise"
+                  ? "bg-purple-500/10 text-purple-600 dark:text-purple-400"
+                  : subData?.plan?.id === "pro"
+                    ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                    : "bg-secondary text-muted-foreground"
+              )}>
+                {subData?.plan?.name || "Free"}
+              </span>
+            </Link>
+          )}
 
           {/* User Profile Section */}
           {user && (

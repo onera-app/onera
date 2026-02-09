@@ -22,6 +22,7 @@ export function Footer() {
 
         {/* Links */}
         <div className="flex items-center gap-6 sm:gap-8 text-sm font-medium text-neutral-600 dark:text-neutral-300">
+          <Link to="/pricing" className="hover:text-neutral-900 dark:hover:text-white transition-colors">Pricing</Link>
           <Link to="/terms" className="hover:text-neutral-900 dark:hover:text-white transition-colors">Terms</Link>
           <Link to="/privacy" className="hover:text-neutral-900 dark:hover:text-white transition-colors">Privacy</Link>
           <a href="https://github.com/onera-app" target="_blank" rel="noopener noreferrer" className="hover:text-neutral-900 dark:hover:text-white transition-colors">
