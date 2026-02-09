@@ -1,4 +1,5 @@
-import { Link, Outlet, useMatchRoute } from "@tanstack/react-router";
+import { Link, Navigate, Outlet, useMatchRoute } from "@tanstack/react-router";
+import { useUser } from "@clerk/clerk-react";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -22,7 +23,20 @@ const navItems = [
 ] as const;
 
 export function AdminLayout() {
+  const { user, isLoaded } = useUser();
   const matchRoute = useMatchRoute();
+
+  if (isLoaded && (!user || (user.publicMetadata as Record<string, unknown>)?.role !== "admin")) {
+    return <Navigate to="/app" />;
+  }
+
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full">
