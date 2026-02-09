@@ -28,29 +28,36 @@ async function setupUser(planId: string, status: "active" | "trialing" = "active
 }
 
 // Helper to add usage records
-async function addUsage(userId: string, count: number, periodStart: Date, periodEnd: Date) {
+async function addUsage(
+  userId: string,
+  count: number,
+  periodStart: Date,
+  periodEnd: Date,
+  type: "inference_request" | "byok_inference_request" = "inference_request"
+) {
   await db.insert(usageRecords).values({
     id: randomUUID(),
     userId,
-    type: "inference_request",
+    type,
     quantity: count,
     periodStart,
     periodEnd,
   });
 }
 
-describe("checkInferenceAllowance", () => {
+describe("checkInferenceAllowance — private inference", () => {
   it("should allow free user with usage under limit", async () => {
     const { userId } = await setupUser("free");
-    const result = await checkInferenceAllowance(userId);
+    const result = await checkInferenceAllowance(userId, "private");
     expect(result.allowed).toBe(true);
     expect(result.remaining).toBe(24); // 25 limit - 1 just recorded
+    expect(result.inferenceType).toBe("private");
   });
 
   it("should deny free user who exceeded limit", async () => {
     const { userId, periodStart, periodEnd } = await setupUser("free");
-    await addUsage(userId, 25, periodStart, periodEnd);
-    const result = await checkInferenceAllowance(userId);
+    await addUsage(userId, 25, periodStart, periodEnd, "inference_request");
+    const result = await checkInferenceAllowance(userId, "private");
     expect(result.allowed).toBe(false);
     expect(result.remaining).toBe(0);
     expect(result.upgradeRequired).toBe(true);
@@ -58,25 +65,24 @@ describe("checkInferenceAllowance", () => {
 
   it("should allow pro user with high usage", async () => {
     const { userId, periodStart, periodEnd } = await setupUser("pro");
-    await addUsage(userId, 4999, periodStart, periodEnd);
-    const result = await checkInferenceAllowance(userId);
+    await addUsage(userId, 4999, periodStart, periodEnd, "inference_request");
+    const result = await checkInferenceAllowance(userId, "private");
     expect(result.allowed).toBe(true);
     expect(result.remaining).toBe(0); // 5000 - 4999 - 1 = 0 remaining after this one
   });
 
   it("should allow unlimited plan with any usage", async () => {
     const { userId, periodStart, periodEnd } = await setupUser("privacy_max");
-    await addUsage(userId, 999999, periodStart, periodEnd);
-    const result = await checkInferenceAllowance(userId);
+    await addUsage(userId, 999999, periodStart, periodEnd, "inference_request");
+    const result = await checkInferenceAllowance(userId, "private");
     expect(result.allowed).toBe(true);
     expect(result.remaining).toBe(-1); // unlimited
   });
 
   it("should record usage when allowed", async () => {
     const { userId } = await setupUser("pro");
-    await checkInferenceAllowance(userId);
+    await checkInferenceAllowance(userId, "private");
 
-    // Verify a usage record was created
     const records = await db
       .select()
       .from(usageRecords)
@@ -88,8 +94,8 @@ describe("checkInferenceAllowance", () => {
 
   it("should NOT record usage when denied", async () => {
     const { userId, periodStart, periodEnd } = await setupUser("free");
-    await addUsage(userId, 25, periodStart, periodEnd);
-    await checkInferenceAllowance(userId);
+    await addUsage(userId, 25, periodStart, periodEnd, "inference_request");
+    await checkInferenceAllowance(userId, "private");
 
     const records = await db
       .select()
@@ -97,5 +103,53 @@ describe("checkInferenceAllowance", () => {
       .where(eq(usageRecords.userId, userId));
     // Only the pre-existing record, no new one
     expect(records.length).toBe(1);
+  });
+});
+
+describe("checkInferenceAllowance — BYOK inference", () => {
+  it("should allow free user BYOK with usage under limit", async () => {
+    const { userId } = await setupUser("free");
+    const result = await checkInferenceAllowance(userId, "byok");
+    expect(result.allowed).toBe(true);
+    expect(result.remaining).toBe(99); // 100 BYOK limit - 1 just recorded
+    expect(result.inferenceType).toBe("byok");
+  });
+
+  it("should deny free user BYOK who exceeded limit", async () => {
+    const { userId, periodStart, periodEnd } = await setupUser("free");
+    await addUsage(userId, 100, periodStart, periodEnd, "byok_inference_request");
+    const result = await checkInferenceAllowance(userId, "byok");
+    expect(result.allowed).toBe(false);
+    expect(result.upgradeRequired).toBe(true);
+  });
+
+  it("should track BYOK and private usage independently", async () => {
+    const { userId, periodStart, periodEnd } = await setupUser("free");
+    // Fill up private inference to the limit
+    await addUsage(userId, 25, periodStart, periodEnd, "inference_request");
+    // BYOK should still work (separate counter)
+    const result = await checkInferenceAllowance(userId, "byok");
+    expect(result.allowed).toBe(true);
+    expect(result.remaining).toBe(99); // BYOK limit is 100
+  });
+
+  it("should allow unlimited BYOK for pro plan", async () => {
+    const { userId, periodStart, periodEnd } = await setupUser("pro");
+    await addUsage(userId, 999999, periodStart, periodEnd, "byok_inference_request");
+    const result = await checkInferenceAllowance(userId, "byok");
+    expect(result.allowed).toBe(true);
+    expect(result.remaining).toBe(-1); // pro has unlimited BYOK
+  });
+
+  it("should record BYOK usage as byok_inference_request type", async () => {
+    const { userId } = await setupUser("starter");
+    await checkInferenceAllowance(userId, "byok");
+
+    const records = await db
+      .select()
+      .from(usageRecords)
+      .where(eq(usageRecords.userId, userId));
+    expect(records.length).toBe(1);
+    expect(records[0].type).toBe("byok_inference_request");
   });
 });

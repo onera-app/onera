@@ -4,6 +4,8 @@ import { eq, and, gte, lte, sql } from "drizzle-orm";
 import { getEntitlements } from "./entitlements";
 import { randomUUID } from "crypto";
 
+export type InferenceType = "private" | "byok";
+
 export interface InferenceAllowanceResult {
   allowed: boolean;
   remaining: number; // -1 = unlimited
@@ -11,21 +13,34 @@ export interface InferenceAllowanceResult {
   used: number;
   upgradeRequired: boolean;
   planId: string;
+  inferenceType: InferenceType;
 }
+
+// Map inference type to usage record type
+const usageTypeMap: Record<InferenceType, "inference_request" | "byok_inference_request"> = {
+  private: "inference_request",
+  byok: "byok_inference_request",
+};
 
 /**
  * Check if user can make an inference request.
  * If allowed, atomically records the usage.
+ *
+ * @param inferenceType - "private" for enclave inference, "byok" for bring-your-own-key
  */
 export async function checkInferenceAllowance(
-  userId: string
+  userId: string,
+  inferenceType: InferenceType = "private"
 ): Promise<InferenceAllowanceResult> {
   const entitlements = await getEntitlements(userId);
-  const limit = entitlements.inferenceRequestsLimit;
+  const usageType = usageTypeMap[inferenceType];
+  const limit = inferenceType === "byok"
+    ? entitlements.byokInferenceRequestsLimit
+    : entitlements.inferenceRequestsLimit;
 
   // Unlimited plan — always allow
   if (limit === -1) {
-    await recordUsage(userId, "inference_request");
+    await recordUsage(userId, usageType);
     return {
       allowed: true,
       remaining: -1,
@@ -33,6 +48,7 @@ export async function checkInferenceAllowance(
       used: 0, // not tracked for unlimited
       upgradeRequired: false,
       planId: entitlements.planId,
+      inferenceType,
     };
   }
 
@@ -50,7 +66,7 @@ export async function checkInferenceAllowance(
       .where(
         and(
           eq(usageRecords.userId, userId),
-          eq(usageRecords.type, "inference_request"),
+          eq(usageRecords.type, usageType),
           gte(usageRecords.periodStart, periodStart),
           lte(usageRecords.periodEnd, periodEnd)
         )
@@ -66,6 +82,7 @@ export async function checkInferenceAllowance(
         used,
         upgradeRequired: true,
         planId: entitlements.planId,
+        inferenceType,
       };
     }
 
@@ -73,7 +90,7 @@ export async function checkInferenceAllowance(
     await tx.insert(usageRecords).values({
       id: randomUUID(),
       userId,
-      type: "inference_request",
+      type: usageType,
       quantity: 1,
       periodStart,
       periodEnd,
@@ -86,6 +103,7 @@ export async function checkInferenceAllowance(
       used: used + 1,
       upgradeRequired: false,
       planId: entitlements.planId,
+      inferenceType,
     };
   });
 }
@@ -113,7 +131,7 @@ async function getCurrentPeriod(userId: string): Promise<{ periodStart: Date; pe
  */
 async function recordUsage(
   userId: string,
-  type: "inference_request" | "storage_mb",
+  type: "inference_request" | "byok_inference_request" | "storage_mb",
   periodStart?: Date,
   periodEnd?: Date
 ): Promise<void> {

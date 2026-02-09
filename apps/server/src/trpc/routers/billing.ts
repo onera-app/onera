@@ -260,6 +260,7 @@ export const billingRouter = router({
 
     return {
       inferenceRequests: usageMap["inference_request"] || 0,
+      byokInferenceRequests: usageMap["byok_inference_request"] || 0,
       storageMb: usageMap["storage_mb"] || 0,
       periodStart: periodStart.getTime(),
       periodEnd: periodEnd.getTime(),
@@ -341,9 +342,15 @@ export const billingRouter = router({
   }),
 
   // Pre-flight check before inference — validates limit and records usage
-  checkInferenceAllowance: protectedProcedure.mutation(async ({ ctx }) => {
-    return checkInferenceAllowance(ctx.user.id);
-  }),
+  checkInferenceAllowance: protectedProcedure
+    .input(
+      z.object({
+        inferenceType: z.enum(["private", "byok"]).default("private"),
+      }).optional()
+    )
+    .mutation(async ({ ctx, input }) => {
+      return checkInferenceAllowance(ctx.user.id, input?.inferenceType ?? "private");
+    }),
 
   // Get current user's entitlements for feature gating
   getEntitlements: protectedProcedure.query(async ({ ctx }) => {

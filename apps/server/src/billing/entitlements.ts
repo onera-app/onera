@@ -5,7 +5,8 @@ import { subscriptions, plans } from "../db/schema";
 export interface Entitlements {
   planId: string;
   planName: string;
-  inferenceRequestsLimit: number; // -1 = unlimited
+  inferenceRequestsLimit: number; // -1 = unlimited (private/enclave)
+  byokInferenceRequestsLimit: number; // -1 = unlimited (BYOK)
   storageLimitMb: number; // -1 = unlimited
   maxEnclaves: number; // -1 = unlimited
   features: Record<string, boolean>;
@@ -18,6 +19,7 @@ export async function getEntitlements(userId: string): Promise<Entitlements> {
       planId: plans.id,
       planName: plans.name,
       inferenceRequestsLimit: plans.inferenceRequestsLimit,
+      byokInferenceRequestsLimit: plans.byokInferenceRequestsLimit,
       storageLimitMb: plans.storageLimitMb,
       maxEnclaves: plans.maxEnclaves,
       features: plans.features,
@@ -41,6 +43,7 @@ export async function getEntitlements(userId: string): Promise<Entitlements> {
     planId: result.planId,
     planName: result.planName,
     inferenceRequestsLimit: result.inferenceRequestsLimit,
+    byokInferenceRequestsLimit: result.byokInferenceRequestsLimit,
     storageLimitMb: result.storageLimitMb,
     maxEnclaves: result.maxEnclaves,
     features: (result.features as Record<string, boolean>) || {},
@@ -64,6 +67,7 @@ async function getFreePlanEntitlements(): Promise<Entitlements> {
       planId: freePlan.id,
       planName: freePlan.name,
       inferenceRequestsLimit: freePlan.inferenceRequestsLimit,
+      byokInferenceRequestsLimit: freePlan.byokInferenceRequestsLimit,
       storageLimitMb: freePlan.storageLimitMb,
       maxEnclaves: freePlan.maxEnclaves,
       features: (freePlan.features as Record<string, boolean>) || {},
@@ -76,6 +80,7 @@ async function getFreePlanEntitlements(): Promise<Entitlements> {
     planId: "free",
     planName: "Free",
     inferenceRequestsLimit: 25,
+    byokInferenceRequestsLimit: 100,
     storageLimitMb: 100,
     maxEnclaves: 0,
     features: {

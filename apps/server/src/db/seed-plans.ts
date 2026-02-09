@@ -17,6 +17,7 @@ async function seed() {
           monthlyPrice: plan.monthlyPrice,
           yearlyPrice: plan.yearlyPrice,
           inferenceRequestsLimit: plan.inferenceRequestsLimit,
+          byokInferenceRequestsLimit: plan.byokInferenceRequestsLimit,
           storageLimitMb: plan.storageLimitMb,
           maxEnclaves: plan.maxEnclaves,
           features: plan.features,

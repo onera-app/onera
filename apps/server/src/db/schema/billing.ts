@@ -16,7 +16,8 @@ export const plans = pgTable("plans", {
   description: text("description").notNull(),
   monthlyPrice: integer("monthly_price").notNull(), // cents
   yearlyPrice: integer("yearly_price").notNull(), // cents
-  inferenceRequestsLimit: integer("inference_requests_limit").notNull(), // -1 = unlimited
+  inferenceRequestsLimit: integer("inference_requests_limit").notNull(), // -1 = unlimited (private/enclave)
+  byokInferenceRequestsLimit: integer("byok_inference_requests_limit").notNull().default(-1), // -1 = unlimited (BYOK)
   storageLimitMb: integer("storage_limit_mb").notNull(),
   maxEnclaves: integer("max_enclaves").notNull(),
   features: jsonb("features").$type<Record<string, boolean>>().notNull(),
@@ -92,7 +93,7 @@ export const usageRecords = pgTable(
   {
     id: text("id").primaryKey(),
     userId: text("user_id").notNull(),
-    type: text("type").notNull().$type<"inference_request" | "storage_mb">(),
+    type: text("type").notNull().$type<"inference_request" | "byok_inference_request" | "storage_mb">(),
     quantity: integer("quantity").notNull(),
     periodStart: timestamp("period_start", { mode: "date" }).notNull(),
     periodEnd: timestamp("period_end", { mode: "date" }).notNull(),

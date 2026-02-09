@@ -51,9 +51,15 @@ export function BillingTab() {
         {usage && currentPlan && (
           <div className="space-y-3 pt-2 border-t border-border">
             <UsageMeter
-              label="Inference Requests"
+              label="Private Inference"
               used={usage.inferenceRequests}
               limit={currentPlan.inferenceRequestsLimit}
+              unit="requests"
+            />
+            <UsageMeter
+              label="BYOK Inference"
+              used={usage.byokInferenceRequests}
+              limit={currentPlan.byokInferenceRequestsLimit}
               unit="requests"
             />
             <UsageMeter

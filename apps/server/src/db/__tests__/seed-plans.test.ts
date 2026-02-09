@@ -71,4 +71,14 @@ describe("Plan Seed Data", () => {
     const max = planData.find((p) => p.id === "privacy_max")!;
     expect(max.inferenceRequestsLimit).toBe(-1);
   });
+
+  it("should have byokInferenceRequestsLimit on all plans", () => {
+    for (const plan of planData) {
+      expect(typeof plan.byokInferenceRequestsLimit).toBe("number");
+    }
+    const free = planData.find((p) => p.id === "free")!;
+    expect(free.byokInferenceRequestsLimit).toBeGreaterThan(0);
+    const pro = planData.find((p) => p.id === "pro")!;
+    expect(pro.byokInferenceRequestsLimit).toBe(-1); // unlimited
+  });
 });

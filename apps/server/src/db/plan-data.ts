@@ -6,6 +6,7 @@ export const planData = [
     monthlyPrice: 0,
     yearlyPrice: 0,
     inferenceRequestsLimit: 25,
+    byokInferenceRequestsLimit: 100,
     storageLimitMb: 100,
     maxEnclaves: 0,
     features: {
@@ -28,6 +29,7 @@ export const planData = [
     monthlyPrice: 1200, // $12/mo
     yearlyPrice: 12000, // $120/yr ($10/mo)
     inferenceRequestsLimit: 500,
+    byokInferenceRequestsLimit: 2000,
     storageLimitMb: 2000, // 2 GB
     maxEnclaves: 0,
     features: {
@@ -50,6 +52,7 @@ export const planData = [
     monthlyPrice: 2900, // $29/mo
     yearlyPrice: 27600, // $276/yr ($23/mo)
     inferenceRequestsLimit: 5000,
+    byokInferenceRequestsLimit: -1, // unlimited
     storageLimitMb: 20000, // 20 GB
     maxEnclaves: 0, // available as add-on, not included
     features: {
@@ -72,6 +75,7 @@ export const planData = [
     monthlyPrice: 4900, // $49/mo
     yearlyPrice: 46800, // $468/yr ($39/mo)
     inferenceRequestsLimit: -1, // unlimited
+    byokInferenceRequestsLimit: -1, // unlimited
     storageLimitMb: 100000, // 100 GB
     maxEnclaves: -1, // unlimited (10 hrs/mo included via usage tracking)
     features: {
@@ -94,6 +98,7 @@ export const planData = [
     monthlyPrice: 3500, // $35/user/mo
     yearlyPrice: 39600, // $396/user/yr ($33/user/mo)
     inferenceRequestsLimit: 5000, // per user, pooled
+    byokInferenceRequestsLimit: -1, // unlimited
     storageLimitMb: 20000, // per user
     maxEnclaves: -1,
     features: {

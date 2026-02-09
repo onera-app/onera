@@ -332,14 +332,20 @@ export function useDirectChat({
   // Pre-flight: check inference allowance before sending/regenerating
   const checkAllowanceRef = useRef(checkAllowance);
   useEffect(() => { checkAllowanceRef.current = checkAllowance; });
+  const selectedModelIdRef = useRef(selectedModelId);
+  useEffect(() => { selectedModelIdRef.current = selectedModelId; });
 
   const enforceAllowance = useCallback(async () => {
+    const inferenceType = selectedModelIdRef.current && isPrivateModel(selectedModelIdRef.current)
+      ? 'private' as const
+      : 'byok' as const;
     try {
-      const allowance = await checkAllowanceRef.current.mutateAsync();
+      const allowance = await checkAllowanceRef.current.mutateAsync({ inferenceType });
       if (!allowance.allowed) {
+        const label = inferenceType === 'private' ? 'private inference' : 'BYOK inference';
         const error = new Error(
           allowance.remaining === 0
-            ? `You've reached your ${allowance.limit} inference request limit for this period. Upgrade your plan for more.`
+            ? `You've reached your ${allowance.limit} ${label} request limit for this period. Upgrade your plan for more.`
             : 'Inference not available on your current plan.'
         );
         (error as any).upgradeRequired = true;
