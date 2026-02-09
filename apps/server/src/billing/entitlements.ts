@@ -1,4 +1,4 @@
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and, or, inArray, gt } from "drizzle-orm";
 import { db } from "../db/client";
 import { subscriptions, plans } from "../db/schema";
 
@@ -29,7 +29,14 @@ export async function getEntitlements(userId: string): Promise<Entitlements> {
     .where(
       and(
         eq(subscriptions.userId, userId),
-        inArray(subscriptions.status, ["active", "trialing"])
+        or(
+          inArray(subscriptions.status, ["active", "trialing"]),
+          // Cancelled users keep access until their paid period ends
+          and(
+            eq(subscriptions.status, "cancelled"),
+            gt(subscriptions.currentPeriodEnd, new Date())
+          )
+        )
       )
     )
     .limit(1);

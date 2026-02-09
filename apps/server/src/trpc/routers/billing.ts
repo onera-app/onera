@@ -98,6 +98,20 @@ export const billingRouter = router({
         });
       }
 
+      // Prevent overwriting an active subscription via checkout race condition
+      const [existingSub] = await db
+        .select()
+        .from(subscriptions)
+        .where(eq(subscriptions.userId, ctx.user.id))
+        .limit(1);
+
+      if (existingSub && ["active", "trialing"].includes(existingSub.status)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "You already have an active subscription. Use plan change instead.",
+        });
+      }
+
       const priceId =
         input.billingInterval === "monthly"
           ? plan.dodoPriceIdMonthly

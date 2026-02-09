@@ -114,8 +114,14 @@ async function handleSubscriptionActive(data: Record<string, any>) {
   };
 
   // Set planId from metadata — this is where the plan actually upgrades
+  // Validate against DB to prevent injection of arbitrary plan IDs
   if (data.metadata?.planId) {
-    updates.planId = data.metadata.planId;
+    const plan = await lookupPlanById(data.metadata.planId);
+    if (plan) {
+      updates.planId = plan.id;
+    } else {
+      console.error(`Invalid plan ID in webhook metadata: ${data.metadata.planId}`);
+    }
   }
   if (data.metadata?.billingInterval) {
     updates.billingInterval = data.metadata.billingInterval;
@@ -149,8 +155,14 @@ async function handleSubscriptionUpdated(data: Record<string, any>) {
     updates.currentPeriodEnd = new Date(data.current_period_end * 1000);
 
   // Resolve planId from metadata or product_id (for plan changes)
+  // Validate against DB to prevent injection of arbitrary plan IDs
   if (data.metadata?.planId) {
-    updates.planId = data.metadata.planId;
+    const plan = await lookupPlanById(data.metadata.planId);
+    if (plan) {
+      updates.planId = plan.id;
+    } else {
+      console.error(`Invalid plan ID in webhook metadata: ${data.metadata.planId}`);
+    }
   } else if (data.product_id) {
     const plan = await lookupPlanByDodoProductId(data.product_id);
     if (plan) {
@@ -251,6 +263,19 @@ async function handlePayment(
     description: data.description || `Payment ${status}`,
     paidAt: status === "succeeded" ? new Date() : null,
   });
+}
+
+/**
+ * Validate a plan ID exists in the database.
+ * Prevents injection of arbitrary plan IDs via webhook metadata.
+ */
+async function lookupPlanById(planId: string) {
+  const [plan] = await db
+    .select({ id: plans.id })
+    .from(plans)
+    .where(eq(plans.id, planId))
+    .limit(1);
+  return plan || null;
 }
 
 /**

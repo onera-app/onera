@@ -96,30 +96,44 @@ export function BillingPage() {
               </p>
             </div>
             {subscription?.status && (
-              <span
-                className={cn(
-                  "inline-flex rounded-full px-3 py-1 text-sm font-medium",
-                  subscription.status === "active"
-                    ? "bg-green-500/10 text-green-600"
-                    : subscription.status === "on_hold"
-                      ? "bg-yellow-500/10 text-yellow-600"
-                      : subscription.status === "cancelled" ||
-                          subscription.status === "expired"
-                        ? "bg-red-500/10 text-red-600"
-                        : "bg-secondary text-muted-foreground"
+              <div className="flex flex-col items-end gap-1">
+                <span
+                  className={cn(
+                    "inline-flex rounded-full px-3 py-1 text-sm font-medium",
+                    subscription.status === "active"
+                      ? "bg-green-500/10 text-green-600"
+                      : subscription.status === "on_hold"
+                        ? "bg-yellow-500/10 text-yellow-600"
+                        : subscription.status === "cancelled" ||
+                            subscription.status === "expired"
+                          ? "bg-red-500/10 text-red-600"
+                          : "bg-secondary text-muted-foreground"
+                  )}
+                >
+                  {subscription.status}
+                </span>
+                {subscription.currentPeriodEnd && (
+                  <span className="text-xs text-muted-foreground">
+                    {subscription.status === "cancelled" ? "Access until" : "Renews"}{" "}
+                    {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                  </span>
                 )}
-              >
-                {subscription.status}
-              </span>
+              </div>
             )}
           </div>
 
           {usage && currentPlan && (
             <div className="space-y-4">
               <UsageMeter
-                label="Inference Requests"
+                label="Private Inference"
                 used={usage.inferenceRequests}
                 limit={currentPlan.inferenceRequestsLimit}
+                unit="requests"
+              />
+              <UsageMeter
+                label="BYOK Inference"
+                used={usage.byokInferenceRequests}
+                limit={currentPlan.byokInferenceRequestsLimit}
                 unit="requests"
               />
               <UsageMeter
@@ -128,6 +142,11 @@ export function BillingPage() {
                 limit={currentPlan.storageLimitMb}
                 unit="MB"
               />
+              {usage.periodStart && usage.periodEnd && (
+                <p className="text-xs text-muted-foreground pt-1">
+                  Billing period: {new Date(usage.periodStart).toLocaleDateString()} — {new Date(usage.periodEnd).toLocaleDateString()}
+                </p>
+              )}
             </div>
           )}
 
