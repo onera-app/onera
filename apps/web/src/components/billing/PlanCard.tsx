@@ -31,9 +31,13 @@ function formatLimit(value: number, unit: string): string {
 
 const featureLabels: Record<string, string> = {
   voiceCalls: "Voice calls",
+  voiceInput: "Voice input",
   prioritySupport: "Priority support",
   dedicatedEnclaves: "Dedicated enclaves",
   customModels: "Custom models",
+  customEndpoints: "Custom API endpoints",
+  largeModels: "70B+ models in TEE",
+  priorityQueue: "Priority inference queue",
 };
 
 export function PlanCard({
