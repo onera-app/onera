@@ -2,15 +2,25 @@ import { z } from "zod";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { db } from "../../db/client";
 import { plans, subscriptions, invoices, usageRecords } from "../../db/schema";
-import { eq, and, desc, sql, gte, lt } from "drizzle-orm";
+import { eq, and, desc, sql, gte, lte, inArray } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { requireDodoClient } from "../../billing/dodo";
 import { randomUUID } from "crypto";
+import { checkInferenceAllowance } from "../../billing/usage";
+import { getEntitlements } from "../../billing/entitlements";
+import { planData } from "../../db/plan-data";
+
+// Only return plans that are actively seeded (excludes retired plans like enterprise)
+const activePlanIds = planData.map((p) => p.id);
 
 export const billingRouter = router({
   // List available plans (public — pricing page is unauthenticated) (#4)
   getPlans: publicProcedure.query(async () => {
-    return db.select().from(plans).orderBy(plans.monthlyPrice);
+    return db
+      .select()
+      .from(plans)
+      .where(inArray(plans.id, activePlanIds))
+      .orderBy(plans.monthlyPrice);
   }),
 
   // Get current user's subscription
@@ -238,7 +248,7 @@ export const billingRouter = router({
         and(
           eq(usageRecords.userId, ctx.user.id),
           gte(usageRecords.periodStart, periodStart),
-          lt(usageRecords.periodEnd, periodEnd)
+          lte(usageRecords.periodEnd, periodEnd)
         )
       )
       .groupBy(usageRecords.type);
@@ -328,5 +338,15 @@ export const billingRouter = router({
     // Dodo customer portal URL pattern
     const portalUrl = `https://checkout.dodopayments.com/customer-portal/${sub.dodoCustomerId}`;
     return { url: portalUrl };
+  }),
+
+  // Pre-flight check before inference — validates limit and records usage
+  checkInferenceAllowance: protectedProcedure.mutation(async ({ ctx }) => {
+    return checkInferenceAllowance(ctx.user.id);
+  }),
+
+  // Get current user's entitlements for feature gating
+  getEntitlements: protectedProcedure.query(async ({ ctx }) => {
+    return getEntitlements(ctx.user.id);
   }),
 });
