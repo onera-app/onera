@@ -18,7 +18,7 @@ export function PricingSection() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:60px_60px]" />
       </div>
 
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Heading */}
         <div className="text-center mb-10 sm:mb-16 px-2">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
@@ -58,8 +58,8 @@ export function PricingSection() {
 
         {/* Plans Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 max-w-4xl mx-auto">
-            {[...Array(3)].map((_, i) => (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
+            {[...Array(4)].map((_, i) => (
               <div
                 key={i}
                 className="h-96 animate-pulse rounded-2xl bg-neutral-100 dark:bg-neutral-800/50"
@@ -67,31 +67,33 @@ export function PricingSection() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 max-w-4xl mx-auto">
-            {plans?.map((plan) => (
-              <PlanCard
-                key={plan.id}
-                name={plan.name}
-                description={plan.description}
-                monthlyPrice={plan.monthlyPrice}
-                yearlyPrice={plan.yearlyPrice}
-                features={plan.features as Record<string, boolean>}
-                limits={{
-                  inferenceRequests: plan.inferenceRequestsLimit,
-                  storageMb: plan.storageLimitMb,
-                  maxEnclaves: plan.maxEnclaves,
-                }}
-                isPopular={plan.id === "pro"}
-                billingInterval={billingInterval}
-                onSelect={() => {
-                  if (!isAuthenticated) {
-                    window.location.href = "/auth";
-                  } else {
-                    window.location.href = "/pricing";
-                  }
-                }}
-              />
-            ))}
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
+            {plans
+              ?.filter((plan) => plan.id !== "team")
+              .map((plan) => (
+                <PlanCard
+                  key={plan.id}
+                  name={plan.name}
+                  description={plan.description}
+                  monthlyPrice={plan.monthlyPrice}
+                  yearlyPrice={plan.yearlyPrice}
+                  features={plan.features as Record<string, boolean>}
+                  limits={{
+                    inferenceRequests: plan.inferenceRequestsLimit,
+                    storageMb: plan.storageLimitMb,
+                    maxEnclaves: plan.maxEnclaves,
+                  }}
+                  isPopular={plan.id === "pro"}
+                  billingInterval={billingInterval}
+                  onSelect={() => {
+                    if (!isAuthenticated) {
+                      window.location.href = "/auth";
+                    } else {
+                      window.location.href = "/pricing";
+                    }
+                  }}
+                />
+              ))}
           </div>
         )}
 
