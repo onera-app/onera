@@ -13,6 +13,7 @@ import { PromptsPage } from './routes/prompts';
 import { LandingPage } from './routes/landing';
 import { PrivacyPage } from './routes/privacy';
 import { TermsPage } from './routes/terms';
+import { PricingPage } from './routes/pricing';
 
 // Root route with layout
 const rootRoute = createRootRoute({
@@ -38,6 +39,13 @@ const termsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/terms',
   component: TermsPage,
+});
+
+// Pricing page (public)
+const pricingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/pricing',
+  component: PricingPage,
 });
 
 // Auth route (login/signup)
@@ -98,6 +106,7 @@ export const routeTree = rootRoute.addChildren([
   landingRoute,
   privacyRoute,
   termsRoute,
+  pricingRoute,
   authRoute,
   ssoCallbackRoute,
   appRoute.addChildren([homeRoute, chatRoute, notesRoute, promptsRoute]),
