@@ -141,7 +141,7 @@ export function BillingPage() {
                 </a>
               </Button>
             )}
-            {hasActiveSubscription && currentPlan?.id !== "free" && (
+            {hasDodoSubscription && currentPlan?.id !== "free" && (
               <Button
                 variant="outline"
                 size="sm"

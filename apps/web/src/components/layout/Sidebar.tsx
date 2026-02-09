@@ -37,7 +37,6 @@ import {
   FileText,
   MessageSquare,
   ChevronRight,
-  CreditCard,
   Pencil,
   PanelLeftClose,
   PanelLeftOpen,
@@ -393,15 +392,6 @@ export function Sidebar() {
             >
               <FileText className="h-4 w-4 text-muted-foreground group-hover:text-sidebar-foreground transition-colors" />
               <span className="text-[14px]">Notes</span>
-            </Link>
-
-            {/* Billing */}
-            <Link
-              to="/app/billing"
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-sidebar-accent active:scale-[0.98] active:bg-sidebar-accent/80 transition-all duration-150 text-sidebar-foreground/90 group"
-            >
-              <CreditCard className="h-4 w-4 text-muted-foreground group-hover:text-sidebar-foreground transition-colors" />
-              <span className="text-[14px]">Billing</span>
             </Link>
 
             {/* Admin */}

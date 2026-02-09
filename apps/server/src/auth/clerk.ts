@@ -148,18 +148,20 @@ export async function authenticateRequest(
 
   // JWT missing email claim — fetch full user from Clerk API
   const fullUser = await getClerkUser(payload.sub);
-  if (fullUser) {
+  if (fullUser?.email) {
     return fullUser;
   }
 
   // Last resort: return user without email (non-billing operations will still work)
+  console.warn(`User ${payload.sub} has no email in JWT or Clerk profile — billing operations will fail`);
   return {
     id: payload.sub,
     email: "",
-    firstName: payload.first_name || null,
-    lastName: payload.last_name || null,
-    name: [payload.first_name, payload.last_name].filter(Boolean).join(" ") || "User",
-    imageUrl: payload.image_url || null,
+    firstName: fullUser?.firstName ?? payload.first_name ?? null,
+    lastName: fullUser?.lastName ?? payload.last_name ?? null,
+    name: fullUser?.name ||
+          [payload.first_name, payload.last_name].filter(Boolean).join(" ") || "User",
+    imageUrl: fullUser?.imageUrl ?? payload.image_url ?? null,
     emailVerified: false,
   };
 }
