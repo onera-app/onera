@@ -43,6 +43,12 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: bun run db:migrate
 
+      - name: Seed plans
+        working-directory: apps/server
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: bun run db:seed-plans
+
       - name: Prepare deployment package
         run: |
           mkdir -p deploy/src
