@@ -18,6 +18,7 @@ import { BillingPage } from './routes/billing';
 import { AdminLayout } from './components/admin/AdminLayout';
 import { AdminDashboard } from './routes/admin/index';
 import { AdminUsersPage } from './routes/admin/users';
+import { AdminUserDetailPage } from './routes/admin/user-detail';
 import { AdminSubscriptionsPage } from './routes/admin/subscriptions';
 import { AdminInvoicesPage } from './routes/admin/invoices';
 
@@ -135,6 +136,13 @@ const adminUsersRoute = createRoute({
   component: AdminUsersPage,
 });
 
+// Admin user detail route - /app/admin/users/$userId
+const adminUserDetailRoute = createRoute({
+  getParentRoute: () => adminLayoutRoute,
+  path: '/users/$userId',
+  component: AdminUserDetailPage,
+});
+
 // Admin subscriptions route - /app/admin/subscriptions
 const adminSubscriptionsRoute = createRoute({
   getParentRoute: () => adminLayoutRoute,
@@ -166,6 +174,7 @@ export const routeTree = rootRoute.addChildren([
     adminLayoutRoute.addChildren([
       adminDashboardRoute,
       adminUsersRoute,
+      adminUserDetailRoute,
       adminSubscriptionsRoute,
       adminInvoicesRoute,
     ]),
