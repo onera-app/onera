@@ -99,6 +99,13 @@
       "when": 1738500000000,
       "tag": "0013_add_model_servers_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1739059200000,
+      "tag": "0014_add_billing_tables",
+      "breakpoints": true
     }
   ]
 }

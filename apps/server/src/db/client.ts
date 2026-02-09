@@ -34,6 +34,10 @@ export const {
   notes,
   credentials,
   prompts,
+  plans,
+  subscriptions,
+  invoices,
+  usageRecords,
 } = schema;
 
 // Type for the database
