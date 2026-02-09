@@ -1,4 +1,4 @@
-export { router, publicProcedure, protectedProcedure, adminProcedure } from "./trpc";
+export { router, publicProcedure, protectedProcedure, adminProcedure, entitledProcedure } from "./trpc";
 
 // Import routers
 import { router } from "./trpc";

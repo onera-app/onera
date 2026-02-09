@@ -2,6 +2,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import type { Context } from "./context";
 import type { ClerkUser } from "../auth/clerk";
 import { getUserMetadata } from "../auth/clerk";
+import { getEntitlements, type Entitlements } from "../billing/entitlements";
 
 const t = initTRPC.context<Context>().create();
 
@@ -70,3 +71,32 @@ const isAdmin = t.middleware(async ({ ctx, next }) => {
  * Use this for admin-only endpoints
  */
 export const adminProcedure = t.procedure.use(isAdmin);
+
+interface EntitledContext extends AuthedContext {
+  entitlements: Entitlements;
+}
+
+/**
+ * Middleware to load user entitlements
+ */
+const withEntitlements = t.middleware(async ({ ctx, next }) => {
+  if (!ctx.user) {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "Not authenticated" });
+  }
+
+  const entitlements = await getEntitlements(ctx.user.id);
+
+  return next({
+    ctx: {
+      ...ctx,
+      user: ctx.user,
+      entitlements,
+    } as EntitledContext,
+  });
+});
+
+/**
+ * Protected procedure with entitlements loaded
+ * Use for routes that need to check plan limits
+ */
+export const entitledProcedure = t.procedure.use(isAuthed).use(withEntitlements);
