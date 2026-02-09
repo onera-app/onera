@@ -101,11 +101,15 @@ export function AdminUsersPage() {
                       <span
                         className={cn(
                           "inline-flex rounded-full px-2 py-0.5 text-xs font-medium",
-                          user.subscription?.planId === "enterprise"
+                          user.subscription?.planId === "privacy_max" || user.subscription?.planId === "enterprise"
                             ? "bg-purple-500/10 text-purple-600"
                             : user.subscription?.planId === "pro"
                               ? "bg-blue-500/10 text-blue-600"
-                              : "bg-secondary text-muted-foreground"
+                              : user.subscription?.planId === "starter"
+                                ? "bg-emerald-500/10 text-emerald-600"
+                                : user.subscription?.planId === "team"
+                                  ? "bg-amber-500/10 text-amber-600"
+                                  : "bg-secondary text-muted-foreground"
                         )}
                       >
                         {user.subscription?.planId || "free"}

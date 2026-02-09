@@ -40,7 +40,7 @@ export const planData = [
       largeModels: false,
       priorityQueue: false,
     },
-    dodoPriceIdMonthly: "pdt_0NY6luwJk4UoMIhsO1mMe", // TODO: Create in Dodo dashboard
+    dodoPriceIdMonthly: "pdt_0NY6luwJk4UoMIhsO1mMe",
     dodoPriceIdYearly: "pdt_0NY6lxXewtV9yLxjq8Yzl",
   },
   {
@@ -62,7 +62,7 @@ export const planData = [
       largeModels: true,
       priorityQueue: false,
     },
-    dodoPriceIdMonthly: "pdt_0NY6NccyasPmnImIkbocM", // TODO: Create in Dodo dashboard
+    dodoPriceIdMonthly: "pdt_0NY6NccyasPmnImIkbocM",
     dodoPriceIdYearly: "pdt_0NY6Nj9gnxfrsiUrxrlI1",
   },
   {
@@ -84,7 +84,7 @@ export const planData = [
       largeModels: true,
       priorityQueue: true,
     },
-    dodoPriceIdMonthly: "pdt_0NY6mBbYf6BwIo4YKhsrH", // TODO: Create in Dodo dashboard
+    dodoPriceIdMonthly: "pdt_0NY6mBbYf6BwIo4YKhsrH",
     dodoPriceIdYearly: "pdt_0NY6mGr6afu5TvwTnrhiL",
   },
   {
@@ -106,7 +106,7 @@ export const planData = [
       largeModels: true,
       priorityQueue: true,
     },
-    dodoPriceIdMonthly: "pdt_0NY6Nqvklb7ueLbSB4FCz", // TODO: Create in Dodo dashboard
+    dodoPriceIdMonthly: "pdt_0NY6Nqvklb7ueLbSB4FCz",
     dodoPriceIdYearly: "pdt_0NY6O27jrS1W7Xfz9PLma",
   },
 ];

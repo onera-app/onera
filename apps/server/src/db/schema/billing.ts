@@ -11,7 +11,7 @@ import {
 // --- Plans ---
 
 export const plans = pgTable("plans", {
-  id: text("id").primaryKey(), // 'free', 'pro', 'enterprise'
+  id: text("id").primaryKey(), // 'free', 'starter', 'pro', 'privacy_max', 'team'
   name: text("name").notNull(),
   description: text("description").notNull(),
   monthlyPrice: integer("monthly_price").notNull(), // cents

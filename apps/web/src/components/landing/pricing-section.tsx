@@ -51,7 +51,7 @@ export function PricingSection() {
               )}
             >
               Yearly
-              <span className="ml-1 text-xs opacity-75">Save 20%</span>
+              <span className="ml-1 text-xs opacity-75">Save up to 20%</span>
             </button>
           </div>
         </div>

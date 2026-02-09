@@ -59,7 +59,7 @@ export function BillingPage() {
   const currentPlan = subData?.plan;
   const subscription = subData?.subscription;
   const hasActiveSubscription =
-    subscription && subscription.status === "active";
+    subscription && (subscription.status === "active" || subscription.status === "trialing");
 
   const handlePlanAction = (planId: string) => {
     if (planId === "free") return;
