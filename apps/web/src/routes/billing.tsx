@@ -33,8 +33,20 @@ export function BillingPage() {
   const { data: portalData } = trpc.billing.getPortalUrl.useQuery();
 
   const changePlan = trpc.billing.changePlan.useMutation({
+    onSuccess: (data) => {
+      if (data.pendingDowngrade) {
+        toast.success("Downgrade scheduled for end of billing period");
+      } else {
+        toast.success("Plan upgraded successfully");
+      }
+      refetchSub();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const cancelPendingDowngrade = trpc.billing.cancelPendingDowngrade.useMutation({
     onSuccess: () => {
-      toast.success("Plan updated successfully");
+      toast.success("Pending downgrade cancelled");
       refetchSub();
     },
     onError: (error) => toast.error(error.message),
@@ -58,6 +70,7 @@ export function BillingPage() {
 
   const currentPlan = subData?.plan;
   const subscription = subData?.subscription;
+  const pendingPlan = subData?.pendingPlan;
   const hasActiveSubscription =
     subscription && (subscription.status === "active" || subscription.status === "trialing");
   const hasDodoSubscription = hasActiveSubscription && !!subscription.dodoSubscriptionId;
@@ -147,6 +160,25 @@ export function BillingPage() {
                   Billing period: {new Date(usage.periodStart).toLocaleDateString()} — {new Date(usage.periodEnd).toLocaleDateString()}
                 </p>
               )}
+            </div>
+          )}
+
+          {/* Pending Downgrade Notice */}
+          {pendingPlan && subscription?.currentPeriodEnd && (
+            <div className="flex items-center justify-between rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-3">
+              <p className="text-sm text-yellow-600">
+                Downgrading to <span className="font-medium">{pendingPlan.name}</span> on{" "}
+                {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => cancelPendingDowngrade.mutate()}
+                disabled={cancelPendingDowngrade.isPending}
+                className="text-yellow-600 hover:text-yellow-700"
+              >
+                Cancel
+              </Button>
             </div>
           )}
 

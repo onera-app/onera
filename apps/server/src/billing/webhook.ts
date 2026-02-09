@@ -156,10 +156,12 @@ async function handleSubscriptionUpdated(data: Record<string, any>) {
 
   // Resolve planId from metadata or product_id (for plan changes)
   // Validate against DB to prevent injection of arbitrary plan IDs
+  let planChanged = false;
   if (data.metadata?.planId) {
     const plan = await lookupPlanById(data.metadata.planId);
     if (plan) {
       updates.planId = plan.id;
+      planChanged = true;
     } else {
       console.error(`Invalid plan ID in webhook metadata: ${data.metadata.planId}`);
     }
@@ -167,7 +169,14 @@ async function handleSubscriptionUpdated(data: Record<string, any>) {
     const plan = await lookupPlanByDodoProductId(data.product_id);
     if (plan) {
       updates.planId = plan.id;
+      planChanged = true;
     }
+  }
+
+  // Clear pending downgrade if the plan was actually changed (defense in depth)
+  if (planChanged) {
+    updates.pendingPlanId = null;
+    updates.pendingBillingInterval = null;
   }
 
   await db
@@ -193,6 +202,80 @@ async function handleSubscriptionRenewed(data: Record<string, any>) {
   const dodoSubId = data.subscription_id || data.id;
   if (!dodoSubId) return;
 
+  // Check for pending downgrade
+  const [sub] = await db
+    .select()
+    .from(subscriptions)
+    .where(eq(subscriptions.dodoSubscriptionId, dodoSubId))
+    .limit(1);
+
+  if (sub?.pendingPlanId) {
+    // Apply the pending downgrade now that the new period has started
+    const [targetPlan] = await db
+      .select()
+      .from(plans)
+      .where(eq(plans.id, sub.pendingPlanId))
+      .limit(1);
+
+    if (targetPlan) {
+      const priceId = sub.pendingBillingInterval === "yearly"
+        ? targetPlan.dodoPriceIdYearly
+        : targetPlan.dodoPriceIdMonthly;
+
+      if (priceId && dodoClient) {
+        try {
+          await dodoClient.subscriptions.changePlan(dodoSubId, {
+            product_id: priceId,
+            quantity: 1,
+            proration_billing_mode: "prorated_immediately",
+          });
+        } catch (error) {
+          // Dodo API failed — keep pending state so next renewal retries
+          console.error(`Failed to apply pending downgrade for ${dodoSubId}, will retry on next renewal:`, error);
+
+          // Still update period dates but preserve pending downgrade
+          await db
+            .update(subscriptions)
+            .set({
+              status: "active",
+              currentPeriodStart: data.current_period_start
+                ? new Date(data.current_period_start * 1000)
+                : undefined,
+              currentPeriodEnd: data.current_period_end
+                ? new Date(data.current_period_end * 1000)
+                : undefined,
+              updatedAt: new Date(),
+            })
+            .where(eq(subscriptions.dodoSubscriptionId, dodoSubId));
+
+          return;
+        }
+      }
+
+      // Dodo API succeeded — apply downgrade and clear pending
+      await db
+        .update(subscriptions)
+        .set({
+          planId: targetPlan.id,
+          billingInterval: sub.pendingBillingInterval || sub.billingInterval,
+          pendingPlanId: null,
+          pendingBillingInterval: null,
+          status: "active",
+          currentPeriodStart: data.current_period_start
+            ? new Date(data.current_period_start * 1000)
+            : undefined,
+          currentPeriodEnd: data.current_period_end
+            ? new Date(data.current_period_end * 1000)
+            : undefined,
+          updatedAt: new Date(),
+        })
+        .where(eq(subscriptions.dodoSubscriptionId, dodoSubId));
+
+      return; // Done — downgrade applied
+    }
+  }
+
+  // No pending downgrade — just update period
   await db
     .update(subscriptions)
     .set({

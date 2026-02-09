@@ -42,6 +42,7 @@ export const billingRouter = router({
       return {
         subscription: null,
         plan: freePlan || null,
+        pendingPlan: null,
       };
     }
 
@@ -50,6 +51,17 @@ export const billingRouter = router({
       .from(plans)
       .where(eq(plans.id, subscription.planId))
       .limit(1);
+
+    // Look up pending downgrade plan if set
+    let pendingPlan = null;
+    if (subscription.pendingPlanId) {
+      const [pp] = await db
+        .select()
+        .from(plans)
+        .where(eq(plans.id, subscription.pendingPlanId))
+        .limit(1);
+      pendingPlan = pp || null;
+    }
 
     return {
       subscription: {
@@ -60,6 +72,7 @@ export const billingRouter = router({
         currentPeriodEnd: subscription.currentPeriodEnd?.getTime() ?? null,
       },
       plan: plan || null,
+      pendingPlan,
     };
   }),
 
@@ -224,7 +237,32 @@ export const billingRouter = router({
         });
       }
 
-      // Use Dodo's changePlan API for plan upgrades/downgrades
+      // Get current plan to compare prices
+      const [currentPlan] = await db
+        .select()
+        .from(plans)
+        .where(eq(plans.id, currentSub.planId))
+        .limit(1);
+
+      const currentPrice = currentPlan?.monthlyPrice ?? 0;
+      const targetPrice = targetPlan.monthlyPrice;
+      const isDowngrade = targetPrice < currentPrice;
+
+      if (isDowngrade) {
+        // Downgrade: schedule for end of billing period, don't change Dodo plan yet
+        await db
+          .update(subscriptions)
+          .set({
+            pendingPlanId: targetPlan.id,
+            pendingBillingInterval: input.billingInterval,
+            updatedAt: new Date(),
+          })
+          .where(eq(subscriptions.userId, ctx.user.id));
+
+        return { success: true, pendingDowngrade: true };
+      }
+
+      // Upgrade: apply immediately via Dodo
       // The actual planId update happens via the subscription.updated webhook
       await dodo.subscriptions.changePlan(currentSub.dodoSubscriptionId, {
         product_id: priceId,
@@ -232,7 +270,19 @@ export const billingRouter = router({
         proration_billing_mode: "prorated_immediately",
       });
 
-      return { success: true };
+      // Clear any pending downgrade since the user is upgrading instead
+      if (currentSub.pendingPlanId) {
+        await db
+          .update(subscriptions)
+          .set({
+            pendingPlanId: null,
+            pendingBillingInterval: null,
+            updatedAt: new Date(),
+          })
+          .where(eq(subscriptions.userId, ctx.user.id));
+      }
+
+      return { success: true, pendingDowngrade: false };
     }),
 
   // Get current period usage
@@ -335,6 +385,20 @@ export const billingRouter = router({
 
     // Don't set status to "cancelled" — subscription remains active until period end.
     // The subscription.cancelled webhook will update the status when Dodo actually cancels.
+
+    return { success: true };
+  }),
+
+  // Cancel a pending downgrade
+  cancelPendingDowngrade: protectedProcedure.mutation(async ({ ctx }) => {
+    await db
+      .update(subscriptions)
+      .set({
+        pendingPlanId: null,
+        pendingBillingInterval: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(subscriptions.userId, ctx.user.id));
 
     return { success: true };
   }),

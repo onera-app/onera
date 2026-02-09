@@ -47,6 +47,8 @@ export const subscriptions = pgTable(
       .$type<"monthly" | "yearly" | "none">(),
     currentPeriodStart: timestamp("current_period_start", { mode: "date" }),
     currentPeriodEnd: timestamp("current_period_end", { mode: "date" }),
+    pendingPlanId: text("pending_plan_id").references(() => plans.id),
+    pendingBillingInterval: text("pending_billing_interval").$type<"monthly" | "yearly" | null>(),
     createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
   },

@@ -113,6 +113,13 @@
       "when": 1739145600000,
       "tag": "0015_add_byok_inference_limit",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1739232000000,
+      "tag": "0016_add_pending_downgrade_columns",
+      "breakpoints": true
     }
   ]
 }
