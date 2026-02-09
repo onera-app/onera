@@ -1,6 +1,7 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import type { Context } from "./context";
 import type { ClerkUser } from "../auth/clerk";
+import { getUserMetadata } from "../auth/clerk";
 
 const t = initTRPC.context<Context>().create();
 
@@ -35,3 +36,37 @@ const isAuthed = t.middleware(({ ctx, next }) => {
  * Use this for all endpoints that need a logged-in user
  */
 export const protectedProcedure = t.procedure.use(isAuthed);
+
+/**
+ * Middleware to require admin role
+ * Checks Clerk publicMetadata.role === "admin"
+ */
+const isAdmin = t.middleware(async ({ ctx, next }) => {
+  if (!ctx.user) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Not authenticated",
+    });
+  }
+
+  const metadata = await getUserMetadata(ctx.user.id);
+  if (!metadata || metadata.publicMetadata?.role !== "admin") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Admin access required",
+    });
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      user: ctx.user,
+    } as AuthedContext,
+  });
+});
+
+/**
+ * Admin procedure that requires admin role
+ * Use this for admin-only endpoints
+ */
+export const adminProcedure = t.procedure.use(isAdmin);
