@@ -182,8 +182,10 @@ export function BillingPage() {
             </button>
           </div>
         </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {plans?.map((plan) => (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {plans
+            ?.filter((plan) => plan.id !== "team")
+            .map((plan) => (
             <PlanCard
               key={plan.id}
               name={plan.name}
