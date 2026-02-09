@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS "plans" (
   "dodo_price_id_yearly" text,
   "created_at" timestamp DEFAULT now() NOT NULL,
   "updated_at" timestamp DEFAULT now() NOT NULL
-);
+);--> statement-breakpoint
 
 -- Subscriptions table
 CREATE TABLE IF NOT EXISTS "subscriptions" (
@@ -28,11 +28,11 @@ CREATE TABLE IF NOT EXISTS "subscriptions" (
   "current_period_end" timestamp,
   "created_at" timestamp DEFAULT now() NOT NULL,
   "updated_at" timestamp DEFAULT now() NOT NULL
-);
+);--> statement-breakpoint
 
-CREATE UNIQUE INDEX IF NOT EXISTS "idx_subscriptions_user_id" ON "subscriptions" USING btree ("user_id");
-CREATE INDEX IF NOT EXISTS "idx_subscriptions_status" ON "subscriptions" USING btree ("status");
-CREATE INDEX IF NOT EXISTS "idx_subscriptions_dodo_subscription_id" ON "subscriptions" USING btree ("dodo_subscription_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "idx_subscriptions_user_id" ON "subscriptions" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_subscriptions_status" ON "subscriptions" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_subscriptions_dodo_subscription_id" ON "subscriptions" USING btree ("dodo_subscription_id");--> statement-breakpoint
 
 -- Invoices table
 CREATE TABLE IF NOT EXISTS "invoices" (
@@ -46,11 +46,11 @@ CREATE TABLE IF NOT EXISTS "invoices" (
   "description" text,
   "paid_at" timestamp,
   "created_at" timestamp DEFAULT now() NOT NULL
-);
+);--> statement-breakpoint
 
-CREATE INDEX IF NOT EXISTS "idx_invoices_user_id" ON "invoices" USING btree ("user_id");
-CREATE INDEX IF NOT EXISTS "idx_invoices_subscription_id" ON "invoices" USING btree ("subscription_id");
-CREATE UNIQUE INDEX IF NOT EXISTS "idx_invoices_dodo_payment_id" ON "invoices" USING btree ("dodo_payment_id") WHERE "dodo_payment_id" IS NOT NULL;
+CREATE INDEX IF NOT EXISTS "idx_invoices_user_id" ON "invoices" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_invoices_subscription_id" ON "invoices" USING btree ("subscription_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "idx_invoices_dodo_payment_id" ON "invoices" USING btree ("dodo_payment_id") WHERE "dodo_payment_id" IS NOT NULL;--> statement-breakpoint
 
 -- Usage Records table
 CREATE TABLE IF NOT EXISTS "usage_records" (
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS "usage_records" (
   "period_start" timestamp NOT NULL,
   "period_end" timestamp NOT NULL,
   "recorded_at" timestamp DEFAULT now() NOT NULL
-);
+);--> statement-breakpoint
 
-CREATE INDEX IF NOT EXISTS "idx_usage_records_user_id" ON "usage_records" USING btree ("user_id");
+CREATE INDEX IF NOT EXISTS "idx_usage_records_user_id" ON "usage_records" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "idx_usage_records_user_period" ON "usage_records" USING btree ("user_id", "type", "period_start", "period_end");
