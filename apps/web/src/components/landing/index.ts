@@ -7,3 +7,5 @@ export { PricingSection } from "./pricing-section";
 export { FAQSection } from "./faq-section";
 export { Footer } from "./footer";
 export { ThemeToggle } from "./theme-toggle";
+export * from "./bento-grid";
+

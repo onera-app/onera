@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import {
   Accordion,
   AccordionContent,
@@ -48,64 +47,47 @@ const faqs = [
 
 export function FAQSection() {
   return (
-    <section className="py-20 sm:py-32 px-4 border-t border-neutral-100 dark:border-neutral-800/50">
-      <div className="max-w-3xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 text-neutral-900 dark:text-white">
-            Questions
-          </h2>
-          <p className="text-lg text-neutral-500 dark:text-neutral-400">
-            Everything you need to know about Onera
+    <section id="faq" className="py-24 px-4 bg-white dark:bg-[#0a0a0a]">
+      <div className="max-w-[800px] mx-auto">
+        <div className="text-center mb-16">
+          <p className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 mb-4 tracking-widest uppercase">
+            Questions? We've got answers.
           </p>
-        </motion.div>
+          <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-neutral-900 dark:text-white mb-6">
+            Everything you need to know about Onera
+          </h2>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          <Accordion type="single" collapsible className="w-full space-y-2">
+        <div className="max-w-3xl mx-auto">
+          <Accordion type="single" collapsible className="space-y-0">
             {faqs.map((faq, index) => (
               <AccordionItem
                 key={index}
                 value={`item-${index}`}
-                className="border border-neutral-200 dark:border-neutral-800 rounded-xl px-5 data-[state=open]:bg-neutral-50 dark:data-[state=open]:bg-neutral-900/50 transition-colors"
+                className="border-b border-neutral-200 dark:border-neutral-800 px-0"
               >
-                <AccordionTrigger className="text-left text-base font-medium py-4 hover:no-underline text-neutral-900 dark:text-white">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent className="text-sm text-neutral-500 dark:text-neutral-400 pb-4 leading-relaxed">
-                  {faq.answer}
-                </AccordionContent>
+                <div className="py-2">
+                  <AccordionTrigger className="text-left text-xl font-medium py-6 hover:no-underline text-neutral-900 dark:text-white transition-colors [&>svg]:size-5 [&>svg]:text-neutral-400">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-neutral-500 dark:text-neutral-400 pb-6 text-lg leading-relaxed max-w-2xl">
+                    {faq.answer}
+                  </AccordionContent>
+                </div>
               </AccordionItem>
             ))}
           </Accordion>
-        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-center mt-12"
-        >
-          <p className="text-sm text-neutral-400">
+          <p className="mt-16 text-center text-sm text-neutral-500 dark:text-neutral-400">
             Still have questions?{" "}
             <a
               href="mailto:hello@onera.ai"
               className="text-neutral-900 dark:text-white font-medium hover:underline underline-offset-4"
             >
-              Reach out
+              Reach out to us
             </a>
           </p>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

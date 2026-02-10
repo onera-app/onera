@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=SF+Pro+Display:wght@400;500;600;700&display=swap');
 @source "../node_modules/streamdown/dist/*.js";
 
 /*
@@ -79,8 +79,28 @@
   /* 12px default radius */
 
   /* Fonts */
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .mask-radial-faded {
+    mask-image: radial-gradient(circle at center, black, transparent 80%);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .mask-radial-faded {
+    mask-image: radial-gradient(circle at center, black, transparent 80%);
+  }
 }
 
 /* Light mode overrides - Warm, refined neutrals */
@@ -283,18 +303,23 @@
 
 /* Premium gradient animations for landing page */
 @keyframes gradient-float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
     opacity: 0.8;
   }
+
   25% {
     transform: translate(5%, 5%) scale(1.05);
     opacity: 1;
   }
+
   50% {
     transform: translate(2%, -3%) scale(0.95);
     opacity: 0.7;
   }
+
   75% {
     transform: translate(-3%, 2%) scale(1.02);
     opacity: 0.9;
@@ -302,14 +327,18 @@
 }
 
 @keyframes gradient-float-delayed {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
     opacity: 0.7;
   }
+
   33% {
     transform: translate(-4%, 6%) scale(1.08);
     opacity: 1;
   }
+
   66% {
     transform: translate(3%, -4%) scale(0.92);
     opacity: 0.6;
@@ -317,10 +346,13 @@
 }
 
 @keyframes gradient-float-slow {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0, 0) scale(1) rotate(0deg);
     opacity: 0.6;
   }
+
   50% {
     transform: translate(-2%, 4%) scale(1.1) rotate(2deg);
     opacity: 0.9;
@@ -328,14 +360,18 @@
 }
 
 @keyframes gradient-float-reverse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
     opacity: 0.5;
   }
+
   40% {
     transform: translate(6%, -3%) scale(1.06);
     opacity: 0.8;
   }
+
   80% {
     transform: translate(-4%, 5%) scale(0.94);
     opacity: 0.6;
@@ -346,6 +382,7 @@
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
@@ -422,6 +459,7 @@
       opacity: 0;
       transform: scaleY(0.5);
     }
+
     100% {
       opacity: 0.7;
       transform: scaleY(1);
@@ -440,8 +478,15 @@
 
 /* Streaming animations */
 @keyframes cursor-blink {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 0; }
+
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+
+  50% {
+    opacity: 0;
+  }
 }
 
 @keyframes scroll-button-enter {
@@ -449,6 +494,7 @@
     opacity: 0;
     transform: translateX(-50%) translateY(8px) scale(0.9);
   }
+
   100% {
     opacity: 1;
     transform: translateX(-50%) translateY(0) scale(1);
@@ -460,6 +506,7 @@
     opacity: 1;
     transform: translateX(-50%) translateY(0) scale(1);
   }
+
   100% {
     opacity: 0;
     transform: translateX(-50%) translateY(8px) scale(0.9);
@@ -471,6 +518,7 @@
   0% {
     opacity: 0.7;
   }
+
   100% {
     opacity: 1;
   }
@@ -478,10 +526,13 @@
 
 /* Typing indicator pulse - smoother than bounce */
 @keyframes typing-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.3;
     transform: scale(0.85);
   }
+
   50% {
     opacity: 0.8;
     transform: scale(1);
@@ -489,6 +540,7 @@
 }
 
 @layer utilities {
+
   /* Typing indicator with smooth pulse */
   .typing-dot {
     animation: typing-pulse 1.4s ease-in-out infinite;
@@ -498,14 +550,15 @@
   .streaming-complete {
     animation: content-appear 0.3s ease-out;
   }
-  
+
   /* Reduce motion for accessibility */
   @media (prefers-reduced-motion: reduce) {
+
     .streaming-cursor::after,
     .typing-dot {
       animation: none;
     }
-    
+
     .scroll-smooth {
       scroll-behavior: auto;
     }

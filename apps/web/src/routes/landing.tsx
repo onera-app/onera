@@ -10,20 +10,13 @@ import {
 
 export function LandingPage() {
   return (
-    <main className="min-h-screen overflow-x-hidden relative bg-white dark:bg-neutral-950">
-      {/* Content */}
+    <main className="min-h-screen bg-white dark:bg-[#0a0a0a] selection:bg-neutral-900 selection:text-white dark:selection:bg-white dark:selection:text-neutral-900">
       <Header />
       <Hero />
-      <div id="how-it-works">
-        <HowItWorks />
-      </div>
       <FeaturesSection />
-      <div id="pricing">
-        <PricingSection />
-      </div>
-      <div id="faq">
-        <FAQSection />
-      </div>
+      <HowItWorks />
+      <PricingSection />
+      <FAQSection />
       <Footer />
     </main>
   );
