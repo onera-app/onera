@@ -134,6 +134,13 @@
       "when": 1739404800000,
       "tag": "0018_add_usage_billing_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1739491200000,
+      "tag": "0019_repair_billing_tables",
+      "breakpoints": true
     }
   ]
 }
