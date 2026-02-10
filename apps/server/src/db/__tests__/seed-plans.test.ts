@@ -48,14 +48,14 @@ describe("Plan Seed Data", () => {
     }
   });
 
-  it("should have most features enabled on free plan during early access", () => {
+  it("should have correct features on free plan during early access", () => {
     const free = planData.find((p) => p.id === "free")!;
     expect(free.features.voiceCalls).toBe(true);
     expect(free.features.voiceInput).toBe(true);
-    expect(free.features.dedicatedEnclaves).toBe(true);
-    expect(free.features.customModels).toBe(true);
     expect(free.features.customEndpoints).toBe(true);
-    expect(free.features.largeModels).toBe(true);
+    expect(free.features.dedicatedEnclaves).toBe(false);
+    expect(free.features.customModels).toBe(false);
+    expect(free.features.largeModels).toBe(false);
   });
 
   it("should have no Dodo price IDs on free plan", () => {
