@@ -70,7 +70,7 @@ export const enclavesRouter = router({
    * List available private inference models.
    * Queries enclaves directly for their available models.
    */
-  listModels: entitledProcedure.query(async ({ ctx }) => {
+  listModels: entitledProcedure.query(async ({ ctx: _ctx }) => {
     // First try: get models from server_models table (preferred, avoids network calls)
     const dbModels = await db
       .select({

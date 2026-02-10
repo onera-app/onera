@@ -91,20 +91,21 @@ async function getFreePlanEntitlements(): Promise<Entitlements> {
   }
 
   // Hardcoded fallback only if the free plan doesn't exist in the database yet
+  // Temporarily unlimited while Dodo Payments live account is pending
   return {
     planId: "free",
     planName: "Free",
-    inferenceRequestsLimit: 25,
-    byokInferenceRequestsLimit: 100,
-    storageLimitMb: 100,
-    maxEnclaves: 0,
+    inferenceRequestsLimit: -1,
+    byokInferenceRequestsLimit: -1,
+    storageLimitMb: -1,
+    maxEnclaves: -1,
     features: {
       voiceCalls: true,
-      voiceInput: false,
+      voiceInput: true,
       prioritySupport: false,
-      dedicatedEnclaves: false,
-      customModels: false,
-      customEndpoints: false,
+      dedicatedEnclaves: true,
+      customModels: true,
+      customEndpoints: true,
       largeModels: true,
       priorityQueue: false,
     },

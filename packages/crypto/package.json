@@ -18,6 +18,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@onera/types": "workspace:*",
     "@peculiar/asn1-schema": "2.6.0",
     "@peculiar/asn1-x509": "2.6.0",
     "asn1js": "3.0.7",

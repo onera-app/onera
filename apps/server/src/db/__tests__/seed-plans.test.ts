@@ -1,14 +1,17 @@
 import { describe, it, expect } from "bun:test";
 import { planData } from "../plan-data";
 
+// NOTE: These tests reflect the temporary early-access state where only the
+// free plan exists with unlimited limits. Update when paid plans are re-enabled.
+
 describe("Plan Seed Data", () => {
-  it("should have 5 plans", () => {
-    expect(planData).toHaveLength(5);
+  it("should have 1 plan (early access)", () => {
+    expect(planData).toHaveLength(1);
   });
 
-  it("should have correct plan IDs", () => {
+  it("should only contain the free plan", () => {
     const ids = planData.map((p) => p.id);
-    expect(ids).toEqual(["free", "starter", "pro", "privacy_max", "team"]);
+    expect(ids).toEqual(["free"]);
   });
 
   it("should have free plan at $0", () => {
@@ -17,21 +20,12 @@ describe("Plan Seed Data", () => {
     expect(free.yearlyPrice).toBe(0);
   });
 
-  it("should have ascending prices for individual plans", () => {
-    const prices = planData
-      .filter((p) => p.id !== "team")
-      .map((p) => p.monthlyPrice);
-    for (let i = 1; i < prices.length; i++) {
-      expect(prices[i]).toBeGreaterThanOrEqual(prices[i - 1]);
-    }
-  });
-
-  it("should have yearly discount on all paid plans", () => {
-    const paid = planData.filter((p) => p.monthlyPrice > 0);
-    for (const plan of paid) {
-      const yearlyMonthly = plan.yearlyPrice / 12;
-      expect(yearlyMonthly).toBeLessThan(plan.monthlyPrice);
-    }
+  it("should have unlimited limits on free plan during early access", () => {
+    const free = planData.find((p) => p.id === "free")!;
+    expect(free.inferenceRequestsLimit).toBe(-1);
+    expect(free.byokInferenceRequestsLimit).toBe(-1);
+    expect(free.storageLimitMb).toBe(-1);
+    expect(free.maxEnclaves).toBe(-1);
   });
 
   it("should have valid feature flags on all plans", () => {
@@ -54,28 +48,20 @@ describe("Plan Seed Data", () => {
     }
   });
 
-  it("should have free plan with most features disabled", () => {
+  it("should have most features enabled on free plan during early access", () => {
     const free = planData.find((p) => p.id === "free")!;
-    expect(free.features.dedicatedEnclaves).toBe(false);
-    expect(free.features.customModels).toBe(false);
-    expect(free.features.prioritySupport).toBe(false);
+    expect(free.features.voiceCalls).toBe(true);
+    expect(free.features.voiceInput).toBe(true);
+    expect(free.features.dedicatedEnclaves).toBe(true);
+    expect(free.features.customModels).toBe(true);
+    expect(free.features.customEndpoints).toBe(true);
+    expect(free.features.largeModels).toBe(true);
   });
 
-  it("should have voice calls and all model sizes on every plan", () => {
-    for (const plan of planData) {
-      expect(plan.features.voiceCalls).toBe(true);
-      expect(plan.features.largeModels).toBe(true);
-    }
-  });
-
-  it("should have privacy_max with all features enabled", () => {
-    const max = planData.find((p) => p.id === "privacy_max")!;
-    expect(Object.values(max.features).every(Boolean)).toBe(true);
-  });
-
-  it("should have unlimited inference for privacy_max", () => {
-    const max = planData.find((p) => p.id === "privacy_max")!;
-    expect(max.inferenceRequestsLimit).toBe(-1);
+  it("should have no Dodo price IDs on free plan", () => {
+    const free = planData.find((p) => p.id === "free")!;
+    expect(free.dodoPriceIdMonthly).toBeNull();
+    expect(free.dodoPriceIdYearly).toBeNull();
   });
 
   it("should have byokInferenceRequestsLimit on all plans", () => {
@@ -83,8 +69,6 @@ describe("Plan Seed Data", () => {
       expect(typeof plan.byokInferenceRequestsLimit).toBe("number");
     }
     const free = planData.find((p) => p.id === "free")!;
-    expect(free.byokInferenceRequestsLimit).toBeGreaterThan(0);
-    const pro = planData.find((p) => p.id === "pro")!;
-    expect(pro.byokInferenceRequestsLimit).toBe(-1); // unlimited
+    expect(free.byokInferenceRequestsLimit).toBe(-1); // unlimited during early access
   });
 });
