@@ -44,55 +44,65 @@ export const billingRouter = router({
 
   // Get current user's subscription
   getSubscription: protectedProcedure.query(async ({ ctx }) => {
-    const [subscription] = await db
-      .select()
-      .from(subscriptions)
-      .where(eq(subscriptions.userId, ctx.user.id))
-      .limit(1);
-
-    if (!subscription) {
-      // Return free plan defaults
-      const [freePlan] = await db
+    try {
+      const [subscription] = await db
         .select()
-        .from(plans)
-        .where(eq(plans.id, "free"))
+        .from(subscriptions)
+        .where(eq(subscriptions.userId, ctx.user.id))
         .limit(1);
 
+      if (!subscription) {
+        // Return free plan defaults
+        const [freePlan] = await db
+          .select()
+          .from(plans)
+          .where(eq(plans.id, "free"))
+          .limit(1);
+
+        return {
+          subscription: null,
+          plan: freePlan || null,
+          pendingPlan: null,
+        };
+      }
+
+      const [plan] = await db
+        .select()
+        .from(plans)
+        .where(eq(plans.id, subscription.planId))
+        .limit(1);
+
+      // Look up pending downgrade plan if set
+      let pendingPlan = null;
+      if (subscription.pendingPlanId) {
+        const [pp] = await db
+          .select()
+          .from(plans)
+          .where(eq(plans.id, subscription.pendingPlanId))
+          .limit(1);
+        pendingPlan = pp || null;
+      }
+
+      return {
+        subscription: {
+          ...subscription,
+          createdAt: subscription.createdAt.getTime(),
+          updatedAt: subscription.updatedAt.getTime(),
+          currentPeriodStart: subscription.currentPeriodStart?.getTime() ?? null,
+          currentPeriodEnd: subscription.currentPeriodEnd?.getTime() ?? null,
+        },
+        plan: plan || null,
+        pendingPlan,
+      };
+    } catch (err) {
+      // If billing tables don't exist yet, return free plan defaults
+      console.error("getSubscription query failed:", err);
       return {
         subscription: null,
-        plan: freePlan || null,
+        plan: null,
         pendingPlan: null,
       };
     }
-
-    const [plan] = await db
-      .select()
-      .from(plans)
-      .where(eq(plans.id, subscription.planId))
-      .limit(1);
-
-    // Look up pending downgrade plan if set
-    let pendingPlan = null;
-    if (subscription.pendingPlanId) {
-      const [pp] = await db
-        .select()
-        .from(plans)
-        .where(eq(plans.id, subscription.pendingPlanId))
-        .limit(1);
-      pendingPlan = pp || null;
-    }
-
-    return {
-      subscription: {
-        ...subscription,
-        createdAt: subscription.createdAt.getTime(),
-        updatedAt: subscription.updatedAt.getTime(),
-        currentPeriodStart: subscription.currentPeriodStart?.getTime() ?? null,
-        currentPeriodEnd: subscription.currentPeriodEnd?.getTime() ?? null,
-      },
-      plan: plan || null,
-      pendingPlan,
-    };
   }),
 
   // Create checkout session for a plan
