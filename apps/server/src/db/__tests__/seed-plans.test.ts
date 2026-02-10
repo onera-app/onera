@@ -56,10 +56,16 @@ describe("Plan Seed Data", () => {
 
   it("should have free plan with most features disabled", () => {
     const free = planData.find((p) => p.id === "free")!;
-    expect(free.features.voiceCalls).toBe(false);
     expect(free.features.dedicatedEnclaves).toBe(false);
     expect(free.features.customModels).toBe(false);
     expect(free.features.prioritySupport).toBe(false);
+  });
+
+  it("should have voice calls and all model sizes on every plan", () => {
+    for (const plan of planData) {
+      expect(plan.features.voiceCalls).toBe(true);
+      expect(plan.features.largeModels).toBe(true);
+    }
   });
 
   it("should have privacy_max with all features enabled", () => {

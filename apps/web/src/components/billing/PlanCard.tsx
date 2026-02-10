@@ -10,6 +10,7 @@ interface PlanCardProps {
   features: Record<string, boolean>;
   limits: {
     inferenceRequests: number;
+    byokInferenceRequests?: number;
     storageMb: number;
     maxEnclaves: number;
   };
@@ -24,21 +25,28 @@ function formatPrice(cents: number): string {
   return `$${(cents / 100).toFixed(0)}`;
 }
 
-function formatLimit(value: number, unit: string): string {
-  if (value === -1) return "Unlimited";
+function formatLimit(value: number, unit: string, unlimitedLabel?: string): string {
+  if (value === -1) return unlimitedLabel ?? `Unlimited ${unit}`;
   return `${value.toLocaleString()} ${unit}`;
 }
 
+function formatStorage(mb: number): string {
+  if (mb === -1) return "Unlimited storage";
+  if (mb >= 1000) return `${(mb / 1000).toFixed(mb % 1000 === 0 ? 0 : 1)} GB storage`;
+  return `${mb} MB storage`;
+}
+
 const featureLabels: Record<string, string> = {
-  voiceCalls: "Voice calls",
   voiceInput: "Voice input",
   prioritySupport: "Priority support",
   dedicatedEnclaves: "Dedicated enclaves",
   customModels: "Custom models",
   customEndpoints: "Custom API endpoints",
-  largeModels: "70B+ models in TEE",
   priorityQueue: "Priority inference queue",
 };
+
+// Features included in all plans — not shown as differentiators
+const universalFeatures = new Set(["voiceCalls", "largeModels"]);
 
 export function PlanCard({
   name,
@@ -92,11 +100,17 @@ export function PlanCard({
       <ul className="mb-8 flex-1 space-y-3">
         <li className="flex items-center gap-2 text-sm">
           <Check className="h-4 w-4 text-primary flex-shrink-0" />
-          {formatLimit(limits.inferenceRequests, "inference requests/mo")}
+          {formatLimit(limits.inferenceRequests, "private requests/mo", "Unlimited private requests")}
         </li>
+        {limits.byokInferenceRequests != null && (
+          <li className="flex items-center gap-2 text-sm">
+            <Check className="h-4 w-4 text-primary flex-shrink-0" />
+            {formatLimit(limits.byokInferenceRequests, "BYOK requests/mo", "Unlimited BYOK requests")}
+          </li>
+        )}
         <li className="flex items-center gap-2 text-sm">
           <Check className="h-4 w-4 text-primary flex-shrink-0" />
-          {formatLimit(limits.storageMb, "MB storage")}
+          {formatStorage(limits.storageMb)}
         </li>
         {limits.maxEnclaves !== 0 && (
           <li className="flex items-center gap-2 text-sm">
@@ -105,7 +119,7 @@ export function PlanCard({
           </li>
         )}
         {Object.entries(features).map(([key, enabled]) =>
-          enabled ? (
+          enabled && !universalFeatures.has(key) ? (
             <li key={key} className="flex items-center gap-2 text-sm">
               <Check className="h-4 w-4 text-primary flex-shrink-0" />
               {featureLabels[key] || key}

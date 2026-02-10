@@ -19,6 +19,12 @@ export const dodoClient = apiKey
 export const DODO_WEBHOOK_KEY =
   process.env.DODO_PAYMENTS_WEBHOOK_SECRET || "";
 
+export const DODO_USAGE_PRODUCT_ID =
+  process.env.DODO_USAGE_PRODUCT_ID || "";
+
+export const DODO_USAGE_EVENT_NAME =
+  process.env.DODO_USAGE_EVENT_NAME || "private_inference_overage";
+
 /**
  * Get the Dodo client, throwing if not configured.
  * Use this in billing routes that require the client.

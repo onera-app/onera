@@ -10,6 +10,8 @@ export interface Entitlements {
   storageLimitMb: number; // -1 = unlimited
   maxEnclaves: number; // -1 = unlimited
   features: Record<string, boolean>;
+  usageBasedBilling: boolean;
+  dodoCustomerId: string | null;
 }
 
 export async function getEntitlements(userId: string): Promise<Entitlements> {
@@ -23,6 +25,8 @@ export async function getEntitlements(userId: string): Promise<Entitlements> {
       storageLimitMb: plans.storageLimitMb,
       maxEnclaves: plans.maxEnclaves,
       features: plans.features,
+      usageBasedBilling: subscriptions.usageBasedBilling,
+      dodoCustomerId: subscriptions.dodoCustomerId,
     })
     .from(subscriptions)
     .innerJoin(plans, eq(subscriptions.planId, plans.id))
@@ -54,6 +58,8 @@ export async function getEntitlements(userId: string): Promise<Entitlements> {
     storageLimitMb: result.storageLimitMb,
     maxEnclaves: result.maxEnclaves,
     features: (result.features as Record<string, boolean>) || {},
+    usageBasedBilling: result.usageBasedBilling,
+    dodoCustomerId: result.dodoCustomerId,
   };
 }
 
@@ -78,6 +84,8 @@ async function getFreePlanEntitlements(): Promise<Entitlements> {
       storageLimitMb: freePlan.storageLimitMb,
       maxEnclaves: freePlan.maxEnclaves,
       features: (freePlan.features as Record<string, boolean>) || {},
+      usageBasedBilling: false,
+      dodoCustomerId: null,
     };
     return cachedFreeEntitlements;
   }
@@ -91,14 +99,16 @@ async function getFreePlanEntitlements(): Promise<Entitlements> {
     storageLimitMb: 100,
     maxEnclaves: 0,
     features: {
-      voiceCalls: false,
+      voiceCalls: true,
       voiceInput: false,
       prioritySupport: false,
       dedicatedEnclaves: false,
       customModels: false,
       customEndpoints: false,
-      largeModels: false,
+      largeModels: true,
       priorityQueue: false,
     },
+    usageBasedBilling: false,
+    dodoCustomerId: null,
   };
 }

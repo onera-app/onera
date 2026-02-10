@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { eq, or } from "drizzle-orm";
 import { db } from "../db/client";
 import { subscriptions, invoices, plans } from "../db/schema";
-import { dodoClient, DODO_WEBHOOK_KEY } from "./dodo";
+import { dodoClient, DODO_WEBHOOK_KEY, DODO_USAGE_PRODUCT_ID } from "./dodo";
 import { randomUUID } from "crypto";
 
 export const webhookApp = new Hono();
@@ -108,6 +108,12 @@ async function handleSubscriptionActive(data: Record<string, any>) {
   const dodoSubId = data.subscription_id || data.id;
   if (!dodoSubId) return;
 
+  // Check if this is a usage billing subscription
+  if (isUsageSubscription(data)) {
+    await handleUsageSubscriptionActive(data);
+    return;
+  }
+
   const updates: Record<string, any> = {
     status: "active",
     updatedAt: new Date(),
@@ -191,6 +197,14 @@ async function handleSubscriptionStatusChange(
 ) {
   const dodoSubId = data.subscription_id || data.id;
   if (!dodoSubId) return;
+
+  // Check if this is a usage billing subscription
+  if (isUsageSubscription(data)) {
+    if (status === "cancelled" || status === "expired") {
+      await handleUsageSubscriptionDisabled(data);
+    }
+    return;
+  }
 
   await db
     .update(subscriptions)
@@ -377,4 +391,55 @@ async function lookupPlanByDodoProductId(productId: string) {
     )
     .limit(1);
   return plan || null;
+}
+
+/**
+ * Check if a webhook event is for a usage billing subscription.
+ * Uses metadata flag or product ID to distinguish from plan subscriptions.
+ */
+function isUsageSubscription(data: Record<string, any>): boolean {
+  if (data.metadata?.usageBilling === "true") return true;
+  if (DODO_USAGE_PRODUCT_ID && data.product_id === DODO_USAGE_PRODUCT_ID) return true;
+  return false;
+}
+
+/**
+ * Handle activation of a usage billing subscription.
+ * Sets usageBasedBilling = true and stores the usage subscription ID.
+ */
+async function handleUsageSubscriptionActive(data: Record<string, any>) {
+  const dodoSubId = data.subscription_id || data.id;
+  const userId = data.metadata?.userId;
+  if (!userId) {
+    console.error("Usage subscription active webhook missing userId in metadata");
+    return;
+  }
+
+  await db
+    .update(subscriptions)
+    .set({
+      usageBasedBilling: true,
+      dodoUsageSubscriptionId: dodoSubId,
+      updatedAt: new Date(),
+    })
+    .where(eq(subscriptions.userId, userId));
+}
+
+/**
+ * Handle cancellation/failure of a usage billing subscription.
+ * Sets usageBasedBilling = false and clears the usage subscription ID.
+ */
+async function handleUsageSubscriptionDisabled(data: Record<string, any>) {
+  const dodoSubId = data.subscription_id || data.id;
+  if (!dodoSubId) return;
+
+  // Find by dodoUsageSubscriptionId
+  await db
+    .update(subscriptions)
+    .set({
+      usageBasedBilling: false,
+      dodoUsageSubscriptionId: null,
+      updatedAt: new Date(),
+    })
+    .where(eq(subscriptions.dodoUsageSubscriptionId, dodoSubId));
 }

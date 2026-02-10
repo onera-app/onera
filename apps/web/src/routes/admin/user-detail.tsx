@@ -102,9 +102,9 @@ export function AdminUserDetailPage() {
           />
           <UsageMeter
             label="Storage"
-            used={data.usage.storageMb}
-            limit={data.plan.storageLimitMb}
-            unit="MB"
+            used={Math.round(data.usage.storageMb / 100) / 10}
+            limit={data.plan.storageLimitMb === -1 ? -1 : Math.round(data.plan.storageLimitMb / 100) / 10}
+            unit="GB"
           />
         </section>
       )}

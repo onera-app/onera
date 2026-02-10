@@ -4,7 +4,7 @@ import { db } from "../../db/client";
 import { plans, subscriptions, invoices, usageRecords } from "../../db/schema";
 import { eq, and, desc, sql, gte, lte, inArray } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { requireDodoClient } from "../../billing/dodo";
+import { requireDodoClient, DODO_USAGE_PRODUCT_ID } from "../../billing/dodo";
 import { randomUUID } from "crypto";
 import { checkInferenceAllowance } from "../../billing/usage";
 import { getEntitlements } from "../../billing/entitlements";
@@ -12,6 +12,25 @@ import { planData } from "../../db/plan-data";
 
 // Only return plans that are actively seeded (excludes retired plans like enterprise)
 const activePlanIds = planData.map((p) => p.id);
+
+/** Count overage usage records for a user within a billing period. */
+async function getOverageCount(userId: string, periodStart: Date, periodEnd: Date): Promise<number> {
+  const [result] = await db
+    .select({
+      total: sql<number>`COALESCE(sum(${usageRecords.quantity}), 0)`,
+    })
+    .from(usageRecords)
+    .where(
+      and(
+        eq(usageRecords.userId, userId),
+        eq(usageRecords.type, "inference_request"),
+        eq(usageRecords.isOverage, true),
+        gte(usageRecords.periodStart, periodStart),
+        lte(usageRecords.periodEnd, periodEnd)
+      )
+    );
+  return Number(result?.total) || 0;
+}
 
 export const billingRouter = router({
   // List available plans (public — pricing page is unauthenticated) (#4)
@@ -323,10 +342,14 @@ export const billingRouter = router({
       usageMap[row.type] = Number(row.total) || 0;
     }
 
+    const overageCount = await getOverageCount(ctx.user.id, periodStart, periodEnd);
+
     return {
       inferenceRequests: usageMap["inference_request"] || 0,
       byokInferenceRequests: usageMap["byok_inference_request"] || 0,
       storageMb: usageMap["storage_mb"] || 0,
+      overageCount,
+      usageBasedBilling: sub?.usageBasedBilling ?? false,
       periodStart: periodStart.getTime(),
       periodEnd: periodEnd.getTime(),
     };
@@ -430,6 +453,131 @@ export const billingRouter = router({
     .mutation(async ({ ctx, input }) => {
       return checkInferenceAllowance(ctx.user.id, input?.inferenceType ?? "private");
     }),
+
+  // Enable usage-based billing (creates Dodo checkout for usage product)
+  enableUsageBilling: protectedProcedure.mutation(async ({ ctx }) => {
+    const dodo = requireDodoClient();
+
+    if (!DODO_USAGE_PRODUCT_ID) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Usage billing product not configured",
+      });
+    }
+
+    if (!ctx.user.email) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "No email address found on your account.",
+      });
+    }
+
+    const [sub] = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, ctx.user.id))
+      .limit(1);
+
+    if (!sub || !["active", "trialing"].includes(sub.status) || sub.planId === "free") {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Usage-based billing requires an active paid subscription",
+      });
+    }
+
+    if (sub.usageBasedBilling) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Usage-based billing is already enabled",
+      });
+    }
+
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+
+    const checkout = await dodo.subscriptions.create({
+      product_id: DODO_USAGE_PRODUCT_ID,
+      quantity: 1,
+      billing: { country: "US" },
+      customer: {
+        email: ctx.user.email,
+        name: ctx.user.name,
+      },
+      metadata: {
+        userId: ctx.user.id,
+        usageBilling: "true",
+      },
+      payment_link: true,
+      return_url: `${frontendUrl}/app/billing`,
+    });
+
+    return {
+      url: checkout.payment_link,
+      subscriptionId: checkout.subscription_id,
+    };
+  }),
+
+  // Disable usage-based billing (cancels the Dodo usage subscription)
+  disableUsageBilling: protectedProcedure.mutation(async ({ ctx }) => {
+    const dodo = requireDodoClient();
+
+    const [sub] = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, ctx.user.id))
+      .limit(1);
+
+    if (!sub?.usageBasedBilling || !sub.dodoUsageSubscriptionId) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Usage-based billing is not enabled",
+      });
+    }
+
+    // Cancel the usage subscription in Dodo
+    await dodo.subscriptions.update(sub.dodoUsageSubscriptionId, {
+      cancel_at_next_billing_date: true,
+    });
+
+    // Disable locally immediately (user reverts to hard-block at limits)
+    await db
+      .update(subscriptions)
+      .set({
+        usageBasedBilling: false,
+        dodoUsageSubscriptionId: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(subscriptions.userId, ctx.user.id));
+
+    return { success: true };
+  }),
+
+  // Get usage billing status
+  getUsageBillingStatus: protectedProcedure.query(async ({ ctx }) => {
+    const [sub] = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, ctx.user.id))
+      .limit(1);
+
+    if (!sub) {
+      return { enabled: false, overageCount: 0 };
+    }
+
+    const now = new Date();
+    const periodStart =
+      sub.currentPeriodStart ||
+      new Date(now.getFullYear(), now.getMonth(), 1);
+    const periodEnd =
+      sub.currentPeriodEnd ||
+      new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+    const overageCount = await getOverageCount(ctx.user.id, periodStart, periodEnd);
+
+    return {
+      enabled: sub.usageBasedBilling,
+      overageCount,
+    };
+  }),
 
   // Get current user's entitlements for feature gating
   getEntitlements: protectedProcedure.query(async ({ ctx }) => {

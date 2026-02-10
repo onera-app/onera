@@ -2,6 +2,7 @@ import { db } from "../db/client";
 import { usageRecords, subscriptions } from "../db/schema";
 import { eq, and, gte, lte, sql } from "drizzle-orm";
 import { getEntitlements } from "./entitlements";
+import { reportOverageEvent } from "./usage-reporting";
 import { randomUUID } from "crypto";
 
 export type InferenceType = "private" | "byok";
@@ -14,6 +15,7 @@ export interface InferenceAllowanceResult {
   upgradeRequired: boolean;
   planId: string;
   inferenceType: InferenceType;
+  isOverage: boolean;
 }
 
 // Map inference type to usage record type
@@ -49,6 +51,7 @@ export async function checkInferenceAllowance(
       upgradeRequired: false,
       planId: entitlements.planId,
       inferenceType,
+      isOverage: false,
     };
   }
 
@@ -75,6 +78,34 @@ export async function checkInferenceAllowance(
     const used = Number(result?.total) || 0;
 
     if (used >= limit) {
+      // Check if user has usage-based billing enabled for overage
+      if (entitlements.usageBasedBilling && inferenceType === "private") {
+        const requestId = randomUUID();
+        await tx.insert(usageRecords).values({
+          id: requestId,
+          userId,
+          type: usageType,
+          quantity: 1,
+          isOverage: true,
+          periodStart,
+          periodEnd,
+        });
+
+        // Fire-and-forget: report overage to Dodo (never blocks inference)
+        reportOverageEvent(userId, entitlements.dodoCustomerId || "", requestId);
+
+        return {
+          allowed: true,
+          remaining: 0,
+          limit,
+          used: used + 1,
+          upgradeRequired: false,
+          planId: entitlements.planId,
+          inferenceType,
+          isOverage: true,
+        };
+      }
+
       return {
         allowed: false,
         remaining: 0,
@@ -83,6 +114,7 @@ export async function checkInferenceAllowance(
         upgradeRequired: true,
         planId: entitlements.planId,
         inferenceType,
+        isOverage: false,
       };
     }
 
@@ -104,6 +136,7 @@ export async function checkInferenceAllowance(
       upgradeRequired: false,
       planId: entitlements.planId,
       inferenceType,
+      isOverage: false,
     };
   });
 }
@@ -146,6 +179,7 @@ async function recordUsage(
     userId,
     type,
     quantity: 1,
+    isOverage: false,
     periodStart,
     periodEnd,
   });

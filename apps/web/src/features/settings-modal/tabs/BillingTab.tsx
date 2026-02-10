@@ -64,9 +64,9 @@ export function BillingTab() {
             />
             <UsageMeter
               label="Storage"
-              used={usage.storageMb}
-              limit={currentPlan.storageLimitMb}
-              unit="MB"
+              used={Math.round(usage.storageMb / 100) / 10}
+              limit={currentPlan.storageLimitMb === -1 ? -1 : Math.round(currentPlan.storageLimitMb / 100) / 10}
+              unit="GB"
             />
           </div>
         )}

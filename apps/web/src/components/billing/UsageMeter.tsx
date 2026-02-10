@@ -5,13 +5,17 @@ interface UsageMeterProps {
   used: number;
   limit: number; // -1 = unlimited
   unit?: string;
+  overageCount?: number; // number of overage requests (usage billing)
 }
 
-export function UsageMeter({ label, used, limit, unit = "" }: UsageMeterProps) {
+export function UsageMeter({ label, used, limit, unit = "", overageCount = 0 }: UsageMeterProps) {
   const isUnlimited = limit === -1;
-  const percentage = isUnlimited ? 0 : Math.min((used / limit) * 100, 100);
+  const hasOverage = overageCount > 0 && !isUnlimited;
+  const baseUsed = hasOverage ? used - overageCount : used;
+  const percentage = isUnlimited ? 0 : Math.min((baseUsed / limit) * 100, 100);
+  const overagePercentage = hasOverage ? Math.min((overageCount / limit) * 100, 20) : 0;
   const isWarning = !isUnlimited && percentage >= 80;
-  const isDanger = !isUnlimited && percentage >= 95;
+  const isDanger = !isUnlimited && (percentage >= 95 || hasOverage);
 
   return (
     <div className="space-y-2">
@@ -22,21 +26,37 @@ export function UsageMeter({ label, used, limit, unit = "" }: UsageMeterProps) {
           {isUnlimited
             ? ` ${unit} (Unlimited)`
             : ` / ${limit.toLocaleString()} ${unit}`}
+          {hasOverage && (
+            <span className="text-orange-500 ml-1">
+              (+{overageCount.toLocaleString()} overage)
+            </span>
+          )}
         </span>
       </div>
       {!isUnlimited && (
-        <div className="h-2 rounded-full bg-secondary">
-          <div
-            className={cn(
-              "h-full rounded-full transition-all duration-500",
-              isDanger
-                ? "bg-destructive"
-                : isWarning
-                  ? "bg-yellow-500"
-                  : "bg-primary"
+        <div className="h-2 rounded-full bg-secondary overflow-hidden">
+          <div className="flex h-full">
+            <div
+              className={cn(
+                "h-full transition-all duration-500",
+                hasOverage
+                  ? "rounded-l-full"
+                  : "rounded-full",
+                isDanger
+                  ? "bg-destructive"
+                  : isWarning
+                    ? "bg-yellow-500"
+                    : "bg-primary"
+              )}
+              style={{ width: `${percentage}%` }}
+            />
+            {hasOverage && (
+              <div
+                className="h-full rounded-r-full bg-orange-500 transition-all duration-500"
+                style={{ width: `${overagePercentage}%` }}
+              />
             )}
-            style={{ width: `${percentage}%` }}
-          />
+          </div>
         </div>
       )}
     </div>

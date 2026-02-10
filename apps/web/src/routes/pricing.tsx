@@ -99,6 +99,7 @@ export function PricingPage() {
                 features={plan.features as Record<string, boolean>}
                 limits={{
                   inferenceRequests: plan.inferenceRequestsLimit,
+                  byokInferenceRequests: plan.byokInferenceRequestsLimit ?? undefined,
                   storageMb: plan.storageLimitMb,
                   maxEnclaves: plan.maxEnclaves,
                 }}

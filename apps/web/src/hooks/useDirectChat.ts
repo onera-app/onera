@@ -352,6 +352,9 @@ export function useDirectChat({
         onErrorRef.current?.(error);
         throw error;
       }
+      if (allowance.isOverage) {
+        console.info('Request billed as overage (usage-based billing)');
+      }
     } catch (err) {
       if ((err as any).upgradeRequired) throw err;
       // Network/server errors should not block inference — fail open

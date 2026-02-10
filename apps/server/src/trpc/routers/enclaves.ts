@@ -71,10 +71,6 @@ export const enclavesRouter = router({
    * Queries enclaves directly for their available models.
    */
   listModels: entitledProcedure.query(async ({ ctx }) => {
-    // Filter large models if plan doesn't include them
-    const largeModelPattern = /\b(70b|72b|110b|180b|405b|671b)\b/i;
-    const filterLarge = !ctx.entitlements.features.largeModels;
-
     // First try: get models from server_models table (preferred, avoids network calls)
     const dbModels = await db
       .select({
@@ -93,14 +89,10 @@ export const enclavesRouter = router({
       );
 
     if (dbModels.length > 0) {
-      const models = dbModels.map((m) => ({
+      return dbModels.map((m) => ({
         ...m,
         provider: 'onera-private' as const,
       }));
-      if (filterLarge) {
-        return models.filter((m) => !largeModelPattern.test(m.name) && !largeModelPattern.test(m.displayName));
-      }
-      return models;
     }
 
     // Fallback: query enclaves directly (existing behavior)
@@ -145,10 +137,6 @@ export const enclavesRouter = router({
       } catch (error) {
         console.warn(`Failed to fetch models from enclave ${enclave.id}:`, error);
       }
-    }
-
-    if (filterLarge) {
-      return allModels.filter((m) => !largeModelPattern.test(m.name) && !largeModelPattern.test(m.displayName));
     }
 
     return allModels;
