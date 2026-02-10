@@ -39,12 +39,6 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL_STAGE }}
         run: bun run db:migrate
 
-      - name: Push schema changes
-        working-directory: apps/server
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_STAGE }}
-        run: bunx drizzle-kit push --force
-
       - name: Seed plans
         working-directory: apps/server
         env:
