@@ -22,12 +22,12 @@ const faqs = [
   {
     question: "How do I know you really can't see my chats?",
     answer:
-      "Your browser automatically verifies our servers before every session. For the technical details, check Settings → Security.",
+      "Your browser automatically verifies our servers before every session. For the technical details, check Settings after signing up.",
   },
   {
     question: "What happens to my chat history?",
     answer:
-      "It's encrypted with a key only you have. We store scrambled data we can't read.",
+      "It's encrypted with a key only you have. We store data we can't read.",
   },
   {
     question: "What if I lose my recovery key?",
@@ -37,53 +37,51 @@ const faqs = [
   {
     question: "What encryption do you use?",
     answer:
-      "Industry-standard encryption (AES-256) for your stored chats, plus special hardware protection for processing. Happy to nerd out — email us.",
+      "Industry-standard encryption (AES-256) for stored chats, plus hardware-level protection for processing. All open source.",
   },
   {
     question: "Is it really free?",
     answer:
-      "Yes, during beta. We'll add paid options later for power features, but basic private chat will stay accessible.",
+      "Yes, during early access. We'll add paid tiers later for power features, but basic private chat will stay accessible.",
   },
 ];
 
 export function FAQSection() {
   return (
-    <section className="py-16 sm:py-24 px-4 bg-neutral-50 dark:bg-transparent">
+    <section className="py-20 sm:py-32 px-4 border-t border-neutral-100 dark:border-neutral-800/50">
       <div className="max-w-3xl mx-auto">
-        {/* Heading */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-10 sm:mb-14"
+          transition={{ duration: 0.5 }}
+          className="text-center mb-12"
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4">
-            Questions? We've got answers.
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 text-neutral-900 dark:text-white">
+            Questions
           </h2>
-          <p className="text-base sm:text-lg text-muted-foreground">
+          <p className="text-lg text-neutral-500 dark:text-neutral-400">
             Everything you need to know about Onera
           </p>
         </motion.div>
 
-        {/* FAQ Accordion */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.1 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <Accordion type="single" collapsible className="w-full space-y-3">
+          <Accordion type="single" collapsible className="w-full space-y-2">
             {faqs.map((faq, index) => (
               <AccordionItem
                 key={index}
                 value={`item-${index}`}
-                className="bg-white dark:bg-neutral-900/80 backdrop-blur-sm border border-neutral-200/60 dark:border-neutral-700/60 rounded-xl px-4 sm:px-6 data-[state=open]:shadow-lg transition-shadow"
+                className="border border-neutral-200 dark:border-neutral-800 rounded-xl px-5 data-[state=open]:bg-neutral-50 dark:data-[state=open]:bg-neutral-900/50 transition-colors"
               >
-                <AccordionTrigger className="text-left text-base sm:text-lg font-medium py-4 sm:py-5 hover:no-underline">
+                <AccordionTrigger className="text-left text-base font-medium py-4 hover:no-underline text-neutral-900 dark:text-white">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-sm sm:text-base text-muted-foreground pb-4 sm:pb-5 leading-relaxed">
+                <AccordionContent className="text-sm text-neutral-500 dark:text-neutral-400 pb-4 leading-relaxed">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
@@ -91,21 +89,20 @@ export function FAQSection() {
           </Accordion>
         </motion.div>
 
-        {/* Contact CTA */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-center mt-10 sm:mt-14"
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="text-center mt-12"
         >
-          <p className="text-sm sm:text-base text-muted-foreground">
+          <p className="text-sm text-neutral-400">
             Still have questions?{" "}
             <a
               href="mailto:hello@onera.ai"
-              className="text-foreground font-medium hover:underline underline-offset-4"
+              className="text-neutral-900 dark:text-white font-medium hover:underline underline-offset-4"
             >
-              Reach out to us
+              Reach out
             </a>
           </p>
         </motion.div>
