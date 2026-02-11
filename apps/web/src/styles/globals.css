@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=SF+Pro+Display:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
 @source "../node_modules/streamdown/dist/*.js";
 
 /*
@@ -9,88 +9,80 @@
 
 @theme {
   /* 
-   * Color Palette - OpenWebUI Style
-   * Very dark theme with subtle contrast between sidebar and main area.
+   * Color Palette - Apple-inspired Dark Theme
+   * Premium dark theme with depth, clarity, and subtle sophistication.
    */
 
-  --color-background: oklch(0.17 0.005 260);
-  /* OpenWebUI-style very dark main area #212121 */
-  --color-foreground: oklch(0.92 0.005 90);
-  /* Clean white text */
+  --color-background: oklch(0.14 0.004 260);
+  /* Deep dark background */
+  --color-foreground: oklch(0.94 0.003 90);
+  /* Clean white text with slight warmth */
 
-  --color-card: oklch(0.20 0.005 260);
+  --color-card: oklch(0.18 0.004 260);
   /* Elevated surface */
-  --color-card-foreground: oklch(0.92 0.005 90);
+  --color-card-foreground: oklch(0.94 0.003 90);
 
-  --color-popover: oklch(0.18 0.005 260 / 0.98);
-  --color-popover-foreground: oklch(0.92 0.005 90);
+  --color-popover: oklch(0.16 0.004 260 / 0.96);
+  --color-popover-foreground: oklch(0.94 0.003 90);
 
-  --color-primary: oklch(0.92 0.005 90);
+  --color-primary: oklch(0.94 0.003 90);
   /* White as Primary */
-  --color-primary-foreground: oklch(0.15 0.005 260);
+  --color-primary-foreground: oklch(0.12 0.004 260);
   /* Dark text on Primary */
 
-  --color-secondary: oklch(0.24 0.005 260);
+  --color-secondary: oklch(0.22 0.004 260);
   /* Slightly lighter for secondary */
-  --color-secondary-foreground: oklch(0.92 0.005 90);
+  --color-secondary-foreground: oklch(0.94 0.003 90);
 
-  --color-muted: oklch(0.22 0.005 260);
-  --color-muted-foreground: oklch(0.55 0.01 260);
-  /* Muted gray text */
+  --color-muted: oklch(0.2 0.004 260);
+  --color-muted-foreground: oklch(0.5 0.008 260);
+  /* Subtle muted text */
 
-  --color-accent: oklch(0.26 0.005 260);
+  --color-accent: oklch(0.24 0.004 260);
   /* Hover/interaction state */
-  --color-accent-foreground: oklch(0.92 0.005 90);
+  --color-accent-foreground: oklch(0.94 0.003 90);
 
-  --color-destructive: oklch(0.55 0.18 25);
+  --color-destructive: oklch(0.58 0.2 25);
   /* Red for errors */
   --color-destructive-foreground: oklch(0.98 0 0);
 
-  --color-border: oklch(0.28 0.005 260 / 0.6);
-  --color-input: oklch(0.22 0.005 260);
-  --color-ring: oklch(0.50 0.01 260 / 0.5);
+  --color-border: oklch(0.26 0.004 260 / 0.5);
+  --color-input: oklch(0.2 0.004 260);
+  --color-ring: oklch(0.45 0.008 260 / 0.4);
 
-  /* Sidebar - darker than main content like OpenWebUI */
-  --color-sidebar-background: oklch(0.13 0.005 260);
-  /* Very dark sidebar #171717 */
-  --color-sidebar-foreground: oklch(0.80 0.005 90);
-  --color-sidebar-primary: oklch(0.92 0.005 90);
-  --color-sidebar-primary-foreground: oklch(0.13 0.005 260);
-  --color-sidebar-accent: oklch(0.22 0.005 260);
-  --color-sidebar-accent-foreground: oklch(0.92 0.005 90);
-  --color-sidebar-border: oklch(0.22 0.005 260);
-  --color-sidebar-ring: oklch(0.50 0.01 260 / 0.5);
+  /* Sidebar - subtly darker than main content */
+  --color-sidebar-background: oklch(0.11 0.004 260);
+  /* Very dark sidebar */
+  --color-sidebar-foreground: oklch(0.82 0.003 90);
+  --color-sidebar-primary: oklch(0.94 0.003 90);
+  --color-sidebar-primary-foreground: oklch(0.11 0.004 260);
+  --color-sidebar-accent: oklch(0.2 0.004 260);
+  --color-sidebar-accent-foreground: oklch(0.94 0.003 90);
+  --color-sidebar-border: oklch(0.2 0.004 260);
+  --color-sidebar-ring: oklch(0.45 0.008 260 / 0.4);
 
   /* AI Provider Colors - Desaturated / Neutralized where appropriate, or kept distinct but darker */
-  --color-provider-anthropic: oklch(0.70 0.05 45);
-  --color-provider-openai: oklch(0.70 0 0);
+  --color-provider-anthropic: oklch(0.7 0.05 45);
+  --color-provider-openai: oklch(0.7 0 0);
   /* Grey for OpenAI/Neutral */
-  --color-provider-google: oklch(0.70 0.05 250);
-  --color-provider-meta: oklch(0.70 0.05 300);
+  --color-provider-google: oklch(0.7 0.05 250);
+  --color-provider-meta: oklch(0.7 0.05 300);
   --color-provider-mistral: oklch(0.75 0.05 70);
 
   /* Status Colors */
   --color-status-success: oklch(0.65 0.18 150);
   --color-status-warning: oklch(0.75 0.18 85);
-  --color-status-error: oklch(0.60 0.20 25);
+  --color-status-error: oklch(0.6 0.2 25);
 
-  /* Radius */
-  --radius: 0.75rem;
-  /* 12px default radius */
+  /* Radius - Apple-style rounded corners */
+  --radius: 0.875rem;
+  /* 14px default radius */
 
-  /* Fonts */
-  --font-sans: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-
-  .mask-radial-faded {
-    mask-image: radial-gradient(circle at center, black, transparent 80%);
-  }
+  /* Fonts - SF Pro for that Apple feel */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter",
+    ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "SF Mono", "JetBrains Mono", ui-monospace, monospace;
 }
 
 @layer utilities {
@@ -122,7 +114,7 @@
 
   --color-secondary: oklch(0.95 0.005 85);
   /* Warm light gray */
-  --color-secondary-foreground: oklch(0.30 0.01 260);
+  --color-secondary-foreground: oklch(0.3 0.01 260);
 
   --color-muted: oklch(0.94 0.005 85);
   --color-muted-foreground: oklch(0.45 0.01 260);
@@ -135,19 +127,19 @@
   --color-destructive: oklch(0.55 0.18 25);
   --color-destructive-foreground: oklch(0.99 0 0);
 
-  --color-border: oklch(0.90 0.008 85);
+  --color-border: oklch(0.9 0.008 85);
   /* Warm visible border */
   --color-input: oklch(0.92 0.005 85);
   --color-ring: oklch(0.25 0.01 260 / 0.25);
 
   --color-sidebar-background: oklch(0.97 0.005 85 / 0.95);
-  --color-sidebar-foreground: oklch(0.30 0.01 260);
+  --color-sidebar-foreground: oklch(0.3 0.01 260);
   /* Good contrast on light sidebar */
   --color-sidebar-primary: oklch(0.25 0.01 260);
   --color-sidebar-primary-foreground: oklch(0.99 0.003 85);
   --color-sidebar-accent: oklch(0.93 0.005 85);
   --color-sidebar-accent-foreground: oklch(0.22 0.01 260);
-  --color-sidebar-border: oklch(0.90 0.008 85);
+  --color-sidebar-border: oklch(0.9 0.008 85);
 }
 
 @layer base {
@@ -157,53 +149,58 @@
 
   html {
     @apply h-full;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
-    @apply bg-background text-foreground antialiased selection:bg-blue-500/30 selection:text-blue-900 dark:selection:bg-blue-500/40 dark:selection:text-blue-100 min-h-full;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    @apply bg-background text-foreground antialiased selection:bg-blue-500/25 selection:text-foreground min-h-full;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1,
+      "ss01" 1,
+      "ss02" 1;
+    letter-spacing: -0.011em;
   }
 
   #root {
     @apply h-full w-full;
   }
-
 }
 
 @layer utilities {
-
-  /* Pressable / Interactive Element Utility */
+  /* Pressable / Interactive Element Utility - Apple-style micro-interactions */
   .pressable {
-    @apply cursor-pointer select-none transition-all duration-200 ease-out;
-    @apply hover:bg-accent/50 hover:-translate-y-0.5;
-    @apply active:scale-[0.98] active:translate-y-0 active:opacity-90;
+    @apply cursor-pointer select-none transition-all duration-200 ease-[cubic-bezier(0.32,0.72,0,1)];
+    @apply hover:bg-white/[0.04];
+    @apply active:scale-[0.97] active:opacity-80;
   }
 
   .pressable-scale {
-    @apply cursor-pointer select-none transition-transform duration-150 ease-out;
+    @apply cursor-pointer select-none transition-transform duration-200 ease-[cubic-bezier(0.32,0.72,0,1)];
     @apply hover:scale-[1.02];
-    @apply active:scale-[0.98];
+    @apply active:scale-[0.97];
   }
 
   .pressable-opacity {
-    @apply cursor-pointer select-none transition-opacity duration-150 ease-out;
-    @apply hover:opacity-80;
-    @apply active:opacity-60;
+    @apply cursor-pointer select-none transition-opacity duration-200 ease-out;
+    @apply hover:opacity-70;
+    @apply active:opacity-50;
   }
 
-  /* Glassmorphism Utilities */
+  /* Glassmorphism Utilities - refined for Apple aesthetic */
   .glass-panel {
-    @apply bg-card/70 backdrop-blur-xl border border-border shadow-xl;
+    @apply bg-white/[0.04] backdrop-blur-2xl border border-white/[0.06] shadow-2xl;
   }
 
   .glass-button {
-    @apply bg-foreground/5 border border-border backdrop-blur-md transition-all duration-200 cursor-pointer select-none;
-    @apply hover:bg-foreground/10 hover:-translate-y-0.5;
-    @apply active:bg-foreground/5 active:scale-[0.98] active:translate-y-0;
+    @apply bg-white/[0.04] border border-white/[0.08] backdrop-blur-xl transition-all duration-200 ease-out cursor-pointer select-none;
+    @apply hover:bg-white/[0.08];
+    @apply active:bg-white/[0.04] active:scale-[0.97];
   }
 
   .glass-input {
-    @apply bg-muted/40 border-border focus:border-primary/50 focus:ring-primary/20 backdrop-blur-sm transition-all duration-200;
+    @apply bg-white/[0.04] border-white/[0.08] focus:border-white/[0.16] focus:ring-white/[0.08] backdrop-blur-xl transition-all duration-200;
   }
 
   /* Glow Effects */
@@ -231,9 +228,9 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Custom scrollbar for chat containers */
+  /* Custom scrollbar for chat containers - minimal Apple-style */
   .chat-scrollbar::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
   }
 
   .chat-scrollbar::-webkit-scrollbar-track {
@@ -241,17 +238,20 @@
   }
 
   .chat-scrollbar::-webkit-scrollbar-thumb {
-    background: var(--color-border);
-    border-radius: 3px;
+    background: oklch(0.3 0.004 260 / 0.4);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
   }
 
   .chat-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: var(--color-muted-foreground);
+    background: oklch(0.4 0.004 260 / 0.5);
+    background-clip: padding-box;
   }
 
   .chat-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: var(--color-border) transparent;
+    scrollbar-color: oklch(0.3 0.004 260 / 0.4) transparent;
   }
 
   /* Animations */
@@ -288,7 +288,6 @@
 }
 
 @keyframes pulse-soft {
-
   0%,
   100% {
     opacity: 0.4;
@@ -303,7 +302,6 @@
 
 /* Premium gradient animations for landing page */
 @keyframes gradient-float {
-
   0%,
   100% {
     transform: translate(0, 0) scale(1);
@@ -327,7 +325,6 @@
 }
 
 @keyframes gradient-float-delayed {
-
   0%,
   100% {
     transform: translate(0, 0) scale(1);
@@ -346,7 +343,6 @@
 }
 
 @keyframes gradient-float-slow {
-
   0%,
   100% {
     transform: translate(0, 0) scale(1) rotate(0deg);
@@ -360,7 +356,6 @@
 }
 
 @keyframes gradient-float-reverse {
-
   0%,
   100% {
     transform: translate(0, 0) scale(1);
@@ -441,14 +436,16 @@
   }
 
   .streaming-cursor::after {
-    content: '';
+    content: "";
     display: inline-block;
     width: 2px;
     height: 1.1em;
     background: currentColor;
     margin-left: 2px;
     vertical-align: text-bottom;
-    animation: cursor-blink 1s steps(2, start) infinite, cursor-fade-in 0.2s ease-out;
+    animation:
+      cursor-blink 1s steps(2, start) infinite,
+      cursor-fade-in 0.2s ease-out;
     opacity: 0.7;
     border-radius: 1px;
   }
@@ -478,7 +475,6 @@
 
 /* Streaming animations */
 @keyframes cursor-blink {
-
   0%,
   100% {
     opacity: 0.7;
@@ -524,26 +520,24 @@
   }
 }
 
-/* Typing indicator pulse - smoother than bounce */
+/* Typing indicator pulse - Apple-style gentle pulse */
 @keyframes typing-pulse {
-
   0%,
   100% {
-    opacity: 0.3;
-    transform: scale(0.85);
+    opacity: 0.25;
+    transform: scale(0.9);
   }
 
   50% {
-    opacity: 0.8;
+    opacity: 0.7;
     transform: scale(1);
   }
 }
 
 @layer utilities {
-
   /* Typing indicator with smooth pulse */
   .typing-dot {
-    animation: typing-pulse 1.4s ease-in-out infinite;
+    animation: typing-pulse 1.2s ease-in-out infinite;
   }
 
   /* Message content that just finished streaming */
@@ -553,7 +547,6 @@
 
   /* Reduce motion for accessibility */
   @media (prefers-reduced-motion: reduce) {
-
     .streaming-cursor::after,
     .typing-dot {
       animation: none;
@@ -564,7 +557,6 @@
     }
   }
 }
-
 
 /* Prose overrides for Markdown content */
 .prose {
@@ -614,7 +606,7 @@
 
 /* Base code styling */
 .hljs {
-  color: oklch(0.90 0.01 90);
+  color: oklch(0.9 0.01 90);
   background: transparent;
 }
 
@@ -637,7 +629,7 @@
 .hljs-template-tag,
 .hljs-template-variable,
 .hljs-addition {
-  color: oklch(0.80 0.14 85);
+  color: oklch(0.8 0.14 85);
 }
 
 /* Numbers, booleans, constants - teal/cyan */
@@ -678,12 +670,12 @@
 .hljs-meta,
 .hljs-meta .hljs-keyword,
 .hljs-meta .hljs-string {
-  color: oklch(0.70 0.10 60);
+  color: oklch(0.7 0.1 60);
 }
 
 /* Deletion (diffs) */
 .hljs-deletion {
-  color: oklch(0.70 0.16 25);
+  color: oklch(0.7 0.16 25);
   background: oklch(0.25 0.05 25 / 0.3);
 }
 
@@ -696,7 +688,7 @@
 /* Selection within code */
 .hljs::selection,
 .hljs *::selection {
-  background: oklch(0.40 0.02 260);
+  background: oklch(0.4 0.02 260);
 }
 
 /* Emphasis */
@@ -731,25 +723,25 @@
 
 /* Light mode overrides for syntax highlighting */
 .light .hljs {
-  color: oklch(0.30 0.01 260);
+  color: oklch(0.3 0.01 260);
 }
 
 .light .hljs-comment,
 .light .hljs-quote {
-  color: oklch(0.50 0.02 260);
+  color: oklch(0.5 0.02 260);
   font-style: italic;
 }
 
 .light .hljs-keyword,
 .light .hljs-selector-tag,
 .light .hljs-tag {
-  color: oklch(0.50 0.18 25);
+  color: oklch(0.5 0.18 25);
 }
 
 .light .hljs-string,
 .light .hljs-template-tag,
 .light .hljs-template-variable {
-  color: oklch(0.50 0.16 85);
+  color: oklch(0.5 0.16 85);
 }
 
 .light .hljs-number,
@@ -768,7 +760,7 @@
 .light .hljs-built_in,
 .light .hljs-type,
 .light .hljs-class .hljs-title {
-  color: oklch(0.50 0.14 300);
+  color: oklch(0.5 0.14 300);
 }
 
 .light .hljs-property,
@@ -778,23 +770,23 @@
 
 .light .hljs-operator,
 .light .hljs-punctuation {
-  color: oklch(0.40 0.02 260);
+  color: oklch(0.4 0.02 260);
 }
 
 .light .hljs-meta,
 .light .hljs-meta .hljs-keyword,
 .light .hljs-meta .hljs-string {
-  color: oklch(0.50 0.12 60);
+  color: oklch(0.5 0.12 60);
 }
 
 .light .hljs-deletion {
-  color: oklch(0.50 0.18 25);
-  background: oklch(0.90 0.05 25 / 0.3);
+  color: oklch(0.5 0.18 25);
+  background: oklch(0.9 0.05 25 / 0.3);
 }
 
 .light .hljs-addition {
   color: oklch(0.45 0.16 150);
-  background: oklch(0.90 0.05 150 / 0.3);
+  background: oklch(0.9 0.05 150 / 0.3);
 }
 
 .light .hljs::selection,
@@ -803,7 +795,7 @@
 }
 
 .light .hljs-regexp {
-  color: oklch(0.50 0.16 40);
+  color: oklch(0.5 0.16 40);
 }
 
 .light .hljs-symbol {

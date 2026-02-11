@@ -4,18 +4,25 @@
  * Inspired by open-webui's implementation
  */
 
-import { useState, memo } from 'react';
-import { RefreshCw, ChevronDown, Sparkles, FileText, Minimize2, MessageSquare } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState, memo } from "react";
+import {
+  RefreshCw,
+  ChevronDown,
+  Zap,
+  FileText,
+  Minimize2,
+  MessageSquare,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import type { RegenerateOptions } from './AssistantMessage';
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import type { RegenerateOptions } from "./AssistantMessage";
 
 interface RegenerateMenuProps {
   onRegenerate: (options?: RegenerateOptions) => void;
@@ -24,32 +31,32 @@ interface RegenerateMenuProps {
 
 const REGENERATE_OPTIONS = [
   {
-    id: 'retry',
-    label: 'Try Again',
-    description: 'Regenerate the response',
+    id: "retry",
+    label: "Try Again",
+    description: "Regenerate the response",
     icon: RefreshCw,
     modifier: undefined,
   },
   {
-    id: 'details',
-    label: 'Add Details',
-    description: 'Ask for more detailed explanation',
+    id: "details",
+    label: "Add Details",
+    description: "Ask for more detailed explanation",
     icon: FileText,
-    modifier: 'Please provide more details and expand on your explanation.',
+    modifier: "Please provide more details and expand on your explanation.",
   },
   {
-    id: 'concise',
-    label: 'More Concise',
-    description: 'Ask for a shorter response',
+    id: "concise",
+    label: "More Concise",
+    description: "Ask for a shorter response",
     icon: Minimize2,
-    modifier: 'Please be more concise and brief in your response.',
+    modifier: "Please be more concise and brief in your response.",
   },
   {
-    id: 'creative',
-    label: 'Be Creative',
-    description: 'Ask for a more creative response',
-    icon: Sparkles,
-    modifier: 'Please be more creative and think outside the box.',
+    id: "creative",
+    label: "Be Creative",
+    description: "Ask for a more creative response",
+    icon: Zap,
+    modifier: "Please be more creative and think outside the box.",
   },
 ] as const;
 
@@ -57,13 +64,13 @@ export const RegenerateMenu = memo(function RegenerateMenu({
   onRegenerate,
   disabled,
 }: RegenerateMenuProps) {
-  const [customPrompt, setCustomPrompt] = useState('');
+  const [customPrompt, setCustomPrompt] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
   const handleRegenerate = (modifier?: string) => {
     onRegenerate(modifier ? { modifier } : undefined);
     setIsOpen(false);
-    setCustomPrompt('');
+    setCustomPrompt("");
   };
 
   const handleCustomSubmit = (e: React.FormEvent) => {
@@ -97,7 +104,9 @@ export const RegenerateMenu = memo(function RegenerateMenu({
             <option.icon className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-medium">{option.label}</span>
-              <span className="text-xs text-muted-foreground">{option.description}</span>
+              <span className="text-xs text-muted-foreground">
+                {option.description}
+              </span>
             </div>
           </DropdownMenuItem>
         ))}
@@ -117,11 +126,7 @@ export const RegenerateMenu = memo(function RegenerateMenu({
             />
           </div>
           {customPrompt.trim() && (
-            <Button
-              type="submit"
-              size="sm"
-              className="w-full mt-2 h-7"
-            >
+            <Button type="submit" size="sm" className="w-full mt-2 h-7">
               Regenerate with custom prompt
             </Button>
           )}

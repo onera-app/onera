@@ -8,51 +8,70 @@ interface UsageMeterProps {
   overageCount?: number; // number of overage requests (usage billing)
 }
 
-export function UsageMeter({ label, used, limit, unit = "", overageCount = 0 }: UsageMeterProps) {
+export function UsageMeter({
+  label,
+  used,
+  limit,
+  unit = "",
+  overageCount = 0,
+}: UsageMeterProps) {
   const isUnlimited = limit === -1;
   const hasOverage = overageCount > 0 && !isUnlimited;
   const baseUsed = hasOverage ? used - overageCount : used;
   const percentage = isUnlimited ? 0 : Math.min((baseUsed / limit) * 100, 100);
-  const overagePercentage = hasOverage ? Math.min((overageCount / limit) * 100, 20) : 0;
+  const overagePercentage = hasOverage
+    ? Math.min((overageCount / limit) * 100, 20)
+    : 0;
   const isWarning = !isUnlimited && percentage >= 80;
   const isDanger = !isUnlimited && (percentage >= 95 || hasOverage);
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between text-sm">
-        <span className="font-medium">{label}</span>
-        <span className="text-muted-foreground">
-          {used.toLocaleString()}
-          {isUnlimited
-            ? ` ${unit} (Unlimited)`
-            : ` / ${limit.toLocaleString()} ${unit}`}
+      {/* Label and Value */}
+      <div className="flex items-center justify-between">
+        <span className="text-[13px] text-foreground">{label}</span>
+        <span className="text-[13px] text-muted-foreground">
+          {isUnlimited ? (
+            <>
+              {used.toLocaleString()} {unit}
+              <span className="text-muted-foreground ml-1">(Unlimited)</span>
+            </>
+          ) : (
+            <>
+              {used.toLocaleString()}
+              <span className="text-muted-foreground">
+                {" "}
+                / {limit.toLocaleString()} {unit}
+              </span>
+            </>
+          )}
           {hasOverage && (
-            <span className="text-orange-500 ml-1">
-              (+{overageCount.toLocaleString()} overage)
+            <span className="text-amber-500 ml-1.5">
+              +{overageCount.toLocaleString()}
             </span>
           )}
         </span>
       </div>
+
+      {/* Progress Bar - only for limited plans */}
       {!isUnlimited && (
-        <div className="h-2 rounded-full bg-secondary overflow-hidden">
+        <div className="h-1.5 rounded-full bg-muted overflow-hidden">
           <div className="flex h-full">
             <div
               className={cn(
-                "h-full transition-all duration-500",
-                hasOverage
-                  ? "rounded-l-full"
-                  : "rounded-full",
+                "h-full transition-all duration-500 ease-out",
+                hasOverage ? "rounded-l-full" : "rounded-full",
                 isDanger
-                  ? "bg-destructive"
+                  ? "bg-red-500"
                   : isWarning
-                    ? "bg-yellow-500"
-                    : "bg-primary"
+                    ? "bg-amber-500"
+                    : "bg-primary/50",
               )}
               style={{ width: `${percentage}%` }}
             />
             {hasOverage && (
               <div
-                className="h-full rounded-r-full bg-orange-500 transition-all duration-500"
+                className="h-full rounded-r-full bg-amber-500 transition-all duration-500 ease-out"
                 style={{ width: `${overagePercentage}%` }}
               />
             )}

@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, Link } from '@tanstack/react-router';
-import { toast } from 'sonner';
-import { useAuth, useSignInWithE2EE } from '@/providers/ClerkAuthProvider';
-import { Button } from '@/components/ui/button';
-import { OneraLogo } from '@/components/ui/onera-logo';
-import { Loader2 } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { useNavigate, Link } from "@tanstack/react-router";
+import { toast } from "sonner";
+import { useAuth, useSignInWithE2EE } from "@/providers/ClerkAuthProvider";
+import { Button } from "@/components/ui/button";
+import { OneraLogo } from "@/components/ui/onera-logo";
+import { Spinner } from "@/components/ui/spinner";
 
 function GoogleIcon({ className }: { className?: string }) {
   return (
@@ -41,31 +41,33 @@ export function AuthPage() {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { isLoaded, isLoading, signInWithOAuth } = useSignInWithE2EE();
-  const [loadingProvider, setLoadingProvider] = useState < 'google' | 'apple' | null > (null);
+  const [loadingProvider, setLoadingProvider] = useState<
+    "google" | "apple" | null
+  >(null);
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
-      navigate({ to: '/app' });
+      navigate({ to: "/app" });
     }
   }, [isAuthenticated, authLoading, navigate]);
 
   const handleGoogleSignIn = async () => {
     try {
-      setLoadingProvider('google');
-      await signInWithOAuth('oauth_google');
+      setLoadingProvider("google");
+      await signInWithOAuth("oauth_google");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Google sign in failed');
+      toast.error(err instanceof Error ? err.message : "Google sign in failed");
       setLoadingProvider(null);
     }
   };
 
   const handleAppleSignIn = async () => {
     try {
-      setLoadingProvider('apple');
-      await signInWithOAuth('oauth_apple');
+      setLoadingProvider("apple");
+      await signInWithOAuth("oauth_apple");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Apple sign in failed');
+      toast.error(err instanceof Error ? err.message : "Apple sign in failed");
       setLoadingProvider(null);
     }
   };
@@ -75,7 +77,6 @@ export function AuthPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-white dark:bg-[#0a0a0a] selection:bg-neutral-900 selection:text-white dark:selection:bg-white dark:selection:text-neutral-900">
       <div className="w-full max-w-[360px] relative z-10 flex flex-col items-center text-center">
-
         {/* Logo */}
         <div className="mb-10">
           <OneraLogo size={64} className="text-neutral-900 dark:text-white" />
@@ -99,8 +100,8 @@ export function AuthPage() {
             onClick={handleGoogleSignIn}
             disabled={!isLoaded || isButtonLoading}
           >
-            {loadingProvider === 'google' ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+            {loadingProvider === "google" ? (
+              <Spinner size="sm" />
             ) : (
               <div className="absolute left-4">
                 <GoogleIcon className="w-5 h-5" />
@@ -115,8 +116,8 @@ export function AuthPage() {
             onClick={handleAppleSignIn}
             disabled={!isLoaded || isButtonLoading}
           >
-            {loadingProvider === 'apple' ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+            {loadingProvider === "apple" ? (
+              <Spinner size="sm" />
             ) : (
               <div className="absolute left-4">
                 <AppleIcon className="w-5 h-5 text-black dark:text-white" />
@@ -128,10 +129,21 @@ export function AuthPage() {
 
         {/* Footer */}
         <p className="mt-12 text-xs text-neutral-400 dark:text-neutral-500 max-w-xs mx-auto leading-relaxed">
-          By continuing, you agree to our{' '}
-          <Link to="/terms" className="underline hover:text-neutral-900 dark:hover:text-white transition-colors">Terms</Link>
-          {' '}and{' '}
-          <Link to="/privacy" className="underline hover:text-neutral-900 dark:hover:text-white transition-colors">Privacy Policy</Link>.
+          By continuing, you agree to our{" "}
+          <Link
+            to="/terms"
+            className="underline hover:text-neutral-900 dark:hover:text-white transition-colors"
+          >
+            Terms
+          </Link>{" "}
+          and{" "}
+          <Link
+            to="/privacy"
+            className="underline hover:text-neutral-900 dark:hover:text-white transition-colors"
+          >
+            Privacy Policy
+          </Link>
+          .
         </p>
       </div>
     </div>

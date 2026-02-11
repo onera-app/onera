@@ -1,31 +1,45 @@
-import { useState, useEffect, useRef, useMemo, useCallback, memo, type KeyboardEvent } from 'react';
-import { useUIStore } from '@/stores/uiStore';
-import { useE2EE } from '@/providers/E2EEProvider';
-import { useCredentials } from '@/hooks/queries/useCredentials';
+import {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+  memo,
+  type KeyboardEvent,
+} from "react";
+import { useUIStore } from "@/stores/uiStore";
+import { useE2EE } from "@/providers/E2EEProvider";
+import { useCredentials } from "@/hooks/queries/useCredentials";
 import {
   decryptCredentialsWithMetadata,
   getAvailableModelsFromCredentials,
   PRIVATE_MODEL_PREFIX,
   type ModelOption,
   type PartiallyDecryptedCredential,
-} from '@/lib/ai';
-import { trpc } from '@/lib/trpc';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { AlertTriangle, ChevronDown, Lock, Search, Loader2, Pin } from 'lucide-react';
-import { useModelSelection } from '../hooks/useModelSelection';
-import { FilterChips } from './FilterChips';
-import { ModelItem } from './ModelItem';
+} from "@/lib/ai";
+import { trpc } from "@/lib/trpc";
+import { cn } from "@/lib/utils";
+
+import { TooltipProvider } from "@/components/ui/tooltip";
+import {
+  AlertTriangle,
+  ChevronDown,
+  Lock,
+  Search,
+  Loader2,
+  Pin,
+} from "lucide-react";
+import { useModelSelection } from "../hooks/useModelSelection";
+import { ModelItem } from "./ModelItem";
 
 interface ModelSelectorDropdownProps {
   value: string;
   onChange: (model: string) => void;
 }
 
-function groupModelsByProvider(models: ModelOption[]): [string, ModelOption[]][] {
+function groupModelsByProvider(
+  models: ModelOption[],
+): [string, ModelOption[]][] {
   const groups = new Map<string, ModelOption[]>();
 
   for (const model of models) {
@@ -42,7 +56,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
   onChange,
 }: ModelSelectorDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [models, setModels] = useState<ModelOption[]>([]);
   const [loadingModels, setLoadingModels] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -58,32 +72,23 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
   const hasAnyConnections = rawCredentials && rawCredentials.length > 0;
 
   // Fetch private inference models from server (cached for 5 minutes)
-  const { data: privateModels, isLoading: loadingPrivateModels } = trpc.enclaves.listModels.useQuery(
-    undefined,
-    {
+  const { data: privateModels, isLoading: loadingPrivateModels } =
+    trpc.enclaves.listModels.useQuery(undefined, {
       enabled: isUnlocked,
       staleTime: 5 * 60 * 1000, // 5 minutes
       refetchOnWindowFocus: false,
-    }
-  );
+    });
 
   // Only block on initial load, not background refetches (show stale data while refetching)
-  const privateModelsQueryPending = !isUnlocked || (loadingPrivateModels && !privateModels);
+  const privateModelsQueryPending =
+    !isUnlocked || (loadingPrivateModels && !privateModels);
 
   // Use the model selection hook
-  const {
-    filteredModels,
-    pinnedModels,
-    unpinnedModels,
-    connectionFilter,
-    setConnectionFilter,
-    togglePin,
-    isPinned,
-    availableProviders,
-  } = useModelSelection({
-    models,
-    searchQuery,
-  });
+  const { filteredModels, pinnedModels, unpinnedModels, togglePin, isPinned } =
+    useModelSelection({
+      models,
+      searchQuery,
+    });
 
   // Fetch available models when credentials or private models change
   useEffect(() => {
@@ -98,29 +103,33 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
         // Fetch credential-based models
         let credentialModels: ModelOption[] = [];
         if (rawCredentials && rawCredentials.length > 0) {
-          const partial: PartiallyDecryptedCredential[] = rawCredentials.map((c) => ({
-            id: c.id,
-            provider: c.provider,
-            name: c.name,
-            encryptedData: c.encryptedData,
-            iv: c.iv,
-          }));
+          const partial: PartiallyDecryptedCredential[] = rawCredentials.map(
+            (c) => ({
+              id: c.id,
+              provider: c.provider,
+              name: c.name,
+              encryptedData: c.encryptedData,
+              iv: c.iv,
+            }),
+          );
           const decrypted = decryptCredentialsWithMetadata(partial);
           credentialModels = await getAvailableModelsFromCredentials(decrypted);
         }
 
         // Convert private models to ModelOption format
-        const privateModelOptions: ModelOption[] = (privateModels || []).map((m) => ({
-          id: `${PRIVATE_MODEL_PREFIX}${m.id}`,
-          name: m.displayName,
-          provider: m.provider, // 'onera-private'
-          credentialId: '', // No credential needed for private models
-        }));
+        const privateModelOptions: ModelOption[] = (privateModels || []).map(
+          (m) => ({
+            id: `${PRIVATE_MODEL_PREFIX}${m.id}`,
+            name: m.displayName,
+            provider: m.provider, // 'onera-private'
+            credentialId: "", // No credential needed for private models
+          }),
+        );
 
         // Merge: private models first, then credential models
         setModels([...privateModelOptions, ...credentialModels]);
       } catch (err) {
-        console.error('Failed to load models:', err);
+        console.error("Failed to load models:", err);
         setModels([]);
       } finally {
         setLoadingModels(false);
@@ -148,14 +157,17 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
   // Close on outside click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setIsOpen(false);
-        setSearchQuery('');
+        setSearchQuery("");
       }
     };
     if (isOpen) {
-      document.addEventListener('mousedown', handleClick);
-      return () => document.removeEventListener('mousedown', handleClick);
+      document.addEventListener("mousedown", handleClick);
+      return () => document.removeEventListener("mousedown", handleClick);
     }
   }, [isOpen]);
 
@@ -167,32 +179,32 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
   // Keyboard navigation
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'ArrowDown') {
+      if (e.key === "ArrowDown") {
         e.preventDefault();
         setHighlightedIndex((i) => Math.min(i + 1, flatModelList.length - 1));
-      } else if (e.key === 'ArrowUp') {
+      } else if (e.key === "ArrowUp") {
         e.preventDefault();
         setHighlightedIndex((i) => Math.max(i - 1, 0));
-      } else if (e.key === 'Enter' && flatModelList[highlightedIndex]) {
+      } else if (e.key === "Enter" && flatModelList[highlightedIndex]) {
         e.preventDefault();
         onChange(flatModelList[highlightedIndex].id);
         setIsOpen(false);
-        setSearchQuery('');
-      } else if (e.key === 'Escape') {
+        setSearchQuery("");
+      } else if (e.key === "Escape") {
         setIsOpen(false);
-        setSearchQuery('');
+        setSearchQuery("");
       }
     },
-    [flatModelList, highlightedIndex, onChange]
+    [flatModelList, highlightedIndex, onChange],
   );
 
   // Scroll highlighted item into view
   useEffect(() => {
     if (isOpen && listRef.current) {
-      const items = listRef.current.querySelectorAll('[data-model-item]');
+      const items = listRef.current.querySelectorAll("[data-model-item]");
       const highlighted = items[highlightedIndex];
       if (highlighted) {
-        highlighted.scrollIntoView({ block: 'nearest' });
+        highlighted.scrollIntoView({ block: "nearest" });
       }
     }
   }, [highlightedIndex, isOpen]);
@@ -200,16 +212,16 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
   // Reset highlight when search changes
   useEffect(() => {
     setHighlightedIndex(0);
-  }, [searchQuery, connectionFilter]);
+  }, [searchQuery]);
 
   // Stable callbacks for ModelItem - prevents re-renders of all items
   const handleModelSelect = useCallback(
     (modelId: string) => {
       onChange(modelId);
       setIsOpen(false);
-      setSearchQuery('');
+      setSearchQuery("");
     },
-    [onChange]
+    [onChange],
   );
 
   const handleTogglePin = useCallback(
@@ -217,101 +229,109 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
       e.stopPropagation();
       togglePin(modelId);
     },
-    [togglePin]
+    [togglePin],
   );
 
   const selectedModel = models.find((m) => m.id === value);
-  const isLoading = checkingConnections || loadingModels || privateModelsQueryPending;
+  const isLoading =
+    checkingConnections || loadingModels || privateModelsQueryPending;
 
   // No connections and no private models - only show after all queries complete
   const hasPrivateModels = privateModels && privateModels.length > 0;
-  if (!checkingConnections && !privateModelsQueryPending && !hasAnyConnections && !hasPrivateModels) {
+  if (
+    !checkingConnections &&
+    !privateModelsQueryPending &&
+    !hasAnyConnections &&
+    !hasPrivateModels
+  ) {
     return (
-      <Button
-        variant="outline"
-        className="text-amber-600 border-amber-300 hover:bg-amber-50 dark:text-amber-400 dark:border-amber-700 dark:hover:bg-amber-950"
-        onClick={() => openSettingsModal('connections')}
+      <button
+        onClick={() => openSettingsModal("connections")}
+        className="flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-[13px] text-amber-500 hover:text-amber-600 hover:bg-foreground/[0.06] transition-colors duration-150"
       >
-        <AlertTriangle className="h-4 w-4 mr-2" />
-        Add Connection
-      </Button>
+        <AlertTriangle className="h-3.5 w-3.5" />
+        <span>Add Connection</span>
+      </button>
     );
   }
 
   // Not unlocked
   if (!isUnlocked) {
     return (
-      <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm bg-muted text-muted-foreground">
-        <Lock className="h-4 w-4" />
+      <div className="flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-[13px] text-muted-foreground">
+        <Lock className="h-3 w-3" />
         <span>Unlock to select</span>
       </div>
     );
   }
 
+  // Format provider name for display (e.g., "onera-private" -> "Private")
+  const formatProviderName = (provider: string) => {
+    if (provider === "onera-private") return "Private";
+    // Capitalize first letter
+    return provider.charAt(0).toUpperCase() + provider.slice(1);
+  };
+
   return (
     <TooltipProvider>
       <div className="relative" ref={dropdownRef}>
-        <Button
-          variant="outline"
+        {/* Trigger button - Apple style: minimal, no border */}
+        <button
           onClick={() => setIsOpen(!isOpen)}
           disabled={isLoading || models.length === 0}
           className={cn(
-            'h-9 min-w-[140px] sm:min-w-[180px] justify-between',
-            isOpen && 'ring-1 ring-ring'
+            "flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-[13px] transition-all duration-150",
+            "hover:bg-foreground/[0.06] active:bg-foreground/10",
+            "disabled:opacity-40 disabled:cursor-not-allowed",
+            isOpen && "bg-foreground/[0.06]",
           )}
         >
           {isLoading ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              <span>Loading...</span>
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+              <span className="text-muted-foreground">Loading...</span>
             </>
           ) : models.length === 0 ? (
             <span className="text-muted-foreground">No models</span>
           ) : (
             <>
-              <span className="truncate font-medium">
-                {selectedModel?.name || 'Select model'}
+              <span className="truncate text-foreground max-w-[160px] sm:max-w-[200px]">
+                {selectedModel?.name || "Select model"}
               </span>
               <ChevronDown
-                className={cn('h-4 w-4 ml-2 flex-shrink-0 transition-transform', isOpen && 'rotate-180')}
+                className={cn(
+                  "h-3 w-3 text-muted-foreground transition-transform duration-150",
+                  isOpen && "rotate-180",
+                )}
               />
             </>
           )}
-        </Button>
+        </button>
 
+        {/* Dropdown panel - Apple style: subtle glass, soft shadow */}
         {isOpen && models.length > 0 && (
-          <div className="absolute left-0 mt-2 w-72 sm:w-80 max-w-[calc(100vw-2rem)] z-50 bg-popover rounded-xl shadow-xl border border-border overflow-hidden">
-            {/* Search input */}
-            <div className="p-2 border-b border-border">
+          <div className="absolute left-0 mt-1 w-56 sm:w-64 max-w-[calc(100vw-2rem)] z-50 bg-popover backdrop-blur-2xl rounded-xl shadow-lg border border-border overflow-hidden">
+            {/* Search input - cleaner, more subtle */}
+            <div className="p-2 pb-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <input
                   ref={searchInputRef}
                   type="text"
-                  placeholder="Search models..."
+                  placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  className="pl-10"
+                  className="w-full h-8 pl-8 pr-3 rounded-lg bg-foreground/[0.06] border-0 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-colors"
                 />
               </div>
             </div>
 
-            {/* Filter chips */}
-            <div className="border-b border-border">
-              <FilterChips
-                currentFilter={connectionFilter}
-                onFilterChange={setConnectionFilter}
-                availableProviders={availableProviders}
-                pinnedCount={pinnedModels.length}
-              />
-            </div>
-
             {/* Model list */}
-            <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-700 scrollbar-track-transparent">
+            <div className="max-h-64 overflow-y-auto overscroll-contain">
               <div ref={listRef} className="py-1">
                 {filteredModels.length === 0 ? (
-                  <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                  <div className="px-3 py-8 text-center text-[13px] text-muted-foreground">
                     No models found
                   </div>
                 ) : (
@@ -319,12 +339,14 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
                     {/* Pinned models section */}
                     {pinnedModels.length > 0 && (
                       <>
-                        <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50 sticky top-0 flex items-center gap-1.5">
-                          <Pin className="h-3 w-3" />
+                        <div className="px-3 pt-1 pb-1.5 text-[11px] font-medium text-muted-foreground flex items-center gap-1.5">
+                          <Pin className="h-2.5 w-2.5" />
                           Pinned
                         </div>
                         {pinnedModels.map((model) => {
-                          const flatIndex = flatModelList.findIndex((m) => m.id === model.id);
+                          const flatIndex = flatModelList.findIndex(
+                            (m) => m.id === model.id,
+                          );
                           return (
                             <ModelItem
                               key={model.id}
@@ -337,55 +359,41 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
                             />
                           );
                         })}
-                        {unpinnedModels.length > 0 && <Separator className="my-1" />}
+                        {unpinnedModels.length > 0 && (
+                          <div className="my-1.5 mx-3 h-px bg-border" />
+                        )}
                       </>
                     )}
 
                     {/* Unpinned models grouped by provider */}
-                    {groupModelsByProvider(unpinnedModels).map(([provider, providerModels]) => (
-                      <div key={provider}>
-                        <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50 sticky top-0">
-                          {provider}
+                    {groupModelsByProvider(unpinnedModels).map(
+                      ([provider, providerModels]) => (
+                        <div key={provider}>
+                          <div className="px-3 pt-1 pb-1.5 text-[11px] font-medium text-muted-foreground">
+                            {formatProviderName(provider)}
+                          </div>
+                          {providerModels.map((model) => {
+                            const flatIndex = flatModelList.findIndex(
+                              (m) => m.id === model.id,
+                            );
+                            return (
+                              <ModelItem
+                                key={model.id}
+                                model={model}
+                                isSelected={model.id === value}
+                                isHighlighted={flatIndex === highlightedIndex}
+                                isPinned={isPinned(model.id)}
+                                onSelect={handleModelSelect}
+                                onTogglePin={handleTogglePin}
+                              />
+                            );
+                          })}
                         </div>
-                        {providerModels.map((model) => {
-                          const flatIndex = flatModelList.findIndex((m) => m.id === model.id);
-                          return (
-                            <ModelItem
-                              key={model.id}
-                              model={model}
-                              isSelected={model.id === value}
-                              isHighlighted={flatIndex === highlightedIndex}
-                              isPinned={isPinned(model.id)}
-                              onSelect={handleModelSelect}
-                              onTogglePin={handleTogglePin}
-                            />
-                          );
-                        })}
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </>
                 )}
               </div>
-            </div>
-
-            {/* Footer hint */}
-            <div className="border-t border-border px-3 py-2 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <kbd className="px-1.5 py-0.5 bg-muted rounded text-micro">↑↓</kbd>
-                <span>navigate</span>
-                <kbd className="px-1.5 py-0.5 bg-muted rounded text-micro">↵</kbd>
-                <span>select</span>
-              </div>
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  setSearchQuery('');
-                  openSettingsModal('connections');
-                }}
-                className="text-xs text-primary hover:underline"
-              >
-                Manage
-              </button>
             </div>
           </div>
         )}

@@ -1,15 +1,16 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
-import { useNavigate } from '@tanstack/react-router';
-import { cn } from '@/lib/utils';
-import { useChats } from '@/hooks/queries/useChats';
-import { useE2EE } from '@/providers/E2EEProvider';
-import { decryptChatTitle } from '@onera/crypto';
-import { groupByDate, type DateGroup, DATE_GROUP_LABELS } from '@/lib/dateGrouping';
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { cn } from "@/lib/utils";
+import { useChats } from "@/hooks/queries/useChats";
+import { useE2EE } from "@/providers/E2EEProvider";
+import { decryptChatTitle } from "@onera/crypto";
 import {
-  Dialog,
-  DialogContent,
-} from '@/components/ui/dialog';
-import { Search, X, MessageSquare, ArrowRight, Sparkles } from 'lucide-react';
+  groupByDate,
+  type DateGroup,
+  DATE_GROUP_LABELS,
+} from "@/lib/dateGrouping";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Search, X, MessageSquare, ArrowRight } from "lucide-react";
 
 interface SearchModalProps {
   open: boolean;
@@ -30,16 +31,22 @@ interface ChatWithTitle {
 function formatDate(timestamp: number): string {
   const date = new Date(timestamp);
   const now = new Date();
-  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-  
+  const diffDays = Math.floor(
+    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
+  );
+
   if (diffDays === 0) {
-    return 'Today';
+    return "Today";
   } else if (diffDays === 1) {
-    return 'Yesterday';
+    return "Yesterday";
   } else if (diffDays < 7) {
-    return date.toLocaleDateString(undefined, { weekday: 'long' });
+    return date.toLocaleDateString(undefined, { weekday: "long" });
   } else {
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    return date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
   }
 }
 
@@ -48,8 +55,8 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   const { isUnlocked } = useE2EE();
   const rawChats = useChats();
   const inputRef = useRef<HTMLInputElement>(null);
-  
-  const [searchQuery, setSearchQuery] = useState('');
+
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
 
   // Reset state when modal opens/closes
@@ -58,7 +65,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
       // Focus input when modal opens
       setTimeout(() => inputRef.current?.focus(), 0);
     } else {
-      setSearchQuery('');
+      setSearchQuery("");
       setSelectedChatId(null);
     }
   }, [open]);
@@ -68,14 +75,20 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
     if (!rawChats) return [];
 
     return rawChats.map((chat) => {
-      if (isUnlocked && chat.encryptedChatKey && chat.chatKeyNonce && chat.encryptedTitle && chat.titleNonce) {
+      if (
+        isUnlocked &&
+        chat.encryptedChatKey &&
+        chat.chatKeyNonce &&
+        chat.encryptedTitle &&
+        chat.titleNonce
+      ) {
         try {
           const title = decryptChatTitle(
             chat.id,
             chat.encryptedChatKey,
             chat.chatKeyNonce,
             chat.encryptedTitle,
-            chat.titleNonce
+            chat.titleNonce,
           );
           return {
             id: chat.id,
@@ -87,7 +100,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
           return {
             id: chat.id,
             updatedAt: chat.updatedAt,
-            decryptedTitle: 'Encrypted',
+            decryptedTitle: "Encrypted",
             isLocked: true,
           };
         }
@@ -95,7 +108,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
       return {
         id: chat.id,
         updatedAt: chat.updatedAt,
-        decryptedTitle: 'Encrypted',
+        decryptedTitle: "Encrypted",
         isLocked: !isUnlocked,
       };
     });
@@ -106,7 +119,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
     if (!searchQuery.trim()) return chats;
     const query = searchQuery.toLowerCase();
     return chats.filter((chat) =>
-      chat.decryptedTitle.toLowerCase().includes(query)
+      chat.decryptedTitle.toLowerCase().includes(query),
     );
   }, [chats, searchQuery]);
 
@@ -120,7 +133,11 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   };
 
   const handleOpenChat = (chatId: string) => {
-    navigate({ to: '/app/c/$chatId', params: { chatId }, search: { pending: false } });
+    navigate({
+      to: "/app/c/$chatId",
+      params: { chatId },
+      search: { pending: false },
+    });
     onOpenChange(false);
   };
 
@@ -129,20 +146,23 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
     if (!open) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && selectedChatId) {
+      if (e.key === "Enter" && selectedChatId) {
         handleOpenChat(selectedChatId);
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open, selectedChatId]);
 
-  const selectedChat = chats.find(c => c.id === selectedChatId);
+  const selectedChat = chats.find((c) => c.id === selectedChatId);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[600px] p-0 overflow-hidden" hideCloseButton>
+      <DialogContent
+        className="max-w-4xl h-[600px] p-0 overflow-hidden"
+        hideCloseButton
+      >
         <div className="flex h-full">
           {/* Left Panel - Search & Results */}
           <div className="flex-1 flex flex-col border-r border-border">
@@ -160,7 +180,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                 />
                 {searchQuery && (
                   <button
-                    onClick={() => setSearchQuery('')}
+                    onClick={() => setSearchQuery("")}
                     className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                   >
                     <X className="h-4 w-4" />
@@ -173,22 +193,24 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             {!searchQuery && (
               <div className="px-4 pb-4">
                 <div className="p-3 rounded-xl bg-muted/50 border border-border">
-                  <div className="text-xs font-medium text-muted-foreground mb-2">Quick filters</div>
+                  <div className="text-xs font-medium text-muted-foreground mb-2">
+                    Quick filters
+                  </div>
                   <div className="flex flex-wrap gap-2">
                     <button
-                      onClick={() => setSearchQuery('pinned:')}
+                      onClick={() => setSearchQuery("pinned:")}
                       className="px-3 py-1.5 rounded-lg bg-muted text-xs text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
                     >
                       pinned:
                     </button>
                     <button
-                      onClick={() => setSearchQuery('folder:')}
+                      onClick={() => setSearchQuery("folder:")}
                       className="px-3 py-1.5 rounded-lg bg-muted text-xs text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
                     >
                       folder:
                     </button>
                     <button
-                      onClick={() => setSearchQuery('tag:')}
+                      onClick={() => setSearchQuery("tag:")}
                       className="px-3 py-1.5 rounded-lg bg-muted text-xs text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
                     >
                       tag:
@@ -206,38 +228,44 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                     <MessageSquare className="h-8 w-8 text-muted-foreground/60" />
                   </div>
                   <p className="text-sm font-medium text-foreground mb-1">
-                    {searchQuery ? 'No results found' : 'No conversations yet'}
+                    {searchQuery ? "No results found" : "No conversations yet"}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {searchQuery ? `Try a different search term` : 'Start a new chat to begin'}
+                    {searchQuery
+                      ? `Try a different search term`
+                      : "Start a new chat to begin"}
                   </p>
                 </div>
               ) : (
                 <div className="py-1 space-y-4">
-                  {Array.from(groupedChats.entries()).map(([group, groupChats]) => (
-                    <div key={group}>
-                      <div className="px-3 py-2 text-xs font-medium text-muted-foreground">
-                        {DATE_GROUP_LABELS[group as DateGroup]}
+                  {Array.from(groupedChats.entries()).map(
+                    ([group, groupChats]) => (
+                      <div key={group}>
+                        <div className="px-3 py-2 text-xs font-medium text-muted-foreground">
+                          {DATE_GROUP_LABELS[group as DateGroup]}
+                        </div>
+                        <div className="space-y-0.5">
+                          {groupChats.map((chat) => (
+                            <button
+                              key={chat.id}
+                              onClick={() => handleSelectChat(chat.id)}
+                              onDoubleClick={() => handleOpenChat(chat.id)}
+                              className={cn(
+                                "w-full flex items-center gap-3 px-3 h-10 rounded-xl text-left transition-all duration-150",
+                                selectedChatId === chat.id
+                                  ? "bg-accent text-foreground"
+                                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+                              )}
+                            >
+                              <span className="flex-1 truncate text-sm">
+                                {chat.decryptedTitle}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                      <div className="space-y-0.5">
-                        {groupChats.map((chat) => (
-                          <button
-                            key={chat.id}
-                            onClick={() => handleSelectChat(chat.id)}
-                            onDoubleClick={() => handleOpenChat(chat.id)}
-                            className={cn(
-                              'w-full flex items-center gap-3 px-3 h-10 rounded-xl text-left transition-all duration-150',
-                              selectedChatId === chat.id
-                                ? 'bg-accent text-foreground'
-                                : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
-                            )}
-                          >
-                            <span className="flex-1 truncate text-sm">{chat.decryptedTitle}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               )}
             </div>
@@ -246,11 +274,15 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             <div className="px-4 py-3 border-t border-border">
               <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1.5">
-                  <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-[10px]">↵</kbd>
+                  <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-[10px]">
+                    ↵
+                  </kbd>
                   <span>open</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-[10px]">esc</kbd>
+                  <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-[10px]">
+                    esc
+                  </kbd>
                   <span>close</span>
                 </div>
               </div>
@@ -262,8 +294,8 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             {selectedChat ? (
               <div className="flex-1 flex flex-col p-5">
                 {/* Chat icon */}
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 border border-violet-500/20 flex items-center justify-center mb-4">
-                  <Sparkles className="h-6 w-6 text-violet-400" />
+                <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mb-4">
+                  <MessageSquare className="h-5 w-5 text-muted-foreground" />
                 </div>
 
                 {/* Title */}

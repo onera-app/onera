@@ -6,36 +6,46 @@ import {
   memo,
   type DragEvent,
   type ClipboardEvent,
-} from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { EditorContent, useEditor } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Placeholder from '@tiptap/extension-placeholder';
-import Mention from '@tiptap/extension-mention';
-import { ReactRenderer } from '@tiptap/react';
-import tippy, { type Instance } from 'tippy.js';
-import 'tippy.js/dist/tippy.css';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { ArrowUp, Square } from 'lucide-react';
-import { toast } from 'sonner';
-import { AttachmentButton, DragDropOverlay } from '@/components/chat/AttachmentButton';
-import { AttachmentPreview, type PendingAttachment } from '@/components/chat/AttachmentPreview';
-import { SearchToggle } from '@/components/chat/SearchToggle';
-import { processFile } from '@/lib/fileProcessing';
-import { useToolsStore } from '@/stores/toolsStore';
-import { useE2EE } from '@/providers/E2EEProvider';
-import { useCredentials } from '@/hooks/queries/useCredentials';
+} from "react";
+import { v4 as uuidv4 } from "uuid";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Placeholder from "@tiptap/extension-placeholder";
+import Mention from "@tiptap/extension-mention";
+import { ReactRenderer } from "@tiptap/react";
+import tippy, { type Instance } from "tippy.js";
+import "tippy.js/dist/tippy.css";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { ArrowUp, Square } from "lucide-react";
+import { toast } from "sonner";
+import {
+  AttachmentButton,
+  DragDropOverlay,
+} from "@/components/chat/AttachmentButton";
+import {
+  AttachmentPreview,
+  type PendingAttachment,
+} from "@/components/chat/AttachmentPreview";
+import { SearchToggle } from "@/components/chat/SearchToggle";
+import { processFile } from "@/lib/fileProcessing";
+import { useToolsStore } from "@/stores/toolsStore";
+import { useE2EE } from "@/providers/E2EEProvider";
+import { useCredentials } from "@/hooks/queries/useCredentials";
 import {
   decryptCredentialsWithMetadata,
   getAvailableModelsFromCredentials,
   type ModelOption,
   type PartiallyDecryptedCredential,
-} from '@/lib/ai';
-import { MentionList, type MentionListRef } from './MentionList';
-import type { ProcessedFile } from '@/lib/fileProcessing';
-import type { SearchProvider } from '@onera/types';
+} from "@/lib/ai";
+import { MentionList, type MentionListRef } from "./MentionList";
+import type { ProcessedFile } from "@/lib/fileProcessing";
+import type { SearchProvider } from "@onera/types";
 
 export interface MessageInputOptions {
   attachments?: ProcessedFile[];
@@ -55,14 +65,16 @@ interface RichTextMessageInputProps {
 export const RichTextMessageInput = memo(function RichTextMessageInput({
   onSend,
   disabled = false,
-  placeholder = 'Message Onera...',
+  placeholder = "Message Onera...",
   onStop,
   isStreaming = false,
 }: RichTextMessageInputProps) {
   const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [searchEnabled, setSearchEnabled] = useState(false);
-  const [searchProvider, setSearchProvider] = useState<SearchProvider | undefined>();
+  const [searchProvider, setSearchProvider] = useState<
+    SearchProvider | undefined
+  >();
   const [isSearching] = useState(false);
   const [models, setModels] = useState<ModelOption[]>([]);
   const [editorHasContent, setEditorHasContent] = useState(false);
@@ -88,18 +100,21 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
       }
 
       try {
-        const partial: PartiallyDecryptedCredential[] = rawCredentials.map((c) => ({
-          id: c.id,
-          provider: c.provider,
-          name: c.name,
-          encryptedData: c.encryptedData,
-          iv: c.iv,
-        }));
+        const partial: PartiallyDecryptedCredential[] = rawCredentials.map(
+          (c) => ({
+            id: c.id,
+            provider: c.provider,
+            name: c.name,
+            encryptedData: c.encryptedData,
+            iv: c.iv,
+          }),
+        );
         const decrypted = decryptCredentialsWithMetadata(partial);
-        const availableModels = await getAvailableModelsFromCredentials(decrypted);
+        const availableModels =
+          await getAvailableModelsFromCredentials(decrypted);
         setModels(availableModels);
       } catch (err) {
-        console.error('Failed to load models for mentions:', err);
+        console.error("Failed to load models for mentions:", err);
         setModels([]);
       }
     }
@@ -129,19 +144,20 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
       }),
       Placeholder.configure({
         placeholder: () => placeholderRef.current,
-        emptyEditorClass: 'is-editor-empty',
+        emptyEditorClass: "is-editor-empty",
       }),
       Mention.configure({
         HTMLAttributes: {
-          class: 'mention bg-primary/20 text-primary px-1 rounded font-medium',
+          class: "mention bg-primary/20 text-primary px-1 rounded font-medium",
         },
         suggestion: {
-          char: '@',
+          char: "@",
           items: ({ query }) => {
             return models
-              .filter((model) =>
-                model.name.toLowerCase().includes(query.toLowerCase()) ||
-                model.provider.toLowerCase().includes(query.toLowerCase())
+              .filter(
+                (model) =>
+                  model.name.toLowerCase().includes(query.toLowerCase()) ||
+                  model.provider.toLowerCase().includes(query.toLowerCase()),
               )
               .slice(0, 10);
           },
@@ -158,15 +174,15 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
 
                 if (!props.clientRect) return;
 
-                popup = tippy('body', {
+                popup = tippy("body", {
                   getReferenceClientRect: props.clientRect as () => DOMRect,
                   appendTo: () => document.body,
                   content: component.element,
                   showOnCreate: true,
                   interactive: true,
-                  trigger: 'manual',
-                  placement: 'top-start',
-                  theme: 'mention-dropdown',
+                  trigger: "manual",
+                  placement: "top-start",
+                  theme: "mention-dropdown",
                 });
               },
 
@@ -181,7 +197,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
               },
 
               onKeyDown(props) {
-                if (props.event.key === 'Escape') {
+                if (props.event.key === "Escape") {
                   popup?.[0]?.hide();
                   return true;
                 }
@@ -201,18 +217,18 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
     editorProps: {
       attributes: {
         class: cn(
-          'prose prose-sm dark:prose-invert max-w-none',
-          'focus:outline-none min-h-[24px] max-h-[200px]',
-          '[&_p]:my-0 [&_code]:bg-muted [&_code]:px-1 [&_code]:rounded',
-          '[&_pre]:bg-muted [&_pre]:p-2 [&_pre]:rounded-lg [&_pre]:text-sm',
-          'overflow-y-auto'
+          "prose prose-sm dark:prose-invert max-w-none",
+          "focus:outline-none min-h-[24px] max-h-[200px]",
+          "[&_p]:my-0 [&_code]:bg-muted [&_code]:px-1 [&_code]:rounded",
+          "[&_pre]:bg-muted [&_pre]:p-2 [&_pre]:rounded-lg [&_pre]:text-sm",
+          "overflow-y-auto",
         ),
       },
       handleKeyDown: (_view, event) => {
         // Submit on Enter (without shift)
-        if (event.key === 'Enter' && !event.shiftKey) {
+        if (event.key === "Enter" && !event.shiftKey) {
           // Don't submit if suggestions are visible
-          const suggestionPopup = document.querySelector('.tippy-box');
+          const suggestionPopup = document.querySelector(".tippy-box");
           if (suggestionPopup) {
             return false;
           }
@@ -249,7 +265,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
     const pending: PendingAttachment[] = files.map((file) => ({
       id: uuidv4(),
       file,
-      status: 'processing' as const,
+      status: "processing" as const,
     }));
 
     setAttachments((prev) => [...prev, ...pending]);
@@ -259,29 +275,29 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
         try {
           const processed = await processFile(entry.file!);
           let preview: string | undefined;
-          if (processed.type === 'image') {
+          if (processed.type === "image") {
             preview = `data:${processed.mimeType};base64,${processed.data}`;
           }
           return {
             id: entry.id,
             processed,
             preview,
-            status: 'ready' as const,
+            status: "ready" as const,
             error: undefined,
           };
         } catch (error) {
           toast.error(
-            `Failed to process ${entry.file?.name}: ${error instanceof Error ? error.message : 'Unknown error'}`
+            `Failed to process ${entry.file?.name}: ${error instanceof Error ? error.message : "Unknown error"}`,
           );
           return {
             id: entry.id,
             processed: undefined,
             preview: undefined,
-            status: 'error' as const,
-            error: error instanceof Error ? error.message : 'Processing failed',
+            status: "error" as const,
+            error: error instanceof Error ? error.message : "Processing failed",
           };
         }
-      })
+      }),
     );
 
     setAttachments((prev) =>
@@ -297,7 +313,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
           };
         }
         return a;
-      })
+      }),
     );
   }, []);
 
@@ -314,7 +330,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
 
       const imageItems: File[] = [];
       for (const item of items) {
-        if (item.type.startsWith('image/')) {
+        if (item.type.startsWith("image/")) {
           const file = item.getAsFile();
           if (file) {
             imageItems.push(file);
@@ -327,7 +343,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
         handleFilesSelected(imageItems);
       }
     },
-    [handleFilesSelected]
+    [handleFilesSelected],
   );
 
   // Drag and drop handlers
@@ -370,7 +386,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
         handleFilesSelected(Array.from(files));
       }
     },
-    [handleFilesSelected]
+    [handleFilesSelected],
   );
 
   // Extract mentioned models from editor content
@@ -378,7 +394,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
     if (!editor) return [];
     const mentions: string[] = [];
     editor.state.doc.descendants((node) => {
-      if (node.type.name === 'mention') {
+      if (node.type.name === "mention") {
         mentions.push(node.attrs.id);
       }
     });
@@ -389,7 +405,9 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
     if (!editor) return;
 
     const text = editor.getText().trim();
-    const readyAttachments = attachments.filter((a) => a.status === 'ready' && a.processed);
+    const readyAttachments = attachments.filter(
+      (a) => a.status === "ready" && a.processed,
+    );
 
     if (!text && readyAttachments.length === 0) return;
     if (disabled) return;
@@ -420,9 +438,17 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
     editor.commands.clearContent();
     setAttachments([]);
     setEditorHasContent(false);
-  }, [editor, attachments, disabled, searchEnabled, searchProvider, onSend, extractMentionedModels]);
+  }, [
+    editor,
+    attachments,
+    disabled,
+    searchEnabled,
+    searchProvider,
+    onSend,
+    extractMentionedModels,
+  ]);
 
-  const readyAttachments = attachments.filter((a) => a.status === 'ready');
+  const readyAttachments = attachments.filter((a) => a.status === "ready");
   const canSend = editorHasContent || readyAttachments.length > 0;
 
   return (
@@ -431,13 +457,13 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
       <div
         ref={containerRef}
         className={cn(
-          'relative rounded-3xl overflow-hidden',
-          'bg-background dark:bg-neutral-900',
-          'border border-input dark:border-neutral-700',
-          'shadow-sm',
-          'transition-all duration-200',
-          'focus-within:ring-1 focus-within:ring-ring',
-          disabled && 'opacity-60'
+          "relative rounded-3xl overflow-hidden",
+          "bg-background/80 backdrop-blur-2xl",
+          "border border-border",
+          "shadow-lg shadow-black/5 dark:shadow-black/20",
+          "transition-all duration-200",
+          "focus-within:ring-1 focus-within:ring-ring focus-within:border-foreground/20",
+          disabled && "opacity-60",
         )}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
@@ -465,8 +491,8 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
             <EditorContent
               editor={editor}
               className={cn(
-                'text-body leading-relaxed',
-                disabled && 'cursor-not-allowed'
+                "text-body leading-relaxed",
+                disabled && "cursor-not-allowed",
               )}
             />
           </div>
@@ -493,9 +519,9 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
             {isStreaming ? (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button 
-                    onClick={onStop} 
-                    size="icon" 
+                  <Button
+                    onClick={onStop}
+                    size="icon"
                     className="h-9 w-9 rounded-2xl bg-red-500 text-white hover:bg-red-600 transition-all duration-200 shadow-md"
                   >
                     <Square className="h-3.5 w-3.5 fill-current" />
@@ -513,8 +539,8 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
                     className={cn(
                       "h-9 w-9 rounded-2xl transition-all duration-200 shadow-md",
                       canSend && !disabled
-                        ? "bg-white dark:bg-white text-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-200 hover:scale-105"
-                        : "bg-neutral-600 dark:bg-neutral-700 text-neutral-400 dark:text-neutral-500 cursor-not-allowed"
+                        ? "bg-foreground text-background hover:bg-foreground/90 hover:scale-105"
+                        : "bg-muted text-muted-foreground cursor-not-allowed",
                     )}
                   >
                     <ArrowUp className="h-4 w-4" strokeWidth={2.5} />

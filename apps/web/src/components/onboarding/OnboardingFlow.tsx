@@ -8,7 +8,8 @@ import {
   CheckCircle,
   ArrowRight,
   ArrowLeft,
-  Sparkles,
+  Check,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -68,8 +69,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 index === currentStep
                   ? "w-8 bg-primary"
                   : index < currentStep
-                  ? "w-4 bg-primary/50"
-                  : "w-4 bg-muted"
+                    ? "w-4 bg-primary/50"
+                    : "w-4 bg-muted",
               )}
             />
           ))}
@@ -101,7 +102,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             {currentStep === steps.length - 1 ? (
               <>
                 I Understand
-                <Sparkles className="h-4 w-4" />
+                <Check className="h-4 w-4" />
               </>
             ) : (
               <>
@@ -129,8 +130,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 function WelcomeStep() {
   return (
     <div className="text-center">
-      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-transparent ring-1 ring-primary/20">
-        <Sparkles className="h-10 w-10 text-primary" />
+      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-white/[0.04] ring-1 ring-white/[0.08]">
+        <MessageSquare className="h-9 w-9 text-foreground/80" />
       </div>
       <h1 className="text-3xl font-bold tracking-tight mb-3">
         Welcome to Onera
@@ -140,8 +141,14 @@ function WelcomeStep() {
       </p>
       <div className="space-y-3 text-left">
         <Feature icon={Lock} text="Your chats are end-to-end encrypted" />
-        <Feature icon={Shield} text="Processed in secure hardware we can't access" />
-        <Feature icon={CheckCircle} text="Your browser verifies every connection" />
+        <Feature
+          icon={Shield}
+          text="Processed in secure hardware we can't access"
+        />
+        <Feature
+          icon={CheckCircle}
+          text="Your browser verifies every connection"
+        />
       </div>
     </div>
   );
@@ -168,7 +175,8 @@ function RecoveryStep() {
               It's your backup key
             </p>
             <p className="text-xs text-amber-800/80 dark:text-amber-200/70">
-              Use it to recover your data if you lose access to your passkey or password.
+              Use it to recover your data if you lose access to your passkey or
+              password.
             </p>
           </div>
         </div>
@@ -186,13 +194,20 @@ function RecoveryStep() {
       </div>
 
       <p className="mt-4 text-sm text-muted-foreground">
-        Save it somewhere safe. You'll see it after setting up your unlock method.
+        Save it somewhere safe. You'll see it after setting up your unlock
+        method.
       </p>
     </div>
   );
 }
 
-function Feature({ icon: Icon, text }: { icon: React.ElementType; text: string }) {
+function Feature({
+  icon: Icon,
+  text,
+}: {
+  icon: React.ElementType;
+  text: string;
+}) {
   return (
     <div className="flex items-center gap-3 rounded-lg border bg-card/50 p-3">
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">

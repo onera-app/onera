@@ -1,15 +1,24 @@
-import { useState, useCallback, memo, useMemo, useRef, useEffect } from 'react';
-import { Streamdown } from 'streamdown';
-import { MessageActions } from './MessageActions';
-import { cn, formatModelName } from '@/lib/utils';
-import { Sources, type Source } from '../Sources';
-import { ToolInvocations, type ToolInvocationData } from '../ToolInvocation';
-import { MessageMetadata } from '../MessageMetadata';
-import { MessageReasoning } from '../MessageReasoning';
-import { LLMIcon } from '@/components/ui/llm-icon';
-import { parseThinkingBlocks, hasThinkingContent, type ThinkingBlock } from '@/lib/parseThinkingBlocks';
-import type { BranchInfo } from './BranchNavigation';
-import type { MessagePart, ToolInvocationPart, SourcePart, MessageMetadata as MessageMetadataType } from '../Messages';
+import { useState, useCallback, memo, useMemo, useRef, useEffect } from "react";
+import { Streamdown } from "streamdown";
+import { MessageActions } from "./MessageActions";
+import { cn, formatModelName } from "@/lib/utils";
+import { Sources, type Source } from "../Sources";
+import { ToolInvocations, type ToolInvocationData } from "../ToolInvocation";
+import { MessageMetadata } from "../MessageMetadata";
+import { MessageReasoning } from "../MessageReasoning";
+import { LLMIcon } from "@/components/ui/llm-icon";
+import {
+  parseThinkingBlocks,
+  hasThinkingContent,
+  type ThinkingBlock,
+} from "@/lib/parseThinkingBlocks";
+import type { BranchInfo } from "./BranchNavigation";
+import type {
+  MessagePart,
+  ToolInvocationPart,
+  SourcePart,
+  MessageMetadata as MessageMetadataType,
+} from "../Messages";
 
 export interface RegenerateOptions {
   modifier?: string;
@@ -30,7 +39,10 @@ interface AssistantMessageProps {
   isLoading?: boolean;
   onCopy?: () => void;
   /** Raw regenerate handler - will be bound to messageId internally */
-  onRegenerateMessage?: (messageId: string, options?: RegenerateOptions) => void;
+  onRegenerateMessage?: (
+    messageId: string,
+    options?: RegenerateOptions,
+  ) => void;
   /** Raw delete handler - will be bound to messageId internally */
   onDeleteMessage?: (messageId: string) => void;
   /** Raw branch handlers - will be bound to messageId internally */
@@ -71,19 +83,31 @@ export const AssistantMessage = memo(function AssistantMessage({
   const streamingStartRef = useRef<number | null>(null);
 
   // Determine if handlers are available (for conditional rendering)
-  const hasRegenerate = !!(legacyOnRegenerate || (messageId && onRegenerateMessage));
+  const hasRegenerate = !!(
+    legacyOnRegenerate ||
+    (messageId && onRegenerateMessage)
+  );
   const hasDelete = !!(legacyOnDelete || (messageId && onDeleteMessage));
-  const hasPreviousBranch = !!(legacyOnPreviousBranch || (messageId && onPreviousBranchMessage));
-  const hasNextBranch = !!(legacyOnNextBranch || (messageId && onNextBranchMessage));
+  const hasPreviousBranch = !!(
+    legacyOnPreviousBranch ||
+    (messageId && onPreviousBranchMessage)
+  );
+  const hasNextBranch = !!(
+    legacyOnNextBranch ||
+    (messageId && onNextBranchMessage)
+  );
 
   // Create stable callbacks bound to messageId (or use legacy props if provided)
-  const onRegenerate = useCallback((options?: RegenerateOptions) => {
-    if (legacyOnRegenerate) {
-      legacyOnRegenerate(options);
-    } else if (messageId && onRegenerateMessage) {
-      onRegenerateMessage(messageId, options);
-    }
-  }, [messageId, onRegenerateMessage, legacyOnRegenerate]);
+  const onRegenerate = useCallback(
+    (options?: RegenerateOptions) => {
+      if (legacyOnRegenerate) {
+        legacyOnRegenerate(options);
+      } else if (messageId && onRegenerateMessage) {
+        onRegenerateMessage(messageId, options);
+      }
+    },
+    [messageId, onRegenerateMessage, legacyOnRegenerate],
+  );
 
   const onDelete = useCallback(() => {
     if (legacyOnDelete) {
@@ -119,7 +143,13 @@ export const AssistantMessage = memo(function AssistantMessage({
   }, [isLoading]);
 
   // Extract all content types from parts
-  const { displayContent, thinkingBlocks, isThinking, sources, toolInvocations } = useMemo(() => {
+  const {
+    displayContent,
+    thinkingBlocks,
+    isThinking,
+    sources,
+    toolInvocations,
+  } = useMemo(() => {
     // Default values
     let displayText = content;
     let blocks: ThinkingBlock[] = [];
@@ -129,19 +159,28 @@ export const AssistantMessage = memo(function AssistantMessage({
 
     // If we have AI SDK parts, extract everything from them
     if (parts && parts.length > 0) {
-      const reasoningParts = parts.filter((p): p is { type: 'reasoning'; text: string } => p.type === 'reasoning');
-      const textParts = parts.filter((p): p is { type: 'text'; text: string } => p.type === 'text');
-      const sourceParts = parts.filter((p): p is SourcePart => p.type === 'source');
-      const toolParts = parts.filter((p): p is ToolInvocationPart => p.type === 'tool-invocation');
+      const reasoningParts = parts.filter(
+        (p): p is { type: "reasoning"; text: string } => p.type === "reasoning",
+      );
+      const textParts = parts.filter(
+        (p): p is { type: "text"; text: string } => p.type === "text",
+      );
+      const sourceParts = parts.filter(
+        (p): p is SourcePart => p.type === "source",
+      );
+      const toolParts = parts.filter(
+        (p): p is ToolInvocationPart => p.type === "tool-invocation",
+      );
 
-      displayText = textParts.map(p => p.text).join('');
+      displayText = textParts.map((p) => p.text).join("");
 
       // Extract thinking/reasoning blocks
       if (reasoningParts.length > 0) {
         blocks = reasoningParts.map((p, i) => {
-          const duration = !isLoading && streamingStartRef.current
-            ? Math.round((Date.now() - streamingStartRef.current) / 1000)
-            : undefined;
+          const duration =
+            !isLoading && streamingStartRef.current
+              ? Math.round((Date.now() - streamingStartRef.current) / 1000)
+              : undefined;
           return {
             id: `reasoning-${i}`,
             content: p.text,
@@ -150,14 +189,18 @@ export const AssistantMessage = memo(function AssistantMessage({
           };
         });
 
-        thinking = !!(isLoading && reasoningParts.some(p => p.text.length > 0) && textParts.every(p => !p.text));
+        thinking = !!(
+          isLoading &&
+          reasoningParts.some((p) => p.text.length > 0) &&
+          textParts.every((p) => !p.text)
+        );
       }
 
       // Extract sources
       for (const sp of sourceParts) {
         if (sp.source?.url) {
           extractedSources.push({
-            sourceType: sp.source.sourceType || 'url',
+            sourceType: sp.source.sourceType || "url",
             url: sp.source.url,
             title: sp.source.title,
             domain: sp.source.domain,
@@ -178,7 +221,10 @@ export const AssistantMessage = memo(function AssistantMessage({
       }
     } else if (content && hasThinkingContent(content)) {
       // Fall back to custom parsing for content with thinking tags
-      const parsed = parseThinkingBlocks(content, streamingStartRef.current || undefined);
+      const parsed = parseThinkingBlocks(
+        content,
+        streamingStartRef.current || undefined,
+      );
       displayText = parsed.displayContent;
       blocks = parsed.thinkingBlocks;
       thinking = parsed.isThinking;
@@ -207,26 +253,35 @@ export const AssistantMessage = memo(function AssistantMessage({
   const name = formatModelName(model);
 
   // Combine thinking blocks into a single reasoning string for the new component
-  const reasoningText = thinkingBlocks.map(b => b.content).join('\n\n');
+  const reasoningText = thinkingBlocks.map((b) => b.content).join("\n\n");
   const hasReasoning = reasoningText.trim().length > 0;
 
   return (
     <div
-      className="group/message fade-in w-full animate-in duration-200"
+      className="group/message w-full animate-in fade-in-0 slide-in-from-bottom-2 duration-300 ease-out"
       data-role="assistant"
     >
-      <div className="flex w-full items-start gap-2 sm:gap-2.5 md:gap-3 justify-start">
+      <div className="flex w-full items-start gap-3 sm:gap-3.5 justify-start">
         {/* Avatar with provider icon */}
-        <LLMIcon model={model} size="md" isLoading={isLoading} className="-mt-1 flex-shrink-0" />
+        <LLMIcon
+          model={model}
+          size="md"
+          isLoading={isLoading}
+          className="flex-shrink-0 mt-0.5"
+        />
 
         {/* Message content */}
-        <div className={cn(
-          'flex flex-col w-full min-w-0',
-          displayContent || toolInvocations.length > 0 || hasReasoning ? 'gap-2 sm:gap-3 md:gap-4' : ''
-        )}>
+        <div
+          className={cn(
+            "flex flex-col w-full min-w-0",
+            displayContent || toolInvocations.length > 0 || hasReasoning
+              ? "gap-3 sm:gap-4"
+              : "",
+          )}
+        >
           {/* Model name indicator */}
           {name && (
-            <span className="text-xs font-medium text-muted-foreground">
+            <span className="text-[12px] font-medium text-muted-foreground/60 tracking-[-0.01em]">
               {name}
             </span>
           )}
@@ -244,10 +299,12 @@ export const AssistantMessage = memo(function AssistantMessage({
 
           {/* Main content */}
           {displayContent ? (
-            <div className={cn(
-              'bg-transparent px-0 py-0 text-left transition-opacity duration-200',
-              isLoading && 'streaming-cursor'
-            )}>
+            <div
+              className={cn(
+                "text-left transition-opacity duration-200 text-[15px] leading-[1.65] tracking-[-0.01em] text-foreground/95",
+                isLoading && "streaming-cursor",
+              )}
+            >
               <Streamdown>{displayContent}</Streamdown>
             </div>
           ) : isLoading && !hasReasoning ? (
@@ -257,30 +314,35 @@ export const AssistantMessage = memo(function AssistantMessage({
           ) : null}
 
           {/* Sources/Citations */}
-          {!isLoading && sources.length > 0 && (
-            <Sources sources={sources} />
-          )}
+          {!isLoading && sources.length > 0 && <Sources sources={sources} />}
 
           {/* Actions and Metadata */}
           {!isLoading && content && (
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <div className="flex items-center gap-0.5 sm:gap-1">
+            <div className="flex items-center justify-between flex-wrap gap-2 mt-1 opacity-0 group-hover/message:opacity-100 transition-opacity duration-200">
+              <div className="flex items-center gap-1">
                 <MessageActions
                   onCopy={handleCopy}
                   onRegenerate={hasRegenerate ? onRegenerate : undefined}
                   onDelete={hasDelete ? onDelete : undefined}
                   isUser={false}
                   branchInfo={branchInfo}
-                  onPreviousBranch={hasPreviousBranch ? onPreviousBranch : undefined}
+                  onPreviousBranch={
+                    hasPreviousBranch ? onPreviousBranch : undefined
+                  }
                   onNextBranch={hasNextBranch ? onNextBranch : undefined}
                 />
                 {copied && (
-                  <span className="text-xs text-status-success-text ml-2 animate-in fade-in">Copied!</span>
+                  <span className="text-[11px] text-emerald-500 ml-1.5 animate-in fade-in">
+                    Copied!
+                  </span>
                 )}
               </div>
               {/* Token usage and metadata */}
               {metadata && (
-                <MessageMetadata metadata={metadata} className="hidden sm:flex" />
+                <MessageMetadata
+                  metadata={metadata}
+                  className="hidden sm:flex"
+                />
               )}
             </div>
           )}
@@ -292,24 +354,23 @@ export const AssistantMessage = memo(function AssistantMessage({
 
 /**
  * ThinkingMessage - shown while waiting for initial response
- * Displays elegant animated dots as a typing indicator
- * Uses smooth pulse animation instead of bouncing for a more refined look
+ * Apple-style minimal typing indicator with gentle pulsing dots
  */
 export const ThinkingMessage = () => {
   return (
-    <div className="flex items-center h-6 mt-1 text-muted-foreground/50">
-      <span className="inline-flex items-center gap-1.5">
-        <span 
-          className="w-1.5 h-1.5 bg-current rounded-full typing-dot" 
-          style={{ animationDelay: '0ms' }} 
+    <div className="flex items-center h-5 text-muted-foreground/40">
+      <span className="inline-flex items-center gap-1">
+        <span
+          className="w-[5px] h-[5px] bg-current rounded-full typing-dot"
+          style={{ animationDelay: "0ms" }}
         />
-        <span 
-          className="w-1.5 h-1.5 bg-current rounded-full typing-dot" 
-          style={{ animationDelay: '200ms' }} 
+        <span
+          className="w-[5px] h-[5px] bg-current rounded-full typing-dot"
+          style={{ animationDelay: "150ms" }}
         />
-        <span 
-          className="w-1.5 h-1.5 bg-current rounded-full typing-dot" 
-          style={{ animationDelay: '400ms' }} 
+        <span
+          className="w-[5px] h-[5px] bg-current rounded-full typing-dot"
+          style={{ animationDelay: "300ms" }}
         />
       </span>
     </div>

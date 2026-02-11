@@ -1,57 +1,51 @@
-import { Outlet, useNavigate } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { useE2EEStore } from '@/stores/e2eeStore';
-import { useUIStore } from '@/stores/uiStore';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { ResizeHandle } from '@/components/layout/ResizeHandle';
-import { E2EEUnlockModal } from '@/components/e2ee/E2EEUnlockModal';
-import { E2EESetupModal } from '@/components/e2ee/E2EESetupModal';
-import { OnboardingCompletionModal } from '@/components/e2ee/OnboardingCompletionModal';
-import { SettingsModal } from '@/features/settings-modal';
-import { Skeleton } from '@/components/ui/skeleton';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
-import { Sparkles } from 'lucide-react';
-import { useOnboardingStatus } from '@/hooks/useOnboardingStatus';
+import { Outlet, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useE2EEStore } from "@/stores/e2eeStore";
+import { useUIStore } from "@/stores/uiStore";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { ResizeHandle } from "@/components/layout/ResizeHandle";
+import { E2EEUnlockModal } from "@/components/e2ee/E2EEUnlockModal";
+import { E2EESetupModal } from "@/components/e2ee/E2EESetupModal";
+import { OnboardingCompletionModal } from "@/components/e2ee/OnboardingCompletionModal";
+import { SettingsModal } from "@/features/settings-modal";
+
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+
+import { useOnboardingStatus } from "@/hooks/useOnboardingStatus";
 
 export function AppLayout() {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useAuth();
   const { status: e2eeStatus, needsSetup } = useE2EEStore();
-  const { chatDensity, settingsModalOpen, settingsModalTab, closeSettingsModal } = useUIStore();
-  
+  const {
+    chatDensity,
+    settingsModalOpen,
+    settingsModalTab,
+    closeSettingsModal,
+  } = useUIStore();
+
   // Check onboarding status to detect users who left mid-onboarding
-  const { onboardingComplete, isLoading: isOnboardingStatusLoading } = useOnboardingStatus(isAuthenticated);
-  
+  const { onboardingComplete, isLoading: isOnboardingStatusLoading } =
+    useOnboardingStatus(isAuthenticated);
+
   // Track if user has completed onboarding in this session (to avoid showing modal again)
-  const [onboardingCompletedThisSession, setOnboardingCompletedThisSession] = useState(false);
+  const [onboardingCompletedThisSession, setOnboardingCompletedThisSession] =
+    useState(false);
 
   // Redirect to auth if not logged in
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      navigate({ to: '/auth' });
+      navigate({ to: "/auth" });
     }
   }, [isLoading, isAuthenticated, navigate]);
 
-  // Show loading state
+  // Show loading state - minimal Apple-style spinner
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative">
-            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center rotate-3">
-              <Sparkles className="w-7 h-7 text-primary" />
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="animate-spin rounded-full h-14 w-14 border-2 border-transparent border-t-primary/30" />
-            </div>
-          </div>
-          <div className="text-center space-y-2">
-            <Skeleton className="h-4 w-16 mx-auto" />
-            <Skeleton className="h-3 w-20 mx-auto" />
-          </div>
-        </div>
+        <div className="w-8 h-8 rounded-full border-2 border-white/[0.08] border-t-white/40 animate-spin" />
       </div>
     );
   }
@@ -65,8 +59,8 @@ export function AppLayout() {
     <TooltipProvider>
       <div
         className={cn(
-          'flex h-dvh w-full bg-background relative overflow-x-hidden overflow-y-hidden',
-          `chat-density-${chatDensity}`
+          "flex h-dvh w-full bg-background relative overflow-x-hidden overflow-y-hidden",
+          `chat-density-${chatDensity}`,
         )}
       >
         {/* Ambient Background Effects - Neutral */}
@@ -90,19 +84,22 @@ export function AppLayout() {
         {needsSetup && <E2EESetupModal />}
 
         {/* E2EE Unlock Modal - show when locked or unlocking */}
-        {!needsSetup && (e2eeStatus === 'locked' || e2eeStatus === 'unlocking') && <E2EEUnlockModal />}
+        {!needsSetup &&
+          (e2eeStatus === "locked" || e2eeStatus === "unlocking") && (
+            <E2EEUnlockModal />
+          )}
 
         {/* Onboarding Completion Modal - show when unlocked but no unlock method set up */}
-        {!needsSetup && 
-         e2eeStatus === 'unlocked' && 
-         !isOnboardingStatusLoading && 
-         !onboardingComplete && 
-         !onboardingCompletedThisSession && (
-          <OnboardingCompletionModal
-            open={true}
-            onComplete={() => setOnboardingCompletedThisSession(true)}
-          />
-        )}
+        {!needsSetup &&
+          e2eeStatus === "unlocked" &&
+          !isOnboardingStatusLoading &&
+          !onboardingComplete &&
+          !onboardingCompletedThisSession && (
+            <OnboardingCompletionModal
+              open={true}
+              onComplete={() => setOnboardingCompletedThisSession(true)}
+            />
+          )}
 
         {/* Settings Modal */}
         <SettingsModal

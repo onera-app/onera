@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect, memo, useCallback } from 'react';
-import { cn } from '@/lib/utils';
-import { MessageActions } from './MessageActions';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import type { BranchInfo } from './BranchNavigation';
-import type { MessageContent } from '@onera/types';
+import { useState, useRef, useEffect, memo, useCallback } from "react";
+import { cn } from "@/lib/utils";
+import { MessageActions } from "./MessageActions";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import type { BranchInfo } from "./BranchNavigation";
+import type { MessageContent } from "@onera/types";
 
 interface UserMessageProps {
   content: string | MessageContent[];
@@ -32,18 +32,18 @@ interface UserMessageProps {
 
 // Helper to extract text content from MessageContent[]
 function getTextContent(content: string | MessageContent[]): string {
-  if (typeof content === 'string') return content;
+  if (typeof content === "string") return content;
   return content
-    .filter((c) => c.type === 'text')
-    .map((c) => c.text || '')
-    .join('\n');
+    .filter((c) => c.type === "text")
+    .map((c) => c.text || "")
+    .join("\n");
 }
 
 // Helper to extract images from MessageContent[]
 function getImages(content: string | MessageContent[]): string[] {
-  if (typeof content === 'string') return [];
+  if (typeof content === "string") return [];
   return content
-    .filter((c) => c.type === 'image_url' && c.image_url?.url)
+    .filter((c) => c.type === "image_url" && c.image_url?.url)
     .map((c) => c.image_url!.url);
 }
 
@@ -56,9 +56,9 @@ interface DocumentInfo {
 
 // Helper to extract documents from MessageContent[]
 function getDocuments(content: string | MessageContent[]): DocumentInfo[] {
-  if (typeof content === 'string') return [];
+  if (typeof content === "string") return [];
   return content
-    .filter((c) => c.type === 'document_url' && c.document_url?.url)
+    .filter((c) => c.type === "document_url" && c.document_url?.url)
     .map((c) => ({
       url: c.document_url!.url,
       fileName: c.document_url!.fileName,
@@ -93,17 +93,26 @@ export const UserMessage = memo(function UserMessage({
   // Determine if handlers are available (for conditional rendering)
   const hasEdit = !!(legacyOnEdit || (messageId && onEditMessage));
   const hasDelete = !!(legacyOnDelete || (messageId && onDeleteMessage));
-  const hasPreviousBranch = !!(legacyOnPreviousBranch || (messageId && onPreviousBranchMessage));
-  const hasNextBranch = !!(legacyOnNextBranch || (messageId && onNextBranchMessage));
+  const hasPreviousBranch = !!(
+    legacyOnPreviousBranch ||
+    (messageId && onPreviousBranchMessage)
+  );
+  const hasNextBranch = !!(
+    legacyOnNextBranch ||
+    (messageId && onNextBranchMessage)
+  );
 
   // Create stable callbacks bound to messageId (or use legacy props if provided)
-  const onEdit = useCallback((newContent: string) => {
-    if (legacyOnEdit) {
-      legacyOnEdit(newContent);
-    } else if (messageId && onEditMessage) {
-      onEditMessage(messageId, newContent);
-    }
-  }, [messageId, onEditMessage, legacyOnEdit]);
+  const onEdit = useCallback(
+    (newContent: string) => {
+      if (legacyOnEdit) {
+        legacyOnEdit(newContent);
+      } else if (messageId && onEditMessage) {
+        onEditMessage(messageId, newContent);
+      }
+    },
+    [messageId, onEditMessage, legacyOnEdit],
+  );
 
   const onDelete = useCallback(() => {
     if (legacyOnDelete) {
@@ -134,7 +143,7 @@ export const UserMessage = memo(function UserMessage({
       textareaRef.current.focus();
       textareaRef.current.selectionStart = textareaRef.current.value.length;
       // Auto-resize
-      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   }, [isEditing]);
@@ -174,31 +183,28 @@ export const UserMessage = memo(function UserMessage({
               value={editValue}
               onChange={(e) => {
                 setEditValue(e.target.value);
-                e.target.style.height = 'auto';
+                e.target.style.height = "auto";
                 e.target.style.height = `${e.target.scrollHeight}px`;
               }}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
+                if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
                   handleSaveEdit();
                 }
-                if (e.key === 'Escape') {
+                if (e.key === "Escape") {
                   handleCancelEdit();
                 }
               }}
               className={cn(
-                'w-full px-4 py-3.5 rounded-xl resize-none',
-                'border-2 border-ring',
-                'text-body leading-relaxed'
+                "w-full px-4 py-3.5 rounded-xl resize-none",
+                "border-2 border-ring",
+                "text-body leading-relaxed",
               )}
               rows={1}
             />
           </div>
           <div className="flex items-center justify-end gap-2 mt-3">
-            <Button
-              variant="ghost"
-              onClick={handleCancelEdit}
-            >
+            <Button variant="ghost" onClick={handleCancelEdit}>
               Cancel
             </Button>
             <Button
@@ -215,12 +221,12 @@ export const UserMessage = memo(function UserMessage({
 
   return (
     <div
-      className="group/message fade-in w-full animate-in duration-200 select-none"
+      className="group/message w-full animate-in fade-in-0 slide-in-from-bottom-2 duration-300 ease-out select-none"
       data-role="user"
     >
-      <div className="flex w-full items-start gap-1.5 sm:gap-2 md:gap-3 justify-end">
-        {/* Actions - always visible */}
-        <div className="self-center flex items-center gap-0.5 sm:gap-1">
+      <div className="flex w-full items-start gap-2 sm:gap-2.5 justify-end">
+        {/* Actions - show on hover */}
+        <div className="self-center flex items-center gap-1 opacity-0 group-hover/message:opacity-100 transition-opacity duration-200">
           <MessageActions
             onCopy={handleCopy}
             onEdit={hasEdit ? handleStartEdit : undefined}
@@ -231,28 +237,27 @@ export const UserMessage = memo(function UserMessage({
             onNextBranch={hasNextBranch ? onNextBranch : undefined}
           />
           {copied && (
-            <span className="text-xs text-status-success-text animate-in fade-in">Copied!</span>
+            <span className="text-[11px] text-emerald-500 animate-in fade-in">
+              Copied!
+            </span>
           )}
         </div>
 
         {/* Message content */}
-        <div className="flex flex-col items-end max-w-[85%] sm:max-w-[min(fit-content,80%)]">
+        <div className="flex flex-col items-end max-w-[85%] sm:max-w-[min(fit-content,75%)]">
           {/* Attachments/Images */}
           {images.length > 0 && (
             <div className="flex flex-row justify-end gap-2 mb-2">
               {images.map((src, idx) => (
-                <div
-                  key={idx}
-                  className="relative overflow-hidden rounded-lg"
-                >
+                <div key={idx} className="relative overflow-hidden rounded-lg">
                   <img
                     src={src}
                     alt={`Attached image ${idx + 1}`}
                     className={cn(
-                      'max-h-64 max-w-full object-contain rounded-lg',
-                      'cursor-pointer transition-transform hover:scale-[1.02]'
+                      "max-h-64 max-w-full object-contain rounded-lg",
+                      "cursor-pointer transition-transform hover:scale-[1.02]",
                     )}
-                    onClick={() => window.open(src, '_blank')}
+                    onClick={() => window.open(src, "_blank")}
                   />
                 </div>
               ))}
@@ -268,9 +273,9 @@ export const UserMessage = memo(function UserMessage({
                   href={doc.url}
                   download={doc.fileName}
                   className={cn(
-                    'flex items-center gap-2 px-3 py-2 rounded-lg',
-                    'bg-muted/50 hover:bg-muted transition-colors',
-                    'text-sm text-foreground'
+                    "flex items-center gap-2 px-3 py-2 rounded-lg",
+                    "bg-muted/50 hover:bg-muted transition-colors",
+                    "text-sm text-foreground",
                   )}
                 >
                   <svg
@@ -292,16 +297,18 @@ export const UserMessage = memo(function UserMessage({
             </div>
           )}
 
-          {/* Text bubble - ChatGPT style grayish bubble in dark mode */}
+          {/* Text bubble - refined with subtle background, fully rounded */}
           {textContent && (
-            <div
-              className="inline-block w-fit rounded-2xl rounded-tr-sm px-3 sm:px-4 py-2 sm:py-2.5 text-left bg-neutral-200 dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 shadow-sm select-text"
-            >
-              <span className="whitespace-pre-wrap break-words text-[15px] sm:text-base leading-normal">{textContent}</span>
+            <div className="inline-block w-fit rounded-[22px] px-4 py-2.5 text-left bg-foreground/10 text-foreground select-text">
+              <span className="whitespace-pre-wrap break-words text-[15px] leading-[1.55] tracking-[-0.01em]">
+                {textContent}
+              </span>
             </div>
           )}
           {edited && (
-            <span className="text-xs text-muted-foreground mt-1 text-right">edited</span>
+            <span className="text-[11px] text-muted-foreground mt-1 text-right">
+              edited
+            </span>
           )}
         </div>
       </div>

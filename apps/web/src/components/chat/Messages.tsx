@@ -1,19 +1,21 @@
-import { useRef, useEffect, memo, useCallback, useState } from 'react';
-import { type ChatMessage, type ChatHistory } from '@onera/types';
-import { UserMessage, AssistantMessage, type BranchInfo, type RegenerateOptions } from './Message';
-import { cn } from '@/lib/utils';
-import { getMessageText } from '@/lib/chat/messageUtils';
-import { useScrollToBottom } from '@/hooks/useScrollToBottom';
+import { useRef, useEffect, memo, useCallback, useState } from "react";
+import { type ChatMessage, type ChatHistory } from "@onera/types";
 import {
-  getBranchInfo,
-  getSiblings,
-  getDeepestChild,
-} from '@/lib/messageTree';
-import type { Source } from './Sources';
-import { SuggestedActions } from './SuggestedActions';
-import { FollowUps } from './FollowUps';
-import { ArrowDown, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+  UserMessage,
+  AssistantMessage,
+  type BranchInfo,
+  type RegenerateOptions,
+} from "./Message";
+import { cn } from "@/lib/utils";
+import { getMessageText } from "@/lib/chat/messageUtils";
+import { useScrollToBottom } from "@/hooks/useScrollToBottom";
+import { getBranchInfo, getSiblings, getDeepestChild } from "@/lib/messageTree";
+import type { Source } from "./Sources";
+
+import { FollowUps } from "./FollowUps";
+import { ArrowDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 // Custom hook for smooth scroll button visibility with animation
 function useScrollButtonVisibility(isAtBottom: boolean) {
@@ -42,7 +44,7 @@ function useScrollButtonVisibility(isAtBottom: boolean) {
 function useStreamingAnchor(
   containerRef: React.RefObject<HTMLDivElement | null>,
   messages: ChatMessage[],
-  isStreaming: boolean | undefined
+  isStreaming: boolean | undefined,
 ) {
   const lastUserMessageRef = useRef<HTMLDivElement>(null);
   const wasStreamingRef = useRef(false);
@@ -52,18 +54,19 @@ function useStreamingAnchor(
   useEffect(() => {
     const container = containerRef.current;
     const userMessageEl = lastUserMessageRef.current;
-    
+
     // Capture previous state before updating
     const wasStreaming = wasStreamingRef.current;
     const prevMessageCount = prevMessageCountRef.current;
-    
+
     // Detect state changes
     const messageCountIncreased = messages.length > prevMessageCount;
     const lastMessage = messages[messages.length - 1];
-    const isNewUserMessage = messageCountIncreased && lastMessage?.role === 'user';
+    const isNewUserMessage =
+      messageCountIncreased && lastMessage?.role === "user";
     const streamingJustStarted = isStreaming && !wasStreaming;
     const streamingJustEnded = !isStreaming && wasStreaming;
-    
+
     // Update refs for next render
     prevMessageCountRef.current = messages.length;
     wasStreamingRef.current = !!isStreaming;
@@ -75,27 +78,29 @@ function useStreamingAnchor(
     }
 
     // Anchor when: new user message added OR streaming just started
-    const shouldAnchor = (isNewUserMessage || streamingJustStarted) && 
-                         userMessageEl && 
-                         container && 
-                         !hasAnchoredRef.current;
+    const shouldAnchor =
+      (isNewUserMessage || streamingJustStarted) &&
+      userMessageEl &&
+      container &&
+      !hasAnchoredRef.current;
 
     if (shouldAnchor) {
       hasAnchoredRef.current = true;
-      
+
       // Use requestAnimationFrame to ensure DOM is updated
       requestAnimationFrame(() => {
         if (!container || !userMessageEl) return;
-        
+
         // Calculate scroll position to show user message at top with padding
         const containerRect = container.getBoundingClientRect();
         const messageRect = userMessageEl.getBoundingClientRect();
-        const relativeTop = messageRect.top - containerRect.top + container.scrollTop;
-        
+        const relativeTop =
+          messageRect.top - containerRect.top + container.scrollTop;
+
         // Position user message with comfortable top padding (accounts for navbar)
         const topPadding = 100;
         const targetScroll = Math.max(0, relativeTop - topPadding);
-        
+
         // Instant scroll to anchor position (then smooth scroll takes over for streaming)
         container.scrollTop = targetScroll;
       });
@@ -106,10 +111,14 @@ function useStreamingAnchor(
 }
 
 // AI SDK message part types - compatible with UIMessagePart
-export type ToolInvocationState = 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
+export type ToolInvocationState =
+  | "input-streaming"
+  | "input-available"
+  | "output-available"
+  | "output-error";
 
 export interface ToolInvocationPart {
-  type: 'tool-invocation';
+  type: "tool-invocation";
   toolCallId: string;
   toolName: string;
   args?: unknown;
@@ -119,7 +128,7 @@ export interface ToolInvocationPart {
 }
 
 export interface SourcePart {
-  type: 'source';
+  type: "source";
   source: {
     sourceType?: string;
     url?: string;
@@ -129,13 +138,19 @@ export interface SourcePart {
 }
 
 export type MessagePart =
-  | { type: 'text'; text: string }
-  | { type: 'reasoning'; text: string; providerMetadata?: unknown }
+  | { type: "text"; text: string }
+  | { type: "reasoning"; text: string; providerMetadata?: unknown }
   | ToolInvocationPart
   | SourcePart
-  | { type: 'file'; data: string; mediaType: string; url?: string; filename?: string }
+  | {
+      type: "file";
+      data: string;
+      mediaType: string;
+      url?: string;
+      filename?: string;
+    }
   // Catch-all for other AI SDK part types
-  | { type: string;[key: string]: unknown };
+  | { type: string; [key: string]: unknown };
 
 // Message metadata for token usage, timing, etc.
 export interface MessageMetadata {
@@ -159,7 +174,10 @@ interface MessagesProps {
   /** Current model ID - used to show typing indicator with correct model icon */
   currentModelId?: string;
   onEditMessage?: (messageId: string, newContent: string) => void;
-  onRegenerateMessage?: (messageId: string, options?: RegenerateOptions) => void;
+  onRegenerateMessage?: (
+    messageId: string,
+    options?: RegenerateOptions,
+  ) => void;
   onDeleteMessage?: (messageId: string) => void;
   onSwitchBranch?: (messageId: string) => void;
   /** Callback when suggested action is clicked in empty state */
@@ -185,27 +203,31 @@ export const Messages = memo(function Messages({
   onRegenerateMessage,
   onDeleteMessage,
   onSwitchBranch,
-  onSendMessage,
-  inputDisabled,
   followUps,
   isGeneratingFollowUps,
   onFollowUpSelect,
 }: MessagesProps) {
   // Use observer-based scroll handling instead of useEffect on messages
-  const { containerRef, endRef, isAtBottom, scrollToBottom } = useScrollToBottom();
-  
+  const { containerRef, endRef, isAtBottom, scrollToBottom } =
+    useScrollToBottom();
+
   // Smooth scroll button visibility with animation
-  const { shouldRender: showScrollButton, isVisible: scrollButtonVisible } = useScrollButtonVisibility(isAtBottom);
+  const { shouldRender: showScrollButton, isVisible: scrollButtonVisible } =
+    useScrollButtonVisibility(isAtBottom);
 
   // Anchor user message at top when streaming starts
-  const { lastUserMessageRef } = useStreamingAnchor(containerRef, messages, isStreaming);
+  const { lastUserMessageRef } = useStreamingAnchor(
+    containerRef,
+    messages,
+    isStreaming,
+  );
 
   // Track seen message IDs for animation - handles branch switching correctly
   const seenMessageIdsRef = useRef<Set<string>>(new Set());
 
   // Ref for history to avoid recreating callbacks during streaming
   const historyRef = useRef(history);
-  
+
   // Keep historyRef in sync
   useEffect(() => {
     historyRef.current = history;
@@ -213,7 +235,7 @@ export const Messages = memo(function Messages({
 
   // Mark messages as seen after render
   useEffect(() => {
-    messages.forEach(m => seenMessageIdsRef.current.add(m.id));
+    messages.forEach((m) => seenMessageIdsRef.current.add(m.id));
   });
 
   // Get branch info for a message - uses ref for stable callback
@@ -222,7 +244,7 @@ export const Messages = memo(function Messages({
       if (!historyRef.current) return null;
       return getBranchInfo(historyRef.current, messageId);
     },
-    []
+    [],
   );
 
   // Navigate to previous sibling branch - uses ref for stable callback
@@ -237,7 +259,7 @@ export const Messages = memo(function Messages({
         onSwitchBranch(targetId);
       }
     },
-    [onSwitchBranch]
+    [onSwitchBranch],
   );
 
   // Navigate to next sibling branch - uses ref for stable callback
@@ -252,13 +274,13 @@ export const Messages = memo(function Messages({
         onSwitchBranch(targetId);
       }
     },
-    [onSwitchBranch]
+    [onSwitchBranch],
   );
 
   // Count new messages for staggered animation delays
   // NOTE: Must be defined before any early returns to comply with Rules of Hooks
   const newMessagesCount = useRef(0);
-  
+
   // Reset counter at start of each render so each batch of new messages
   // starts with fresh animation delays (0ms, 50ms, 100ms...) instead of
   // accumulating from previous renders
@@ -267,25 +289,15 @@ export const Messages = memo(function Messages({
   if (messages.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full px-4">
-        {/* Empty state */}
-        <div className="text-center mb-6 sm:mb-8 max-w-lg mx-auto px-2">
-          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight mb-2 sm:mb-3 text-foreground">
+        {/* Empty state - clean and minimal */}
+        <div className="text-center max-w-lg mx-auto px-2">
+          <h1 className="text-[26px] sm:text-[32px] font-semibold tracking-[-0.02em] mb-2 sm:mb-3 text-foreground/90">
             How can I help you today?
           </h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Start a conversation or try one of the suggestions below.
+          <p className="text-[14px] sm:text-[15px] text-muted-foreground/60 leading-relaxed">
+            Start a conversation below.
           </p>
         </div>
-
-        {/* Suggested actions grid */}
-        {onSendMessage && (
-          <div className="w-full max-w-2xl px-2 sm:px-4">
-            <SuggestedActions
-              onSend={onSendMessage}
-              disabled={inputDisabled}
-            />
-          </div>
-        )}
       </div>
     );
   }
@@ -294,8 +306,8 @@ export const Messages = memo(function Messages({
     <div className="relative h-full">
       <div ref={containerRef} className="h-full overflow-y-auto chat-scrollbar">
         {/* Messages container */}
-        <div className="max-w-3xl mx-auto px-3 sm:px-4 md:px-6 pb-32 sm:pb-36 pt-20">
-          <div className="space-y-6 sm:space-y-8 md:space-y-10 message-gap">
+        <div className="max-w-3xl mx-auto px-4 sm:px-5 md:px-6 pb-36 sm:pb-40 pt-20">
+          <div className="space-y-5 sm:space-y-6 md:space-y-7">
             {messages.map((message, index) => {
               const textContent = getMessageText(message);
               const isLastMessage = index === messages.length - 1;
@@ -304,7 +316,8 @@ export const Messages = memo(function Messages({
               // This handles branch switching correctly (existing messages don't re-animate)
               const isNewMessage = !seenMessageIdsRef.current.has(message.id);
               // Check if this is the streaming message (last assistant message while streaming)
-              const isStreamingMessage = isStreaming && isLastMessage && message.role === 'assistant';
+              const isStreamingMessage =
+                isStreaming && isLastMessage && message.role === "assistant";
 
               // Track new message index for staggered delays
               let newMessageIndex = 0;
@@ -312,17 +325,23 @@ export const Messages = memo(function Messages({
                 newMessageIndex = newMessagesCount.current++;
               }
 
-              if (message.role === 'user') {
+              if (message.role === "user") {
                 // Check if this is the last user message (for anchoring during streaming)
-                const isLastUserMessage = index === messages.length - 1 || 
-                  (index === messages.length - 2 && messages[messages.length - 1]?.role === 'assistant');
-                
+                const isLastUserMessage =
+                  index === messages.length - 1 ||
+                  (index === messages.length - 2 &&
+                    messages[messages.length - 1]?.role === "assistant");
+
                 return (
                   <div
                     key={message.id}
                     ref={isLastUserMessage ? lastUserMessageRef : undefined}
-                    className={isNewMessage ? 'message-enter' : undefined}
-                    style={isNewMessage ? { animationDelay: `${newMessageIndex * 50}ms` } : undefined}
+                    className={isNewMessage ? "message-enter" : undefined}
+                    style={
+                      isNewMessage
+                        ? { animationDelay: `${newMessageIndex * 50}ms` }
+                        : undefined
+                    }
                   >
                     <UserMessage
                       content={message.content}
@@ -342,10 +361,14 @@ export const Messages = memo(function Messages({
                 <div
                   key={message.id}
                   className={cn(
-                    isNewMessage && 'message-enter',
-                    isStreamingMessage && 'message-streaming'
+                    isNewMessage && "message-enter",
+                    isStreamingMessage && "message-streaming",
                   )}
-                  style={isNewMessage ? { animationDelay: `${newMessageIndex * 50}ms` } : undefined}
+                  style={
+                    isNewMessage
+                      ? { animationDelay: `${newMessageIndex * 50}ms` }
+                      : undefined
+                  }
                 >
                   <AssistantMessage
                     content={textContent}
@@ -355,43 +378,52 @@ export const Messages = memo(function Messages({
                     parts={isStreamingMessage ? streamingParts : undefined}
                     sources={isStreamingMessage ? streamingSources : undefined}
                     isLoading={isStreamingMessage}
-                    onRegenerateMessage={isLastMessage && !isStreaming ? onRegenerateMessage : undefined}
+                    onRegenerateMessage={
+                      isLastMessage && !isStreaming
+                        ? onRegenerateMessage
+                        : undefined
+                    }
                     onDeleteMessage={onDeleteMessage}
                     branchInfo={branchInfo}
                     onPreviousBranchMessage={handlePreviousBranch}
                     onNextBranchMessage={handleNextBranch}
                   />
-                  
+
                   {/* Follow-ups attached to last assistant message - aligned with text content */}
-                  {isLastMessage && message.role === 'assistant' && !isStreaming && onFollowUpSelect && (
-                    <div className="mt-3 sm:mt-4 pl-8 sm:pl-10 md:pl-11">
-                      {isGeneratingFollowUps ? (
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                          <span>Generating suggestions...</span>
-                        </div>
-                      ) : followUps && followUps.length > 0 ? (
-                        <FollowUps
-                          followUps={followUps}
-                          onSelect={onFollowUpSelect}
-                        />
-                      ) : null}
-                    </div>
-                  )}
+                  {isLastMessage &&
+                    message.role === "assistant" &&
+                    !isStreaming &&
+                    onFollowUpSelect && (
+                      <div className="mt-3 sm:mt-4 pl-8 sm:pl-10 md:pl-11">
+                        {isGeneratingFollowUps ? (
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Spinner size="sm" />
+                            <span>Generating suggestions...</span>
+                          </div>
+                        ) : followUps && followUps.length > 0 ? (
+                          <FollowUps
+                            followUps={followUps}
+                            onSelect={onFollowUpSelect}
+                          />
+                        ) : null}
+                      </div>
+                    )}
                 </div>
               );
             })}
 
             {/* Typing indicator placeholder - shown when streaming but no assistant message yet */}
-            {isStreaming && messages.length > 0 && messages[messages.length - 1].role === 'user' && (
-              <div className="message-enter">
-                <AssistantMessage
-                  content=""
-                  model={currentModelId}
-                  isLoading={true}
-                />
-              </div>
-            )}
+            {isStreaming &&
+              messages.length > 0 &&
+              messages[messages.length - 1].role === "user" && (
+                <div className="message-enter">
+                  <AssistantMessage
+                    content=""
+                    model={currentModelId}
+                    isLoading={true}
+                  />
+                </div>
+              )}
           </div>
 
           {/* Scroll anchor with padding */}
@@ -401,22 +433,24 @@ export const Messages = memo(function Messages({
 
       {/* Scroll to bottom button - appears when not at bottom with smooth animation */}
       {showScrollButton && (
-        <div 
+        <div
           className={cn(
-            "absolute bottom-24 sm:bottom-28 left-1/2 z-10 transition-all duration-200",
-            scrollButtonVisible 
-              ? "opacity-100 translate-y-0 scale-100" 
-              : "opacity-0 translate-y-2 scale-95"
+            "absolute bottom-28 sm:bottom-32 left-1/2 z-10 transition-all duration-300 ease-out",
+            scrollButtonVisible
+              ? "opacity-100 translate-y-0 scale-100"
+              : "opacity-0 translate-y-2 scale-95",
           )}
-          style={{ transform: `translateX(-50%) translateY(${scrollButtonVisible ? 0 : 8}px) scale(${scrollButtonVisible ? 1 : 0.95})` }}
+          style={{
+            transform: `translateX(-50%) translateY(${scrollButtonVisible ? 0 : 8}px) scale(${scrollButtonVisible ? 1 : 0.95})`,
+          }}
         >
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 sm:h-9 sm:w-9 rounded-full shadow-lg bg-background/90 backdrop-blur-md border-border/40 hover:bg-background hover:border-border/60 hover:shadow-xl transition-all duration-200 hover:scale-105"
-            onClick={() => scrollToBottom('smooth')}
+            className="h-9 w-9 rounded-full shadow-lg bg-background/80 backdrop-blur-xl border-white/[0.08] hover:bg-background/90 hover:border-white/[0.12] hover:shadow-xl transition-all duration-200 hover:scale-105"
+            onClick={() => scrollToBottom("smooth")}
           >
-            <ArrowDown className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <ArrowDown className="h-4 w-4 text-muted-foreground" />
             <span className="sr-only">Scroll to bottom</span>
           </Button>
         </div>
@@ -424,4 +458,3 @@ export const Messages = memo(function Messages({
     </div>
   );
 });
-

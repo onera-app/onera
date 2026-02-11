@@ -1,20 +1,33 @@
-import { useState, useRef, useCallback, useEffect, memo, type KeyboardEvent, type DragEvent, type ClipboardEvent } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { ArrowUp, Square } from 'lucide-react';
-import { toast } from 'sonner';
-import { AttachmentButton, DragDropOverlay } from './AttachmentButton';
-import { AttachmentPreview, type PendingAttachment } from './AttachmentPreview';
-import { SearchToggle } from './SearchToggle';
-import { processFile } from '@/lib/fileProcessing';
-import { useToolsStore } from '@/stores/toolsStore';
-import { useUIStore } from '@/stores/uiStore';
-import { RichTextMessageInput } from '@/features/rich-text-input';
-import type { ProcessedFile } from '@/lib/fileProcessing';
-import type { SearchProvider } from '@onera/types';
+import {
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  memo,
+  type KeyboardEvent,
+  type DragEvent,
+  type ClipboardEvent,
+} from "react";
+import { v4 as uuidv4 } from "uuid";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { ArrowUp, Square } from "lucide-react";
+import { toast } from "sonner";
+import { AttachmentButton, DragDropOverlay } from "./AttachmentButton";
+import { AttachmentPreview, type PendingAttachment } from "./AttachmentPreview";
+import { SearchToggle } from "./SearchToggle";
+import { processFile } from "@/lib/fileProcessing";
+import { useToolsStore } from "@/stores/toolsStore";
+import { useUIStore } from "@/stores/uiStore";
+import { RichTextMessageInput } from "@/features/rich-text-input";
+import type { ProcessedFile } from "@/lib/fileProcessing";
+import type { SearchProvider } from "@onera/types";
 
 export interface MessageInputOptions {
   attachments?: ProcessedFile[];
@@ -33,7 +46,7 @@ interface MessageInputProps {
 export const MessageInput = memo(function MessageInput({
   onSend,
   disabled = false,
-  placeholder = 'Message Onera...',
+  placeholder = "Message Onera...",
   onStop,
   isStreaming = false,
 }: MessageInputProps) {
@@ -75,15 +88,17 @@ export const MessageInput = memo(function MessageInput({
 const SimpleMessageInput = memo(function SimpleMessageInput({
   onSend,
   disabled = false,
-  placeholder = 'Message Onera...',
+  placeholder = "Message Onera...",
   onStop,
   isStreaming = false,
 }: MessageInputProps) {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState("");
   const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [searchEnabled, setSearchEnabled] = useState(false);
-  const [searchProvider, setSearchProvider] = useState<SearchProvider | undefined>();
+  const [searchProvider, setSearchProvider] = useState<
+    SearchProvider | undefined
+  >();
   const [isSearching] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
 
@@ -112,7 +127,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
     const pending: PendingAttachment[] = files.map((file) => ({
       id: uuidv4(),
       file,
-      status: 'processing' as const,
+      status: "processing" as const,
     }));
 
     setAttachments((prev) => [...prev, ...pending]);
@@ -125,7 +140,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
 
           // Generate preview for images
           let preview: string | undefined;
-          if (processed.type === 'image') {
+          if (processed.type === "image") {
             preview = `data:${processed.mimeType};base64,${processed.data}`;
           }
 
@@ -133,22 +148,22 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
             id: entry.id,
             processed,
             preview,
-            status: 'ready' as const,
+            status: "ready" as const,
             error: undefined,
           };
         } catch (error) {
           toast.error(
-            `Failed to process ${entry.file?.name}: ${error instanceof Error ? error.message : 'Unknown error'}`
+            `Failed to process ${entry.file?.name}: ${error instanceof Error ? error.message : "Unknown error"}`,
           );
           return {
             id: entry.id,
             processed: undefined,
             preview: undefined,
-            status: 'error' as const,
-            error: error instanceof Error ? error.message : 'Processing failed',
+            status: "error" as const,
+            error: error instanceof Error ? error.message : "Processing failed",
           };
         }
-      })
+      }),
     );
 
     // Batch update all results at once to avoid race conditions
@@ -165,7 +180,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
           };
         }
         return a;
-      })
+      }),
     );
   }, []);
 
@@ -182,7 +197,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
 
       const imageItems: File[] = [];
       for (const item of items) {
-        if (item.type.startsWith('image/')) {
+        if (item.type.startsWith("image/")) {
           const file = item.getAsFile();
           if (file) {
             imageItems.push(file);
@@ -195,7 +210,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
         handleFilesSelected(imageItems);
       }
     },
-    [handleFilesSelected]
+    [handleFilesSelected],
   );
 
   // Drag and drop handlers
@@ -239,12 +254,14 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
         handleFilesSelected(Array.from(files));
       }
     },
-    [handleFilesSelected]
+    [handleFilesSelected],
   );
 
   const handleSubmit = useCallback(() => {
     const trimmed = value.trim();
-    const readyAttachments = attachments.filter((a) => a.status === 'ready' && a.processed);
+    const readyAttachments = attachments.filter(
+      (a) => a.status === "ready" && a.processed,
+    );
 
     if (!trimmed && readyAttachments.length === 0) return;
     if (disabled) return;
@@ -266,17 +283,17 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
     onSend(trimmed, Object.keys(options).length > 0 ? options : undefined);
 
     // Reset state
-    setValue('');
+    setValue("");
     setAttachments([]);
 
     // Reset textarea height
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = "auto";
     }
   }, [value, attachments, disabled, searchEnabled, searchProvider, onSend]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
     }
@@ -284,13 +301,14 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
 
   const handleInput = () => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
     }
   };
 
-  const readyAttachments = attachments.filter((a) => a.status === 'ready');
-  const canSend = (value.trim().length > 0 || readyAttachments.length > 0) && !disabled;
+  const readyAttachments = attachments.filter((a) => a.status === "ready");
+  const canSend =
+    (value.trim().length > 0 || readyAttachments.length > 0) && !disabled;
 
   return (
     <div className="relative w-full">
@@ -298,11 +316,14 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
       <div
         ref={containerRef}
         className={cn(
-          'relative rounded-3xl overflow-hidden transition-all duration-300 ease-out',
-          'bg-card/70 backdrop-blur-xl',
-          'border border-border shadow-lg',
-          isFocused ? 'ring-1 ring-ring shadow-xl scale-[1.01]' : 'hover:bg-card/80',
-          disabled && 'opacity-60'
+          "relative rounded-[24px] overflow-hidden transition-all duration-300 ease-out",
+          "bg-background/80 backdrop-blur-2xl",
+          "border border-border",
+          "shadow-lg shadow-black/5 dark:shadow-black/20",
+          isFocused
+            ? "border-foreground/20 shadow-xl"
+            : "hover:bg-background/90",
+          disabled && "opacity-50",
         )}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
@@ -323,9 +344,9 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
         )}
 
         {/* Textarea row */}
-        <div className="flex items-end pl-2 sm:pl-3 pr-2 py-2 gap-1.5 sm:gap-2">
+        <div className="flex items-end pl-2.5 sm:pl-3 pr-2 py-2 gap-1.5 sm:gap-2">
           {/* Attach file button */}
-          <div className="pb-0.5 flex-shrink-0">
+          <div className="pb-1 flex-shrink-0">
             <AttachmentButton
               onFilesSelected={handleFilesSelected}
               disabled={disabled || isStreaming}
@@ -346,13 +367,13 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
             disabled={disabled || isStreaming}
             rows={1}
             className={cn(
-              'flex-1 w-full bg-transparent resize-none border-0 shadow-none',
-              'px-0 py-2 sm:py-2.5',
-              'focus-visible:ring-0',
-              'disabled:cursor-not-allowed',
-              'max-h-[150px] sm:max-h-[200px] min-h-[40px] sm:min-h-[44px]',
-              'text-[16px] sm:text-base leading-relaxed',
-              'placeholder:text-muted-foreground text-foreground'
+              "flex-1 w-full bg-transparent resize-none border-0 shadow-none",
+              "px-1 py-2.5 sm:py-3",
+              "focus-visible:ring-0",
+              "disabled:cursor-not-allowed",
+              "max-h-[150px] sm:max-h-[200px] min-h-[44px] sm:min-h-[48px]",
+              "text-[15px] sm:text-[15px] leading-[1.5]",
+              "placeholder:text-muted-foreground/50 text-foreground/95",
             )}
           />
 
@@ -392,8 +413,8 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
                     className={cn(
                       "h-9 w-9 rounded-2xl transition-all duration-200 shadow-md",
                       canSend
-                        ? "bg-white dark:bg-white text-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-200 hover:scale-105"
-                        : "bg-neutral-600 dark:bg-neutral-700 text-neutral-400 dark:text-neutral-500 cursor-not-allowed"
+                        ? "bg-foreground text-background hover:bg-foreground/90 hover:scale-105"
+                        : "bg-muted text-muted-foreground cursor-not-allowed",
                     )}
                   >
                     <ArrowUp className="h-4 w-4" strokeWidth={2.5} />
@@ -408,4 +429,3 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
     </div>
   );
 });
-
