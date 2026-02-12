@@ -24,7 +24,7 @@ import dayjs from 'dayjs';
 
 export function ConnectionsTab() {
   const credentialsData = useCredentials();
-  const credentials = credentialsData ?? [];
+  const credentials = useMemo(() => credentialsData ?? [], [credentialsData]);
   const isLoading = credentialsData === undefined;
   const deleteCredential = useDeleteCredential();
   const { isUnlocked } = useE2EE();

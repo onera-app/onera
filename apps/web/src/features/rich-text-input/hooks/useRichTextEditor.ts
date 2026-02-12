@@ -93,7 +93,7 @@ export function useRichTextEditor({
     const html = editor.getHTML();
 
     // Convert code blocks
-    let markdown = html
+    const markdown = html
       .replace(/<pre><code[^>]*>([\s\S]*?)<\/code><\/pre>/g, '```\n$1\n```')
       .replace(/<code>(.*?)<\/code>/g, '`$1`')
       .replace(/<strong>(.*?)<\/strong>/g, '**$1**')

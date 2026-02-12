@@ -24,6 +24,7 @@ import {
 import { trpc } from '@/lib/trpc';
 import type { NativeSearchSettings } from '@/stores/toolsStore';
 import { useModelParamsStore } from '@/stores/modelParamsStore';
+import { AppError, normalizeAppError } from '@/lib/errors/app-error';
 
 interface UseDirectChatOptions {
   /**
@@ -111,6 +112,10 @@ interface UseDirectChatReturn extends Omit<UseChatHelpers<UIMessage>, 'sendMessa
    * Set the selected model
    */
   setSelectedModel: (modelId: string) => void;
+}
+
+interface UpgradeRequiredError extends Error {
+  upgradeRequired?: boolean;
 }
 
 export function useDirectChat({
@@ -219,7 +224,16 @@ export function useDirectChat({
           },
           onError: (error) => {
             console.error('Failed to request enclave:', error);
-            onErrorRef.current?.(new Error(`Failed to connect to private inference: ${error.message}`));
+            const wrapped = new AppError({
+              code: 'IntegrationError',
+              message: `Failed to connect to private inference: ${error.message}`,
+              userMessage: 'Could not connect to private inference. Please retry.',
+              retryable: true,
+              blocking: false,
+              cause: error,
+              context: { modelId: selectedModelId },
+            });
+            onErrorRef.current?.(wrapped);
           },
         }
       );
@@ -244,7 +258,14 @@ export function useDirectChat({
         clearInterval(heartbeatIntervalRef.current);
       }
     };
-  }, [selectedModelId, isUnlocked]);
+  }, [
+    enclaveAssignmentId,
+    heartbeatMutation,
+    isUnlocked,
+    releaseEnclaveMutation,
+    requestEnclaveMutation,
+    selectedModelId,
+  ]);
 
   // Cleanup enclave on unmount
   useEffect(() => {
@@ -256,7 +277,7 @@ export function useDirectChat({
         clearInterval(heartbeatIntervalRef.current);
       }
     };
-  }, []);
+  }, [enclaveAssignmentId, releaseEnclaveMutation]);
 
   // Check if transport is ready
   const isReady = useMemo(() => {
@@ -277,12 +298,7 @@ export function useDirectChat({
   useEffect(() => {
     if (!transportRef.current) {
       transportRef.current = new DirectBrowserTransport({
-        modelId: selectedModelId || 'placeholder',
-        maxTokens,
-        systemPrompt,
-        nativeSearch,
-        providerSettings,
-        enclaveConfig: enclaveConfig || undefined,
+        modelId: 'placeholder',
       });
     }
   }, []);
@@ -319,7 +335,7 @@ export function useDirectChat({
     return {
       id: chatId,
       messages: initialMessages,
-      transport: transportRef.current as any, // Type cast needed due to generic constraints
+      transport: transportRef.current as unknown as ChatInit<UIMessage>['transport'],
       onFinish: ({ message }) => onFinishRef.current?.(message),
       onError: (error) => onErrorRef.current?.(error),
     };
@@ -348,7 +364,7 @@ export function useDirectChat({
             ? `You've reached your ${allowance.limit} ${label} request limit for this period. Upgrade your plan for more.`
             : 'Inference not available on your current plan.'
         );
-        (error as any).upgradeRequired = true;
+        (error as UpgradeRequiredError).upgradeRequired = true;
         onErrorRef.current?.(error);
         throw error;
       }
@@ -356,9 +372,10 @@ export function useDirectChat({
         console.info('Request billed as overage (usage-based billing)');
       }
     } catch (err) {
-      if ((err as any).upgradeRequired) throw err;
+      if ((err as UpgradeRequiredError).upgradeRequired) throw err;
       // Network/server errors should not block inference — fail open
-      console.warn('Allowance check failed, proceeding:', err);
+      const normalized = normalizeAppError(err, 'Allowance check failed', { stage: 'allowance_check' });
+      console.warn('Allowance check failed, proceeding:', normalized);
     }
   }, []);
 
@@ -405,7 +422,7 @@ export function useDirectChat({
         }),
       });
     },
-    [isReady, isUnlocked, selectedModelId, chat.sendMessage, enforceAllowance]
+    [chat, enclaveConfig, enforceAllowance, isReady, isUnlocked, selectedModelId]
   );
 
   // Regenerate the last assistant message
@@ -470,7 +487,7 @@ export function useDirectChat({
       // Re-send the user message to get a new response
       await chat.sendMessage({ text: userContent });
     },
-    [isReady, isUnlocked, selectedModelId, chat, enforceAllowance]
+    [chat, enclaveConfig, enforceAllowance, isReady, isUnlocked, selectedModelId]
   );
 
   return {

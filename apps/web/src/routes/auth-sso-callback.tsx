@@ -1,13 +1,7 @@
-import { useEffect, useState, useRef } from 'react';
-import { useNavigate } from '@tanstack/react-router';
-import { useClerk, useSignUp, useSignIn } from '@clerk/clerk-react';
-import { toast } from 'sonner';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Loader2, ShieldCheck, AlertTriangle, Fingerprint, KeyRound, Eye, EyeOff, Lock } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { useClerk, useSignIn, useSignUp } from "@clerk/clerk-react";
+import { toast } from "sonner";
 import {
   setupUserKeysWithSharding,
   getOrCreateDeviceId,
@@ -15,30 +9,63 @@ import {
   getDecryptedMasterKey,
   encryptDeviceName,
   type RecoveryKeyInfo,
-} from '@onera/crypto';
-import { trpc } from '@/lib/trpc';
-import { usePasskeySupport } from '@/hooks/useWebAuthnSupport';
-import { usePasskeyRegistration } from '@/hooks/useWebAuthn';
-import { usePasswordSetup } from '@/hooks/usePasswordUnlock';
-import { RecoveryPhraseDisplay } from '@/components/e2ee/RecoveryPhraseDisplay';
-import { OnboardingFlow } from '@/components/onboarding';
+} from "@onera/crypto";
+import { trpc } from "@/lib/trpc";
+import { usePasskeySupport } from "@/hooks/useWebAuthnSupport";
+import { usePasskeyRegistration } from "@/hooks/useWebAuthn";
+import { usePasswordSetup } from "@/hooks/usePasswordUnlock";
+import { OnboardingFlow } from "@/components/onboarding";
+import { RecoveryPhraseDisplay } from "@/components/e2ee/RecoveryPhraseDisplay";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  AlertTriangle,
+  Eye,
+  EyeOff,
+  Fingerprint,
+  KeyRound,
+  Loader2,
+  Lock,
+  ShieldCheck,
+} from "lucide-react";
+import { AppError, normalizeAppError } from "@/lib/errors/app-error";
 
-type CallbackStep = 'processing' | 'onboarding' | 'recovery' | 'passkey' | 'password' | 'error';
+type CallbackView = "processing" | "onboarding" | "passkey" | "password" | "recovery" | "error";
+
+type CallbackStage =
+  | "oauth_complete"
+  | "keyshare_status_check"
+  | "device_registration"
+  | "key_setup"
+  | "unlock_method_setup"
+  | "recovery_ack"
+  | "done"
+  | "error";
+
+interface AuthResolution {
+  userId: string | null;
+}
 
 function getDeviceName(): string {
   const ua = navigator.userAgent;
-  let browser = 'Unknown Browser';
-  let os = 'Unknown OS';
-  if (ua.includes('Chrome') && !ua.includes('Edg')) browser = 'Chrome';
-  else if (ua.includes('Safari') && !ua.includes('Chrome')) browser = 'Safari';
-  else if (ua.includes('Firefox')) browser = 'Firefox';
-  else if (ua.includes('Edg')) browser = 'Edge';
-  if (ua.includes('Windows')) os = 'Windows';
-  else if (ua.includes('Mac')) os = 'Mac';
-  else if (ua.includes('Linux')) os = 'Linux';
-  else if (ua.includes('iPhone')) os = 'iPhone';
-  else if (ua.includes('iPad')) os = 'iPad';
-  else if (ua.includes('Android')) os = 'Android';
+  let browser = "Unknown Browser";
+  let os = "Unknown OS";
+
+  if (ua.includes("Chrome") && !ua.includes("Edg")) browser = "Chrome";
+  else if (ua.includes("Safari") && !ua.includes("Chrome")) browser = "Safari";
+  else if (ua.includes("Firefox")) browser = "Firefox";
+  else if (ua.includes("Edg")) browser = "Edge";
+
+  if (ua.includes("Windows")) os = "Windows";
+  else if (ua.includes("Mac")) os = "Mac";
+  else if (ua.includes("Linux")) os = "Linux";
+  else if (ua.includes("iPhone")) os = "iPhone";
+  else if (ua.includes("iPad")) os = "iPad";
+  else if (ua.includes("Android")) os = "Android";
+
   return `${browser} on ${os}`;
 }
 
@@ -47,30 +74,25 @@ export function SSOCallbackPage() {
   const clerk = useClerk();
   const { signUp, setActive: setSignUpActive } = useSignUp();
   const { signIn, setActive: setSignInActive } = useSignIn();
-  const [step, setStep] = useState<CallbackStep>('processing');
-  const [error, setError] = useState<string | null>(null);
+  const [view, setView] = useState<CallbackView>("processing");
+  const [stage, setStage] = useState<CallbackStage>("oauth_complete");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [recoveryInfo, setRecoveryInfo] = useState<RecoveryKeyInfo | null>(null);
   const [passkeyError, setPasskeyError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const processingRef = useRef(false);
 
-  // Passkey support
   const { isSupported: passkeySupported, isLoading: isCheckingPasskeySupport } = usePasskeySupport();
   const { registerPasskey, isRegistering: isRegisteringPasskey } = usePasskeyRegistration();
   const { setupPasswordEncryption, isSettingUp: isSettingUpPassword } = usePasswordSetup();
 
-  // tRPC utils for cache invalidation
   const trpcUtils = trpc.useUtils();
-
-  // tRPC mutations for E2EE
-  const keySharesQuery = trpc.keyShares.get.useQuery(undefined, { enabled: false });
   const onboardingStatusQuery = trpc.keyShares.getOnboardingStatus.useQuery(undefined, { enabled: false });
   const createKeySharesMutation = trpc.keyShares.create.useMutation({
     onSuccess: () => {
-      // Invalidate the keyShares.check query so AppLayout doesn't show "Encryption Setup Required"
       trpcUtils.keyShares.check.invalidate();
       trpcUtils.keyShares.get.invalidate();
       trpcUtils.keyShares.getOnboardingStatus.invalidate();
@@ -79,237 +101,251 @@ export function SSOCallbackPage() {
   const registerDeviceMutation = trpc.devices.register.useMutation();
   const updateLastSeenMutation = trpc.devices.updateLastSeen.useMutation();
 
-  // Main OAuth handling effect - handles both OAuth completion AND E2EE setup
+  const stageLabel = useMemo(() => {
+    const map: Record<CallbackStage, string> = {
+      oauth_complete: "Completing OAuth session",
+      keyshare_status_check: "Checking encryption state",
+      device_registration: "Registering device",
+      key_setup: "Setting up encryption keys",
+      unlock_method_setup: "Configuring unlock method",
+      recovery_ack: "Preparing recovery backup",
+      done: "Finishing setup",
+      error: "Error",
+    };
+    return map[stage];
+  }, [stage]);
+
+  const failWith = useCallback((error: unknown, defaultMessage: string): void => {
+    const normalized = normalizeAppError(error, defaultMessage, { stage });
+    setErrorMessage(normalized.userMessage);
+    setStage("error");
+    setView("error");
+  }, [stage]);
+
+  const resolveOAuthSession = useCallback(async (): Promise<AuthResolution> => {
+    const externalAccountError = signUp?.verifications?.externalAccount?.error;
+
+    if (externalAccountError?.code === "external_account_exists") {
+      const result = await signIn?.create({ transfer: true });
+      if (result?.status === "complete" && result.createdSessionId && setSignInActive) {
+        await setSignInActive({ session: result.createdSessionId });
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        return { userId: clerk.user?.id || null };
+      }
+    }
+
+    if (signUp?.status === "complete" && signUp.createdSessionId && setSignUpActive) {
+      await setSignUpActive({ session: signUp.createdSessionId });
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      return { userId: clerk.user?.id || null };
+    }
+
+    if (signIn?.status === "complete" && signIn.createdSessionId && setSignInActive) {
+      await setSignInActive({ session: signIn.createdSessionId });
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      return { userId: clerk.user?.id || null };
+    }
+
+    if (clerk.user) {
+      return { userId: clerk.user.id };
+    }
+
+    return { userId: null };
+  }, [clerk.user, setSignInActive, setSignUpActive, signIn, signUp]);
+
+  const runExistingUserPath = useCallback(async (): Promise<void> => {
+    const deviceId = getOrCreateDeviceId();
+    await updateLastSeenMutation.mutateAsync({ deviceId }).catch(() => {
+      // Device may not be registered yet.
+    });
+    toast.info("Please unlock your encryption to continue.");
+    setStage("done");
+    navigate({ to: "/app" });
+  }, [navigate, updateLastSeenMutation]);
+
+  const runNewUserPath = useCallback(async (): Promise<void> => {
+    setStage("device_registration");
+    const deviceId = getOrCreateDeviceId();
+    const plaintextDeviceName = getDeviceName();
+    const deviceResult = await registerDeviceMutation.mutateAsync({
+      deviceId,
+      userAgent: navigator.userAgent,
+    });
+
+    setStage("key_setup");
+    const keyBundle = await setupUserKeysWithSharding(deviceResult.deviceSecret);
+    await createKeySharesMutation.mutateAsync({
+      authShare: keyBundle.storableKeys.authShare,
+      encryptedRecoveryShare: keyBundle.storableKeys.encryptedRecoveryShare,
+      recoveryShareNonce: keyBundle.storableKeys.recoveryShareNonce,
+      publicKey: keyBundle.storableKeys.publicKey,
+      encryptedPrivateKey: keyBundle.storableKeys.encryptedPrivateKey,
+      privateKeyNonce: keyBundle.storableKeys.privateKeyNonce,
+      masterKeyRecovery: keyBundle.storableKeys.masterKeyRecovery,
+      masterKeyRecoveryNonce: keyBundle.storableKeys.masterKeyRecoveryNonce,
+      encryptedRecoveryKey: keyBundle.storableKeys.encryptedRecoveryKey,
+      recoveryKeyNonce: keyBundle.storableKeys.recoveryKeyNonce,
+    });
+
+    setDecryptedKeys({
+      masterKey: keyBundle.masterKey,
+      publicKey: keyBundle.keyPair.publicKey,
+      privateKey: keyBundle.keyPair.privateKey,
+    });
+
+    try {
+      const encryptedName = encryptDeviceName(plaintextDeviceName);
+      await registerDeviceMutation.mutateAsync({
+        deviceId,
+        encryptedDeviceName: encryptedName.encryptedDeviceName,
+        deviceNameNonce: encryptedName.deviceNameNonce,
+        userAgent: navigator.userAgent,
+      });
+    } catch (error) {
+      console.warn("Failed to encrypt device name:", error);
+    }
+
+    setRecoveryInfo(keyBundle.recoveryInfo);
+    setStage("unlock_method_setup");
+    setView("onboarding");
+    toast.success("Account created! Let's get your secure unlock set up.");
+  }, [createKeySharesMutation, registerDeviceMutation]);
+
+  // This initialization must run once per callback entry.
   useEffect(() => {
-    async function handleOAuthAndE2EE() {
-      if (processingRef.current || !clerk.loaded) return;
+    const initialize = async () => {
+      if (processingRef.current || !clerk.loaded) {
+        return;
+      }
+      processingRef.current = true;
+      setView("processing");
+      setStage("oauth_complete");
 
-      let userId: string | null = null;
-      let isNewUser = false;
+      try {
+        const resolved = await resolveOAuthSession();
+        if (!resolved.userId) {
+          throw new AppError({
+            code: "AuthError",
+            message: "No authenticated user after OAuth callback",
+            userMessage: "Sign in session could not be established. Please try again.",
+            retryable: true,
+            blocking: true,
+          });
+        }
 
-      // Check if the external account already exists (existing user via OAuth)
-      const externalAccountError = signUp?.verifications?.externalAccount?.error;
-      if (externalAccountError?.code === 'external_account_exists') {
-        processingRef.current = true;
+        setStage("keyshare_status_check");
+        const onboardingStatusResult = await onboardingStatusQuery.refetch().catch(() => null);
+        const onboardingStatus = onboardingStatusResult?.data;
 
-        try {
-          // Transfer the OAuth verification to sign-in flow
-          const result = await signIn?.create({ transfer: true });
-          if (result?.status === 'complete' && result.createdSessionId && setSignInActive) {
-            await setSignInActive({ session: result.createdSessionId });
-            // Wait for Clerk to update
-            await new Promise(resolve => setTimeout(resolve, 100));
-            userId = clerk.user?.id || null;
-            isNewUser = false;
-          }
-        } catch (err) {
-          setError(err instanceof Error ? err.message : 'Sign in failed');
-          setStep('error');
+        if (onboardingStatus?.hasKeyShares) {
+          await runExistingUserPath();
           return;
         }
-      } else if (signUp?.status === 'complete' && signUp.createdSessionId && setSignUpActive) {
-        processingRef.current = true;
-        await setSignUpActive({ session: signUp.createdSessionId });
-        await new Promise(resolve => setTimeout(resolve, 100));
-        userId = clerk.user?.id || null;
-        isNewUser = true;
-      } else if (signIn?.status === 'complete' && signIn.createdSessionId && setSignInActive) {
-        processingRef.current = true;
-        await setSignInActive({ session: signIn.createdSessionId });
-        await new Promise(resolve => setTimeout(resolve, 100));
-        userId = clerk.user?.id || null;
-        isNewUser = false;
-      } else if (clerk.user) {
-        // User is already authenticated (maybe from a previous session)
-        processingRef.current = true;
-        userId = clerk.user.id;
-        isNewUser = false;
-      }
 
-      // If we have a userId, handle E2EE
-      if (userId) {
-        try {
-          await handleE2EE(userId, isNewUser);
-        } catch (err) {
-          setError(err instanceof Error ? err.message : 'E2EE setup failed');
-          setStep('error');
-        }
+        await runNewUserPath();
+      } catch (error) {
+        failWith(error, "E2EE setup failed");
       }
+    };
+
+    initialize();
+  }, [
+    clerk.loaded,
+    failWith,
+    onboardingStatusQuery,
+    resolveOAuthSession,
+    runExistingUserPath,
+    runNewUserPath,
+    signIn,
+    signUp,
+    setSignInActive,
+    setSignUpActive,
+  ]);
+
+  useEffect(() => {
+    if (view === "passkey" && !isCheckingPasskeySupport && !passkeySupported) {
+      setView("password");
     }
+  }, [isCheckingPasskeySupport, passkeySupported, view]);
 
-    async function handleE2EE(_userId: string, _presumedNewUser: boolean) {
-      // Check onboarding status to determine where user is in the flow
-      let onboardingStatus = null;
-      try {
-        const result = await onboardingStatusQuery.refetch();
-        onboardingStatus = result.data;
-      } catch {
-        // No status found - treat as new user
-      }
-
-      if (onboardingStatus?.hasKeyShares) {
-        // User has encryption set up
-        const deviceId = getOrCreateDeviceId();
-        await updateLastSeenMutation.mutateAsync({ deviceId }).catch(() => {
-          // Device may not be registered yet, that's okay
-        });
-
-        if (onboardingStatus.onboardingComplete) {
-          // Fully onboarded user - redirect to home, E2EEUnlockModal will prompt for unlock
-          toast.info('Please unlock your encryption to continue.');
-          navigate({ to: '/app' });
-        } else {
-          // User has keyShares but no unlock method - incomplete onboarding
-          // They need to enter their recovery phrase to unlock, then set up passkey/password
-          // AppLayout will show OnboardingCompletionModal after they unlock
-          toast.info('Please complete your encryption setup. Enter your recovery phrase to continue.');
-          navigate({ to: '/app' });
-        }
-      } else {
-        // New user - register device first to get deviceSecret, then setup E2EE keys
-        // Step 1: Register device to get server-generated deviceSecret
-        // Note: We don't include deviceName yet - we'll encrypt it after key setup
-        const deviceId = getOrCreateDeviceId();
-        const plaintextDeviceName = getDeviceName();
-        const deviceResult = await registerDeviceMutation.mutateAsync({
-          deviceId,
-          userAgent: navigator.userAgent,
-        });
-
-        // Step 2: Setup keys using deviceSecret (not userId)
-        // SECURITY: deviceSecret adds server-side entropy to device share encryption
-        const keyBundle = await setupUserKeysWithSharding(deviceResult.deviceSecret);
-
-        // Step 3: Store key shares on server
-        await createKeySharesMutation.mutateAsync({
-          // Auth share is now stored plaintext (protected by Clerk authentication)
-          authShare: keyBundle.storableKeys.authShare,
-          // Recovery share remains encrypted with recovery key
-          encryptedRecoveryShare: keyBundle.storableKeys.encryptedRecoveryShare,
-          recoveryShareNonce: keyBundle.storableKeys.recoveryShareNonce,
-          // Asymmetric key pair
-          publicKey: keyBundle.storableKeys.publicKey,
-          encryptedPrivateKey: keyBundle.storableKeys.encryptedPrivateKey,
-          privateKeyNonce: keyBundle.storableKeys.privateKeyNonce,
-          // Recovery method: master key encrypted with recovery key
-          masterKeyRecovery: keyBundle.storableKeys.masterKeyRecovery,
-          masterKeyRecoveryNonce: keyBundle.storableKeys.masterKeyRecoveryNonce,
-          // Recovery key encrypted with master key (for display)
-          encryptedRecoveryKey: keyBundle.storableKeys.encryptedRecoveryKey,
-          recoveryKeyNonce: keyBundle.storableKeys.recoveryKeyNonce,
-        });
-
-        setDecryptedKeys({
-          masterKey: keyBundle.masterKey,
-          publicKey: keyBundle.keyPair.publicKey,
-          privateKey: keyBundle.keyPair.privateKey,
-        });
-
-        // Step 4: Now that E2EE is set up, update device with encrypted name
-        try {
-          const encryptedName = encryptDeviceName(plaintextDeviceName);
-          await registerDeviceMutation.mutateAsync({
-            deviceId,
-            encryptedDeviceName: encryptedName.encryptedDeviceName,
-            deviceNameNonce: encryptedName.deviceNameNonce,
-            userAgent: navigator.userAgent,
-          });
-        } catch (err) {
-          // Non-fatal: device name encryption is nice-to-have, device is already registered
-          console.warn('Failed to encrypt device name:', err);
-        }
-
-        setRecoveryInfo(keyBundle.recoveryInfo);
-        // Show onboarding flow for new users before recovery phrase
-        setStep('onboarding');
-        toast.success('Account created! Let\'s get you set up.');
-      }
-    }
-
-    handleOAuthAndE2EE();
-  }, [clerk.loaded, clerk.user, signUp, signIn, setSignUpActive, setSignInActive, keySharesQuery, onboardingStatusQuery, createKeySharesMutation, registerDeviceMutation, updateLastSeenMutation, navigate]);
-
-  const handleSetupPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSetupPassword = async (event: FormEvent): Promise<void> => {
+    event.preventDefault();
     setPasswordError(null);
 
     if (password.length < 8) {
-      setPasswordError('Password must be at least 8 characters');
+      setPasswordError("Password must be at least 8 characters");
       return;
     }
-
     if (password !== confirmPassword) {
-      setPasswordError('Passwords do not match');
+      setPasswordError("Passwords do not match");
       return;
     }
 
     try {
       const masterKey = getDecryptedMasterKey();
       if (!masterKey) {
-        throw new Error('Master key not available');
+        throw new Error("Master key not available");
       }
       await setupPasswordEncryption(password, masterKey);
-      toast.success('Encryption password set!');
-      // Show backup recovery phrase
-      setStep('recovery');
-    } catch (err) {
-      setPasswordError(err instanceof Error ? err.message : 'Failed to set up password');
+      toast.success("Encryption password set");
+      setStage("recovery_ack");
+      setView("recovery");
+    } catch (error) {
+      setPasswordError(normalizeAppError(error, "Failed to set password").userMessage);
     }
   };
 
-  const handleRegisterPasskey = async () => {
+  const handleRegisterPasskey = async (): Promise<void> => {
     setPasskeyError(null);
     try {
       const masterKey = getDecryptedMasterKey();
       if (!masterKey) {
-        throw new Error('Master key not available');
+        throw new Error("Master key not available");
       }
       await registerPasskey(masterKey, getDeviceName());
-      toast.success('Passkey registered!');
-      // Show backup recovery phrase
-      setStep('recovery');
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Registration failed');
-      // Don't show error for user cancellation
-      if (error.name === 'NotAllowedError' || error.message.includes('cancel')) {
-        return;
+      toast.success("Passkey registered");
+      setStage("recovery_ack");
+      setView("recovery");
+    } catch (error) {
+      const normalized = normalizeAppError(error, "Passkey registration failed");
+      const isCancellation =
+        normalized.message.includes("cancel") || normalized.message.includes("NotAllowedError");
+      if (!isCancellation) {
+        setPasskeyError(normalized.userMessage);
       }
-      setPasskeyError(error.message);
     }
   };
 
-  const handleUsePasswordInstead = () => {
-    setStep('password');
-  };
-
-  // Processing step
-  if (step === 'processing') {
+  if (view === "processing") {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-background">
         <Card className="w-full max-w-md">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
             <p className="text-muted-foreground">Completing sign in...</p>
+            <p className="mt-2 text-xs text-muted-foreground/80" aria-live="polite">
+              {stageLabel}
+            </p>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  // Error step
-  if (step === 'error') {
+  if (view === "error") {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-background">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Sign In Failed</CardTitle>
+            <CardDescription aria-live="assertive">{stageLabel}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>{error || 'An error occurred during sign in'}</AlertDescription>
+              <AlertDescription>{errorMessage || "An error occurred during sign in"}</AlertDescription>
             </Alert>
-            <Button onClick={() => navigate({ to: '/auth' })} className="w-full">
+            <Button onClick={() => navigate({ to: "/auth" })} className="w-full">
               Back to Sign In
             </Button>
           </CardContent>
@@ -318,58 +354,47 @@ export function SSOCallbackPage() {
     );
   }
 
-  // Onboarding flow for new users
-  if (step === 'onboarding') {
+  if (view === "onboarding") {
     return (
       <OnboardingFlow
         onComplete={() => {
-          // Go directly to passkey if supported, otherwise password
           if (!isCheckingPasskeySupport && passkeySupported) {
-            setStep('passkey');
-          } else if (!isCheckingPasskeySupport && !passkeySupported) {
-            setStep('password');
-          } else {
-            // Still checking - default to passkey, will show loading
-            setStep('passkey');
+            setView("passkey");
+            return;
           }
+          setView("password");
         }}
       />
     );
   }
 
-  // Recovery phrase display step (backup insurance)
-  if (step === 'recovery' && recoveryInfo) {
+  if (view === "recovery" && recoveryInfo) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-        {/* Decorative background elements */}
         <div className="pointer-events-none fixed inset-0 overflow-hidden">
           <div className="absolute -left-1/4 -top-1/4 h-1/2 w-1/2 rounded-full bg-gradient-to-br from-amber-500/5 to-transparent blur-3xl" />
           <div className="absolute -bottom-1/4 -right-1/4 h-1/2 w-1/2 rounded-full bg-gradient-to-tl from-orange-500/5 to-transparent blur-3xl" />
         </div>
 
         <div className="relative w-full max-w-lg">
-          {/* Header */}
           <div className="mb-6 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/20 via-orange-500/20 to-red-500/10 ring-1 ring-amber-500/20">
               <Lock className="h-8 w-8 text-amber-600 dark:text-amber-400" />
             </div>
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Backup Recovery Phrase
-            </h1>
+            <h1 className="text-2xl font-semibold tracking-tight">Backup Recovery Phrase</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Save this as insurance in case you ever lose access to your passkey or password.
+              Save this phrase securely in case you lose your passkey or password.
             </p>
           </div>
 
-          {/* Recovery Phrase Card */}
           <Card className="border-border/50 shadow-xl shadow-black/5">
             <CardContent className="p-4 sm:p-6">
               <RecoveryPhraseDisplay
                 recoveryInfo={recoveryInfo}
                 onContinue={() => {
-                  // Invalidate onboarding status before navigating
                   trpcUtils.keyShares.getOnboardingStatus.invalidate();
-                  navigate({ to: '/app' });
+                  setStage("done");
+                  navigate({ to: "/app" });
                 }}
                 continueLabel="Start Chatting"
               />
@@ -380,8 +405,7 @@ export function SSOCallbackPage() {
     );
   }
 
-  // Password setup step
-  if (step === 'password') {
+  if (view === "password") {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-background">
         <div className="w-full max-w-md">
@@ -392,9 +416,7 @@ export function SSOCallbackPage() {
               </div>
               <div>
                 <CardTitle className="text-2xl">Set Encryption Password</CardTitle>
-                <CardDescription>
-                  This password will unlock your encrypted data
-                </CardDescription>
+                <CardDescription>This password unlocks your encrypted data.</CardDescription>
               </div>
             </CardHeader>
 
@@ -405,9 +427,9 @@ export function SSOCallbackPage() {
                   <div className="relative">
                     <Input
                       id="password"
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(event) => setPassword(event.target.value)}
                       placeholder="Enter a strong password"
                       required
                       autoFocus
@@ -415,8 +437,9 @@ export function SSOCallbackPage() {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={() => setShowPassword((prev) => !prev)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -427,9 +450,9 @@ export function SSOCallbackPage() {
                   <Label htmlFor="confirm-password">Confirm Password</Label>
                   <Input
                     id="confirm-password"
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={(event) => setConfirmPassword(event.target.value)}
                     placeholder="Confirm your password"
                     required
                     minLength={8}
@@ -441,7 +464,7 @@ export function SSOCallbackPage() {
                 </p>
 
                 {passwordError && (
-                  <Alert variant="destructive">
+                  <Alert variant="destructive" aria-live="assertive">
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription>{passwordError}</AlertDescription>
                   </Alert>
@@ -454,7 +477,7 @@ export function SSOCallbackPage() {
                       Setting up...
                     </>
                   ) : (
-                    'Set Password'
+                    "Set Password"
                   )}
                 </Button>
               </form>
@@ -465,9 +488,7 @@ export function SSOCallbackPage() {
     );
   }
 
-  // Passkey setup step (for SSO users with PRF support)
-  if (step === 'passkey') {
-    // If still checking passkey support or passkey not supported, redirect to password
+  if (view === "passkey") {
     if (isCheckingPasskeySupport) {
       return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-background">
@@ -482,8 +503,6 @@ export function SSOCallbackPage() {
     }
 
     if (!passkeySupported) {
-      // Redirect to password if passkey not supported
-      setStep('password');
       return null;
     }
 
@@ -497,9 +516,7 @@ export function SSOCallbackPage() {
               </div>
               <div>
                 <CardTitle className="text-2xl">Add a Passkey</CardTitle>
-                <CardDescription>
-                  Unlock with Face ID, Touch ID, or Windows Hello
-                </CardDescription>
+                <CardDescription>Unlock using Face ID, Touch ID, or Windows Hello.</CardDescription>
               </div>
             </CardHeader>
 
@@ -510,7 +527,7 @@ export function SSOCallbackPage() {
                   <div>
                     <p className="text-sm font-medium">Instant unlock</p>
                     <p className="text-xs text-muted-foreground">
-                      One tap to access your encrypted data
+                      Use one biometric gesture to unlock encrypted data.
                     </p>
                   </div>
                 </div>
@@ -520,24 +537,20 @@ export function SSOCallbackPage() {
                   <div>
                     <p className="text-sm font-medium">Phishing resistant</p>
                     <p className="text-xs text-muted-foreground">
-                      Your passkey is bound to this device and can't be stolen
+                      Passkeys stay bound to your device identity.
                     </p>
                   </div>
                 </div>
               </div>
 
               {passkeyError && (
-                <Alert variant="destructive">
+                <Alert variant="destructive" aria-live="assertive">
                   <AlertTriangle className="h-4 w-4" />
                   <AlertDescription>{passkeyError}</AlertDescription>
                 </Alert>
               )}
 
-              <Button
-                onClick={handleRegisterPasskey}
-                disabled={isRegisteringPasskey}
-                className="w-full"
-              >
+              <Button onClick={handleRegisterPasskey} disabled={isRegisteringPasskey} className="w-full">
                 {isRegisteringPasskey ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -553,7 +566,7 @@ export function SSOCallbackPage() {
 
               <button
                 type="button"
-                onClick={handleUsePasswordInstead}
+                onClick={() => setView("password")}
                 disabled={isRegisteringPasskey}
                 className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
               >

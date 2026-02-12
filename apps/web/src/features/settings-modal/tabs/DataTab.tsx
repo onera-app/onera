@@ -43,7 +43,7 @@ export function DataTab() {
       URL.revokeObjectURL(url);
 
       toast.success('Chats exported successfully');
-    } catch (error) {
+    } catch {
       toast.error('Failed to export chats');
     } finally {
       setIsExporting(false);

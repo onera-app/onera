@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { usePrompt, useUpdatePrompt, useCreatePrompt } from '@/hooks/queries/usePrompts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,7 +51,7 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
   };
 
   // Save prompt
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (!name.trim() || !content.trim()) {
       return;
     }
@@ -79,7 +79,7 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [content, createPrompt, description, isNew, name, onSaved, promptId, updatePrompt]);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -92,7 +92,7 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [name, description, content]);
+  }, [handleSave]);
 
   if (isLoading && !isNew) {
     return (

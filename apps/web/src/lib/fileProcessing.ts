@@ -175,7 +175,7 @@ export async function extractPdfText(file: File): Promise<{
   let pdfjsLib;
   try {
     pdfjsLib = await import('pdfjs-dist');
-  } catch (error) {
+  } catch {
     throw new Error('Failed to load PDF processing library');
   }
 
@@ -194,7 +194,7 @@ export async function extractPdfText(file: File): Promise<{
   try {
     const arrayBuffer = await file.arrayBuffer();
     pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  } catch (error) {
+  } catch {
     throw new Error('Failed to parse PDF file. The file may be corrupted or password-protected.');
   }
 
@@ -208,7 +208,7 @@ export async function extractPdfText(file: File): Promise<{
         .map((item) => ('str' in item ? item.str : ''))
         .join(' ');
       pages.push(`[Page ${i}]\n${pageText}`);
-    } catch (error) {
+    } catch {
       // Skip problematic pages but continue
       pages.push(`[Page ${i}]\n[Error reading page]`);
     }

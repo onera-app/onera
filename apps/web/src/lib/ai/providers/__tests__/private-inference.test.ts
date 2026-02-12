@@ -126,7 +126,7 @@ describe('Private Inference Provider', () => {
       prompt: [{ role: 'user', content: 'Hi' }],
       mode: { type: 'regular' },
       inputFormat: 'messages',
-    } as any);
+    } as unknown as Parameters<typeof model.doGenerate>[0]);
 
     expect(mockFetchAndVerifyAttestation).toHaveBeenCalledWith(
       mockConfig.attestationEndpoint,
@@ -153,7 +153,7 @@ describe('Private Inference Provider', () => {
         prompt: [{ role: 'user', content: 'Hi' }],
         mode: { type: 'regular' },
         inputFormat: 'messages',
-      } as any)
+      } as unknown as Parameters<typeof model.doGenerate>[0])
     ).rejects.toThrow('Attestation verification failed');
   });
 
@@ -176,7 +176,7 @@ describe('Private Inference Provider', () => {
       prompt: [{ role: 'user', content: 'Test' }],
       mode: { type: 'regular' },
       inputFormat: 'messages',
-    } as any);
+    } as unknown as Parameters<typeof model.doGenerate>[0]);
 
     expect(mockNoiseConnect).toHaveBeenCalledWith(
       mockConfig.wsEndpoint,
@@ -203,7 +203,7 @@ describe('Private Inference Provider', () => {
       prompt: [{ role: 'user', content: 'Hello' }],
       mode: { type: 'regular' },
       inputFormat: 'messages',
-    } as any);
+    } as unknown as Parameters<typeof model.doGenerate>[0]);
 
     // Verify the response structure matches Vercel AI SDK v3 format
     expect(result.content).toHaveLength(1);
@@ -236,14 +236,14 @@ describe('Private Inference Provider', () => {
       prompt: [{ role: 'user', content: 'First' }],
       mode: { type: 'regular' },
       inputFormat: 'messages',
-    } as any);
+    } as unknown as Parameters<typeof model.doGenerate>[0]);
 
     // Second call
     await model.doGenerate({
       prompt: [{ role: 'user', content: 'Second' }],
       mode: { type: 'regular' },
       inputFormat: 'messages',
-    } as any);
+    } as unknown as Parameters<typeof model.doGenerate>[0]);
 
     // Attestation should be cached (called once), but each request gets a fresh session
     expect(mockFetchAndVerifyAttestation).toHaveBeenCalledTimes(1);
@@ -270,7 +270,7 @@ describe('Private Inference Provider', () => {
       prompt: [{ role: 'user', content: 'Test' }],
       mode: { type: 'regular' },
       inputFormat: 'messages',
-    } as any);
+    } as unknown as Parameters<typeof model.doGenerate>[0]);
 
     // Session should be closed after the request completes
     expect(mockSession.close).toHaveBeenCalledTimes(1);
@@ -296,7 +296,7 @@ describe('Private Inference Provider', () => {
       prompt: [{ role: 'user', content: 'Hi' }],
       mode: { type: 'regular' },
       inputFormat: 'messages',
-    } as any);
+    } as unknown as Parameters<typeof model.doGenerate>[0]);
 
     expect(result.request?.body).toMatchObject({
       stream: false,
@@ -330,7 +330,7 @@ describe('Private Inference Provider', () => {
       temperature: 0.7,
       topP: 0.9,
       stopSequences: ['END'],
-    } as any);
+    } as unknown as Parameters<typeof model.doGenerate>[0]);
 
     const sentData = mockSession.sendAndReceive.mock.calls[0][0];
     const sentRequest = JSON.parse(new TextDecoder().decode(sentData));
@@ -389,9 +389,9 @@ describe('Private Inference Provider', () => {
         prompt: [{ role: 'user', content: 'Test' }],
         mode: { type: 'regular' },
         inputFormat: 'messages',
-      } as any);
+      } as unknown as Parameters<typeof model.doStream>[0]);
 
-      const parts: any[] = [];
+      const parts: Array<{ type?: string; delta?: string }> = [];
       const reader = result.stream.getReader();
 
       while (true) {
@@ -429,7 +429,7 @@ describe('Private Inference Provider', () => {
         prompt: [{ role: 'user', content: 'Test' }],
         mode: { type: 'regular' },
         inputFormat: 'messages',
-      } as any);
+      } as unknown as Parameters<typeof model.doStream>[0]);
 
       expect(result.request?.body).toMatchObject({
         stream: true,

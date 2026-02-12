@@ -3,16 +3,18 @@ import { NotesList, NoteEditor } from '@/components/notes';
 import { cn } from '@/lib/utils';
 import { FileText, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useMobileBreakpoint } from '@/hooks/useMobileBreakpoint';
 
 export function NotesPage() {
   const [selectedNoteId, setSelectedNoteId] = useState<string>('');
   const [showList, setShowList] = useState(true);
+  const isMobile = useMobileBreakpoint();
 
   // On mobile, when a note is selected, hide the list
   const handleSelectNote = (noteId: string) => {
     setSelectedNoteId(noteId);
     // On mobile, switch to editor view when a note is selected
-    if (window.innerWidth < 768) {
+    if (isMobile) {
       setShowList(false);
     }
   };
@@ -53,6 +55,7 @@ export function NotesPage() {
                 size="sm"
                 onClick={handleBackToList}
                 className="text-muted-foreground"
+                aria-label="Back to notes list"
               >
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Notes
@@ -64,7 +67,7 @@ export function NotesPage() {
           </div>
         ) : (
           <div className="flex items-center justify-center h-full px-4">
-            <div className="text-center text-muted-foreground">
+            <div className="text-center text-muted-foreground" role="status" aria-live="polite">
               <FileText className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 opacity-50" />
               <p className="text-base sm:text-lg font-medium">Select or create a note</p>
               <p className="text-sm mt-1">Choose a note from the sidebar to start editing</p>

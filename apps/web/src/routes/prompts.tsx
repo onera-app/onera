@@ -3,17 +3,19 @@ import { PromptsList, PromptEditor } from '@/components/prompts';
 import { cn } from '@/lib/utils';
 import { MessageSquareText, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useMobileBreakpoint } from '@/hooks/useMobileBreakpoint';
 
 export function PromptsPage() {
   const [selectedPromptId, setSelectedPromptId] = useState<string>('');
   const [isCreating, setIsCreating] = useState(false);
   const [showList, setShowList] = useState(true);
+  const isMobile = useMobileBreakpoint();
 
   const handleCreatePrompt = () => {
     setSelectedPromptId('');
     setIsCreating(true);
     // On mobile, switch to editor view
-    if (window.innerWidth < 768) {
+    if (isMobile) {
       setShowList(false);
     }
   };
@@ -22,7 +24,7 @@ export function PromptsPage() {
     setSelectedPromptId(id);
     setIsCreating(false);
     // On mobile, switch to editor view when a prompt is selected
-    if (window.innerWidth < 768) {
+    if (isMobile) {
       setShowList(false);
     }
   };
@@ -75,6 +77,7 @@ export function PromptsPage() {
                 size="sm"
                 onClick={handleBackToList}
                 className="text-muted-foreground"
+                aria-label="Back to prompts list"
               >
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Prompts
@@ -97,6 +100,7 @@ export function PromptsPage() {
                 size="sm"
                 onClick={handleBackToList}
                 className="text-muted-foreground"
+                aria-label="Back to prompts list"
               >
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Prompts
@@ -108,7 +112,7 @@ export function PromptsPage() {
           </div>
         ) : (
           <div className="flex items-center justify-center h-full px-4">
-            <div className="text-center text-muted-foreground">
+            <div className="text-center text-muted-foreground" role="status" aria-live="polite">
               <MessageSquareText className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 opacity-50" />
               <p className="text-base sm:text-lg font-medium">Select or create a prompt</p>
               <p className="text-sm mt-1">Choose a prompt from the sidebar to start editing</p>

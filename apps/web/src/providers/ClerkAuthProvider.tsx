@@ -586,7 +586,7 @@ export function useSSOCallback() {
       try {
         const keysResult = await keySharesQuery.refetch();
         keyShares = keysResult.data;
-      } catch (_err) {
+      } catch {
         // NOT_FOUND error means new user - this is expected
       }
 

@@ -4,6 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
 
 export function AdminUsersPage() {
   const [search, setSearch] = useState("");
@@ -21,7 +22,7 @@ export function AdminUsersPage() {
     return () => clearTimeout(debounceTimer.current);
   }, [search]);
 
-  const { data, isLoading } = trpc.admin.listUsers.useQuery({
+  const { data, isLoading, error } = trpc.admin.listUsers.useQuery({
     limit,
     offset: page * limit,
     search: debouncedSearch || undefined,
@@ -37,8 +38,12 @@ export function AdminUsersPage() {
 
       {/* Search */}
       <div className="relative">
+        <Label htmlFor="admin-user-search" className="sr-only">
+          Search users
+        </Label>
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <input
+          id="admin-user-search"
           type="text"
           placeholder="Search by name or email..."
           value={search}
@@ -47,15 +52,21 @@ export function AdminUsersPage() {
         />
       </div>
 
+      {error && (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm" role="alert" aria-live="assertive">
+          Failed to load users: {error.message}
+        </div>
+      )}
+
       {/* Table */}
       <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-secondary/50">
-              <th className="p-3 text-left font-medium">User</th>
-              <th className="p-3 text-left font-medium">Plan</th>
-              <th className="p-3 text-left font-medium">Status</th>
-              <th className="p-3 text-left font-medium">Joined</th>
+              <th scope="col" className="p-3 text-left font-medium">User</th>
+              <th scope="col" className="p-3 text-left font-medium">Plan</th>
+              <th scope="col" className="p-3 text-left font-medium">Status</th>
+              <th scope="col" className="p-3 text-left font-medium">Joined</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -134,6 +145,13 @@ export function AdminUsersPage() {
                     </td>
                   </tr>
                 ))}
+            {!isLoading && !error && data?.users.length === 0 && (
+              <tr>
+                <td colSpan={4} className="p-4 text-center text-muted-foreground">
+                  No users found for the current filter.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -150,6 +168,7 @@ export function AdminUsersPage() {
               size="sm"
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0}
+              aria-label="Previous page"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -158,6 +177,7 @@ export function AdminUsersPage() {
               size="sm"
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1}
+              aria-label="Next page"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>

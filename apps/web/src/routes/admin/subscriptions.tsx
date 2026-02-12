@@ -20,7 +20,7 @@ export function AdminSubscriptionsPage() {
   const [page, setPage] = useState(0);
   const limit = 20;
 
-  const { data, isLoading } = trpc.admin.listSubscriptions.useQuery({
+  const { data, isLoading, error } = trpc.admin.listSubscriptions.useQuery({
     limit,
     offset: page * limit,
     status: statusFilter,
@@ -54,11 +54,11 @@ export function AdminSubscriptionsPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-secondary/50">
-              <th className="p-3 text-left font-medium">User ID</th>
-              <th className="p-3 text-left font-medium">Plan</th>
-              <th className="p-3 text-left font-medium">Status</th>
-              <th className="p-3 text-left font-medium">Interval</th>
-              <th className="p-3 text-left font-medium">Period End</th>
+              <th scope="col" className="p-3 text-left font-medium">User ID</th>
+              <th scope="col" className="p-3 text-left font-medium">Plan</th>
+              <th scope="col" className="p-3 text-left font-medium">Status</th>
+              <th scope="col" className="p-3 text-left font-medium">Interval</th>
+              <th scope="col" className="p-3 text-left font-medium">Period End</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -96,9 +96,22 @@ export function AdminSubscriptionsPage() {
                     </td>
                   </tr>
                 ))}
+            {!isLoading && !error && data?.subscriptions.length === 0 && (
+              <tr>
+                <td colSpan={5} className="p-4 text-center text-muted-foreground">
+                  No subscriptions found for this filter.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
+
+      {error && (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm" role="alert" aria-live="assertive">
+          Failed to load subscriptions: {error.message}
+        </div>
+      )}
 
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
@@ -111,6 +124,7 @@ export function AdminSubscriptionsPage() {
               size="sm"
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0}
+              aria-label="Previous page"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -119,6 +133,7 @@ export function AdminSubscriptionsPage() {
               size="sm"
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1}
+              aria-label="Next page"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>

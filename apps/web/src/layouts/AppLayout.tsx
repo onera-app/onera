@@ -1,8 +1,7 @@
 import { Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useE2EEStore } from "@/stores/e2eeStore";
 import { useUIStore } from "@/stores/uiStore";
+import { useUINavigationStore } from "@/stores/uiNavigationStore";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { ResizeHandle } from "@/components/layout/ResizeHandle";
 import { E2EEUnlockModal } from "@/components/e2ee/E2EEUnlockModal";
@@ -13,36 +12,60 @@ import { SettingsModal } from "@/features/settings-modal";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-import { useOnboardingStatus } from "@/hooks/useOnboardingStatus";
+import { useFlowState } from "@/hooks/useFlowState";
 
 export function AppLayout() {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading } = useAuth();
-  const { status: e2eeStatus, needsSetup } = useE2EEStore();
+  const { state, redirectTo, shouldShowSetup, shouldShowUnlock, shouldShowOnboardingCompletion } =
+    useFlowState();
   const {
     chatDensity,
     settingsModalOpen,
     settingsModalTab,
     closeSettingsModal,
   } = useUIStore();
-
-  // Check onboarding status to detect users who left mid-onboarding
-  const { onboardingComplete, isLoading: isOnboardingStatusLoading } =
-    useOnboardingStatus(isAuthenticated);
+  const setActiveModal = useUINavigationStore((state) => state.setActiveModal);
 
   // Track if user has completed onboarding in this session (to avoid showing modal again)
   const [onboardingCompletedThisSession, setOnboardingCompletedThisSession] =
     useState(false);
 
-  // Redirect to auth if not logged in
+  // Centralized route guard handling
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      navigate({ to: "/auth" });
+    if (redirectTo) {
+      navigate({ to: redirectTo });
     }
-  }, [isLoading, isAuthenticated, navigate]);
+  }, [navigate, redirectTo]);
+
+  useEffect(() => {
+    if (shouldShowSetup) {
+      setActiveModal("e2ee_setup");
+      return;
+    }
+    if (shouldShowUnlock) {
+      setActiveModal("e2ee_unlock");
+      return;
+    }
+    if (shouldShowOnboardingCompletion && !onboardingCompletedThisSession) {
+      setActiveModal("onboarding_completion");
+      return;
+    }
+    if (settingsModalOpen) {
+      setActiveModal("settings");
+      return;
+    }
+    setActiveModal(null);
+  }, [
+    onboardingCompletedThisSession,
+    setActiveModal,
+    settingsModalOpen,
+    shouldShowOnboardingCompletion,
+    shouldShowSetup,
+    shouldShowUnlock,
+  ]);
 
   // Show loading state - minimal Apple-style spinner
-  if (isLoading) {
+  if (state.kind === "loading") {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="w-8 h-8 rounded-full border-2 border-white/[0.08] border-t-white/40 animate-spin" />
@@ -51,7 +74,7 @@ export function AppLayout() {
   }
 
   // Not authenticated
-  if (!isAuthenticated) {
+  if (state.kind === "unauthenticated") {
     return null;
   }
 
@@ -81,25 +104,18 @@ export function AppLayout() {
         </main>
 
         {/* E2EE Setup Modal */}
-        {needsSetup && <E2EESetupModal />}
+        {shouldShowSetup && <E2EESetupModal />}
 
         {/* E2EE Unlock Modal - show when locked or unlocking */}
-        {!needsSetup &&
-          (e2eeStatus === "locked" || e2eeStatus === "unlocking") && (
-            <E2EEUnlockModal />
-          )}
+        {shouldShowUnlock && <E2EEUnlockModal />}
 
         {/* Onboarding Completion Modal - show when unlocked but no unlock method set up */}
-        {!needsSetup &&
-          e2eeStatus === "unlocked" &&
-          !isOnboardingStatusLoading &&
-          !onboardingComplete &&
-          !onboardingCompletedThisSession && (
-            <OnboardingCompletionModal
-              open={true}
-              onComplete={() => setOnboardingCompletedThisSession(true)}
-            />
-          )}
+        {shouldShowOnboardingCompletion && !onboardingCompletedThisSession && (
+          <OnboardingCompletionModal
+            open={true}
+            onComplete={() => setOnboardingCompletedThisSession(true)}
+          />
+        )}
 
         {/* Settings Modal */}
         <SettingsModal

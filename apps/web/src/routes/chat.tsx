@@ -50,9 +50,13 @@ import {
 } from "@/lib/search";
 import type { Source } from "@/components/chat/Sources";
 import { useToolsStore, type NativeSearchProvider } from "@/stores/toolsStore";
+import { useChatRuntimeStore } from "@/stores/chatRuntimeStore";
+import { getTextContent, pendingTriggerSignature } from "@/lib/chat/pipeline";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
+import { normalizeAppError } from "@/lib/errors/app-error";
 
 interface DecryptedChat {
   id: string;
@@ -63,6 +67,7 @@ interface DecryptedChat {
   updatedAt: number;
   encryptedChatKey?: string;
   chatKeyNonce?: string;
+  decryptionError?: string;
 }
 
 export function ChatPage() {
@@ -71,10 +76,13 @@ export function ChatPage() {
   const navigate = useNavigate();
   const { isUnlocked } = useE2EE();
   const { selectedModelId, setSelectedModel } = useModelStore();
-  const { nativeSearchSettings, getNativeSearchSettings } = useToolsStore();
+  const { getNativeSearchSettings } = useToolsStore();
+  const setChatRuntimeStatus = useChatRuntimeStore((state) => state.setStatus);
+  const clearChatRuntime = useChatRuntimeStore((state) => state.clearChat);
 
   // Track if we've triggered the pending response (prevents duplicate calls)
   const pendingTriggeredRef = useRef(false);
+  const lastPendingSignatureRef = useRef<string | null>(null);
   // Track if we should skip message sync (for pending chats)
   // This is managed by effects, not the initializer, to handle navigation between chats
   const skipSyncRef = useRef(false);
@@ -84,6 +92,7 @@ export function ChatPage() {
   // Follow-up suggestions state
   const [followUps, setFollowUps] = useState<string[]>([]);
   const [isGeneratingFollowUps, setIsGeneratingFollowUps] = useState(false);
+  const [decryptAttempt, setDecryptAttempt] = useState(0);
 
   // Search sources state - stores results from the current/last search
   const [searchSources, setSearchSources] = useState<Source[]>([]);
@@ -102,7 +111,7 @@ export function ChatPage() {
       enabled: true,
       settings,
     };
-  }, [selectedModelId, getNativeSearchSettings, nativeSearchSettings]);
+  }, [selectedModelId, getNativeSearchSettings]);
 
   // Fetch chat using Convex
   const rawChat = useChat(chatId || "");
@@ -112,6 +121,7 @@ export function ChatPage() {
   // Decrypt chat data
   const chat = useMemo((): DecryptedChat | null => {
     if (!rawChat) return null;
+    void decryptAttempt;
 
     if (isUnlocked && rawChat.encryptedChatKey && rawChat.chatKeyNonce) {
       try {
@@ -163,6 +173,8 @@ export function ChatPage() {
           updatedAt: rawChat.updatedAt,
           encryptedChatKey: rawChat.encryptedChatKey,
           chatKeyNonce: rawChat.chatKeyNonce,
+          decryptionError:
+            "Unable to decrypt this chat in the current session. Re-unlock encryption or retry.",
         };
       }
     }
@@ -178,7 +190,7 @@ export function ChatPage() {
       encryptedChatKey: rawChat.encryptedChatKey,
       chatKeyNonce: rawChat.chatKeyNonce,
     };
-  }, [rawChat, isUnlocked]);
+  }, [rawChat, isUnlocked, decryptAttempt]);
 
   const isLoading = rawChat === undefined;
 
@@ -452,7 +464,11 @@ export function ChatPage() {
     onFinish: handleFinish,
     onError: (error) => {
       if (error.name !== "AbortError") {
-        toast.error(error.message || "Failed to get response");
+        const normalized = normalizeAppError(error, "Failed to get response", {
+          stage: "chat_stream",
+          chatId,
+        });
+        toast.error(normalized?.userMessage ?? (error.message || "Failed to get response"));
       }
     },
     nativeSearch,
@@ -467,6 +483,7 @@ export function ChatPage() {
       lastChatIdRef.current = chatId;
       // Reset refs for the new chat
       pendingTriggeredRef.current = false;
+      lastPendingSignatureRef.current = null;
       // Skip sync only if this new chat has pending=true
       skipSyncRef.current = pending === true;
     }
@@ -583,15 +600,14 @@ export function ChatPage() {
 
       const lastMessage = messages[messages.length - 1];
       if (lastMessage.role !== "user") return;
+      const pendingSignature = pendingTriggerSignature(chatId!, lastMessage.id);
+      if (lastPendingSignatureRef.current === pendingSignature) {
+        return;
+      }
+      lastPendingSignatureRef.current = pendingSignature;
 
       // Extract user message content
-      const userContent =
-        typeof lastMessage.content === "string"
-          ? lastMessage.content
-          : lastMessage.content
-              .filter((c) => c.type === "text")
-              .map((c) => c.text)
-              .join("\n");
+      const userContent = getTextContent(lastMessage);
 
       if (!userContent) return;
 
@@ -603,6 +619,7 @@ export function ChatPage() {
         // Send the message to trigger AI response
         await sendMessage(userContent);
       } catch (err) {
+        lastPendingSignatureRef.current = null;
         if ((err as Error).name !== "AbortError") {
           toast.error(
             err instanceof Error ? err.message : "Failed to get response",
@@ -616,6 +633,28 @@ export function ChatPage() {
 
   // Derive streaming state from AI SDK status
   const isStreaming = status === "streaming" || status === "submitted";
+
+  useEffect(() => {
+    if (!chatId) {
+      return;
+    }
+    if (isStreaming) {
+      setChatRuntimeStatus(chatId, "streaming");
+      return;
+    }
+    if (status === "error") {
+      setChatRuntimeStatus(chatId, "error");
+      return;
+    }
+    setChatRuntimeStatus(chatId, "idle");
+  }, [chatId, isStreaming, setChatRuntimeStatus, status]);
+
+  useEffect(() => {
+    if (!chatId) {
+      return;
+    }
+    return () => clearChatRuntime(chatId);
+  }, [chatId, clearChatRuntime]);
 
   // Get streaming message parts from the last message if it's streaming
   // Includes both text and reasoning parts from the AI SDK
@@ -1172,6 +1211,27 @@ export function ChatPage() {
     <div className="relative flex flex-col h-full w-full min-w-0 bg-background overflow-hidden">
       {/* Chat header - Absolute overlay */}
       <ChatNavbar chatId={chatId || ""}>{navbarChildren}</ChatNavbar>
+
+      {chat.decryptionError && (
+        <div className="px-4 pt-16 sm:px-6">
+          <Alert className="bg-amber-500/10 border-amber-500/30">
+            <AlertTriangle className="h-4 w-4 text-amber-500" />
+            <AlertTitle className="text-foreground">
+              Couldn&apos;t decrypt conversation
+            </AlertTitle>
+            <AlertDescription className="text-muted-foreground flex items-center justify-between gap-3">
+              <span>{chat.decryptionError}</span>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setDecryptAttempt((prev) => prev + 1)}
+              >
+                Retry Decrypt
+              </Button>
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
 
       {/* Messages - Takes full space */}
       <div className="relative flex-1 w-full h-full min-w-0 overflow-hidden">

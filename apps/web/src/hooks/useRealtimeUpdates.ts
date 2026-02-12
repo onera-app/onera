@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "@/providers/ClerkAuthProvider";
 import { trpc } from "@/lib/trpc";
@@ -26,6 +26,54 @@ export function useRealtimeUpdates() {
   const { isAuthenticated, getToken } = useAuth();
   const utils = trpc.useUtils();
   const socketRef = useRef<Socket | null>(null);
+  const invalidationQueueRef = useRef<Set<string>>(new Set());
+  const flushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const eventTimestampsRef = useRef<Map<string, number>>(new Map());
+
+  const enqueueInvalidation = useCallback((key: string) => {
+    invalidationQueueRef.current.add(key);
+    if (flushTimerRef.current) {
+      return;
+    }
+    flushTimerRef.current = setTimeout(() => {
+      const queued = Array.from(invalidationQueueRef.current);
+      invalidationQueueRef.current.clear();
+      flushTimerRef.current = null;
+
+      for (const item of queued) {
+        if (item === "chats:list") {
+          utils.chats.list.invalidate();
+        } else if (item === "notes:list") {
+          utils.notes.list.invalidate();
+        } else if (item.startsWith("notes:get:")) {
+          const noteId = item.replace("notes:get:", "");
+          utils.notes.get.invalidate({ noteId });
+        } else if (item === "folders:list") {
+          utils.folders.list.invalidate();
+        } else if (item.startsWith("folders:get:")) {
+          const folderId = item.replace("folders:get:", "");
+          utils.folders.get.invalidate({ folderId });
+        } else if (item === "credentials:list") {
+          utils.credentials.list.invalidate();
+        } else if (item === "prompts:list") {
+          utils.prompts.list.invalidate();
+        } else if (item.startsWith("prompts:get:")) {
+          const promptId = item.replace("prompts:get:", "");
+          utils.prompts.get.invalidate({ promptId });
+        }
+      }
+    }, 50);
+  }, [utils]);
+
+  const shouldProcessEvent = useCallback((signature: string, ttlMs = 200): boolean => {
+    const now = Date.now();
+    const previous = eventTimestampsRef.current.get(signature);
+    if (previous && now - previous < ttlMs) {
+      return false;
+    }
+    eventTimestampsRef.current.set(signature, now);
+    return true;
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -66,85 +114,151 @@ export function useRealtimeUpdates() {
         console.log("WebSocket disconnected");
       });
 
+      socket.on("connect_error", async (error) => {
+        console.warn("WebSocket connect error:", error.message);
+        const needsRefresh =
+          error.message.toLowerCase().includes("unauthorized") ||
+          error.message.toLowerCase().includes("not authenticated");
+        if (!needsRefresh || !mounted) {
+          return;
+        }
+
+        try {
+          const refreshedToken = await getToken();
+          if (!mounted || !socket) return;
+          socket.auth = { token: refreshedToken };
+          socket.connect();
+        } catch (refreshError) {
+          console.error("Failed to refresh WebSocket token:", refreshError);
+        }
+      });
+
       // Chat events
       socket.on("chat:created", () => {
-        utils.chats.list.invalidate();
+        if (shouldProcessEvent("chat:created")) {
+          enqueueInvalidation("chats:list");
+        }
       });
 
-      socket.on("chat:updated", () => {
+      socket.on("chat:updated", (chat: { id?: string } = {}) => {
         // Only invalidate the list to update sidebar
         // Don't invalidate chats.get - local state already has data and it causes refresh flicker
-        utils.chats.list.invalidate();
+        const signature = `chat:updated:${chat.id ?? "unknown"}`;
+        if (shouldProcessEvent(signature)) {
+          enqueueInvalidation("chats:list");
+        }
       });
 
-      socket.on("chat:deleted", () => {
-        utils.chats.list.invalidate();
+      socket.on("chat:deleted", (chat: { id?: string } = {}) => {
+        const signature = `chat:deleted:${chat.id ?? "unknown"}`;
+        if (shouldProcessEvent(signature)) {
+          enqueueInvalidation("chats:list");
+        }
       });
 
       // Note events
-      socket.on("note:created", () => {
-        utils.notes.list.invalidate();
+      socket.on("note:created", (note: { id?: string } = {}) => {
+        const signature = `note:created:${note.id ?? "unknown"}`;
+        if (shouldProcessEvent(signature)) {
+          enqueueInvalidation("notes:list");
+        }
       });
 
       socket.on("note:updated", (note: { id: string }) => {
-        utils.notes.list.invalidate();
-        utils.notes.get.invalidate({ noteId: note.id });
+        const signature = `note:updated:${note.id}`;
+        if (shouldProcessEvent(signature)) {
+          enqueueInvalidation("notes:list");
+          enqueueInvalidation(`notes:get:${note.id}`);
+        }
       });
 
-      socket.on("note:deleted", () => {
-        utils.notes.list.invalidate();
+      socket.on("note:deleted", (note: { id?: string } = {}) => {
+        const signature = `note:deleted:${note.id ?? "unknown"}`;
+        if (shouldProcessEvent(signature)) {
+          enqueueInvalidation("notes:list");
+        }
       });
 
       // Folder events
-      socket.on("folder:created", () => {
-        utils.folders.list.invalidate();
+      socket.on("folder:created", (folder: { id?: string } = {}) => {
+        const signature = `folder:created:${folder.id ?? "unknown"}`;
+        if (shouldProcessEvent(signature)) {
+          enqueueInvalidation("folders:list");
+        }
       });
 
       socket.on("folder:updated", (folder: { id: string }) => {
-        utils.folders.list.invalidate();
-        utils.folders.get.invalidate({ folderId: folder.id });
+        const signature = `folder:updated:${folder.id}`;
+        if (shouldProcessEvent(signature)) {
+          enqueueInvalidation("folders:list");
+          enqueueInvalidation(`folders:get:${folder.id}`);
+        }
       });
 
-      socket.on("folder:deleted", () => {
-        utils.folders.list.invalidate();
+      socket.on("folder:deleted", (folder: { id?: string } = {}) => {
+        const signature = `folder:deleted:${folder.id ?? "unknown"}`;
+        if (shouldProcessEvent(signature)) {
+          enqueueInvalidation("folders:list");
+        }
       });
 
       // Credential events
       socket.on("credential:created", () => {
-        utils.credentials.list.invalidate();
+        if (shouldProcessEvent("credential:created")) {
+          enqueueInvalidation("credentials:list");
+        }
       });
 
       socket.on("credential:updated", () => {
-        utils.credentials.list.invalidate();
+        if (shouldProcessEvent("credential:updated")) {
+          enqueueInvalidation("credentials:list");
+        }
       });
 
       socket.on("credential:deleted", () => {
-        utils.credentials.list.invalidate();
+        if (shouldProcessEvent("credential:deleted")) {
+          enqueueInvalidation("credentials:list");
+        }
       });
 
       // Prompt events
-      socket.on("prompt:created", () => {
-        utils.prompts.list.invalidate();
+      socket.on("prompt:created", (prompt: { id?: string } = {}) => {
+        const signature = `prompt:created:${prompt.id ?? "unknown"}`;
+        if (shouldProcessEvent(signature)) {
+          enqueueInvalidation("prompts:list");
+        }
       });
 
       socket.on("prompt:updated", (prompt: { id: string }) => {
-        utils.prompts.list.invalidate();
-        utils.prompts.get.invalidate({ promptId: prompt.id });
+        const signature = `prompt:updated:${prompt.id}`;
+        if (shouldProcessEvent(signature)) {
+          enqueueInvalidation("prompts:list");
+          enqueueInvalidation(`prompts:get:${prompt.id}`);
+        }
       });
 
-      socket.on("prompt:deleted", () => {
-        utils.prompts.list.invalidate();
+      socket.on("prompt:deleted", (prompt: { id?: string } = {}) => {
+        const signature = `prompt:deleted:${prompt.id ?? "unknown"}`;
+        if (shouldProcessEvent(signature)) {
+          enqueueInvalidation("prompts:list");
+        }
       });
     };
 
     connectWithToken();
+    const invalidationQueue = invalidationQueueRef.current;
 
     return () => {
       mounted = false;
+      if (flushTimerRef.current) {
+        clearTimeout(flushTimerRef.current);
+        flushTimerRef.current = null;
+      }
+      invalidationQueue.clear();
       if (socket) {
         socket.disconnect();
       }
       socketRef.current = null;
     };
-  }, [isAuthenticated, getToken, utils]);
+  }, [enqueueInvalidation, getToken, isAuthenticated, shouldProcessEvent]);
 }

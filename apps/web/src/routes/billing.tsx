@@ -1,13 +1,20 @@
 import { trpc } from "@/lib/trpc";
 import { UsageMeter } from "@/components/billing/UsageMeter";
-import { Check, CreditCard } from "lucide-react";
+import { AlertTriangle, Check, CreditCard } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function BillingPage() {
-  const { data: subData } = trpc.billing.getSubscription.useQuery();
-  const { data: usage } = trpc.billing.getUsage.useQuery();
+  const {
+    data: subData,
+    isLoading: loadingSubscription,
+    error: subscriptionError,
+  } = trpc.billing.getSubscription.useQuery();
+  const { data: usage, isLoading: loadingUsage, error: usageError } = trpc.billing.getUsage.useQuery();
 
   const currentPlan = subData?.plan;
+  const isLoading = loadingSubscription || loadingUsage;
+  const hasError = subscriptionError || usageError;
 
   const features = [
     "Unlimited inference requests",
@@ -33,6 +40,24 @@ export function BillingPage() {
             Manage your subscription and usage
           </p>
         </header>
+
+        {hasError && (
+          <Alert className="mb-8 border-destructive/40 bg-destructive/5" aria-live="assertive">
+            <AlertTriangle className="h-4 w-4 text-destructive" />
+            <AlertTitle>Couldn&apos;t load billing data</AlertTitle>
+            <AlertDescription>
+              Billing details are temporarily unavailable. Please refresh and try again.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {isLoading && !hasError && (
+          <div className="mb-8 rounded-2xl bg-muted/50 p-6 animate-pulse">
+            <div className="h-6 w-1/3 rounded bg-muted mb-4" />
+            <div className="h-4 w-1/2 rounded bg-muted mb-2" />
+            <div className="h-4 w-2/3 rounded bg-muted" />
+          </div>
+        )}
 
         {/* Current Plan Card */}
         <section className="mb-8">

@@ -10,9 +10,10 @@ interface ChatNavbarProps {
 }
 
 export const ChatNavbar = memo(function ChatNavbar({
-  chatId: _chatId,
+  chatId,
   children,
 }: ChatNavbarProps) {
+  void chatId;
   const navigate = useNavigate();
   const { sidebarOpen, toggleSidebar } = useUIStore();
 

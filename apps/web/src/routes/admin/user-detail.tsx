@@ -8,7 +8,7 @@ import { ArrowLeft } from "lucide-react";
 
 export function AdminUserDetailPage() {
   const { userId } = useParams({ from: "/app/admin/users/$userId" });
-  const { data, isLoading, refetch } = trpc.admin.getUser.useQuery({ userId });
+  const { data, isLoading, error, refetch } = trpc.admin.getUser.useQuery({ userId });
   const { data: allPlans } = trpc.billing.getPlans.useQuery();
 
   const updatePlan = trpc.admin.updateUserPlan.useMutation({
@@ -28,7 +28,16 @@ export function AdminUserDetailPage() {
     );
   }
 
-  if (!data) return <p>User not found</p>;
+  if (error) {
+    return (
+      <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6" role="alert" aria-live="assertive">
+        <h2 className="font-semibold text-destructive">Unable to load user details</h2>
+        <p className="text-sm text-muted-foreground mt-1">{error.message}</p>
+      </div>
+    );
+  }
+
+  if (!data) return <p role="status">User not found</p>;
 
   return (
     <div className="space-y-8">

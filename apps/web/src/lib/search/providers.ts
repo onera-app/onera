@@ -12,6 +12,48 @@ import type {
 
 const DEFAULT_MAX_RESULTS = 5;
 
+interface ExaResult {
+  title?: string;
+  url: string;
+  text?: string;
+  highlights?: string[];
+  publishedDate?: string;
+  score?: number;
+}
+
+interface BraveResult {
+  title?: string;
+  url: string;
+  description?: string;
+  age?: string;
+}
+
+interface TavilyResult {
+  title?: string;
+  url: string;
+  content?: string;
+  raw_content?: string;
+  score?: number;
+}
+
+interface SerperOrganicResult {
+  title?: string;
+  link: string;
+  snippet?: string;
+  date?: string;
+}
+
+interface FirecrawlResult {
+  title?: string;
+  url: string;
+  description?: string;
+  markdown?: string;
+  metadata?: {
+    title?: string;
+    description?: string;
+  };
+}
+
 /**
  * Exa Search Provider
  * https://docs.exa.ai
@@ -47,9 +89,9 @@ export const exaProvider: SearchProviderInterface = {
       throw new Error(`Exa search failed: ${error}`);
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as { results?: ExaResult[] };
 
-    return (data.results || []).map((r: any) => ({
+    return (data.results || []).map((r) => ({
       title: r.title || 'Untitled',
       url: r.url,
       snippet: r.text?.substring(0, 300) || r.highlights?.[0] || '',
@@ -93,9 +135,9 @@ export const braveProvider: SearchProviderInterface = {
       throw new Error(`Brave search failed: ${error}`);
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as { web?: { results?: BraveResult[] } };
 
-    return (data.web?.results || []).map((r: any) => ({
+    return (data.web?.results || []).map((r) => ({
       title: r.title || 'Untitled',
       url: r.url,
       snippet: r.description || '',
@@ -136,9 +178,9 @@ export const tavilyProvider: SearchProviderInterface = {
       throw new Error(`Tavily search failed: ${error}`);
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as { results?: TavilyResult[] };
 
-    return (data.results || []).map((r: any) => ({
+    return (data.results || []).map((r) => ({
       title: r.title || 'Untitled',
       url: r.url,
       snippet: r.content?.substring(0, 300) || '',
@@ -178,9 +220,9 @@ export const serperProvider: SearchProviderInterface = {
       throw new Error(`Serper search failed: ${error}`);
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as { organic?: SerperOrganicResult[] };
 
-    return (data.organic || []).map((r: any) => ({
+    return (data.organic || []).map((r) => ({
       title: r.title || 'Untitled',
       url: r.link,
       snippet: r.snippet || '',
@@ -222,9 +264,9 @@ export const firecrawlProvider: SearchProviderInterface = {
       throw new Error(`Firecrawl search failed: ${error}`);
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as { data?: FirecrawlResult[] };
 
-    return (data.data || []).map((r: any) => ({
+    return (data.data || []).map((r) => ({
       title: r.title || r.metadata?.title || 'Untitled',
       url: r.url,
       snippet: r.description || r.metadata?.description || '',

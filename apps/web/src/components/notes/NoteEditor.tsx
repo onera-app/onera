@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNote, useUpdateNote } from '@/hooks/queries/useNotes';
 import { useFolders } from '@/hooks/queries/useFolders';
 import { RichTextEditor } from './RichTextEditor';
@@ -67,7 +67,7 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
   };
 
   // Save note
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (!note || !hasChanges) return;
 
     setIsSaving(true);
@@ -89,7 +89,7 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [content, folderId, hasChanges, note, title, updateNote]);
 
   // Toggle archive
   const handleToggleArchive = async () => {

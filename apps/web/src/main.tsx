@@ -18,6 +18,7 @@ import { TRPCProvider } from './providers/TRPCProvider';
 import { E2EEProvider } from './providers/E2EEProvider';
 import { ThemeProvider } from './providers/ThemeProvider';
 import { useRealtimeUpdates } from './hooks/useRealtimeUpdates';
+import { AppErrorBoundary } from './components/system/AppErrorBoundary';
 import './styles/globals.css';
 
 // Initialize i18n
@@ -41,19 +42,21 @@ function RealtimeUpdatesInitializer({ children }: { children: React.ReactNode })
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ClerkAuthProvider>
-      <TRPCProvider>
-        <AuthContextProvider>
-          <ThemeProvider>
-            <E2EEProvider>
-              <RealtimeUpdatesInitializer>
-                <RouterProvider router={router} />
-                <Toaster position="top-right" richColors />
-              </RealtimeUpdatesInitializer>
-            </E2EEProvider>
-          </ThemeProvider>
-        </AuthContextProvider>
-      </TRPCProvider>
-    </ClerkAuthProvider>
+    <AppErrorBoundary>
+      <ClerkAuthProvider>
+        <TRPCProvider>
+          <AuthContextProvider>
+            <ThemeProvider>
+              <E2EEProvider>
+                <RealtimeUpdatesInitializer>
+                  <RouterProvider router={router} />
+                  <Toaster position="top-right" richColors />
+                </RealtimeUpdatesInitializer>
+              </E2EEProvider>
+            </ThemeProvider>
+          </AuthContextProvider>
+        </TRPCProvider>
+      </ClerkAuthProvider>
+    </AppErrorBoundary>
   </StrictMode>
 );

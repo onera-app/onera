@@ -18,7 +18,7 @@ export function AdminInvoicesPage() {
   const [page, setPage] = useState(0);
   const limit = 20;
 
-  const { data, isLoading } = trpc.admin.listInvoices.useQuery({
+  const { data, isLoading, error } = trpc.admin.listInvoices.useQuery({
     limit,
     offset: page * limit,
     status: statusFilter,
@@ -50,6 +50,18 @@ export function AdminInvoicesPage() {
         <InvoiceTable invoices={data?.invoices || []} isLoading={isLoading} />
       </div>
 
+      {!isLoading && !error && (data?.invoices.length ?? 0) === 0 && (
+        <p className="text-sm text-muted-foreground" role="status">
+          No invoices found for the selected filter.
+        </p>
+      )}
+
+      {error && (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm" role="alert" aria-live="assertive">
+          Failed to load invoices: {error.message}
+        </div>
+      )}
+
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">
@@ -61,6 +73,7 @@ export function AdminInvoicesPage() {
               size="sm"
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0}
+              aria-label="Previous page"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -69,6 +82,7 @@ export function AdminInvoicesPage() {
               size="sm"
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1}
+              aria-label="Next page"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>

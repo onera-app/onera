@@ -141,7 +141,8 @@ export const useModelParamsStore = create<ModelParamsState>()(
 
       clearModelOverride: (modelId) => {
         set((state) => {
-          const { [modelId]: _, ...rest } = state.modelOverrides;
+          const rest = { ...state.modelOverrides };
+          delete rest[modelId];
           return { modelOverrides: rest };
         });
       },

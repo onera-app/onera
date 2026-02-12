@@ -73,7 +73,7 @@ export function DevicesTab() {
       await revokeDevice.mutateAsync({ deviceId: deviceToRevoke.deviceId });
       toast.success('Device access revoked');
       setDeviceToRevoke(null);
-    } catch (err) {
+    } catch {
       toast.error('Failed to revoke device');
     }
   };
@@ -85,7 +85,7 @@ export function DevicesTab() {
       await deleteDevice.mutateAsync({ deviceId: deviceToDelete.deviceId });
       toast.success('Device removed');
       setDeviceToDelete(null);
-    } catch (err) {
+    } catch {
       toast.error('Failed to remove device');
     }
   };

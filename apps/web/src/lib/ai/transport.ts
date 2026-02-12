@@ -133,14 +133,15 @@ export class DirectBrowserTransport {
       // Convert UIMessages to ModelMessages
       const modelMessages = await convertToModelMessages(messages);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = streamText({
-        model: privateModel as any,
+      const request = {
+        model: privateModel,
         system: systemPrompt,
         messages: modelMessages,
         maxOutputTokens: maxTokens ?? 4096,
         abortSignal,
-      });
+      } as unknown as Parameters<typeof streamText>[0];
+
+      const result = streamText(request);
 
       return result.toUIMessageStream({
         sendReasoning: true,
@@ -165,10 +166,9 @@ export class DirectBrowserTransport {
     // OpenAI reasoning models (o1, o3, gpt-5) use native Responses API which handles reasoning automatically
     const usesThinkTags = credential.provider === 'deepseek' || modelName.toLowerCase().includes('deepseek');
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const model = usesThinkTags
       ? wrapLanguageModel({
-          model: baseModel as any,
+          model: baseModel as unknown as Parameters<typeof wrapLanguageModel>[0]['model'],
           middleware: extractReasoningMiddleware({ tagName: 'think' }),
         })
       : baseModel;
@@ -188,9 +188,8 @@ export class DirectBrowserTransport {
     const anthropicSettings = providerSettings?.anthropic;
 
     // Call streamText directly in the browser
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = streamText({
-      model: model as any,
+    const streamOptions = {
+      model,
       system: systemPrompt,
       messages: modelMessages,
       maxOutputTokens: maxTokens ?? 4096,
@@ -213,7 +212,9 @@ export class DirectBrowserTransport {
           },
         },
       }),
-    });
+    } as unknown as Parameters<typeof streamText>[0];
+
+    const result = streamText(streamOptions);
 
     // Convert to UIMessageStream and return as ReadableStream
     // sendReasoning: true forwards reasoning tokens to the client
@@ -229,8 +230,7 @@ export class DirectBrowserTransport {
   private buildNativeSearchTools(
     provider: string,
     nativeSearch?: { enabled: boolean; settings?: NativeSearchSettings }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Record<string, any> | undefined {
+  ): Record<string, unknown> | undefined {
     if (!nativeSearch?.enabled) {
       return undefined;
     }
@@ -262,9 +262,10 @@ export class DirectBrowserTransport {
    * Reconnect to an existing stream.
    * Not supported for direct browser transport since there's no server-side state.
    */
-  async reconnectToStream(_options: {
+  async reconnectToStream(options: {
     chatId: string;
   }): Promise<ReadableStream<UIMessageChunk> | null> {
+    void options;
     // Direct browser transport doesn't support reconnection
     return null;
   }

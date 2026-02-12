@@ -4,7 +4,7 @@ import { InvoiceTable } from "@/components/billing/InvoiceTable";
 import { DollarSign, Users, CreditCard, TrendingUp } from "lucide-react";
 
 export function AdminDashboard() {
-  const { data: stats, isLoading } = trpc.admin.getStats.useQuery();
+  const { data: stats, isLoading, error } = trpc.admin.getStats.useQuery();
 
   if (isLoading) {
     return (
@@ -14,6 +14,15 @@ export function AdminDashboard() {
             <div key={i} className="h-28 rounded-xl bg-secondary" />
           ))}
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6" role="alert" aria-live="assertive">
+        <h2 className="font-semibold text-destructive">Unable to load dashboard stats</h2>
+        <p className="text-sm text-muted-foreground mt-1">{error.message}</p>
       </div>
     );
   }

@@ -16,6 +16,7 @@ import { TermsPage } from './routes/terms';
 import { PricingPage } from './routes/pricing';
 import { BillingPage } from './routes/billing';
 import { AdminLayout } from './components/admin/AdminLayout';
+import { RouteErrorFallback } from './components/system/RouteErrorFallback';
 import { AdminDashboard } from './routes/admin/index';
 import { AdminUsersPage } from './routes/admin/users';
 import { AdminUserDetailPage } from './routes/admin/user-detail';
@@ -25,6 +26,7 @@ import { AdminInvoicesPage } from './routes/admin/invoices';
 // Root route with layout
 const rootRoute = createRootRoute({
   component: RootLayout,
+  errorComponent: RouteErrorFallback,
 });
 
 // Landing page at / (public)

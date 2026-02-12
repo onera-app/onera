@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { useChats } from "@/hooks/queries/useChats";
@@ -132,14 +132,14 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
     setSelectedChatId(chatId);
   };
 
-  const handleOpenChat = (chatId: string) => {
+  const handleOpenChat = useCallback((chatId: string) => {
     navigate({
       to: "/app/c/$chatId",
       params: { chatId },
       search: { pending: false },
     });
     onOpenChange(false);
-  };
+  }, [navigate, onOpenChange]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -153,7 +153,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open, selectedChatId]);
+  }, [handleOpenChat, open, selectedChatId]);
 
   const selectedChat = chats.find((c) => c.id === selectedChatId);
 

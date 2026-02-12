@@ -83,16 +83,21 @@
     "zustand": "^5.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.21.0",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^4.3.0",
     "autoprefixer": "^10.4.20",
+    "eslint": "^9.21.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^15.15.0",
     "libsodium-sumo": "0.7.16",
     "postcss": "^8.4.49",
     "react-scan": "0.4.3",
     "tailwindcss": "^4.0.0",
+    "typescript-eslint": "^8.24.1",
     "typescript": "^5.7.0",
     "vite": "^6.0.0",
     "vite-plugin-node-polyfills": "^0.24.0"

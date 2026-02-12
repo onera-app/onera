@@ -29,6 +29,15 @@ import {
   isUnlocked,
 } from "@onera/crypto";
 
+type ExtensionResults = {
+  prf?: {
+    results?: {
+      first?: ArrayBuffer;
+      second?: ArrayBuffer;
+    } | null;
+  };
+};
+
 /**
  * Hook for checking if user has any passkeys
  */
@@ -104,13 +113,12 @@ export function usePasskeyRegistration() {
     const prfInputs = createPRFExtensionInputs(prfSalt);
 
     // Add PRF extension to registration options
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const optionsWithPRF: PublicKeyCredentialCreationOptionsJSON = {
       ...options,
       extensions: {
         ...options.extensions,
         ...prfInputs,
-      } as any,
+      } as unknown as PublicKeyCredentialCreationOptionsJSON["extensions"],
     };
 
     // Step 3: Register the passkey with PRF extension enabled
@@ -120,13 +128,12 @@ export function usePasskeyRegistration() {
     });
 
     // Step 4: Extract PRF output from registration response
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const extResults = registrationResponse.clientExtensionResults as any;
+    const extResults = registrationResponse.clientExtensionResults as ExtensionResults;
     const prfResults = extResults?.prf?.results;
 
     // Validate PRF results - if not available during registration, the authenticator
     // or browser may not support PRF evaluation during registration
-    if (!validatePRFResults(prfResults)) {
+    if (!prfResults || !validatePRFResults(prfResults)) {
       throw new Error(
         "Failed to get PRF output during passkey registration. " +
         "Your browser or authenticator may not support PRF evaluation during registration. " +
@@ -209,7 +216,6 @@ export function usePasskeyAuthentication() {
 
     // Add PRF extension to options
     // PRF extension types are not in standard WebAuthn types yet
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const optionsWithPRF: PublicKeyCredentialRequestOptionsJSON = {
       ...options,
       extensions: {
@@ -217,7 +223,7 @@ export function usePasskeyAuthentication() {
         prf: {
           evalByCredential,
         },
-      } as any,
+      } as unknown as PublicKeyCredentialRequestOptionsJSON["extensions"],
     };
 
     // Step 3: Start WebAuthn authentication
@@ -226,12 +232,11 @@ export function usePasskeyAuthentication() {
     });
 
     // Step 4: Extract PRF output
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const extensionResults = authResponse.clientExtensionResults as any;
+    const extensionResults = authResponse.clientExtensionResults as ExtensionResults;
     const prfResults = extensionResults?.prf?.results;
 
     // Validate PRF results before extraction
-    if (!validatePRFResults(prfResults)) {
+    if (!prfResults || !validatePRFResults(prfResults)) {
       throw new Error(
         "Failed to get PRF output from passkey. The passkey may not support the PRF extension, " +
         "or there was an error during authentication. Please try again or use an alternative unlock method."
