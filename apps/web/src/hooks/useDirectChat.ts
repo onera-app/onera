@@ -136,11 +136,18 @@ export function useDirectChat({
   const [enclaveConfig, setEnclaveConfig] = useState<EnclaveConfig | null>(null);
   const [enclaveAssignmentId, setEnclaveAssignmentId] = useState<string | null>(null);
   const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const enclaveAssignmentIdRef = useRef<string | null>(null);
+  const activeEnclaveModelIdRef = useRef<string | null>(null);
+  const requestInFlightRef = useRef(false);
+  const lastFailureRef = useRef<{ modelId: string; at: number } | null>(null);
 
   // tRPC mutations for enclave lifecycle
   const requestEnclaveMutation = trpc.enclaves.requestEnclave.useMutation();
   const releaseEnclaveMutation = trpc.enclaves.releaseEnclave.useMutation();
   const heartbeatMutation = trpc.enclaves.heartbeat.useMutation();
+  const requestMutationRef = useRef(requestEnclaveMutation);
+  const releaseMutationRef = useRef(releaseEnclaveMutation);
+  const heartbeatMutationRef = useRef(heartbeatMutation);
 
   // Pre-flight inference allowance check
   const checkAllowance = trpc.billing.checkInferenceAllowance.useMutation();
@@ -154,6 +161,14 @@ export function useDirectChat({
     onFinishRef.current = onFinish;
     onErrorRef.current = onError;
   });
+  useEffect(() => {
+    requestMutationRef.current = requestEnclaveMutation;
+    releaseMutationRef.current = releaseEnclaveMutation;
+    heartbeatMutationRef.current = heartbeatMutation;
+  });
+  useEffect(() => {
+    enclaveAssignmentIdRef.current = enclaveAssignmentId;
+  }, [enclaveAssignmentId]);
 
   // Fetch credentials from Convex
   const rawCredentials = useCredentials();
@@ -187,70 +202,110 @@ export function useDirectChat({
 
   // Request enclave when a private model is selected
   useEffect(() => {
+    const releaseCurrentEnclave = () => {
+      const currentAssignmentId = enclaveAssignmentIdRef.current;
+      if (currentAssignmentId) {
+        releaseMutationRef.current.mutate({ assignmentId: currentAssignmentId });
+      }
+      enclaveAssignmentIdRef.current = null;
+      activeEnclaveModelIdRef.current = null;
+      setEnclaveAssignmentId(null);
+      setEnclaveConfig(null);
+      setEnclaveConfigForTasks(null);
+      if (heartbeatIntervalRef.current) {
+        clearInterval(heartbeatIntervalRef.current);
+        heartbeatIntervalRef.current = null;
+      }
+    };
+
     if (!selectedModelId || !isUnlocked) {
+      releaseCurrentEnclave();
       return;
     }
 
     const isPrivate = isPrivateModel(selectedModelId);
 
-    if (isPrivate) {
-      const { modelName } = parseModelId(selectedModelId);
-      const sessionId = crypto.randomUUID();
-
-      requestEnclaveMutation.mutate(
-        { modelId: modelName, tier: 'shared', sessionId },
-        {
-          onSuccess: (data) => {
-            const config = {
-              endpoint: data.endpoint,
-              wsEndpoint: data.wsEndpoint,
-              attestationEndpoint: data.attestationEndpoint,
-              expectedMeasurements: data.expectedMeasurements,
-              allowUnverified: data.allowUnverified,
-            };
-            setEnclaveConfig(config);
-            setEnclaveConfigForTasks(config); // Enable title/follow-up generation for private models
-            setEnclaveAssignmentId(data.assignmentId);
-
-            // Start heartbeat interval (every 30 seconds)
-            if (heartbeatIntervalRef.current) {
-              clearInterval(heartbeatIntervalRef.current);
-            }
-            heartbeatIntervalRef.current = setInterval(() => {
-              if (data.assignmentId) {
-                heartbeatMutation.mutate({ assignmentId: data.assignmentId });
-              }
-            }, 30000);
-          },
-          onError: (error) => {
-            console.error('Failed to request enclave:', error);
-            const wrapped = new AppError({
-              code: 'IntegrationError',
-              message: `Failed to connect to private inference: ${error.message}`,
-              userMessage: 'Could not connect to private inference. Please retry.',
-              retryable: true,
-              blocking: false,
-              cause: error,
-              context: { modelId: selectedModelId },
-            });
-            onErrorRef.current?.(wrapped);
-          },
-        }
-      );
-    } else {
-      // Release enclave if switching away from private model
-      if (enclaveAssignmentId) {
-        releaseEnclaveMutation.mutate({ assignmentId: enclaveAssignmentId });
-        setEnclaveAssignmentId(null);
-        setEnclaveConfig(null);
-        setEnclaveConfigForTasks(null); // Clear tasks config too
-
-        if (heartbeatIntervalRef.current) {
-          clearInterval(heartbeatIntervalRef.current);
-          heartbeatIntervalRef.current = null;
-        }
-      }
+    if (!isPrivate) {
+      releaseCurrentEnclave();
+      return;
     }
+
+    // Already connected for this model
+    if (activeEnclaveModelIdRef.current === selectedModelId && enclaveAssignmentIdRef.current) {
+      return;
+    }
+
+    // Switching private models: release old enclave first
+    if (
+      activeEnclaveModelIdRef.current &&
+      activeEnclaveModelIdRef.current !== selectedModelId
+    ) {
+      releaseCurrentEnclave();
+    }
+
+    // Prevent duplicate in-flight requests and tight retry loops on 5xx
+    if (requestInFlightRef.current) {
+      return;
+    }
+    if (
+      lastFailureRef.current &&
+      lastFailureRef.current.modelId === selectedModelId &&
+      Date.now() - lastFailureRef.current.at < 10_000
+    ) {
+      return;
+    }
+
+    const { modelName } = parseModelId(selectedModelId);
+    const sessionId = crypto.randomUUID();
+    requestInFlightRef.current = true;
+
+    requestMutationRef.current.mutate(
+      { modelId: modelName, tier: 'shared', sessionId },
+      {
+        onSuccess: (data) => {
+          const config = {
+            endpoint: data.endpoint,
+            wsEndpoint: data.wsEndpoint,
+            attestationEndpoint: data.attestationEndpoint,
+            expectedMeasurements: data.expectedMeasurements,
+            allowUnverified: data.allowUnverified,
+          };
+          activeEnclaveModelIdRef.current = selectedModelId;
+          lastFailureRef.current = null;
+          enclaveAssignmentIdRef.current = data.assignmentId;
+          setEnclaveConfig(config);
+          setEnclaveConfigForTasks(config);
+          setEnclaveAssignmentId(data.assignmentId);
+
+          if (heartbeatIntervalRef.current) {
+            clearInterval(heartbeatIntervalRef.current);
+          }
+          heartbeatIntervalRef.current = setInterval(() => {
+            const assignmentId = enclaveAssignmentIdRef.current;
+            if (assignmentId) {
+              heartbeatMutationRef.current.mutate({ assignmentId });
+            }
+          }, 30000);
+        },
+        onError: (error) => {
+          lastFailureRef.current = { modelId: selectedModelId, at: Date.now() };
+          console.error('Failed to request enclave:', error);
+          const wrapped = new AppError({
+            code: 'IntegrationError',
+            message: `Failed to connect to private inference: ${error.message}`,
+            userMessage: 'Could not connect to private inference. Please retry.',
+            retryable: true,
+            blocking: false,
+            cause: error,
+            context: { modelId: selectedModelId },
+          });
+          onErrorRef.current?.(wrapped);
+        },
+        onSettled: () => {
+          requestInFlightRef.current = false;
+        },
+      }
+    );
 
     // Cleanup on unmount
     return () => {
@@ -258,26 +313,20 @@ export function useDirectChat({
         clearInterval(heartbeatIntervalRef.current);
       }
     };
-  }, [
-    enclaveAssignmentId,
-    heartbeatMutation,
-    isUnlocked,
-    releaseEnclaveMutation,
-    requestEnclaveMutation,
-    selectedModelId,
-  ]);
+  }, [isUnlocked, selectedModelId]);
 
   // Cleanup enclave on unmount
   useEffect(() => {
     return () => {
-      if (enclaveAssignmentId) {
-        releaseEnclaveMutation.mutate({ assignmentId: enclaveAssignmentId });
+      const assignmentId = enclaveAssignmentIdRef.current;
+      if (assignmentId) {
+        releaseMutationRef.current.mutate({ assignmentId });
       }
       if (heartbeatIntervalRef.current) {
         clearInterval(heartbeatIntervalRef.current);
       }
     };
-  }, [enclaveAssignmentId, releaseEnclaveMutation]);
+  }, []);
 
   // Check if transport is ready
   const isReady = useMemo(() => {
