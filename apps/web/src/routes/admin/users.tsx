@@ -113,13 +113,13 @@ export function AdminUsersPage() {
                         className={cn(
                           "inline-flex rounded-full px-2 py-0.5 text-xs font-medium",
                           user.subscription?.planId === "privacy_max" || user.subscription?.planId === "enterprise"
-                            ? "bg-purple-500/10 text-purple-600"
+                            ? "bg-primary/10 text-primary"
                             : user.subscription?.planId === "pro"
-                              ? "bg-blue-500/10 text-blue-600"
+                              ? "bg-primary/10 text-primary"
                               : user.subscription?.planId === "starter"
-                                ? "bg-emerald-500/10 text-emerald-600"
+                                ? "bg-status-success/10 text-status-success-text"
                                 : user.subscription?.planId === "team"
-                                  ? "bg-amber-500/10 text-amber-600"
+                                  ? "bg-status-warning/10 text-status-warning-text"
                                   : "bg-secondary text-muted-foreground"
                         )}
                       >
@@ -131,9 +131,9 @@ export function AdminUsersPage() {
                         className={cn(
                           "inline-flex rounded-full px-2 py-0.5 text-xs font-medium",
                           user.subscription?.status === "active"
-                            ? "bg-green-500/10 text-green-600"
+                            ? "bg-status-success/10 text-status-success-text"
                             : user.subscription?.status === "on_hold"
-                              ? "bg-yellow-500/10 text-yellow-600"
+                              ? "bg-status-warning/10 text-status-warning-text"
                               : "bg-secondary text-muted-foreground"
                         )}
                       >

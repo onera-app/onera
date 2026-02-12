@@ -143,7 +143,7 @@ export function FolderItem({
                 }}
                 onBlur={handleSaveEdit}
                 placeholder="Folder name"
-                className="w-full h-9 px-3 rounded-lg bg-muted text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-all"
+                className="w-full h-9 px-3 rounded-lg bg-sidebar-accent text-sm text-sidebar-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring transition-all"
               />
             </div>
           ) : (
@@ -151,12 +151,12 @@ export function FolderItem({
               <button
                 className={cn(
                   'flex items-center gap-2 w-full py-2 px-2 rounded-lg text-left',
-                  'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-150'
+                  'text-sidebar-foreground/75 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring'
                 )}
               >
                 <ChevronRight
                   className={cn(
-                    'h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 flex-shrink-0',
+                    'h-3.5 w-3.5 text-sidebar-foreground/65 transition-transform duration-200 flex-shrink-0',
                     isExpanded && 'rotate-90'
                   )}
                 />
@@ -167,11 +167,11 @@ export function FolderItem({
 
           {/* Menu button */}
           {!isEditing && (
-            <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+            <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 transition-opacity duration-150">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="p-1 rounded text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+                    className="p-1 rounded text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <MoreHorizontal className="h-4 w-4" />
@@ -185,7 +185,7 @@ export function FolderItem({
                   <DropdownMenuSeparator className="bg-border" />
                   <DropdownMenuItem
                     onClick={() => setShowDeleteDialog(true)}
-                    className="gap-2 text-red-500 dark:text-red-400 focus:text-red-500 dark:focus:text-red-400 focus:bg-red-500/10"
+                    className="gap-2 text-destructive focus:text-destructive focus:bg-destructive/10"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     Delete
@@ -215,7 +215,7 @@ export function FolderItem({
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-red-600 text-white hover:bg-red-700"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
             </AlertDialogAction>

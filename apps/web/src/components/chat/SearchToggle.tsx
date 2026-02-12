@@ -55,7 +55,7 @@ export const SearchToggle = memo(function SearchToggle({
             variant="ghost"
             size="icon"
             disabled
-            className="h-8 w-8 text-white/30 rounded-lg"
+            className="h-8 w-8 text-muted-foreground rounded-lg"
           >
             <Sparkles className="h-4 w-4" />
           </Button>
@@ -86,8 +86,8 @@ export const SearchToggle = memo(function SearchToggle({
             className={cn(
               "h-8 w-8 rounded-lg",
               enabled
-                ? "text-white bg-white/[0.12] hover:bg-white/[0.18]"
-                : "text-white/70 hover:text-white hover:bg-white/[0.08]",
+                ? "text-foreground bg-accent hover:bg-accent/80"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent/60",
             )}
             onClick={() => onToggle(!enabled)}
           >
@@ -121,8 +121,8 @@ export const SearchToggle = memo(function SearchToggle({
               className={cn(
                 "h-8 w-8 rounded-lg",
                 enabled
-                  ? "text-white bg-white/[0.12] hover:bg-white/[0.18]"
-                  : "text-white/70 hover:text-white hover:bg-white/[0.08]",
+                  ? "text-foreground bg-accent hover:bg-accent/80"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent/60",
               )}
             >
               {isSearching ? (

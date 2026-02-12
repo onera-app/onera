@@ -319,9 +319,9 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
         ref={containerRef}
         className={cn(
           "relative rounded-2xl overflow-hidden transition-all duration-200",
-          "bg-[#1a1a1a]",
-          "border border-white/[0.06]",
-          isFocused && "border-white/[0.12]",
+          "bg-card",
+          "border border-border",
+          isFocused && "border-ring",
           disabled && "opacity-50",
         )}
         onDragEnter={handleDragEnter}
@@ -358,11 +358,10 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
             rows={1}
             className={cn(
               "w-full bg-transparent resize-none border-0 shadow-none p-0",
-              "focus-visible:ring-0",
               "disabled:cursor-not-allowed",
               "max-h-[150px] sm:max-h-[200px] min-h-[24px]",
               "text-base leading-relaxed",
-              "placeholder:text-white/40 text-white",
+              "placeholder:text-muted-foreground text-foreground",
             )}
           />
         </div>
@@ -375,7 +374,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
               onFilesSelected={handleFilesSelected}
               disabled={disabled || isStreaming}
             />
-            <div className="w-px h-5 bg-white/10 mx-1" />
+            <div className="w-px h-5 bg-border mx-1" />
             <SearchToggle
               enabled={searchEnabled}
               onToggle={setSearchEnabled}
@@ -394,7 +393,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
                   <Button
                     onClick={onStop}
                     size="icon"
-                    className="h-9 w-9 rounded-full bg-white text-black hover:bg-white/90 transition-colors"
+                    className="h-9 w-9 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
                   >
                     <Square className="h-3.5 w-3.5 fill-current" />
                   </Button>
@@ -411,8 +410,8 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
                     className={cn(
                       "h-9 w-9 rounded-full transition-colors",
                       canSend
-                        ? "bg-white text-black hover:bg-white/90"
-                        : "bg-white/10 text-white/30 cursor-not-allowed",
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                        : "bg-muted text-muted-foreground cursor-not-allowed",
                     )}
                   >
                     <ArrowUp className="h-4 w-4" strokeWidth={2.5} />

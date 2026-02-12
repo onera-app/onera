@@ -161,7 +161,7 @@ export function ConnectionsTab() {
                         e.stopPropagation();
                         setDeleteCredentialId(credential.id);
                       }}
-                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
+                      className="opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

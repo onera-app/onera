@@ -16,9 +16,9 @@ interface InvoiceTableProps {
 }
 
 const statusColors: Record<string, string> = {
-  succeeded: "bg-green-500/10 text-green-600",
-  failed: "bg-red-500/10 text-red-600",
-  refunded: "bg-yellow-500/10 text-yellow-600",
+  succeeded: "bg-status-success/10 text-status-success-text",
+  failed: "bg-destructive/10 text-destructive",
+  refunded: "bg-status-warning/10 text-status-warning-text",
 };
 
 export function InvoiceTable({ invoices, isLoading }: InvoiceTableProps) {

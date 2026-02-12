@@ -79,9 +79,9 @@ export function AdminSubscriptionsPage() {
                         className={cn(
                           "inline-flex rounded-full px-2 py-0.5 text-xs font-medium",
                           sub.status === "active"
-                            ? "bg-green-500/10 text-green-600"
+                            ? "bg-status-success/10 text-status-success-text"
                             : sub.status === "on_hold"
-                              ? "bg-yellow-500/10 text-yellow-600"
+                              ? "bg-status-warning/10 text-status-warning-text"
                               : "bg-secondary text-muted-foreground"
                         )}
                       >

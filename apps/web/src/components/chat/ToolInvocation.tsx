@@ -51,15 +51,15 @@ function getStateIcon(state: ToolState) {
     case 'input-available':
       return <Loader2 className="h-4 w-4 animate-spin text-primary" />;
     case 'approval-requested':
-      return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+      return <AlertCircle className="h-4 w-4 text-status-warning-text" />;
     case 'approval-responded':
-      return <CheckCircle2 className="h-4 w-4 text-blue-500" />;
+      return <CheckCircle2 className="h-4 w-4 text-primary" />;
     case 'output-available':
       return <CheckCircle2 className="h-4 w-4 text-status-success-text" />;
     case 'output-error':
       return <XCircle className="h-4 w-4 text-destructive" />;
     case 'output-denied':
-      return <XCircle className="h-4 w-4 text-orange-500" />;
+      return <XCircle className="h-4 w-4 text-status-warning-text" />;
     default:
       return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
   }
@@ -103,8 +103,8 @@ export const ToolInvocation = memo(function ToolInvocation({
       <div className={cn(
         'mb-3 rounded-lg border overflow-hidden',
         hasError ? 'border-destructive/50 bg-destructive/5' :
-        wasDenied ? 'border-orange-500/50 bg-orange-500/5' :
-        needsApproval ? 'border-yellow-500/50 bg-yellow-500/5 ring-1 ring-yellow-500/20' :
+        wasDenied ? 'border-status-warning/40 bg-status-warning/10' :
+        needsApproval ? 'border-status-warning/40 bg-status-warning/10 ring-1 ring-status-warning/30' :
         'border-border/50 bg-muted/30'
       )}>
         <CollapsibleTrigger className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-muted/50 transition-colors">

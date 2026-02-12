@@ -46,7 +46,7 @@ export function UsageMeter({
             </>
           )}
           {hasOverage && (
-            <span className="text-amber-500 ml-1.5">
+            <span className="text-status-warning-text ml-1.5">
               +{overageCount.toLocaleString()}
             </span>
           )}

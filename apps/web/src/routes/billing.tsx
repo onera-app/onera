@@ -69,15 +69,15 @@ export function BillingPage() {
                   className={cn(
                     "w-10 h-10 rounded-xl flex items-center justify-center",
                     currentPlan?.id === "privacy_max"
-                      ? "bg-purple-500/15"
+                      ? "bg-primary/15"
                       : currentPlan?.id === "pro"
-                        ? "bg-blue-500/15"
+                        ? "bg-primary/15"
                         : currentPlan?.id === "starter"
-                          ? "bg-emerald-500/15"
+                          ? "bg-status-success/15"
                           : currentPlan?.id === "team"
-                            ? "bg-amber-500/15"
+                            ? "bg-status-warning/15"
                             : currentPlan?.id === "enterprise"
-                              ? "bg-purple-500/15"
+                              ? "bg-primary/15"
                               : "bg-muted",
                   )}
                 >
@@ -85,15 +85,15 @@ export function BillingPage() {
                     className={cn(
                       "w-5 h-5",
                       currentPlan?.id === "privacy_max"
-                        ? "text-purple-500"
+                        ? "text-primary"
                         : currentPlan?.id === "pro"
-                          ? "text-blue-500"
+                          ? "text-primary"
                           : currentPlan?.id === "starter"
-                            ? "text-emerald-500"
+                            ? "text-status-success-text"
                             : currentPlan?.id === "team"
-                              ? "text-amber-500"
+                              ? "text-status-warning-text"
                               : currentPlan?.id === "enterprise"
-                                ? "text-purple-500"
+                                ? "text-primary"
                                 : "text-muted-foreground",
                     )}
                   />
@@ -108,7 +108,7 @@ export function BillingPage() {
                   </p>
                 </div>
               </div>
-              <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium bg-emerald-500/10 text-emerald-500">
+              <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium bg-status-success/10 text-status-success-text">
                 Early Access
               </span>
             </div>
@@ -151,8 +151,8 @@ export function BillingPage() {
                   key={feature}
                   className="flex items-center gap-2.5 text-[14px] text-foreground/80"
                 >
-                  <div className="w-4 h-4 rounded-full bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
-                    <Check className="w-2.5 h-2.5 text-emerald-500" />
+                  <div className="w-4 h-4 rounded-full bg-status-success/15 flex items-center justify-center flex-shrink-0">
+                    <Check className="w-2.5 h-2.5 text-status-success-text" />
                   </div>
                   {feature}
                 </li>

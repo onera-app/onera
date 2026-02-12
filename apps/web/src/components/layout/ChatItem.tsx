@@ -133,7 +133,7 @@ export const ChatItem = memo(function ChatItem({
             if (e.key === "Escape") handleCancelEdit();
           }}
           onBlur={handleCancelEdit}
-          className="w-full h-9 px-3 rounded-lg bg-white/10 text-sm text-white focus:outline-none focus:ring-1 focus:ring-white/20 transition-colors"
+          className="w-full h-9 px-3 rounded-lg bg-sidebar-accent text-sm text-sidebar-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring transition-colors"
         />
       </div>
     );
@@ -157,13 +157,14 @@ export const ChatItem = memo(function ChatItem({
           className={cn(
             "relative flex items-center w-full h-9 px-2.5 rounded-lg text-sm transition-colors overflow-hidden",
             isActive
-              ? "bg-white/[0.12] text-white"
-              : "text-white/90 hover:text-white hover:bg-white/[0.08]",
+              ? "bg-sidebar-accent text-sidebar-foreground"
+              : "text-sidebar-foreground/90 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background",
           )}
         >
           {/* Lock indicator */}
           {isLocked && (
-            <Lock className="w-3.5 h-3.5 mr-2 flex-shrink-0 text-white/50" />
+            <Lock className="w-3.5 h-3.5 mr-2 flex-shrink-0 text-sidebar-foreground/60" />
           )}
 
           {/* Title container */}
@@ -181,14 +182,16 @@ export const ChatItem = memo(function ChatItem({
         <div
           className={cn(
             "absolute right-2 top-1/2 -translate-y-1/2 flex items-center",
-            isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100",
+            isActive
+              ? "opacity-100"
+              : "opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100",
             "transition-opacity duration-150",
           )}
         >
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className="p-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/[0.1] transition-colors"
+                className="p-1.5 rounded-lg text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
                 onClick={(e) => e.preventDefault()}
               >
                 <MoreHorizontal className="h-4 w-4" />
@@ -226,7 +229,7 @@ export const ChatItem = memo(function ChatItem({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => setShowDeleteDialog(true)}
-                className="gap-2 text-red-400 focus:text-red-400 focus:bg-red-500/10"
+                className="gap-2 text-destructive focus:text-destructive focus:bg-destructive/10"
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 Delete
@@ -252,7 +255,7 @@ export const ChatItem = memo(function ChatItem({
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDelete}
-                className="bg-red-600 text-white hover:bg-red-700"
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
                 Delete
               </AlertDialogAction>

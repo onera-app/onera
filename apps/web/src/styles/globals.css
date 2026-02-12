@@ -52,8 +52,8 @@
   --color-border: oklch(1 0 0 / 0.1);
   /* white/10 - subtle borders */
   --color-input: oklch(0.15 0 0);
-  --color-ring: oklch(1 0 0 / 0.2);
-  /* white/20 - focus rings */
+  --color-ring: oklch(1 0 0 / 0.4);
+  /* white/40 - accessible focus rings */
 
   /* Sidebar - darker than main content like OpenWebUI */
   --color-sidebar-background: oklch(0.04 0 0);
@@ -80,6 +80,9 @@
   --color-status-success: oklch(0.65 0.18 150);
   --color-status-warning: oklch(0.75 0.18 85);
   --color-status-error: oklch(0.6 0.2 25);
+  --color-status-success-text: oklch(0.82 0.12 150);
+  --color-status-warning-text: oklch(0.86 0.13 85);
+  --color-status-error-text: oklch(0.8 0.14 25);
 
   /* Radius - Apple-style rounded corners */
   --radius: 0.875rem;
@@ -139,7 +142,7 @@
   --color-border: oklch(0 0 0 / 0.1);
   /* black/10 - subtle borders */
   --color-input: oklch(0.96 0 0);
-  --color-ring: oklch(0 0 0 / 0.15);
+  --color-ring: oklch(0 0 0 / 0.45);
 
   --color-sidebar-background: oklch(0.98 0 0);
   --color-sidebar-foreground: oklch(0.3 0 0);
@@ -148,6 +151,11 @@
   --color-sidebar-accent: oklch(0.94 0 0);
   --color-sidebar-accent-foreground: oklch(0.13 0 0);
   --color-sidebar-border: oklch(0 0 0 / 0.1);
+  --color-sidebar-ring: oklch(0 0 0 / 0.45);
+
+  --color-status-success-text: oklch(0.42 0.16 150);
+  --color-status-warning-text: oklch(0.45 0.15 85);
+  --color-status-error-text: oklch(0.45 0.17 25);
 }
 
 /* OLED Dark mode - true black for OLED screens */
@@ -181,7 +189,7 @@
   --color-border: oklch(1 0 0 / 0.08);
   /* Very subtle borders */
   --color-input: oklch(0.08 0 0);
-  --color-ring: oklch(1 0 0 / 0.15);
+  --color-ring: oklch(1 0 0 / 0.35);
 
   --color-sidebar-background: oklch(0 0 0);
   --color-sidebar-foreground: oklch(0.7 0 0);
@@ -191,6 +199,10 @@
   --color-sidebar-accent-foreground: oklch(0.98 0 0);
   --color-sidebar-border: oklch(1 0 0 / 0.08);
   --color-sidebar-ring: oklch(1 0 0 / 0.15);
+
+  --color-status-success-text: oklch(0.78 0.12 150);
+  --color-status-warning-text: oklch(0.82 0.13 85);
+  --color-status-error-text: oklch(0.76 0.14 25);
 }
 
 @layer base {

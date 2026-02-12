@@ -324,7 +324,7 @@ export function Sidebar() {
           <TooltipTrigger asChild>
             <button
               onClick={toggleSidebar}
-              className="fixed top-3.5 left-3.5 z-50 p-2 rounded-xl bg-background/80 backdrop-blur-xl border border-border shadow-sm text-muted-foreground hover:text-foreground hover:bg-foreground/[0.06] active:scale-[0.97] transition-all duration-200 ease-out"
+              className="fixed top-3.5 left-3.5 z-50 p-2 rounded-xl bg-background/80 backdrop-blur-xl border border-border shadow-sm text-muted-foreground hover:text-foreground hover:bg-foreground/[0.06] active:scale-[0.97] transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               aria-label="Open sidebar"
             >
               <PanelLeftOpen className="h-[18px] w-[18px]" />
@@ -364,12 +364,12 @@ export function Sidebar() {
         {/* Content */}
         <div className="flex flex-col h-full">
           {/* Header - OpenWebUI style */}
-          <header className="flex items-center justify-between px-4 h-14 border-b border-white/[0.08]">
+          <header className="flex items-center justify-between px-4 h-14 border-b border-sidebar-border">
             <Link to="/app" className="flex items-center gap-2.5 group">
               <div className="w-8 h-8 rounded-full overflow-hidden">
                 <OneraLogo size={32} />
               </div>
-              <span className="font-medium text-base text-white tracking-tight">
+              <span className="font-medium text-base text-sidebar-foreground tracking-tight">
                 Onera
               </span>
             </Link>
@@ -378,7 +378,7 @@ export function Sidebar() {
               <TooltipTrigger asChild>
                 <button
                   onClick={toggleSidebar}
-                  className="p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/[0.08] transition-colors"
+                  className="p-2 rounded-lg text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background"
                 >
                   <PanelLeftClose className="h-4 w-4" />
                 </button>
@@ -394,7 +394,7 @@ export function Sidebar() {
             {/* New Chat */}
             <Link
               to="/app"
-              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-white/[0.08] transition-colors text-white hover:text-white group"
+              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground hover:text-sidebar-foreground group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background"
             >
               <Plus className="h-4 w-4" />
               <span className="text-sm">New Chat</span>
@@ -403,7 +403,7 @@ export function Sidebar() {
             {/* Search */}
             <button
               onClick={() => setSearchModalOpen(true)}
-              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-white/[0.08] transition-colors text-white hover:text-white group"
+              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground hover:text-sidebar-foreground group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background"
             >
               <Search className="h-4 w-4" />
               <span className="text-sm">Search</span>
@@ -412,7 +412,7 @@ export function Sidebar() {
             {/* Notes */}
             <Link
               to="/app/notes"
-              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-white/[0.08] transition-colors text-white hover:text-white group"
+              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground hover:text-sidebar-foreground group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background"
             >
               <FileText className="h-4 w-4" />
               <span className="text-sm">Notes</span>
@@ -422,7 +422,7 @@ export function Sidebar() {
             {isAdmin && (
               <Link
                 to="/app/admin"
-                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-white/[0.08] transition-colors text-white hover:text-white group"
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground hover:text-sidebar-foreground group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background"
               >
                 <Shield className="h-4 w-4" />
                 <span className="text-sm">Admin</span>
@@ -435,16 +435,16 @@ export function Sidebar() {
             <div className="pb-4">
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-16 gap-3">
-                  <Spinner size="lg" className="text-white/50" />
-                  <span className="text-xs text-white/60">Loading...</span>
+                  <Spinner size="lg" className="text-sidebar-foreground/50" />
+                  <span className="text-xs text-sidebar-foreground/70">Loading...</span>
                 </div>
               ) : chats.length === 0 && foldersWithState.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-                  <MessageSquare className="w-8 h-8 text-white/30 mb-3" />
-                  <p className="text-sm text-white/70 mb-1">
+                  <MessageSquare className="w-8 h-8 text-sidebar-foreground/40 mb-3" />
+                  <p className="text-sm text-sidebar-foreground/80 mb-1">
                     No conversations yet
                   </p>
-                  <p className="text-xs text-white/50">
+                  <p className="text-xs text-sidebar-foreground/65">
                     Start a new chat to begin
                   </p>
                 </div>
@@ -456,7 +456,7 @@ export function Sidebar() {
                     onOpenChange={setFoldersExpanded}
                   >
                     <div className="flex items-center justify-between">
-                      <CollapsibleTrigger className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-white/70 hover:text-white transition-colors">
+                      <CollapsibleTrigger className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background rounded-md">
                         <ChevronRight
                           className={cn(
                             "h-3 w-3 transition-transform duration-200",
@@ -469,7 +469,7 @@ export function Sidebar() {
                         <TooltipTrigger asChild>
                           <button
                             onClick={handleNewFolder}
-                            className="p-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/[0.08] transition-colors"
+                            className="p-1.5 rounded-lg text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background"
                           >
                             <Plus className="h-3.5 w-3.5" />
                           </button>
@@ -483,7 +483,7 @@ export function Sidebar() {
                     <CollapsibleContent className="space-y-0.5 mt-1">
                       {foldersWithState.length === 0 ? (
                         <div className="py-2 px-3 ml-5">
-                          <p className="text-xs text-white/50 italic">
+                          <p className="text-xs text-sidebar-foreground/65 italic">
                             No folders yet
                           </p>
                         </div>
@@ -508,7 +508,7 @@ export function Sidebar() {
                             >
                               {folderChats.length === 0 ? (
                                 <div className="py-1.5 px-3 ml-5">
-                                  <p className="text-xs text-white/50 italic">
+                                  <p className="text-xs text-sidebar-foreground/65 italic">
                                     Empty
                                   </p>
                                 </div>
@@ -544,7 +544,7 @@ export function Sidebar() {
                     open={chatsExpanded}
                     onOpenChange={setChatsExpanded}
                   >
-                    <CollapsibleTrigger className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-white/70 hover:text-white transition-colors w-full">
+                    <CollapsibleTrigger className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background rounded-md">
                       <ChevronRight
                         className={cn(
                           "h-3 w-3 transition-transform duration-200",
@@ -558,7 +558,7 @@ export function Sidebar() {
                       {/* Pinned Section */}
                       {pinnedChats.length > 0 && (
                         <div className="mb-2">
-                          <div className="flex items-center gap-1.5 px-2 py-1 text-xs text-white/60">
+                          <div className="flex items-center gap-1.5 px-2 py-1 text-xs text-sidebar-foreground/65">
                             <Pin className="h-3 w-3" />
                             <span>Pinned</span>
                           </div>
@@ -584,7 +584,7 @@ export function Sidebar() {
                       {Array.from(groupedChats.entries()).map(
                         ([group, groupChats]) => (
                           <div key={group} className="mt-3">
-                            <div className="px-2 py-1 text-xs text-white/60">
+                            <div className="px-2 py-1 text-xs text-sidebar-foreground/65">
                               {DATE_GROUP_LABELS[group as DateGroup]}
                             </div>
                             <div className="space-y-0.5 mt-1">
@@ -609,7 +609,7 @@ export function Sidebar() {
                       {/* Empty state */}
                       {pinnedChats.length === 0 && groupedChats.size === 0 && (
                         <div className="py-2 px-3 ml-5">
-                          <p className="text-[11px] text-muted-foreground/50 italic">
+                          <p className="text-[11px] text-sidebar-foreground/65 italic">
                             No chats yet
                           </p>
                         </div>
@@ -626,7 +626,7 @@ export function Sidebar() {
             <div className="px-2.5 pb-2.5 pt-1">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-3 w-full px-2 py-2 rounded-xl hover:bg-foreground/[0.06] active:scale-[0.98] transition-all duration-150 ease-out text-left group">
+                  <button className="flex items-center gap-3 w-full px-2 py-2 rounded-xl hover:bg-foreground/[0.06] active:scale-[0.98] transition-all duration-150 ease-out text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background">
                     {/* Avatar */}
                     {user.imageUrl ? (
                       <img
@@ -651,16 +651,16 @@ export function Sidebar() {
                         className={cn(
                           "text-[11px]",
                           subData?.plan?.id === "privacy_max"
-                            ? "text-purple-500"
+                            ? "text-primary"
                             : subData?.plan?.id === "pro"
-                              ? "text-blue-500"
+                              ? "text-primary"
                               : subData?.plan?.id === "starter"
-                                ? "text-emerald-500"
+                                ? "text-status-success-text"
                                 : subData?.plan?.id === "team"
-                                  ? "text-amber-500"
+                                  ? "text-status-warning-text"
                                   : subData?.plan?.id === "enterprise"
-                                    ? "text-purple-500"
-                                    : "text-muted-foreground",
+                                    ? "text-primary"
+                                    : "text-sidebar-foreground/70",
                         )}
                       >
                         {subData?.plan?.name || "Free"} plan
@@ -668,7 +668,7 @@ export function Sidebar() {
                     </div>
 
                     {/* Chevron */}
-                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-sidebar-foreground transition-colors flex-shrink-0" />
+                    <ChevronRight className="h-4 w-4 text-sidebar-foreground/60 group-hover:text-sidebar-foreground transition-colors flex-shrink-0" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -683,16 +683,16 @@ export function Sidebar() {
                         className={cn(
                           "w-2 h-2 rounded-full",
                           subData?.plan?.id === "privacy_max"
-                            ? "bg-purple-400"
+                            ? "bg-primary"
                             : subData?.plan?.id === "pro"
-                              ? "bg-blue-400"
+                              ? "bg-primary"
                               : subData?.plan?.id === "starter"
-                                ? "bg-emerald-400"
+                                ? "bg-status-success"
                                 : subData?.plan?.id === "team"
-                                  ? "bg-amber-400"
+                                  ? "bg-status-warning"
                                   : subData?.plan?.id === "enterprise"
-                                    ? "bg-purple-400"
-                                    : "bg-muted-foreground/50",
+                                    ? "bg-primary"
+                                    : "bg-sidebar-foreground/40",
                         )}
                       />
                       Manage plan
@@ -708,7 +708,7 @@ export function Sidebar() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => signOut()}
-                    className="gap-2 text-red-400 focus:text-red-400 focus:bg-red-500/10"
+                    className="gap-2 text-destructive focus:text-destructive focus:bg-destructive/10"
                   >
                     <LogOut className="h-4 w-4" />
                     Sign out
