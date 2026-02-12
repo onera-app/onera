@@ -3,21 +3,25 @@
  * Handles file selection via button click or drag-and-drop
  */
 
-import { useRef, useCallback, type DragEvent } from 'react';
-import { Paperclip, Image, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useRef, useCallback, type DragEvent } from "react";
+import { Plus, Image, FileText, Paperclip } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   SUPPORTED_IMAGE_TYPES,
   SUPPORTED_DOCUMENT_TYPES,
   SUPPORTED_TEXT_TYPES,
-} from '@/lib/fileProcessing';
+} from "@/lib/fileProcessing";
 
 interface AttachmentButtonProps {
   onFilesSelected: (files: File[]) => void;
@@ -38,9 +42,9 @@ export function AttachmentButton({
         onFilesSelected(Array.from(files));
       }
       // Reset input to allow selecting the same file again
-      event.target.value = '';
+      event.target.value = "";
     },
-    [onFilesSelected]
+    [onFilesSelected],
   );
 
   const handleSelectFiles = useCallback(() => {
@@ -55,9 +59,9 @@ export function AttachmentButton({
     ...SUPPORTED_IMAGE_TYPES,
     ...SUPPORTED_DOCUMENT_TYPES,
     ...SUPPORTED_TEXT_TYPES,
-  ].join(',');
+  ].join(",");
 
-  const imageAcceptedTypes = SUPPORTED_IMAGE_TYPES.join(',');
+  const imageAcceptedTypes = SUPPORTED_IMAGE_TYPES.join(",");
 
   return (
     <>
@@ -79,7 +83,7 @@ export function AttachmentButton({
         onChange={handleFileChange}
       />
 
-      {/* Dropdown button */}
+      {/* Dropdown button - OpenWebUI style with Plus icon */}
       <DropdownMenu>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -89,22 +93,22 @@ export function AttachmentButton({
                 variant="ghost"
                 size="icon"
                 disabled={disabled}
-                className="h-9 w-9 text-muted-foreground hover:text-foreground"
+                className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/[0.08] rounded-lg"
               >
-                <Paperclip className="h-5 w-5" />
+                <Plus className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
           </TooltipTrigger>
           <TooltipContent>Attach file</TooltipContent>
         </Tooltip>
 
-        <DropdownMenuContent align="start">
-          <DropdownMenuItem onClick={handleSelectImages}>
-            <Image className="h-4 w-4 mr-2" />
+        <DropdownMenuContent align="start" className="min-w-[160px]">
+          <DropdownMenuItem onClick={handleSelectImages} className="gap-2">
+            <Image className="h-4 w-4" />
             Upload image
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleSelectFiles}>
-            <FileText className="h-4 w-4 mr-2" />
+          <DropdownMenuItem onClick={handleSelectFiles} className="gap-2">
+            <FileText className="h-4 w-4" />
             Upload file
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -162,7 +166,7 @@ export function useDragAndDrop(onFilesDropped: (files: File[]) => void) {
         onFilesDropped(Array.from(files));
       }
     },
-    [onFilesDropped]
+    [onFilesDropped],
   );
 
   return {

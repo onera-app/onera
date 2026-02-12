@@ -20,7 +20,7 @@ export function Hero() {
         </h1>
 
         <p
-          className="mt-8 text-xl md:text-2xl text-neutral-500 dark:text-neutral-400 max-w-2xl leading-relaxed text-balance animate-slide-up-fade"
+          className="mt-8 text-xl md:text-2xl text-neutral-500 dark:text-neutral-300 max-w-2xl leading-relaxed text-balance animate-slide-up-fade"
           style={{ animationDelay: "200ms" }}
         >
           Have conversations you'd never type into ChatGPT. Onera processes your
@@ -61,7 +61,7 @@ export function Hero() {
             href="https://github.com/onera-app"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
+            className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white transition-colors"
           >
             <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
               <path
@@ -72,12 +72,12 @@ export function Hero() {
             </svg>
             GitHub
           </a>
-          <span className="text-neutral-200 dark:text-neutral-700">·</span>
+          <span className="text-neutral-200 dark:text-neutral-500">·</span>
           <a
             href="https://apps.apple.com/us/app/onera-private-ai-chat/id6758128954"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
+            className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white transition-colors"
           >
             <svg className="size-4" viewBox="0 0 24 24" fill="currentColor">
               <path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 21.99 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.1 21.99C7.79 22.03 6.8 20.68 5.96 19.47C4.25 16.99 2.97 12.5 4.7 9.56C5.55 8.08 7.13 7.16 8.82 7.14C10.1 7.12 11.32 8.01 12.11 8.01C12.89 8.01 14.37 6.94 15.92 7.1C16.57 7.13 18.39 7.36 19.56 9.07C19.47 9.13 17.29 10.39 17.31 13.05C17.34 16.24 20.06 17.27 20.09 17.28C20.06 17.35 19.67 18.72 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.09 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z" />

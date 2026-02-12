@@ -20,24 +20,28 @@ export function PricingSection() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <section id="pricing" className="py-16 px-4 bg-neutral-50 dark:bg-neutral-900/30">
+    <section
+      id="pricing"
+      className="py-16 px-4 bg-neutral-50 dark:bg-neutral-900/50"
+    >
       <div className="max-w-[980px] mx-auto">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-neutral-900 dark:text-white mb-4">
             Free during early access
           </h2>
-          <p className="text-lg text-neutral-500 dark:text-neutral-400 max-w-2xl mx-auto text-balance">
-            All features are free while we're in early access. No credit card required.
+          <p className="text-lg text-neutral-500 dark:text-neutral-300 max-w-2xl mx-auto text-balance">
+            All features are free while we're in early access. No credit card
+            required.
           </p>
         </div>
 
         <div className="max-w-md mx-auto">
-          <div className="rounded-3xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="rounded-3xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
             <div className="mb-6 text-center">
               <p className="text-base font-medium text-neutral-900 dark:text-white mb-1">
                 Free
               </p>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              <p className="text-xs text-neutral-500 dark:text-neutral-300">
                 Encrypted AI chat — all features included
               </p>
             </div>
@@ -68,7 +72,7 @@ export function PricingSection() {
               </Button>
             </Link>
 
-            <p className="mt-4 text-xs text-center text-neutral-400 dark:text-neutral-500">
+            <p className="mt-4 text-xs text-center text-neutral-400 dark:text-neutral-300">
               Your conversations stay private with end-to-end encryption
             </p>
           </div>

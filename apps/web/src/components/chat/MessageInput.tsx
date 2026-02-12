@@ -88,10 +88,12 @@ export const MessageInput = memo(function MessageInput({
 const SimpleMessageInput = memo(function SimpleMessageInput({
   onSend,
   disabled = false,
-  placeholder = "Message Onera...",
+  placeholder: _placeholder = "Message Onera...",
   onStop,
   isStreaming = false,
 }: MessageInputProps) {
+  // Note: We use a fixed placeholder "Send a Message" to match OpenWebUI style
+  void _placeholder; // Suppress unused variable warning
   const [value, setValue] = useState("");
   const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -312,17 +314,14 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
 
   return (
     <div className="relative w-full">
-      {/* Main input container */}
+      {/* Main input container - OpenWebUI style */}
       <div
         ref={containerRef}
         className={cn(
-          "relative rounded-[24px] overflow-hidden transition-all duration-300 ease-out",
-          "bg-background/80 backdrop-blur-2xl",
-          "border border-border",
-          "shadow-lg shadow-black/5 dark:shadow-black/20",
-          isFocused
-            ? "border-foreground/20 shadow-xl"
-            : "hover:bg-background/90",
+          "relative rounded-2xl overflow-hidden transition-all duration-200",
+          "bg-[#1a1a1a]",
+          "border border-white/[0.06]",
+          isFocused && "border-white/[0.12]",
           disabled && "opacity-50",
         )}
         onDragEnter={handleDragEnter}
@@ -343,17 +342,8 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
           </div>
         )}
 
-        {/* Textarea row */}
-        <div className="flex items-end pl-2.5 sm:pl-3 pr-2 py-2 gap-1.5 sm:gap-2">
-          {/* Attach file button */}
-          <div className="pb-1 flex-shrink-0">
-            <AttachmentButton
-              onFilesSelected={handleFilesSelected}
-              disabled={disabled || isStreaming}
-            />
-          </div>
-
-          {/* Textarea */}
+        {/* Textarea at top - OpenWebUI style */}
+        <div className="px-4 pt-4 pb-2">
           <Textarea
             ref={textareaRef}
             value={value}
@@ -363,23 +353,29 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
             onPaste={handlePaste}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
-            placeholder={placeholder}
+            placeholder="Send a Message"
             disabled={disabled || isStreaming}
             rows={1}
             className={cn(
-              "flex-1 w-full bg-transparent resize-none border-0 shadow-none",
-              "px-1 py-2.5 sm:py-3",
+              "w-full bg-transparent resize-none border-0 shadow-none p-0",
               "focus-visible:ring-0",
               "disabled:cursor-not-allowed",
-              "max-h-[150px] sm:max-h-[200px] min-h-[44px] sm:min-h-[48px]",
-              "text-[15px] sm:text-[15px] leading-[1.5]",
-              "placeholder:text-muted-foreground/50 text-foreground/95",
+              "max-h-[150px] sm:max-h-[200px] min-h-[24px]",
+              "text-base leading-relaxed",
+              "placeholder:text-white/40 text-white",
             )}
           />
+        </div>
 
-          {/* Right side actions */}
-          <div className="flex items-center gap-1.5 sm:gap-2 pb-1 flex-shrink-0">
-            {/* Search toggle - hide on very small screens, show icon only */}
+        {/* Bottom toolbar - OpenWebUI style */}
+        <div className="flex items-center justify-between px-3 pb-3 pt-1">
+          {/* Left side: attach + separator + tools */}
+          <div className="flex items-center gap-1">
+            <AttachmentButton
+              onFilesSelected={handleFilesSelected}
+              disabled={disabled || isStreaming}
+            />
+            <div className="w-px h-5 bg-white/10 mx-1" />
             <SearchToggle
               enabled={searchEnabled}
               onToggle={setSearchEnabled}
@@ -388,15 +384,17 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
               isSearching={isSearching}
               disabled={disabled || isStreaming}
             />
+          </div>
 
-            {/* Send/Stop button */}
+          {/* Right side: send button */}
+          <div className="flex items-center gap-2">
             {isStreaming ? (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     onClick={onStop}
                     size="icon"
-                    className="h-9 w-9 rounded-2xl bg-red-500 text-white hover:bg-red-600 transition-all duration-200 shadow-md"
+                    className="h-9 w-9 rounded-full bg-white text-black hover:bg-white/90 transition-colors"
                   >
                     <Square className="h-3.5 w-3.5 fill-current" />
                   </Button>
@@ -411,10 +409,10 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
                     disabled={!canSend}
                     size="icon"
                     className={cn(
-                      "h-9 w-9 rounded-2xl transition-all duration-200 shadow-md",
+                      "h-9 w-9 rounded-full transition-colors",
                       canSend
-                        ? "bg-foreground text-background hover:bg-foreground/90 hover:scale-105"
-                        : "bg-muted text-muted-foreground cursor-not-allowed",
+                        ? "bg-white text-black hover:bg-white/90"
+                        : "bg-white/10 text-white/30 cursor-not-allowed",
                     )}
                   >
                     <ArrowUp className="h-4 w-4" strokeWidth={2.5} />

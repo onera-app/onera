@@ -9,57 +9,64 @@
 
 @theme {
   /* 
-   * Color Palette - Apple-inspired Dark Theme
-   * Premium dark theme with depth, clarity, and subtle sophistication.
+   * Color Palette - OpenWebUI/ChatGPT Dark Theme
+   * Clean, minimal dark theme with excellent contrast.
+   * Based on #0a0a0a background, #fafafa foreground
    */
 
-  --color-background: oklch(0.14 0.004 260);
-  /* Deep dark background */
-  --color-foreground: oklch(0.94 0.003 90);
-  /* Clean white text with slight warmth */
+  --color-background: oklch(0.07 0 0);
+  /* #0a0a0a - near black */
+  --color-foreground: oklch(0.98 0 0);
+  /* #fafafa - off-white */
 
-  --color-card: oklch(0.18 0.004 260);
-  /* Elevated surface */
-  --color-card-foreground: oklch(0.94 0.003 90);
+  --color-card: oklch(0.13 0 0);
+  /* #1a1a1a - elevated surface */
+  --color-card-foreground: oklch(0.98 0 0);
 
-  --color-popover: oklch(0.16 0.004 260 / 0.96);
-  --color-popover-foreground: oklch(0.94 0.003 90);
+  --color-popover: oklch(0.11 0 0 / 0.98);
+  /* Slightly darker popover */
+  --color-popover-foreground: oklch(0.98 0 0);
 
-  --color-primary: oklch(0.94 0.003 90);
+  --color-primary: oklch(0.98 0 0);
   /* White as Primary */
-  --color-primary-foreground: oklch(0.12 0.004 260);
+  --color-primary-foreground: oklch(0.07 0 0);
   /* Dark text on Primary */
 
-  --color-secondary: oklch(0.22 0.004 260);
-  /* Slightly lighter for secondary */
-  --color-secondary-foreground: oklch(0.94 0.003 90);
+  --color-secondary: oklch(0.18 0 0);
+  /* #2a2a2a - secondary surfaces */
+  --color-secondary-foreground: oklch(0.98 0 0);
 
-  --color-muted: oklch(0.2 0.004 260);
-  --color-muted-foreground: oklch(0.5 0.008 260);
-  /* Subtle muted text */
+  --color-muted: oklch(0.15 0 0);
+  /* #222222 */
+  --color-muted-foreground: oklch(0.7 0 0);
+  /* Brighter muted text for better readability */
 
-  --color-accent: oklch(0.24 0.004 260);
-  /* Hover/interaction state */
-  --color-accent-foreground: oklch(0.94 0.003 90);
+  --color-accent: oklch(0.2 0 0);
+  /* #303030 - hover/interaction state */
+  --color-accent-foreground: oklch(0.98 0 0);
 
-  --color-destructive: oklch(0.58 0.2 25);
+  --color-destructive: oklch(0.55 0.2 25);
   /* Red for errors */
   --color-destructive-foreground: oklch(0.98 0 0);
 
-  --color-border: oklch(0.26 0.004 260 / 0.5);
-  --color-input: oklch(0.2 0.004 260);
-  --color-ring: oklch(0.45 0.008 260 / 0.4);
+  --color-border: oklch(1 0 0 / 0.1);
+  /* white/10 - subtle borders */
+  --color-input: oklch(0.15 0 0);
+  --color-ring: oklch(1 0 0 / 0.2);
+  /* white/20 - focus rings */
 
-  /* Sidebar - subtly darker than main content */
-  --color-sidebar-background: oklch(0.11 0.004 260);
-  /* Very dark sidebar */
-  --color-sidebar-foreground: oklch(0.82 0.003 90);
-  --color-sidebar-primary: oklch(0.94 0.003 90);
-  --color-sidebar-primary-foreground: oklch(0.11 0.004 260);
-  --color-sidebar-accent: oklch(0.2 0.004 260);
-  --color-sidebar-accent-foreground: oklch(0.94 0.003 90);
-  --color-sidebar-border: oklch(0.2 0.004 260);
-  --color-sidebar-ring: oklch(0.45 0.008 260 / 0.4);
+  /* Sidebar - darker than main content like OpenWebUI */
+  --color-sidebar-background: oklch(0.04 0 0);
+  /* Near black like OpenWebUI sidebar */
+  --color-sidebar-foreground: oklch(0.9 0 0);
+  /* Brighter text for better visibility */
+  --color-sidebar-primary: oklch(1 0 0);
+  --color-sidebar-primary-foreground: oklch(0.04 0 0);
+  --color-sidebar-accent: oklch(0.12 0 0);
+  /* Hover state */
+  --color-sidebar-accent-foreground: oklch(1 0 0);
+  --color-sidebar-border: oklch(1 0 0 / 0.1);
+  --color-sidebar-ring: oklch(1 0 0 / 0.2);
 
   /* AI Provider Colors - Desaturated / Neutralized where appropriate, or kept distinct but darker */
   --color-provider-anthropic: oklch(0.7 0.05 45);
@@ -95,51 +102,95 @@
   }
 }
 
-/* Light mode overrides - Warm, refined neutrals */
+/* Light mode overrides - OpenWebUI/ChatGPT Light Theme */
 .light {
-  --color-background: oklch(0.985 0.005 85);
-  /* Warm cream white */
-  --color-foreground: oklch(0.22 0.01 260);
-  /* Soft charcoal, not harsh black */
+  --color-background: oklch(0.98 0 0);
+  /* #fafafa - off-white */
+  --color-foreground: oklch(0.13 0 0);
+  /* #1a1a1a - near black text */
 
-  --color-card: oklch(1 0.003 85 / 0.9);
-  --color-card-foreground: oklch(0.22 0.01 260);
+  --color-card: oklch(1 0 0);
+  /* Pure white cards */
+  --color-card-foreground: oklch(0.13 0 0);
 
-  --color-popover: oklch(0.995 0.003 85 / 0.98);
-  --color-popover-foreground: oklch(0.22 0.01 260);
+  --color-popover: oklch(1 0 0 / 0.98);
+  --color-popover-foreground: oklch(0.13 0 0);
 
-  --color-primary: oklch(0.25 0.01 260);
-  /* Charcoal primary for strong contrast */
-  --color-primary-foreground: oklch(0.99 0.003 85);
+  --color-primary: oklch(0.13 0 0);
+  /* Dark primary for strong contrast */
+  --color-primary-foreground: oklch(0.98 0 0);
 
-  --color-secondary: oklch(0.95 0.005 85);
-  /* Warm light gray */
-  --color-secondary-foreground: oklch(0.3 0.01 260);
+  --color-secondary: oklch(0.95 0 0);
+  /* #f0f0f0 - light gray */
+  --color-secondary-foreground: oklch(0.2 0 0);
 
-  --color-muted: oklch(0.94 0.005 85);
-  --color-muted-foreground: oklch(0.45 0.01 260);
-  /* Accessible for light mode - passes WCAG AA */
+  --color-muted: oklch(0.96 0 0);
+  /* #f5f5f5 */
+  --color-muted-foreground: oklch(0.4 0 0);
+  /* ~#666666 - good contrast on light */
 
-  --color-accent: oklch(0.93 0.008 85);
-  /* Subtle warm accent */
-  --color-accent-foreground: oklch(0.22 0.01 260);
+  --color-accent: oklch(0.94 0 0);
+  /* #eeeeee - subtle accent */
+  --color-accent-foreground: oklch(0.13 0 0);
 
-  --color-destructive: oklch(0.55 0.18 25);
-  --color-destructive-foreground: oklch(0.99 0 0);
+  --color-destructive: oklch(0.55 0.2 25);
+  --color-destructive-foreground: oklch(0.98 0 0);
 
-  --color-border: oklch(0.9 0.008 85);
-  /* Warm visible border */
-  --color-input: oklch(0.92 0.005 85);
-  --color-ring: oklch(0.25 0.01 260 / 0.25);
+  --color-border: oklch(0 0 0 / 0.1);
+  /* black/10 - subtle borders */
+  --color-input: oklch(0.96 0 0);
+  --color-ring: oklch(0 0 0 / 0.15);
 
-  --color-sidebar-background: oklch(0.97 0.005 85 / 0.95);
-  --color-sidebar-foreground: oklch(0.3 0.01 260);
-  /* Good contrast on light sidebar */
-  --color-sidebar-primary: oklch(0.25 0.01 260);
-  --color-sidebar-primary-foreground: oklch(0.99 0.003 85);
-  --color-sidebar-accent: oklch(0.93 0.005 85);
-  --color-sidebar-accent-foreground: oklch(0.22 0.01 260);
-  --color-sidebar-border: oklch(0.9 0.008 85);
+  --color-sidebar-background: oklch(0.98 0 0);
+  --color-sidebar-foreground: oklch(0.3 0 0);
+  --color-sidebar-primary: oklch(0.13 0 0);
+  --color-sidebar-primary-foreground: oklch(0.98 0 0);
+  --color-sidebar-accent: oklch(0.94 0 0);
+  --color-sidebar-accent-foreground: oklch(0.13 0 0);
+  --color-sidebar-border: oklch(0 0 0 / 0.1);
+}
+
+/* OLED Dark mode - true black for OLED screens */
+.oled-dark {
+  --color-background: oklch(0 0 0);
+  /* Pure black */
+  --color-foreground: oklch(0.98 0 0);
+
+  --color-card: oklch(0.08 0 0);
+  /* Very subtle elevation */
+  --color-card-foreground: oklch(0.98 0 0);
+
+  --color-popover: oklch(0.06 0 0 / 0.98);
+  --color-popover-foreground: oklch(0.98 0 0);
+
+  --color-primary: oklch(0.98 0 0);
+  --color-primary-foreground: oklch(0 0 0);
+
+  --color-secondary: oklch(0.1 0 0);
+  --color-secondary-foreground: oklch(0.98 0 0);
+
+  --color-muted: oklch(0.08 0 0);
+  --color-muted-foreground: oklch(0.6 0 0);
+
+  --color-accent: oklch(0.12 0 0);
+  --color-accent-foreground: oklch(0.98 0 0);
+
+  --color-destructive: oklch(0.55 0.2 25);
+  --color-destructive-foreground: oklch(0.98 0 0);
+
+  --color-border: oklch(1 0 0 / 0.08);
+  /* Very subtle borders */
+  --color-input: oklch(0.08 0 0);
+  --color-ring: oklch(1 0 0 / 0.15);
+
+  --color-sidebar-background: oklch(0 0 0);
+  --color-sidebar-foreground: oklch(0.7 0 0);
+  --color-sidebar-primary: oklch(0.98 0 0);
+  --color-sidebar-primary-foreground: oklch(0 0 0);
+  --color-sidebar-accent: oklch(0.1 0 0);
+  --color-sidebar-accent-foreground: oklch(0.98 0 0);
+  --color-sidebar-border: oklch(1 0 0 / 0.08);
+  --color-sidebar-ring: oklch(1 0 0 / 0.15);
 }
 
 @layer base {
@@ -171,13 +222,15 @@
 @layer utilities {
   /* Pressable / Interactive Element Utility - Apple-style micro-interactions */
   .pressable {
-    @apply cursor-pointer select-none transition-all duration-200 ease-[cubic-bezier(0.32,0.72,0,1)];
+    @apply cursor-pointer select-none transition-all duration-200;
+    transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
     @apply hover:bg-white/[0.04];
     @apply active:scale-[0.97] active:opacity-80;
   }
 
   .pressable-scale {
-    @apply cursor-pointer select-none transition-transform duration-200 ease-[cubic-bezier(0.32,0.72,0,1)];
+    @apply cursor-pointer select-none transition-transform duration-200;
+    transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
     @apply hover:scale-[1.02];
     @apply active:scale-[0.97];
   }
@@ -188,19 +241,19 @@
     @apply active:opacity-50;
   }
 
-  /* Glassmorphism Utilities - refined for Apple aesthetic */
+  /* Glassmorphism Utilities - refined for Apple aesthetic (increased opacity for better visibility) */
   .glass-panel {
-    @apply bg-white/[0.04] backdrop-blur-2xl border border-white/[0.06] shadow-2xl;
+    @apply bg-white/[0.08] backdrop-blur-2xl border border-white/[0.12] shadow-2xl;
   }
 
   .glass-button {
-    @apply bg-white/[0.04] border border-white/[0.08] backdrop-blur-xl transition-all duration-200 ease-out cursor-pointer select-none;
-    @apply hover:bg-white/[0.08];
-    @apply active:bg-white/[0.04] active:scale-[0.97];
+    @apply bg-white/[0.08] border border-white/[0.15] backdrop-blur-xl transition-all duration-200 ease-out cursor-pointer select-none;
+    @apply hover:bg-white/[0.15];
+    @apply active:bg-white/[0.08] active:scale-[0.97];
   }
 
   .glass-input {
-    @apply bg-white/[0.04] border-white/[0.08] focus:border-white/[0.16] focus:ring-white/[0.08] backdrop-blur-xl transition-all duration-200;
+    @apply bg-white/[0.08] border-white/[0.15] focus:border-white/[0.25] focus:ring-white/[0.12] backdrop-blur-xl transition-all duration-200;
   }
 
   /* Glow Effects */
@@ -228,7 +281,7 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Custom scrollbar for chat containers - minimal Apple-style */
+  /* Custom scrollbar for chat containers - minimal style */
   .chat-scrollbar::-webkit-scrollbar {
     width: 8px;
   }
@@ -238,20 +291,20 @@
   }
 
   .chat-scrollbar::-webkit-scrollbar-thumb {
-    background: oklch(0.3 0.004 260 / 0.4);
+    background: oklch(1 0 0 / 0.15);
     border-radius: 4px;
     border: 2px solid transparent;
     background-clip: padding-box;
   }
 
   .chat-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.4 0.004 260 / 0.5);
+    background: oklch(1 0 0 / 0.25);
     background-clip: padding-box;
   }
 
   .chat-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: oklch(0.3 0.004 260 / 0.4) transparent;
+    scrollbar-color: oklch(1 0 0 / 0.15) transparent;
   }
 
   /* Animations */
@@ -262,9 +315,23 @@
   .animate-fade-in {
     animation: fadeIn 0.3s ease-out forwards;
   }
+
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
 }
 
 /* Keyframes */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
 @keyframes enter {
   0% {
     opacity: 0;
@@ -606,14 +673,14 @@
 
 /* Base code styling */
 .hljs {
-  color: oklch(0.9 0.01 90);
+  color: oklch(0.9 0 0);
   background: transparent;
 }
 
 /* Comments - muted but readable */
 .hljs-comment,
 .hljs-quote {
-  color: oklch(0.55 0.02 260);
+  color: oklch(0.5 0 0);
   font-style: italic;
 }
 
@@ -663,7 +730,7 @@
 /* Operators, punctuation */
 .hljs-operator,
 .hljs-punctuation {
-  color: oklch(0.75 0.02 260);
+  color: oklch(0.75 0 0);
 }
 
 /* Meta, annotations */
@@ -688,7 +755,7 @@
 /* Selection within code */
 .hljs::selection,
 .hljs *::selection {
-  background: oklch(0.4 0.02 260);
+  background: oklch(0.4 0 0);
 }
 
 /* Emphasis */
@@ -718,17 +785,17 @@
 
 /* Params - slightly muted */
 .hljs-params {
-  color: oklch(0.85 0.01 90);
+  color: oklch(0.85 0 0);
 }
 
 /* Light mode overrides for syntax highlighting */
 .light .hljs {
-  color: oklch(0.3 0.01 260);
+  color: oklch(0.2 0 0);
 }
 
 .light .hljs-comment,
 .light .hljs-quote {
-  color: oklch(0.5 0.02 260);
+  color: oklch(0.45 0 0);
   font-style: italic;
 }
 
@@ -770,7 +837,7 @@
 
 .light .hljs-operator,
 .light .hljs-punctuation {
-  color: oklch(0.4 0.02 260);
+  color: oklch(0.35 0 0);
 }
 
 .light .hljs-meta,
@@ -791,7 +858,7 @@
 
 .light .hljs::selection,
 .light .hljs *::selection {
-  background: oklch(0.85 0.02 260);
+  background: oklch(0.85 0 0);
 }
 
 .light .hljs-regexp {
@@ -803,5 +870,5 @@
 }
 
 .light .hljs-params {
-  color: oklch(0.35 0.01 260);
+  color: oklch(0.25 0 0);
 }

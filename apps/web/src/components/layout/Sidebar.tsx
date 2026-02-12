@@ -363,13 +363,13 @@ export function Sidebar() {
       >
         {/* Content */}
         <div className="flex flex-col h-full">
-          {/* Header */}
-          <header className="flex items-center justify-between px-4 h-14">
+          {/* Header - OpenWebUI style */}
+          <header className="flex items-center justify-between px-4 h-14 border-b border-white/[0.08]">
             <Link to="/app" className="flex items-center gap-2.5 group">
-              <div className="w-7 h-7 rounded-[10px] overflow-hidden shadow-sm ring-1 ring-white/10">
-                <OneraLogo size={28} />
+              <div className="w-8 h-8 rounded-full overflow-hidden">
+                <OneraLogo size={32} />
               </div>
-              <span className="font-semibold text-[15px] text-sidebar-foreground tracking-[-0.01em]">
+              <span className="font-medium text-base text-white tracking-tight">
                 Onera
               </span>
             </Link>
@@ -378,7 +378,7 @@ export function Sidebar() {
               <TooltipTrigger asChild>
                 <button
                   onClick={toggleSidebar}
-                  className="p-1.5 -mr-1 rounded-lg text-muted-foreground hover:text-sidebar-foreground hover:bg-foreground/[0.06] active:scale-[0.94] transition-all duration-200 ease-out"
+                  className="p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/[0.08] transition-colors"
                 >
                   <PanelLeftClose className="h-4 w-4" />
                 </button>
@@ -389,75 +389,74 @@ export function Sidebar() {
             </Tooltip>
           </header>
 
-          {/* Navigation Menu */}
-          <div className="px-2.5 space-y-0.5">
+          {/* Navigation Menu - OpenWebUI style, tighter spacing */}
+          <div className="px-3 py-1">
+            {/* New Chat */}
+            <Link
+              to="/app"
+              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-white/[0.08] transition-colors text-white hover:text-white group"
+            >
+              <Plus className="h-4 w-4" />
+              <span className="text-sm">New Chat</span>
+            </Link>
+
             {/* Search */}
             <button
               onClick={() => setSearchModalOpen(true)}
-              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-foreground/[0.06] active:scale-[0.98] active:bg-foreground/10 transition-all duration-200 ease-out text-sidebar-foreground/90 group"
+              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-white/[0.08] transition-colors text-white hover:text-white group"
             >
-              <div className="w-7 h-7 rounded-lg bg-foreground/[0.06] flex items-center justify-center group-hover:bg-foreground/10 transition-colors">
-                <Search className="h-3.5 w-3.5 text-muted-foreground group-hover:text-sidebar-foreground transition-colors" />
-              </div>
-              <span className="text-[13px] font-medium">Search</span>
+              <Search className="h-4 w-4" />
+              <span className="text-sm">Search</span>
             </button>
 
             {/* Notes */}
             <Link
               to="/app/notes"
-              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-foreground/[0.06] active:scale-[0.98] active:bg-foreground/10 transition-all duration-200 ease-out text-sidebar-foreground/90 group"
+              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-white/[0.08] transition-colors text-white hover:text-white group"
             >
-              <div className="w-7 h-7 rounded-lg bg-foreground/[0.06] flex items-center justify-center group-hover:bg-foreground/10 transition-colors">
-                <FileText className="h-3.5 w-3.5 text-muted-foreground group-hover:text-sidebar-foreground transition-colors" />
-              </div>
-              <span className="text-[13px] font-medium">Notes</span>
+              <FileText className="h-4 w-4" />
+              <span className="text-sm">Notes</span>
             </Link>
 
             {/* Admin */}
             {isAdmin && (
               <Link
                 to="/app/admin"
-                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-foreground/[0.06] active:scale-[0.98] active:bg-foreground/10 transition-all duration-200 ease-out text-sidebar-foreground/90 group"
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-white/[0.08] transition-colors text-white hover:text-white group"
               >
-                <div className="w-7 h-7 rounded-lg bg-foreground/[0.06] flex items-center justify-center group-hover:bg-foreground/10 transition-colors">
-                  <Shield className="h-3.5 w-3.5 text-muted-foreground group-hover:text-sidebar-foreground transition-colors" />
-                </div>
-                <span className="text-[13px] font-medium">Admin</span>
+                <Shield className="h-4 w-4" />
+                <span className="text-sm">Admin</span>
               </Link>
             )}
           </div>
 
-          {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden px-2.5 mt-2">
+          {/* Scrollable Content - OpenWebUI style */}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 mt-3">
             <div className="pb-4">
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-16 gap-3">
-                  <Spinner size="lg" className="text-muted-foreground/50" />
-                  <span className="text-[11px] text-muted-foreground/60">
-                    Loading...
-                  </span>
+                  <Spinner size="lg" className="text-white/50" />
+                  <span className="text-xs text-white/60">Loading...</span>
                 </div>
               ) : chats.length === 0 && foldersWithState.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-                  <div className="w-12 h-12 rounded-2xl bg-foreground/[0.06] flex items-center justify-center mb-3">
-                    <MessageSquare className="w-5 h-5 text-muted-foreground" />
-                  </div>
-                  <p className="text-[13px] font-medium text-sidebar-foreground/80 mb-1">
+                  <MessageSquare className="w-8 h-8 text-white/30 mb-3" />
+                  <p className="text-sm text-white/70 mb-1">
                     No conversations yet
                   </p>
-                  <p className="text-[11px] text-muted-foreground/60">
+                  <p className="text-xs text-white/50">
                     Start a new chat to begin
                   </p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {/* Folders Section - Always show header */}
+                  {/* Folders Section - OpenWebUI style */}
                   <Collapsible
                     open={foldersExpanded}
                     onOpenChange={setFoldersExpanded}
                   >
-                    <div className="flex items-center justify-between pr-0.5">
-                      <CollapsibleTrigger className="flex items-center gap-1.5 px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50 hover:text-muted-foreground/70 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <CollapsibleTrigger className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-white/70 hover:text-white transition-colors">
                         <ChevronRight
                           className={cn(
                             "h-3 w-3 transition-transform duration-200",
@@ -470,7 +469,7 @@ export function Sidebar() {
                         <TooltipTrigger asChild>
                           <button
                             onClick={handleNewFolder}
-                            className="p-1.5 rounded-lg text-muted-foreground hover:text-sidebar-foreground hover:bg-foreground/[0.06] active:scale-90 transition-all duration-200"
+                            className="p-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/[0.08] transition-colors"
                           >
                             <Plus className="h-3.5 w-3.5" />
                           </button>
@@ -484,7 +483,7 @@ export function Sidebar() {
                     <CollapsibleContent className="space-y-0.5 mt-1">
                       {foldersWithState.length === 0 ? (
                         <div className="py-2 px-3 ml-5">
-                          <p className="text-[11px] text-muted-foreground/50 italic">
+                          <p className="text-xs text-white/50 italic">
                             No folders yet
                           </p>
                         </div>
@@ -509,7 +508,7 @@ export function Sidebar() {
                             >
                               {folderChats.length === 0 ? (
                                 <div className="py-1.5 px-3 ml-5">
-                                  <p className="text-[11px] text-muted-foreground italic">
+                                  <p className="text-xs text-white/50 italic">
                                     Empty
                                   </p>
                                 </div>
@@ -540,12 +539,12 @@ export function Sidebar() {
                     </CollapsibleContent>
                   </Collapsible>
 
-                  {/* Chats Section */}
+                  {/* Chats Section - OpenWebUI style */}
                   <Collapsible
                     open={chatsExpanded}
                     onOpenChange={setChatsExpanded}
                   >
-                    <CollapsibleTrigger className="flex items-center gap-1.5 px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50 hover:text-muted-foreground/70 transition-colors w-full">
+                    <CollapsibleTrigger className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-white/70 hover:text-white transition-colors w-full">
                       <ChevronRight
                         className={cn(
                           "h-3 w-3 transition-transform duration-200",
@@ -558,9 +557,9 @@ export function Sidebar() {
                     <CollapsibleContent className="mt-1">
                       {/* Pinned Section */}
                       {pinnedChats.length > 0 && (
-                        <div className="mb-3">
-                          <div className="flex items-center gap-1.5 px-2 py-1 text-[11px] font-medium text-muted-foreground/60">
-                            <Pin className="h-2.5 w-2.5" />
+                        <div className="mb-2">
+                          <div className="flex items-center gap-1.5 px-2 py-1 text-xs text-white/60">
+                            <Pin className="h-3 w-3" />
                             <span>Pinned</span>
                           </div>
                           <div className="space-y-0.5 mt-1">
@@ -581,11 +580,11 @@ export function Sidebar() {
                         </div>
                       )}
 
-                      {/* Date Groups */}
+                      {/* Date Groups - OpenWebUI style */}
                       {Array.from(groupedChats.entries()).map(
                         ([group, groupChats]) => (
                           <div key={group} className="mt-3">
-                            <div className="px-2 py-1 text-[11px] font-medium text-muted-foreground/60">
+                            <div className="px-2 py-1 text-xs text-white/60">
                               {DATE_GROUP_LABELS[group as DateGroup]}
                             </div>
                             <div className="space-y-0.5 mt-1">

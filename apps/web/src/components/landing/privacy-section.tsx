@@ -7,7 +7,10 @@ import { Link } from "@tanstack/react-router";
 
 export function PrivacySection() {
   return (
-    <section id="security" className="py-20 sm:py-32 px-4 border-t border-neutral-100 dark:border-neutral-800/50">
+    <section
+      id="security"
+      className="py-20 sm:py-32 px-4 border-t border-neutral-100 dark:border-neutral-700"
+    >
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Text Content */}
@@ -19,22 +22,26 @@ export function PrivacySection() {
             className="order-2 lg:order-1"
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-5 text-neutral-900 dark:text-white">
-              Locked away.{" "}
-              <br className="hidden sm:block" />
-              <span className="text-neutral-400 dark:text-neutral-500">
+              Locked away. <br className="hidden sm:block" />
+              <span className="text-neutral-400 dark:text-neutral-300">
                 Not just locked up.
               </span>
             </h2>
 
-            <p className="text-lg text-neutral-500 dark:text-neutral-400 mb-8 leading-relaxed">
-              Your conversations are processed inside protected hardware — a locked room that even we can't enter. Combined with encryption, your data is protected at every step.
+            <p className="text-lg text-neutral-500 dark:text-neutral-300 mb-8 leading-relaxed">
+              Your conversations are processed inside protected hardware — a
+              locked room that even we can't enter. Combined with encryption,
+              your data is protected at every step.
             </p>
 
             <ul className="space-y-4 mb-10">
               {[
                 { icon: Cpu, text: "Processed in protected hardware enclaves" },
                 { icon: Eye, text: "Even we can't see your conversations" },
-                { icon: Fingerprint, text: "Your browser verifies every connection" },
+                {
+                  icon: Fingerprint,
+                  text: "Your browser verifies every connection",
+                },
                 { icon: Lock, text: "Chat history encrypted with your key" },
               ].map((item, i) => (
                 <li key={i} className="flex items-center gap-3">

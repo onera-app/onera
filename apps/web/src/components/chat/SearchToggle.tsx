@@ -3,10 +3,14 @@
  * Per-message toggle for web search functionality
  */
 
-import { memo } from 'react';
-import { Globe, Loader2, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { memo } from "react";
+import { Globe, Loader2, Check, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,11 +18,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
-import { useToolsStore, SEARCH_PROVIDERS } from '@/stores/toolsStore';
-import { hasSearchCapability, getAvailableProviders } from '@/lib/search';
-import type { SearchProvider } from '@onera/types';
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import { useToolsStore, SEARCH_PROVIDERS } from "@/stores/toolsStore";
+import { hasSearchCapability, getAvailableProviders } from "@/lib/search";
+import type { SearchProvider } from "@onera/types";
 
 interface SearchToggleProps {
   enabled: boolean;
@@ -51,9 +55,9 @@ export const SearchToggle = memo(function SearchToggle({
             variant="ghost"
             size="icon"
             disabled
-            className="h-9 w-9 text-muted-foreground"
+            className="h-8 w-8 text-white/30 rounded-lg"
           >
-            <Globe className="h-5 w-5" />
+            <Sparkles className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
@@ -67,7 +71,7 @@ export const SearchToggle = memo(function SearchToggle({
   const providerName =
     SEARCH_PROVIDERS.find((p) => p.id === currentProvider)?.name ||
     currentProvider ||
-    'Search';
+    "Search";
 
   // Simple toggle if only one provider or no provider selection needed
   if (availableProviders.length <= 1 || !onProviderChange) {
@@ -80,22 +84,24 @@ export const SearchToggle = memo(function SearchToggle({
             size="icon"
             disabled={disabled || isSearching}
             className={cn(
-              'h-9 w-9',
+              "h-8 w-8 rounded-lg",
               enabled
-                ? 'text-primary bg-primary/10 hover:bg-primary/20'
-                : 'text-muted-foreground hover:text-foreground'
+                ? "text-white bg-white/[0.12] hover:bg-white/[0.18]"
+                : "text-white/70 hover:text-white hover:bg-white/[0.08]",
             )}
             onClick={() => onToggle(!enabled)}
           >
             {isSearching ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Globe className="h-5 w-5" />
+              <Sparkles className="h-4 w-4" />
             )}
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          {enabled ? `Web search enabled (${providerName})` : 'Enable web search'}
+          {enabled
+            ? `Web search enabled (${providerName})`
+            : "Enable web search"}
         </TooltipContent>
       </Tooltip>
     );
@@ -113,22 +119,22 @@ export const SearchToggle = memo(function SearchToggle({
               size="icon"
               disabled={disabled || isSearching}
               className={cn(
-                'h-9 w-9',
+                "h-8 w-8 rounded-lg",
                 enabled
-                  ? 'text-primary bg-primary/10 hover:bg-primary/20'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? "text-white bg-white/[0.12] hover:bg-white/[0.18]"
+                  : "text-white/70 hover:text-white hover:bg-white/[0.08]",
               )}
             >
               {isSearching ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Globe className="h-5 w-5" />
+                <Sparkles className="h-4 w-4" />
               )}
             </Button>
           </DropdownMenuTrigger>
         </TooltipTrigger>
         <TooltipContent>
-          {enabled ? `Web search: ${providerName}` : 'Web search'}
+          {enabled ? `Web search: ${providerName}` : "Web search"}
         </TooltipContent>
       </Tooltip>
 
@@ -140,7 +146,7 @@ export const SearchToggle = memo(function SearchToggle({
           onClick={() => onToggle(!enabled)}
           className="flex items-center justify-between"
         >
-          <span>{enabled ? 'Disable' : 'Enable'} search</span>
+          <span>{enabled ? "Disable" : "Enable"} search</span>
           {enabled && <Check className="h-4 w-4 ml-2" />}
         </DropdownMenuItem>
 
@@ -186,14 +192,14 @@ export function SearchBadge({
   return (
     <div
       className={cn(
-        'inline-flex items-center gap-1.5 px-2 py-1 rounded-full',
-        'bg-primary/10 text-primary text-xs',
-        className
+        "inline-flex items-center gap-1.5 px-2 py-1 rounded-full",
+        "bg-primary/10 text-primary text-xs",
+        className,
       )}
     >
       <Globe className="h-3 w-3" />
       <span>
-        {resultCount} result{resultCount !== 1 ? 's' : ''} via {provider}
+        {resultCount} result{resultCount !== 1 ? "s" : ""} via {provider}
       </span>
     </div>
   );

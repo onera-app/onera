@@ -133,7 +133,7 @@ export const ChatItem = memo(function ChatItem({
             if (e.key === "Escape") handleCancelEdit();
           }}
           onBlur={handleCancelEdit}
-          className="w-full h-9 px-3 rounded-xl bg-foreground/10 text-[13px] text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20 transition-all duration-200"
+          className="w-full h-9 px-3 rounded-lg bg-white/10 text-sm text-white focus:outline-none focus:ring-1 focus:ring-white/20 transition-colors"
         />
       </div>
     );
@@ -143,8 +143,8 @@ export const ChatItem = memo(function ChatItem({
     <>
       <div
         className={cn(
-          "relative group transition-all duration-200 ease-out",
-          isDragging && "opacity-40 scale-[0.97]",
+          "relative group transition-colors",
+          isDragging && "opacity-40",
         )}
         draggable
         onDragStart={handleDragStart}
@@ -155,15 +155,15 @@ export const ChatItem = memo(function ChatItem({
           params={{ chatId: id }}
           search={{ pending: false }}
           className={cn(
-            "relative flex items-center w-full h-9 px-3 rounded-xl text-[13px] transition-all duration-200 ease-out overflow-hidden",
+            "relative flex items-center w-full h-9 px-2.5 rounded-lg text-sm transition-colors overflow-hidden",
             isActive
-              ? "bg-foreground/10 text-sidebar-foreground"
-              : "text-muted-foreground hover:text-sidebar-foreground hover:bg-foreground/[0.06] active:scale-[0.98]",
+              ? "bg-white/[0.12] text-white"
+              : "text-white/90 hover:text-white hover:bg-white/[0.08]",
           )}
         >
           {/* Lock indicator */}
           {isLocked && (
-            <Lock className="w-3 h-3 mr-2 flex-shrink-0 text-muted-foreground/50" />
+            <Lock className="w-3.5 h-3.5 mr-2 flex-shrink-0 text-white/50" />
           )}
 
           {/* Title container */}
@@ -177,25 +177,21 @@ export const ChatItem = memo(function ChatItem({
           </div>
         </Link>
 
-        {/* Menu trigger - overlays on fade area, shows on hover or when active */}
+        {/* Menu trigger - OpenWebUI style */}
         <div
           className={cn(
-            "absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center",
+            "absolute right-2 top-1/2 -translate-y-1/2 flex items-center",
             isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100",
-            "transition-opacity duration-200",
+            "transition-opacity duration-150",
           )}
         >
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className={cn(
-                  "p-1 rounded-lg transition-all duration-200",
-                  "text-muted-foreground hover:text-sidebar-foreground hover:bg-foreground/10",
-                  "active:scale-90",
-                )}
+                className="p-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/[0.1] transition-colors"
                 onClick={(e) => e.preventDefault()}
               >
-                <MoreHorizontal className="h-3.5 w-3.5" />
+                <MoreHorizontal className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44">

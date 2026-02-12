@@ -47,10 +47,10 @@ const faqs = [
 
 export function FAQSection() {
   return (
-    <section id="faq" className="py-24 px-4 bg-white dark:bg-[#0a0a0a]">
+    <section id="faq" className="py-24 px-4 bg-white dark:bg-background">
       <div className="max-w-[800px] mx-auto">
         <div className="text-center mb-16">
-          <p className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 mb-4 tracking-widest uppercase">
+          <p className="text-xs font-semibold text-neutral-500 dark:text-neutral-300 mb-4 tracking-widest uppercase">
             Questions? We've got answers.
           </p>
           <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-neutral-900 dark:text-white mb-6">
@@ -64,13 +64,13 @@ export function FAQSection() {
               <AccordionItem
                 key={index}
                 value={`item-${index}`}
-                className="border-b border-neutral-200 dark:border-neutral-800 px-0"
+                className="border-b border-neutral-200 dark:border-neutral-700 px-0"
               >
                 <div className="py-2">
                   <AccordionTrigger className="text-left text-xl font-medium py-6 hover:no-underline text-neutral-900 dark:text-white transition-colors [&>svg]:size-5 [&>svg]:text-neutral-400">
                     {faq.question}
                   </AccordionTrigger>
-                  <AccordionContent className="text-neutral-500 dark:text-neutral-400 pb-6 text-lg leading-relaxed max-w-2xl">
+                  <AccordionContent className="text-neutral-500 dark:text-neutral-300 pb-6 text-lg leading-relaxed max-w-2xl">
                     {faq.answer}
                   </AccordionContent>
                 </div>
@@ -78,7 +78,7 @@ export function FAQSection() {
             ))}
           </Accordion>
 
-          <p className="mt-16 text-center text-sm text-neutral-500 dark:text-neutral-400">
+          <p className="mt-16 text-center text-sm text-neutral-500 dark:text-neutral-300">
             Still have questions?{" "}
             <a
               href="mailto:hello@onera.ai"

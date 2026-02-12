@@ -75,7 +75,7 @@ export function AuthPage() {
   const isButtonLoading = isLoading || loadingProvider !== null;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-white dark:bg-[#0a0a0a] selection:bg-neutral-900 selection:text-white dark:selection:bg-white dark:selection:text-neutral-900">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-white dark:bg-background selection:bg-neutral-900 selection:text-white dark:selection:bg-white dark:selection:text-neutral-900">
       <div className="w-full max-w-[360px] relative z-10 flex flex-col items-center text-center">
         {/* Logo */}
         <div className="mb-10">
@@ -128,7 +128,7 @@ export function AuthPage() {
         </div>
 
         {/* Footer */}
-        <p className="mt-12 text-xs text-neutral-400 dark:text-neutral-500 max-w-xs mx-auto leading-relaxed">
+        <p className="mt-12 text-xs text-neutral-400 dark:text-neutral-400 max-w-xs mx-auto leading-relaxed">
           By continuing, you agree to our{" "}
           <Link
             to="/terms"
