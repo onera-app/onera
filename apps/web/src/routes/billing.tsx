@@ -25,6 +25,12 @@ export function BillingPage() {
 
   const currentPlan = subData?.plan;
   const currentSubscription = subData?.subscription;
+  const freePlan = plans.find((plan) => plan.id === "free");
+  const resolvedCurrentPlan =
+    (currentPlan ? plans.find((plan) => plan.id === currentPlan.id) : null) ??
+    currentPlan ??
+    freePlan ??
+    null;
   const isLoading = loadingSubscription || loadingUsage;
   const hasError = subscriptionError || usageError;
   const isProcessing = createCheckout.isPending || changePlan.isPending;
@@ -38,17 +44,32 @@ export function BillingPage() {
       day: "numeric",
     });
 
-  const features = [
-    "Private inference",
-    "BYOK inference",
-    "Storage quotas",
-    "End-to-end encryption",
-  ];
   const CONTACT_US_URL = "https://github.com/onera-app/onera";
   const featureBenefitLabels: Record<string, string> = {
     prioritySupport: "Priority support",
     priorityQueue: "Priority inference queue",
   };
+  const includedFeatures = resolvedCurrentPlan
+    ? [
+        resolvedCurrentPlan.inferenceRequestsLimit === -1
+          ? "Unlimited private requests"
+          : `${resolvedCurrentPlan.inferenceRequestsLimit.toLocaleString()} private requests/mo`,
+        resolvedCurrentPlan.byokInferenceRequestsLimit === -1
+          ? "Unlimited BYOK requests"
+          : `${resolvedCurrentPlan.byokInferenceRequestsLimit.toLocaleString()} BYOK requests/mo`,
+        resolvedCurrentPlan.storageLimitMb === -1
+          ? "Unlimited storage"
+          : resolvedCurrentPlan.storageLimitMb >= 1000
+            ? `${(resolvedCurrentPlan.storageLimitMb / 1000).toFixed(
+                resolvedCurrentPlan.storageLimitMb % 1000 === 0 ? 0 : 1,
+              )} GB storage`
+            : `${resolvedCurrentPlan.storageLimitMb} MB storage`,
+        "End-to-end encryption",
+        ...Object.entries(resolvedCurrentPlan.features ?? {})
+          .filter(([key, enabled]) => Boolean(enabled) && featureBenefitLabels[key])
+          .map(([key]) => featureBenefitLabels[key]),
+      ]
+    : ["End-to-end encryption"];
 
   const handleSelectPlan = async (planId: string): Promise<void> => {
     if (planId === "team") {
@@ -56,8 +77,8 @@ export function BillingPage() {
       return;
     }
 
-    if (!currentPlan) return;
-    if (planId === currentPlan.id) return;
+    const activePlanId = resolvedCurrentPlan?.id ?? "free";
+    if (planId === activePlanId) return;
 
     try {
       if (currentSubscription?.dodoSubscriptionId) {
@@ -163,11 +184,11 @@ export function BillingPage() {
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-foreground">
-                    {currentPlan?.name || "Free"}
+                    {resolvedCurrentPlan?.name || "Free"}
                   </h2>
                   <p className="text-sm text-muted-foreground">
-                    {currentPlan?.description ||
-                      "Encrypted AI chat with all features"}
+                    {resolvedCurrentPlan?.description ||
+                      "Encrypted AI chat to get started"}
                   </p>
                   {currentPeriodEndDate && (
                     <p className="text-xs text-muted-foreground mt-1">
@@ -182,24 +203,24 @@ export function BillingPage() {
             </div>
 
             {/* Usage Meters */}
-            {usage && currentPlan && (
+            {usage && resolvedCurrentPlan && (
               <div className="space-y-4">
                 <UsageMeter
                   label="Private Inference"
                   used={usage.inferenceRequests}
-                  limit={currentPlan.inferenceRequestsLimit}
+                  limit={resolvedCurrentPlan.inferenceRequestsLimit}
                   unit="requests"
                 />
                 <UsageMeter
                   label="BYOK Inference"
                   used={usage.byokInferenceRequests}
-                  limit={currentPlan.byokInferenceRequestsLimit}
+                  limit={resolvedCurrentPlan.byokInferenceRequestsLimit}
                   unit="requests"
                 />
                 <UsageMeter
                   label="Storage"
                   used={usage.storageMb}
-                  limit={currentPlan.storageLimitMb}
+                  limit={resolvedCurrentPlan.storageLimitMb}
                   unit="MB"
                 />
               </div>
@@ -214,7 +235,7 @@ export function BillingPage() {
           </h3>
           <div className="rounded-2xl chat-surface p-5 sm:p-6 border border-[var(--chat-divider)]">
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6">
-              {features.map((feature) => (
+              {includedFeatures.map((feature) => (
                 <li
                   key={feature}
                   className="flex items-center gap-2.5 text-sm text-foreground/80"
@@ -284,8 +305,8 @@ export function BillingPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {plans.map((plan) => {
-                const isCurrent = currentPlan?.id === plan.id;
-                const currentTier = currentPlan?.tier ?? 0;
+                const isCurrent = (resolvedCurrentPlan?.id ?? "free") === plan.id;
+                const currentTier = resolvedCurrentPlan?.tier ?? 0;
                 const isDowngrade = plan.tier < currentTier;
                 const extraBenefits = Object.entries(plan.features ?? {})
                   .filter(([key, enabled]) => Boolean(enabled) && featureBenefitLabels[key])
