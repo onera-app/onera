@@ -1,0 +1,204 @@
+---
+title: Production Hardening
+description: TLS/HTTPS, reverse proxy, security headers, and domain setup
+---
+
+# Production Hardening
+
+This guide covers what you need to run Onera securely in production with a custom domain and TLS.
+
+## TLS / HTTPS
+
+Onera does not terminate TLS itself. You need a reverse proxy in front of the Docker Compose stack to handle HTTPS. The two most common options are **Caddy** (automatic HTTPS) and **Nginx** (manual certificate management or with Certbot).
+
+### Option A: Caddy (Recommended)
+
+Caddy automatically obtains and renews Let's Encrypt certificates.
+
+Create a `Caddyfile` in your project root:
+
+```
+chat.example.com {
+    # Frontend and API are both served through the web container
+    reverse_proxy localhost:5173
+}
+```
+
+Run Caddy alongside Docker Compose:
+
+```bash
+# Install Caddy (https://caddyserver.com/docs/install)
+# Then run it:
+sudo caddy start --config Caddyfile
+```
+
+Or add Caddy as a service in a `docker-compose.override.yml`:
+
+```yaml
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    networks:
+      - onera-network
+
+volumes:
+  caddy_data:
+```
+
+### Option B: Nginx + Certbot
+
+If you prefer Nginx with Let's Encrypt via Certbot:
+
+```bash
+# Install Certbot
+sudo apt install certbot python3-certbot-nginx
+
+# Obtain certificate
+sudo certbot --nginx -d chat.example.com
+```
+
+Example Nginx site config (`/etc/nginx/sites-available/onera`):
+
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name chat.example.com;
+
+    ssl_certificate /etc/letsencrypt/live/chat.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/chat.example.com/privkey.pem;
+
+    # Proxy everything to the Onera web container
+    location / {
+        proxy_pass http://127.0.0.1:5173;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # WebSocket support for Socket.IO
+    location /socket.io/ {
+        proxy_pass http://127.0.0.1:5173;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 86400s;
+    }
+}
+
+server {
+    listen 80;
+    server_name chat.example.com;
+    return 301 https://$host$request_uri;
+}
+```
+
+## Environment Configuration for Production
+
+Update your `.env` to use the production domain:
+
+```bash
+FRONTEND_URL=https://chat.example.com
+VITE_API_URL=https://chat.example.com
+VITE_WS_URL=https://chat.example.com
+
+WEBAUTHN_RP_ID=example.com
+WEBAUTHN_RP_NAME=Onera
+WEBAUTHN_ORIGIN=https://chat.example.com
+```
+
+After changing `VITE_*` variables, rebuild the web container:
+
+```bash
+docker compose build web
+docker compose up -d
+```
+
+## Security Headers
+
+The built-in Nginx configuration (`apps/web/nginx.conf`) already includes these security headers:
+
+- `X-Frame-Options: SAMEORIGIN` — prevents clickjacking
+- `X-Content-Type-Options: nosniff` — prevents MIME sniffing
+- `X-XSS-Protection: 1; mode=block` — XSS filter
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy: camera=(), microphone=(), geolocation=()`
+
+If you add an external reverse proxy (Caddy/Nginx), these headers will still be set by the inner Nginx container.
+
+## Firewall
+
+Only expose the ports you need:
+
+| Port | Service | Expose Publicly? |
+|------|---------|-----------------|
+| 80   | Reverse proxy (HTTP → HTTPS redirect) | Yes |
+| 443  | Reverse proxy (HTTPS) | Yes |
+| 5173 | Onera web container | No (only to reverse proxy) |
+| 3000 | Onera server container | No (internal only) |
+| 5432 | PostgreSQL | No (internal only) |
+
+If using an external reverse proxy, bind the Docker ports to localhost only:
+
+```yaml
+# In docker-compose.yml or docker-compose.override.yml
+services:
+  web:
+    ports:
+      - "127.0.0.1:5173:80"
+  server:
+    ports:
+      - "127.0.0.1:3000:3000"
+```
+
+## PostgreSQL Security
+
+The default Docker Compose setup runs PostgreSQL on an internal Docker network, which is not exposed to the host. For additional hardening:
+
+- Use a strong, randomly generated `POSTGRES_PASSWORD` (at least 32 characters)
+- If you use an external PostgreSQL instance, ensure it requires TLS connections
+- Restrict database access to the server container's network
+
+## CORS
+
+The server's CORS configuration reads from `FRONTEND_URL`. If you need to allow multiple origins (e.g. both `https://chat.example.com` and `https://www.chat.example.com`), set it as a comma-separated list:
+
+```bash
+FRONTEND_URL=https://chat.example.com,https://www.chat.example.com
+```
+
+## Rate Limiting
+
+The built-in configuration does not include rate limiting. If you're exposing Onera to the public internet, consider adding rate limiting at the reverse proxy level:
+
+**Caddy:**
+```
+chat.example.com {
+    rate_limit {remote.host} 100r/m
+    reverse_proxy localhost:5173
+}
+```
+
+**Nginx:**
+```nginx
+limit_req_zone $binary_remote_addr zone=onera:10m rate=10r/s;
+
+server {
+    location / {
+        limit_req zone=onera burst=20 nodelay;
+        proxy_pass http://127.0.0.1:5173;
+    }
+}
+```

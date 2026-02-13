@@ -1,0 +1,143 @@
+---
+title: Docker Compose Deployment
+description: Deploy Onera with Docker Compose
+---
+
+# Docker Compose Deployment
+
+The recommended way to self-host Onera is with Docker Compose. The provided `docker-compose.yml` runs three services: PostgreSQL, the backend server, and the web frontend.
+
+## Prerequisites
+
+- Docker Engine 20.10+ and Docker Compose v2+
+- A [Clerk](https://clerk.com) account (free tier works for small deployments)
+
+## Step 1: Clone and Configure
+
+```bash
+git clone https://github.com/onera-app/onera.git
+cd onera
+cp .env.example .env
+```
+
+Edit `.env` and set the required values:
+
+```bash
+# Required — generate a strong password
+POSTGRES_PASSWORD=your-secure-password-here
+
+# Required — from https://dashboard.clerk.com
+CLERK_SECRET_KEY=sk_live_...
+VITE_CLERK_PUBLISHABLE_KEY=pk_live_...
+
+# Set these to your domain in production
+FRONTEND_URL=https://chat.example.com
+VITE_API_URL=https://chat.example.com
+VITE_WS_URL=https://chat.example.com
+```
+
+See [Configuration](/docs/self-hosting/configuration) for all available environment variables.
+
+## Step 2: Start Services
+
+```bash
+docker compose up -d
+```
+
+This will:
+1. Start PostgreSQL and wait for it to be healthy
+2. Build and start the backend server (runs database migrations automatically)
+3. Build and start the web frontend with Nginx
+
+## Step 3: Verify
+
+Check that all services are running:
+
+```bash
+docker compose ps
+```
+
+All three containers should show `Up (healthy)`:
+
+```
+NAME             STATUS
+onera-postgres   Up (healthy)
+onera-server     Up (healthy)
+onera-web        Up (healthy)
+```
+
+Test the health endpoints:
+
+```bash
+# Backend health
+curl http://localhost:3000/health
+# → {"status":"ok","timestamp":"..."}
+
+# Frontend health
+curl http://localhost:5173/health
+# → healthy
+
+# Backend health via frontend proxy
+curl http://localhost:5173/api/health
+# → {"status":"ok","timestamp":"..."}
+```
+
+## Step 4: Access Onera
+
+Open `http://localhost:5173` in your browser. You should see the Onera login screen.
+
+## Updating
+
+To update to the latest version:
+
+```bash
+cd onera
+git pull
+docker compose build
+docker compose up -d
+```
+
+The server container runs database migrations automatically on startup, so schema changes are applied during the update.
+
+## Stopping
+
+```bash
+# Stop all services (data is preserved in the postgres_data volume)
+docker compose down
+
+# Stop and remove all data (destructive)
+docker compose down -v
+```
+
+## Resource Requirements
+
+The default `docker-compose.yml` includes resource limits:
+
+| Service    | Memory Limit | Memory Reserved |
+|------------|-------------|-----------------|
+| PostgreSQL | 256 MB      | 64 MB           |
+| Server     | 512 MB      | 128 MB          |
+| Web        | 128 MB      | 32 MB           |
+
+For larger deployments, adjust these in `docker-compose.yml` under `deploy.resources`.
+
+## Logs
+
+```bash
+# All services
+docker compose logs -f
+
+# Specific service
+docker compose logs -f server
+
+# Last 100 lines
+docker compose logs --tail 100 server
+```
+
+Logs are configured with a 10 MB max size and 3 rotated files per service.
+
+## Next Steps
+
+- [Configuration](/docs/self-hosting/configuration) — All environment variables and Clerk setup
+- [Production Hardening](/docs/self-hosting/production) — TLS, reverse proxy, and domain configuration
+- [Backup & Restore](/docs/self-hosting/backup-restore) — Database backup strategies

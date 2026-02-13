@@ -102,6 +102,8 @@ docker compose up -d
 
 The web client runs at `http://localhost:5173` and the API at `http://localhost:3000`.
 
+For production deployments with TLS, custom domains, and WebAuthn configuration, see the [Self-Hosting Guide](https://docs.onera.chat/docs/self-hosting).
+
 ## Environment Variables
 
 > See [`.env.example`](.env.example), [`apps/web/.env.example`](apps/web/.env.example), and [`apps/server/.env.example`](apps/server/.env.example) for all configuration options.
@@ -110,10 +112,13 @@ The web client runs at `http://localhost:5173` and the API at `http://localhost:
 |----------|----------|-------------|
 | `DATABASE_URL` | Root / Server | PostgreSQL connection string |
 | `CLERK_SECRET_KEY` | Server | Clerk secret key ([dashboard.clerk.com](https://dashboard.clerk.com)) |
-| `VITE_CLERK_PUBLISHABLE_KEY` | Web | Clerk publishable key |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Root / Web | Clerk publishable key |
 | `FRONTEND_URL` | Root / Server | Frontend URL for CORS |
 | `VITE_API_URL` | Root / Web | Backend API URL |
 | `VITE_WS_URL` | Root / Web | WebSocket URL |
+| `POSTGRES_PASSWORD` | Root (Docker) | PostgreSQL password for Docker Compose |
+| `WEBAUTHN_RP_ID` | Root / Server | Your domain for passkeys (e.g. `example.com`) |
+| `WEBAUTHN_ORIGIN` | Root / Server | Your full origin URL (e.g. `https://example.com`) |
 
 ## Project Structure
 

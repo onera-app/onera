@@ -1,0 +1,11 @@
+{
+  "title": "Self-Hosting",
+  "pages": [
+    "index",
+    "docker",
+    "configuration",
+    "production",
+    "monitoring",
+    "backup-restore"
+  ]
+}

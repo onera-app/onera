@@ -1,0 +1,152 @@
+---
+title: Monitoring
+description: Health checks, logging, and observability
+---
+
+# Monitoring
+
+Onera provides health check endpoints and structured logging for monitoring your self-hosted deployment.
+
+## Health Check Endpoints
+
+| Endpoint | Container | Response |
+|----------|-----------|----------|
+| `GET /health` (port 3000) | Server | `{"status":"ok","timestamp":"..."}` |
+| `GET /health` (port 5173/80) | Web (Nginx) | `healthy` |
+| `GET /api/health` (port 5173/80) | Web → Server proxy | `{"status":"ok","timestamp":"..."}` |
+
+The `/api/health` endpoint on the web container proxies to the server's `/health` endpoint, so you can check both the frontend and backend from a single URL.
+
+### Docker Health Checks
+
+Both the server and web containers include built-in Docker health checks that run every 30 seconds. Check their status with:
+
+```bash
+docker compose ps
+```
+
+A healthy deployment shows all containers as `Up (healthy)`:
+
+```
+NAME             STATUS
+onera-postgres   Up (healthy)
+onera-server     Up (healthy)
+onera-web        Up (healthy)
+```
+
+### External Monitoring
+
+You can point any uptime monitoring service at your health endpoints:
+
+- **UptimeRobot** (free) — monitor `https://chat.example.com/api/health`
+- **Healthchecks.io** — cron-based monitoring with alerts
+- **Better Uptime**, **Pingdom**, **Datadog Synthetics** — commercial options
+
+Example cron-based health check:
+
+```bash
+# Add to crontab: check every 5 minutes, alert on failure
+*/5 * * * * curl -sf https://chat.example.com/api/health > /dev/null || echo "Onera is down" | mail -s "Alert" you@example.com
+```
+
+## Logging
+
+### Docker Compose Logs
+
+All services log to Docker's JSON file driver with rotation configured (10 MB max, 3 files):
+
+```bash
+# Follow all logs
+docker compose logs -f
+
+# Follow a specific service
+docker compose logs -f server
+
+# Last 100 lines from the server
+docker compose logs --tail 100 server
+
+# Logs since a specific time
+docker compose logs --since "2024-01-01T00:00:00" server
+```
+
+### Server Logs
+
+The server logs to stdout with the following events:
+
+- Startup messages (port, enabled features)
+- Database migration results
+- tRPC errors (no plaintext data is logged)
+
+### PostgreSQL Logs
+
+```bash
+docker compose logs -f postgres
+```
+
+PostgreSQL logs slow queries and connection events by default.
+
+### Log Aggregation
+
+For centralized logging, configure Docker's logging driver. For example, to send logs to a syslog server:
+
+```yaml
+# In docker-compose.override.yml
+services:
+  server:
+    logging:
+      driver: syslog
+      options:
+        syslog-address: "tcp://logserver:514"
+        tag: "onera-server"
+```
+
+Or use [Loki](https://grafana.com/oss/loki/) with the Docker plugin for a Grafana-based setup.
+
+## Database Monitoring
+
+### Connection Check
+
+```bash
+docker compose exec postgres pg_isready -U onera -d onera
+```
+
+### Database Size
+
+```bash
+docker compose exec postgres psql -U onera -d onera -c "SELECT pg_size_pretty(pg_database_size('onera'));"
+```
+
+### Active Connections
+
+```bash
+docker compose exec postgres psql -U onera -d onera -c "SELECT count(*) FROM pg_stat_activity WHERE datname = 'onera';"
+```
+
+## Alerts
+
+### Simple Script-Based Alerts
+
+Create a monitoring script that checks all services:
+
+```bash
+#!/bin/bash
+# monitor.sh — run via cron every 5 minutes
+
+HEALTH_URL="https://chat.example.com/api/health"
+ALERT_EMAIL="admin@example.com"
+
+response=$(curl -sf -o /dev/null -w "%{http_code}" "$HEALTH_URL" 2>/dev/null)
+
+if [ "$response" != "200" ]; then
+    echo "Onera health check failed (HTTP $response)" | \
+        mail -s "[ALERT] Onera is down" "$ALERT_EMAIL"
+fi
+```
+
+### Docker Event Monitoring
+
+Monitor container restarts, which may indicate crashes:
+
+```bash
+docker events --filter type=container --filter event=die --filter label=com.docker.compose.project=onera
+```

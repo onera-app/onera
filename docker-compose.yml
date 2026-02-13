@@ -38,12 +38,15 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      # PostgreSQL connection string
       DATABASE_URL: postgresql://onera:${POSTGRES_PASSWORD}@postgres:5432/onera
       CLERK_SECRET_KEY: ${CLERK_SECRET_KEY:?CLERK_SECRET_KEY is required}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
       PORT: 3000
       NODE_ENV: production
+      # WebAuthn / Passkeys (required for non-localhost domains)
+      WEBAUTHN_RP_ID: ${WEBAUTHN_RP_ID:-localhost}
+      WEBAUTHN_RP_NAME: ${WEBAUTHN_RP_NAME:-Onera}
+      WEBAUTHN_ORIGIN: ${WEBAUTHN_ORIGIN:-http://localhost:5173}
     ports:
       - "3000:3000"
     networks:
@@ -67,6 +70,7 @@ services:
       args:
         VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
         VITE_WS_URL: ${VITE_WS_URL:-http://localhost:3000}
+        VITE_CLERK_PUBLISHABLE_KEY: ${VITE_CLERK_PUBLISHABLE_KEY:?VITE_CLERK_PUBLISHABLE_KEY is required}
     container_name: onera-web
     restart: unless-stopped
     depends_on:

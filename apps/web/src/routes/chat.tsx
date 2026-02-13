@@ -1256,7 +1256,7 @@ export function ChatPage() {
 
       {/* Input area - Floating at bottom */}
       <div className="absolute bottom-0 left-0 right-0 z-20 px-4 sm:px-6 bg-[color:var(--chat-shell-bg)]/92 backdrop-blur-md pb-5 sm:pb-6 pt-4 sm:pt-5 w-full">
-        <div className="max-w-7xl mx-auto w-full">
+        <div className="max-w-6xl mx-auto w-full">
           <MessageInput
             onSend={handleSendMessage}
             onStop={stop}

@@ -1,0 +1,73 @@
+---
+title: Self-Hosting Onera
+description: Deploy Onera on your own infrastructure
+---
+
+# Self-Hosting Onera
+
+Onera is fully open source and designed to be self-hosted. The server operates as a zero-knowledge encrypted blob store — it never sees plaintext data — so you maintain complete control over your infrastructure without compromising the security model.
+
+## Prerequisites
+
+- A server with at least 1 vCPU and 1 GB RAM (2 vCPU / 2 GB recommended)
+- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) v2+
+- A domain name with DNS pointing to your server (for production)
+- A [Clerk](https://clerk.com) account for authentication
+- PostgreSQL 16+ (included in Docker Compose)
+
+## Deployment Options
+
+<Cards>
+  <Card title="Docker Compose" href="/docs/self-hosting/docker" description="Recommended. Deploy with a single command using the provided docker-compose.yml." />
+  <Card title="Configuration" href="/docs/self-hosting/configuration" description="Environment variables, Clerk setup, and WebAuthn configuration." />
+  <Card title="Production Hardening" href="/docs/self-hosting/production" description="TLS/HTTPS, reverse proxy, security headers, and domain setup." />
+  <Card title="Monitoring" href="/docs/self-hosting/monitoring" description="Health checks, logging, and observability." />
+  <Card title="Backup & Restore" href="/docs/self-hosting/backup-restore" description="Database backups, disaster recovery, and data migration." />
+</Cards>
+
+## Quick Start
+
+If you want to get running immediately:
+
+```bash
+# Clone the repository
+git clone https://github.com/onera-app/onera.git
+cd onera
+
+# Configure environment
+cp .env.example .env
+# Edit .env — you must set POSTGRES_PASSWORD, CLERK_SECRET_KEY,
+# and VITE_CLERK_PUBLISHABLE_KEY at minimum
+
+# Start all services
+docker compose up -d
+```
+
+The web client will be available at `http://localhost:5173` and the API at `http://localhost:3000`.
+
+See [Docker Compose Deployment](/docs/self-hosting/docker) for the full walkthrough and [Configuration](/docs/self-hosting/configuration) for all available options.
+
+## Architecture
+
+When self-hosted, Onera runs as three containers:
+
+```
+┌─────────────────────────────────────────────────┐
+│                  Your Server                    │
+│                                                 │
+│  ┌───────────┐  ┌───────────┐  ┌────────────┐  │
+│  │  Web      │  │  Server   │  │ PostgreSQL │  │
+│  │  (Nginx)  │──│  (Hono)   │──│  16        │  │
+│  │  :5173    │  │  :3000    │  │  :5432     │  │
+│  └───────────┘  └───────────┘  └────────────┘  │
+│       │                                         │
+└───────┼─────────────────────────────────────────┘
+        │
+   Users connect here
+```
+
+- **Web** — Nginx serves the React SPA and proxies API/WebSocket requests to the server
+- **Server** — Hono + tRPC backend that stores and retrieves encrypted blobs
+- **PostgreSQL** — Stores encrypted data, user metadata, and auth shares
+
+All chat content is encrypted client-side before reaching the server. The server never has access to plaintext messages, API keys, or notes.

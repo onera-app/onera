@@ -28,9 +28,6 @@ FROM oven/bun:alpine AS runner
 ENV NODE_ENV=production
 WORKDIR /app
 
-# Create data directory for SQLite database
-RUN mkdir -p /app/data && chown -R bun:bun /app/data
-
 # Copy built artifacts
 COPY --from=builder /app/apps/server/dist ./dist
 COPY --from=builder /app/apps/server/drizzle ./drizzle

@@ -1,0 +1,117 @@
+---
+title: Configuration
+description: Environment variables, Clerk setup, and WebAuthn configuration
+---
+
+# Configuration
+
+Onera is configured through environment variables. There are three `.env.example` files in the repository:
+
+- **Root** `.env.example` — Shared variables used by Docker Compose
+- **`apps/server/.env.example`** — Backend-specific variables
+- **`apps/web/.env.example`** — Frontend-specific variables
+
+When deploying with Docker Compose, all variables are set in the root `.env` file.
+
+## Required Variables
+
+These must be set for Onera to function:
+
+| Variable | Description |
+|----------|-------------|
+| `POSTGRES_PASSWORD` | Password for the PostgreSQL database (Docker Compose only) |
+| `DATABASE_URL` | PostgreSQL connection string. Set automatically in Docker Compose. For non-Docker setups: `postgresql://user:pass@host:5432/onera` |
+| `CLERK_SECRET_KEY` | Clerk secret key from [dashboard.clerk.com](https://dashboard.clerk.com) |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Clerk publishable key from [dashboard.clerk.com](https://dashboard.clerk.com) |
+
+## URL Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `FRONTEND_URL` | `http://localhost:5173` | Frontend origin, used for CORS. Comma-separated for multiple origins. |
+| `VITE_API_URL` | `http://localhost:3000` | Backend API URL, baked into the frontend at build time |
+| `VITE_WS_URL` | `http://localhost:3000` | WebSocket URL, baked into the frontend at build time |
+
+For production with a reverse proxy, all three should be your public domain (e.g. `https://chat.example.com`).
+
+## WebAuthn / Passkeys
+
+WebAuthn (passkeys) are domain-bound. If you deploy to a custom domain, you **must** configure these or passkey registration and authentication will fail:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `WEBAUTHN_RP_ID` | `localhost` | Your domain without protocol or port (e.g. `example.com`) |
+| `WEBAUTHN_RP_NAME` | `Onera` | Display name shown during passkey prompts |
+| `WEBAUTHN_ORIGIN` | `http://localhost:5173` | Full origin URL including protocol (e.g. `https://chat.example.com`) |
+
+**Important:** The `WEBAUTHN_RP_ID` must match the domain users access Onera from. If you use a subdomain like `chat.example.com`, set `WEBAUTHN_RP_ID` to either `chat.example.com` or `example.com` (the latter allows passkeys to work across subdomains).
+
+## Optional Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `3000` | Backend server port |
+| `NODE_ENV` | `production` | Set automatically in Docker |
+| `DODO_PAYMENTS_API_KEY` | — | Dodo Payments API key (for billing) |
+| `DODO_PAYMENTS_WEBHOOK_SECRET` | — | Dodo Payments webhook secret |
+
+## Clerk Setup
+
+Onera uses [Clerk](https://clerk.com) for authentication. To set up Clerk:
+
+1. Create a Clerk application at [dashboard.clerk.com](https://dashboard.clerk.com)
+2. In the Clerk dashboard, go to **API Keys**
+3. Copy the **Publishable key** (`pk_live_...` or `pk_test_...`) → set as `VITE_CLERK_PUBLISHABLE_KEY`
+4. Copy the **Secret key** (`sk_live_...` or `sk_test_...`) → set as `CLERK_SECRET_KEY`
+
+### Clerk Configuration
+
+In your Clerk dashboard, configure:
+
+- **Sign-in methods**: Enable Passkeys and any social providers you want
+- **Allowed origins**: Add your deployment URL (e.g. `https://chat.example.com`)
+- **Webhooks** (optional): Not required for basic functionality
+
+### Test vs Live Keys
+
+- Use `pk_test_` / `sk_test_` keys for development and testing
+- Use `pk_live_` / `sk_live_` keys for production deployments
+
+## Build-Time vs Runtime Variables
+
+Some variables are baked into the frontend at build time (during `docker compose build`):
+
+| Variable | When Applied |
+|----------|-------------|
+| `VITE_API_URL` | Build time |
+| `VITE_WS_URL` | Build time |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Build time |
+| All other variables | Runtime |
+
+If you change a `VITE_*` variable, you must rebuild the web container:
+
+```bash
+docker compose build web
+docker compose up -d web
+```
+
+## Example Production `.env`
+
+```bash
+# Database
+POSTGRES_PASSWORD=a-very-strong-random-password
+
+# Clerk
+CLERK_SECRET_KEY=sk_live_abc123...
+VITE_CLERK_PUBLISHABLE_KEY=pk_live_xyz789...
+
+# URLs (all pointing to your public domain)
+FRONTEND_URL=https://chat.example.com
+VITE_API_URL=https://chat.example.com
+VITE_WS_URL=https://chat.example.com
+
+# WebAuthn (required for passkeys on your domain)
+WEBAUTHN_RP_ID=example.com
+WEBAUTHN_RP_NAME=Onera
+WEBAUTHN_ORIGIN=https://chat.example.com
+```

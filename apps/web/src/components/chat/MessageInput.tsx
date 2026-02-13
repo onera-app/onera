@@ -56,7 +56,7 @@ export const MessageInput = memo(function MessageInput({
   // Use rich text input if enabled
   if (useRichTextInput) {
     return (
-      <div className="w-full max-w-7xl mx-auto">
+      <div className="w-full max-w-6xl mx-auto">
         <RichTextMessageInput
           onSend={onSend}
           disabled={disabled}
@@ -70,7 +70,7 @@ export const MessageInput = memo(function MessageInput({
 
   // Fallback to simple textarea input
   return (
-    <div className="w-full max-w-7xl mx-auto">
+    <div className="w-full max-w-6xl mx-auto">
       <SimpleMessageInput
         onSend={onSend}
         disabled={disabled}

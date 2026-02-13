@@ -452,7 +452,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
   const canSend = editorHasContent || readyAttachments.length > 0;
 
   return (
-    <div className="relative w-full max-w-3xl mx-auto">
+    <div className="relative w-full max-w-6xl mx-auto">
       {/* Main input container */}
       <div
         ref={containerRef}

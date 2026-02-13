@@ -1,0 +1,162 @@
+---
+title: Backup & Restore
+description: Database backups, disaster recovery, and data migration
+---
+
+# Backup & Restore
+
+Onera stores all data in PostgreSQL. While the data is end-to-end encrypted (the server never sees plaintext), losing the database means users lose their encrypted conversations, notes, and settings. Regular backups are essential.
+
+## What Gets Backed Up
+
+| Data | Location | Encrypted? |
+|------|----------|-----------|
+| Chat messages | PostgreSQL | Yes (E2EE) |
+| Notes | PostgreSQL | Yes (E2EE) |
+| User metadata | PostgreSQL | No (emails, Clerk IDs) |
+| Auth shares | PostgreSQL | Yes (key shares) |
+| Encrypted API keys | PostgreSQL | Yes (E2EE) |
+
+The PostgreSQL data volume (`postgres_data`) contains everything.
+
+## Database Backup
+
+### Manual Backup
+
+```bash
+# Create a compressed backup
+docker compose exec postgres pg_dump -U onera -d onera | gzip > onera-backup-$(date +%Y%m%d-%H%M%S).sql.gz
+```
+
+### Automated Daily Backups
+
+Create a backup script:
+
+```bash
+#!/bin/bash
+# backup.sh
+
+BACKUP_DIR="/var/backups/onera"
+RETENTION_DAYS=30
+
+mkdir -p "$BACKUP_DIR"
+
+# Create backup
+docker compose exec -T postgres pg_dump -U onera -d onera | \
+    gzip > "$BACKUP_DIR/onera-$(date +%Y%m%d-%H%M%S).sql.gz"
+
+# Remove backups older than retention period
+find "$BACKUP_DIR" -name "onera-*.sql.gz" -mtime +"$RETENTION_DAYS" -delete
+
+echo "Backup completed: $(ls -lh "$BACKUP_DIR"/onera-*.sql.gz | tail -1)"
+```
+
+Add to crontab for daily backups at 3 AM:
+
+```bash
+crontab -e
+# Add:
+0 3 * * * /path/to/backup.sh >> /var/log/onera-backup.log 2>&1
+```
+
+### Off-Site Backups
+
+Copy backups to an off-site location for disaster recovery:
+
+```bash
+# To S3-compatible storage
+aws s3 cp "$BACKUP_DIR/onera-latest.sql.gz" s3://your-bucket/onera-backups/
+
+# To a remote server
+rsync -avz "$BACKUP_DIR/" backup-server:/backups/onera/
+```
+
+## Restore
+
+### From a Backup File
+
+```bash
+# Stop the server (keep PostgreSQL running)
+docker compose stop server web
+
+# Drop and recreate the database
+docker compose exec postgres psql -U onera -c "DROP DATABASE IF EXISTS onera;"
+docker compose exec postgres psql -U onera -c "CREATE DATABASE onera;"
+
+# Restore the backup
+gunzip -c onera-backup-20240101-030000.sql.gz | \
+    docker compose exec -T postgres psql -U onera -d onera
+
+# Restart all services (migrations will run automatically)
+docker compose up -d
+```
+
+### Volume-Level Backup and Restore
+
+For faster backups of large databases, you can back up the Docker volume directly:
+
+```bash
+# Stop PostgreSQL
+docker compose stop postgres
+
+# Backup the volume
+docker run --rm -v onera_postgres_data:/data -v $(pwd):/backup \
+    alpine tar czf /backup/postgres-volume-backup.tar.gz -C /data .
+
+# Restart
+docker compose up -d
+```
+
+To restore:
+
+```bash
+# Stop PostgreSQL
+docker compose stop postgres
+
+# Restore the volume
+docker run --rm -v onera_postgres_data:/data -v $(pwd):/backup \
+    alpine sh -c "rm -rf /data/* && tar xzf /backup/postgres-volume-backup.tar.gz -C /data"
+
+# Restart
+docker compose up -d
+```
+
+## Migration Between Servers
+
+To move your Onera installation to a new server:
+
+1. **On the old server:** Create a backup
+```bash
+docker compose exec -T postgres pg_dump -U onera -d onera | gzip > onera-migration.sql.gz
+```
+
+2. **Transfer the backup** to the new server
+```bash
+scp onera-migration.sql.gz newserver:/path/to/onera/
+```
+
+3. **On the new server:** Set up Onera, then restore
+```bash
+git clone https://github.com/onera-app/onera.git
+cd onera
+cp .env.example .env
+# Edit .env with the same values as the old server
+
+# Start only PostgreSQL first
+docker compose up -d postgres
+
+# Wait for it to be healthy, then restore
+gunzip -c onera-migration.sql.gz | \
+    docker compose exec -T postgres psql -U onera -d onera
+
+# Start all services
+docker compose up -d
+```
+
+## Recovery Considerations
+
+Because Onera uses end-to-end encryption:
+
+- **Database loss without backup:** Users lose all encrypted data. Recovery phrases allow users to re-derive their encryption keys, but conversation history stored on the server is gone.
+- **Database restored from backup:** Users can continue seamlessly. All encrypted data is restored. No key re-derivation needed.
+- **Encryption keys are never in the database in plaintext.** Backups are safe to store without additional encryption, though encrypting backups at rest is still good practice.
