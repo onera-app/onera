@@ -1,4 +1,4 @@
-import { Link, useParams } from "@tanstack/react-router";
+import { Link, useLocation, useParams } from "@tanstack/react-router";
 import { useMemo, useState, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import { useUser } from "@clerk/clerk-react";
@@ -82,6 +82,7 @@ interface FolderWithState {
 
 export function Sidebar() {
   const params = useParams({ strict: false });
+  const location = useLocation();
   const currentChatId = (params as { chatId?: string }).chatId;
   const { sidebarOpen, sidebarWidth, toggleSidebar, openSettingsModal } =
     useUIStore();
@@ -316,15 +317,18 @@ export function Sidebar() {
     [],
   );
 
+  const hasInlineMenuTrigger =
+    location.pathname === "/app" || location.pathname.startsWith("/app/c/");
+
   return (
     <TooltipProvider delayDuration={300}>
       {/* Open sidebar button - visible when sidebar is closed */}
-      {!sidebarOpen && (
+      {!sidebarOpen && !hasInlineMenuTrigger && (
         <Tooltip>
           <TooltipTrigger asChild>
             <button
               onClick={toggleSidebar}
-              className="fixed top-3.5 left-3.5 z-50 p-2 rounded-xl bg-background/80 backdrop-blur-xl border border-border shadow-sm text-muted-foreground hover:text-foreground hover:bg-foreground/[0.06] active:scale-[0.97] transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="fixed top-3.5 left-3.5 z-50 p-2 rounded-xl chat-surface text-muted-foreground hover:text-foreground hover:bg-foreground/[0.06] active:scale-[0.97] transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               aria-label="Open sidebar"
             >
               <PanelLeftOpen className="h-[18px] w-[18px]" />
@@ -348,7 +352,7 @@ export function Sidebar() {
       <nav
         id="sidebar"
         className={cn(
-          "flex flex-col h-full transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] flex-shrink-0 bg-sidebar-background",
+          "flex flex-col h-full transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] flex-shrink-0 bg-sidebar-background/95 backdrop-blur-xl border-r border-[var(--chat-divider)]",
           // Mobile: fixed overlay that slides in from left
           "fixed md:relative z-40 md:z-20",
           // Width handling
@@ -364,7 +368,7 @@ export function Sidebar() {
         {/* Content */}
         <div className="flex flex-col h-full">
           {/* Header - OpenWebUI style */}
-          <header className="flex items-center justify-between px-4 h-14 border-b border-sidebar-border">
+          <header className="flex items-center justify-between px-4 h-14 border-b border-[var(--chat-divider)]">
             <Link to="/app" className="flex items-center gap-2.5 group">
               <div className="w-8 h-8 rounded-full overflow-hidden">
                 <OneraLogo size={32} />

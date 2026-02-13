@@ -14,55 +14,54 @@
    * Based on #0a0a0a background, #fafafa foreground
    */
 
-  --color-background: oklch(0.07 0 0);
-  /* #0a0a0a - near black */
+  --color-background: oklch(0.14 0 0);
+  /* softened dark base */
   --color-foreground: oklch(0.98 0 0);
   /* #fafafa - off-white */
 
-  --color-card: oklch(0.13 0 0);
-  /* #1a1a1a - elevated surface */
+  --color-card: oklch(0.19 0 0);
+  /* elevated surface */
   --color-card-foreground: oklch(0.98 0 0);
 
-  --color-popover: oklch(0.11 0 0 / 0.98);
-  /* Slightly darker popover */
+  --color-popover: oklch(0.2 0 0 / 0.98);
+  /* slightly elevated popover */
   --color-popover-foreground: oklch(0.98 0 0);
 
   --color-primary: oklch(0.98 0 0);
   /* White as Primary */
-  --color-primary-foreground: oklch(0.07 0 0);
+  --color-primary-foreground: oklch(0.14 0 0);
   /* Dark text on Primary */
 
-  --color-secondary: oklch(0.18 0 0);
-  /* #2a2a2a - secondary surfaces */
+  --color-secondary: oklch(0.24 0 0);
+  /* secondary surfaces */
   --color-secondary-foreground: oklch(0.98 0 0);
 
-  --color-muted: oklch(0.15 0 0);
-  /* #222222 */
-  --color-muted-foreground: oklch(0.7 0 0);
+  --color-muted: oklch(0.22 0 0);
+  --color-muted-foreground: oklch(0.72 0 0);
   /* Brighter muted text for better readability */
 
-  --color-accent: oklch(0.2 0 0);
-  /* #303030 - hover/interaction state */
+  --color-accent: oklch(0.27 0 0);
+  /* hover/interaction state */
   --color-accent-foreground: oklch(0.98 0 0);
 
   --color-destructive: oklch(0.55 0.2 25);
   /* Red for errors */
   --color-destructive-foreground: oklch(0.98 0 0);
 
-  --color-border: oklch(1 0 0 / 0.1);
+  --color-border: oklch(1 0 0 / 0.12);
   /* white/10 - subtle borders */
-  --color-input: oklch(0.15 0 0);
+  --color-input: oklch(0.22 0 0);
   --color-ring: oklch(1 0 0 / 0.4);
   /* white/40 - accessible focus rings */
 
   /* Sidebar - darker than main content like OpenWebUI */
-  --color-sidebar-background: oklch(0.04 0 0);
-  /* Near black like OpenWebUI sidebar */
+  --color-sidebar-background: oklch(0.12 0 0);
+  /* softened sidebar */
   --color-sidebar-foreground: oklch(0.9 0 0);
   /* Brighter text for better visibility */
   --color-sidebar-primary: oklch(1 0 0);
   --color-sidebar-primary-foreground: oklch(0.04 0 0);
-  --color-sidebar-accent: oklch(0.12 0 0);
+  --color-sidebar-accent: oklch(0.2 0 0);
   /* Hover state */
   --color-sidebar-accent-foreground: oklch(1 0 0);
   --color-sidebar-border: oklch(1 0 0 / 0.1);
@@ -83,6 +82,15 @@
   --color-status-success-text: oklch(0.82 0.12 150);
   --color-status-warning-text: oklch(0.86 0.13 85);
   --color-status-error-text: oklch(0.8 0.14 25);
+
+  /* Chat Surface Tokens - app shell unification */
+  --chat-shell-bg: oklch(0.15 0 0);
+  --chat-surface: oklch(0.2 0 0 / 0.88);
+  --chat-surface-elevated: oklch(0.24 0 0 / 0.94);
+  --chat-muted: oklch(0.3 0 0 / 0.68);
+  --chat-divider: oklch(1 0 0 / 0.14);
+  --chat-pill: oklch(0.28 0 0 / 0.82);
+  --chat-focus: oklch(1 0 0 / 0.28);
 
   /* Radius - Apple-style rounded corners */
   --radius: 0.875rem;
@@ -156,53 +164,68 @@
   --color-status-success-text: oklch(0.42 0.16 150);
   --color-status-warning-text: oklch(0.45 0.15 85);
   --color-status-error-text: oklch(0.45 0.17 25);
+
+  --chat-shell-bg: oklch(0.96 0 0);
+  --chat-surface: oklch(1 0 0 / 0.88);
+  --chat-surface-elevated: oklch(0.98 0 0 / 0.96);
+  --chat-muted: oklch(0.86 0 0 / 0.7);
+  --chat-divider: oklch(0 0 0 / 0.1);
+  --chat-pill: oklch(0.9 0 0 / 0.8);
+  --chat-focus: oklch(0 0 0 / 0.25);
 }
 
 /* OLED Dark mode - true black for OLED screens */
 .oled-dark {
-  --color-background: oklch(0 0 0);
-  /* Pure black */
+  --color-background: oklch(0.08 0 0);
+  /* still deep, less stark than pure black */
   --color-foreground: oklch(0.98 0 0);
 
-  --color-card: oklch(0.08 0 0);
-  /* Very subtle elevation */
+  --color-card: oklch(0.13 0 0);
   --color-card-foreground: oklch(0.98 0 0);
 
-  --color-popover: oklch(0.06 0 0 / 0.98);
+  --color-popover: oklch(0.12 0 0 / 0.98);
   --color-popover-foreground: oklch(0.98 0 0);
 
   --color-primary: oklch(0.98 0 0);
-  --color-primary-foreground: oklch(0 0 0);
+  --color-primary-foreground: oklch(0.08 0 0);
 
-  --color-secondary: oklch(0.1 0 0);
+  --color-secondary: oklch(0.16 0 0);
   --color-secondary-foreground: oklch(0.98 0 0);
 
-  --color-muted: oklch(0.08 0 0);
-  --color-muted-foreground: oklch(0.6 0 0);
+  --color-muted: oklch(0.15 0 0);
+  --color-muted-foreground: oklch(0.68 0 0);
 
-  --color-accent: oklch(0.12 0 0);
+  --color-accent: oklch(0.2 0 0);
   --color-accent-foreground: oklch(0.98 0 0);
 
   --color-destructive: oklch(0.55 0.2 25);
   --color-destructive-foreground: oklch(0.98 0 0);
 
-  --color-border: oklch(1 0 0 / 0.08);
+  --color-border: oklch(1 0 0 / 0.11);
   /* Very subtle borders */
-  --color-input: oklch(0.08 0 0);
+  --color-input: oklch(0.14 0 0);
   --color-ring: oklch(1 0 0 / 0.35);
 
-  --color-sidebar-background: oklch(0 0 0);
-  --color-sidebar-foreground: oklch(0.7 0 0);
+  --color-sidebar-background: oklch(0.07 0 0);
+  --color-sidebar-foreground: oklch(0.8 0 0);
   --color-sidebar-primary: oklch(0.98 0 0);
-  --color-sidebar-primary-foreground: oklch(0 0 0);
-  --color-sidebar-accent: oklch(0.1 0 0);
+  --color-sidebar-primary-foreground: oklch(0.08 0 0);
+  --color-sidebar-accent: oklch(0.16 0 0);
   --color-sidebar-accent-foreground: oklch(0.98 0 0);
-  --color-sidebar-border: oklch(1 0 0 / 0.08);
-  --color-sidebar-ring: oklch(1 0 0 / 0.15);
+  --color-sidebar-border: oklch(1 0 0 / 0.11);
+  --color-sidebar-ring: oklch(1 0 0 / 0.22);
 
   --color-status-success-text: oklch(0.78 0.12 150);
   --color-status-warning-text: oklch(0.82 0.13 85);
   --color-status-error-text: oklch(0.76 0.14 25);
+
+  --chat-shell-bg: oklch(0.08 0 0);
+  --chat-surface: oklch(0.14 0 0 / 0.9);
+  --chat-surface-elevated: oklch(0.18 0 0 / 0.94);
+  --chat-muted: oklch(0.24 0 0 / 0.66);
+  --chat-divider: oklch(1 0 0 / 0.11);
+  --chat-pill: oklch(0.23 0 0 / 0.8);
+  --chat-focus: oklch(1 0 0 / 0.24);
 }
 
 @layer base {
@@ -330,6 +353,28 @@
 
   .animate-marquee {
     animation: marquee 30s linear infinite;
+  }
+
+  .chat-surface {
+    background: var(--chat-surface);
+    border: 1px solid var(--chat-divider);
+    backdrop-filter: blur(18px);
+  }
+
+  .chat-surface-elevated {
+    background: var(--chat-surface-elevated);
+    border: 1px solid var(--chat-divider);
+    backdrop-filter: blur(20px);
+  }
+
+  .chat-pill {
+    background: var(--chat-pill);
+    border: 1px solid var(--chat-divider);
+    border-radius: 9999px;
+  }
+
+  .chat-soft-border {
+    border: 1px solid var(--chat-divider);
   }
 }
 

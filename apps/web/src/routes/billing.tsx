@@ -29,7 +29,10 @@ export function BillingPage() {
   ];
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div
+      className="h-full overflow-y-auto"
+      style={{ background: "var(--chat-shell-bg)" }}
+    >
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Header */}
         <header className="mb-8 sm:mb-10">
@@ -61,7 +64,7 @@ export function BillingPage() {
 
         {/* Current Plan Card */}
         <section className="mb-8">
-          <div className="rounded-2xl bg-muted/50 p-5 sm:p-6">
+          <div className="rounded-2xl chat-surface-elevated p-5 sm:p-6 border border-[var(--chat-divider)]">
             {/* Plan Header */}
             <div className="flex items-start justify-between gap-4 mb-6">
               <div className="flex items-center gap-3">
@@ -144,7 +147,7 @@ export function BillingPage() {
           <h3 className="text-[13px] font-medium text-muted-foreground mb-4 px-1">
             What's included
           </h3>
-          <div className="rounded-2xl bg-muted/50 p-5 sm:p-6">
+          <div className="rounded-2xl chat-surface p-5 sm:p-6 border border-[var(--chat-divider)]">
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6">
               {features.map((feature) => (
                 <li

@@ -140,7 +140,7 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
   if (step === 'select') {
     return (
       <Dialog open={open}>
-        <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ShieldCheck className="h-5 w-5 text-primary" />
@@ -201,7 +201,7 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
   if (step === 'passkey') {
     return (
       <Dialog open={open}>
-        <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Fingerprint className="h-5 w-5 text-primary" />
@@ -275,7 +275,7 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
   // Password setup step
   return (
     <Dialog open={open}>
-      <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+      <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <KeyRound className="h-5 w-5 text-primary" />

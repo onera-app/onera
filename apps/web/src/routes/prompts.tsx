@@ -46,10 +46,13 @@ export function PromptsPage() {
   };
 
   return (
-    <div className="flex h-full overflow-hidden">
+    <div
+      className="flex h-full overflow-hidden"
+      style={{ background: "var(--chat-shell-bg)" }}
+    >
       {/* Prompts List Sidebar */}
       <div className={cn(
-        'border-r border-border flex-shrink-0 transition-all duration-200',
+        'border-r border-[var(--chat-divider)] bg-[var(--chat-surface)] flex-shrink-0 transition-all duration-200',
         // Mobile: full width or hidden
         'w-full md:w-80',
         // Hide on mobile when prompt is selected or creating
@@ -71,7 +74,7 @@ export function PromptsPage() {
         {isCreating ? (
           <div className="h-full flex flex-col">
             {/* Mobile back button */}
-            <div className="md:hidden flex items-center gap-2 px-3 py-2 border-b border-border">
+            <div className="md:hidden sticky top-0 z-10 flex items-center gap-2 px-3 py-2 border-b border-[var(--chat-divider)] bg-[var(--chat-surface)]/95 backdrop-blur">
               <Button
                 variant="ghost"
                 size="sm"
@@ -94,7 +97,7 @@ export function PromptsPage() {
         ) : selectedPromptId ? (
           <div className="h-full flex flex-col">
             {/* Mobile back button */}
-            <div className="md:hidden flex items-center gap-2 px-3 py-2 border-b border-border">
+            <div className="md:hidden sticky top-0 z-10 flex items-center gap-2 px-3 py-2 border-b border-[var(--chat-divider)] bg-[var(--chat-surface)]/95 backdrop-blur">
               <Button
                 variant="ghost"
                 size="sm"

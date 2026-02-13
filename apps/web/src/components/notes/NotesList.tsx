@@ -74,9 +74,9 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
 
   return (
     <>
-      <div className="flex flex-col h-full bg-muted/30">
+      <div className="flex flex-col h-full bg-[var(--chat-surface)]">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border">
+        <div className="flex items-center justify-between px-4 py-3.5 border-b border-[var(--chat-divider)]">
           <h2 className="text-lg font-semibold">Notes</h2>
           <Button size="sm" onClick={handleCreateNote} disabled={createNote.isPending}>
             <Plus className="h-4 w-4 mr-1" />
@@ -85,12 +85,12 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
         </div>
 
         {/* Folder Filter */}
-        <div className="p-3 border-b border-border">
+        <div className="px-3 py-2.5 border-b border-[var(--chat-divider)]">
           <Select
             value={selectedFolderId || 'all'}
             onValueChange={(value) => setSelectedFolderId(value === 'all' ? undefined : value)}
           >
-            <SelectTrigger>
+            <SelectTrigger className="chat-surface border-[var(--chat-divider)] rounded-xl">
               <SelectValue placeholder="All Folders" />
             </SelectTrigger>
             <SelectContent>
@@ -105,7 +105,7 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
         </div>
 
         {/* Archive Toggle */}
-        <div className="px-4 py-3 border-b border-border">
+        <div className="px-4 py-2.5 border-b border-[var(--chat-divider)]">
           <div className="flex items-center space-x-2">
             <Checkbox
               id="show-archived"
@@ -137,7 +137,7 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
               description={showArchived ? undefined : 'Create one to get started'}
             />
           ) : (
-            <div className="divide-y divide-border">
+            <div className="divide-y divide-[var(--chat-divider)]">
               {notes.map((note) => (
                 <div
                   key={note.id}
@@ -145,8 +145,8 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
                   className={cn(
                     'p-4 cursor-pointer transition-colors group',
                     selectedNoteId === note.id
-                      ? 'bg-primary/10 border-l-2 border-l-primary'
-                      : 'hover:bg-muted/50'
+                      ? 'chat-pill border-l-2 border-l-[var(--chat-focus)]'
+                      : 'hover:bg-[var(--chat-muted)]'
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">

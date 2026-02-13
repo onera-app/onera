@@ -306,7 +306,7 @@ export const Messages = memo(function Messages({
     <div className="relative h-full">
       <div ref={containerRef} className="h-full overflow-y-auto chat-scrollbar">
         {/* Messages container */}
-        <div className="max-w-3xl mx-auto px-4 sm:px-5 md:px-6 pb-36 sm:pb-40 pt-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-5 md:px-6 pb-36 sm:pb-40 pt-20">
           <div className="space-y-5 sm:space-y-6 md:space-y-7">
             {messages.map((message, index) => {
               const textContent = getMessageText(message);

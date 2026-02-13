@@ -118,7 +118,7 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-full bg-background p-6">
+      <div className="flex flex-col h-full bg-[var(--chat-shell-bg)] p-6">
         <div className="space-y-4">
           <Skeleton className="h-8 w-1/3" />
           <Skeleton className="h-4 w-1/4" />
@@ -140,16 +140,17 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-[var(--chat-shell-bg)] p-3 sm:p-4">
+      <div className="flex flex-col h-full chat-surface-elevated border border-[var(--chat-divider)] rounded-2xl overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-        <div className="flex items-center gap-4 flex-1">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[var(--chat-divider)]">
+        <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
           {/* Folder selector */}
           <Select
             value={folderId || 'none'}
             onValueChange={handleFolderChange}
           >
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-40 chat-surface border-[var(--chat-divider)] rounded-xl">
               <SelectValue placeholder="No folder" />
             </SelectTrigger>
             <SelectContent>
@@ -163,7 +164,7 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
           </Select>
 
           {/* Last updated */}
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs text-muted-foreground truncate">
             Updated {dayjs(note.updatedAt).format('MMM D, YYYY h:mm A')}
           </span>
 
@@ -173,7 +174,7 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-end sm:self-auto">
           <Button
             size="sm"
             variant="ghost"
@@ -203,7 +204,7 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
       </div>
 
       {/* Title */}
-      <div className="px-6 py-4">
+      <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[var(--chat-divider)]">
         <Input
           type="text"
           value={title}
@@ -214,13 +215,14 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
       </div>
 
       {/* Content Editor */}
-      <div className="flex-1 px-6 pb-6 overflow-y-auto">
+      <div className="flex-1 px-4 sm:px-6 pb-4 sm:pb-6 overflow-y-auto">
         <RichTextEditor
           content={content}
           onChange={handleContentChange}
           placeholder="Start writing..."
           className="h-full"
         />
+      </div>
       </div>
     </div>
   );

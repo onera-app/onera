@@ -1208,7 +1208,7 @@ export function ChatPage() {
   }
 
   return (
-    <div className="relative flex flex-col h-full w-full min-w-0 bg-background overflow-hidden">
+    <div className="relative flex flex-col h-full w-full min-w-0 overflow-hidden">
       {/* Chat header - Absolute overlay */}
       <ChatNavbar chatId={chatId || ""}>{navbarChildren}</ChatNavbar>
 
@@ -1255,8 +1255,8 @@ export function ChatPage() {
       </div>
 
       {/* Input area - Floating at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 px-4 sm:px-6 bg-gradient-to-t from-background via-background/90 to-transparent pb-5 sm:pb-6 pt-10 sm:pt-12 w-full">
-        <div className="max-w-3xl mx-auto w-full">
+      <div className="absolute bottom-0 left-0 right-0 z-20 px-4 sm:px-6 bg-[color:var(--chat-shell-bg)]/92 backdrop-blur-md pb-5 sm:pb-6 pt-4 sm:pt-5 w-full">
+        <div className="max-w-5xl mx-auto w-full">
           <MessageInput
             onSend={handleSendMessage}
             onStop={stop}

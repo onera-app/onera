@@ -56,7 +56,7 @@ export const MessageInput = memo(function MessageInput({
   // Use rich text input if enabled
   if (useRichTextInput) {
     return (
-      <div className="w-full max-w-3xl mx-auto">
+      <div className="w-full max-w-5xl mx-auto">
         <RichTextMessageInput
           onSend={onSend}
           disabled={disabled}
@@ -70,7 +70,7 @@ export const MessageInput = memo(function MessageInput({
 
   // Fallback to simple textarea input
   return (
-    <div className="w-full max-w-3xl mx-auto">
+    <div className="w-full max-w-5xl mx-auto">
       <SimpleMessageInput
         onSend={onSend}
         disabled={disabled}
@@ -318,10 +318,8 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
       <div
         ref={containerRef}
         className={cn(
-          "relative rounded-2xl overflow-hidden transition-all duration-200",
-          "bg-card",
-          "border border-border",
-          isFocused && "border-ring",
+          "relative rounded-3xl overflow-hidden transition-all duration-200 chat-surface-elevated shadow-[0_10px_36px_rgba(28,28,30,0.14)]",
+          isFocused && "ring-2 ring-[var(--chat-focus)]",
           disabled && "opacity-50",
         )}
         onDragEnter={handleDragEnter}
@@ -374,7 +372,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
               onFilesSelected={handleFilesSelected}
               disabled={disabled || isStreaming}
             />
-            <div className="w-px h-5 bg-border mx-1" />
+            <div className="w-px h-5 bg-[var(--chat-divider)] mx-1" />
             <SearchToggle
               enabled={searchEnabled}
               onToggle={setSearchEnabled}
@@ -410,8 +408,8 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
                     className={cn(
                       "h-9 w-9 rounded-full transition-colors",
                       canSend
-                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                        : "bg-muted text-muted-foreground cursor-not-allowed",
+                        ? "bg-foreground text-background hover:bg-foreground/90"
+                        : "bg-[var(--chat-muted)] text-muted-foreground cursor-not-allowed",
                     )}
                   >
                     <ArrowUp className="h-4 w-4" strokeWidth={2.5} />

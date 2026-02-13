@@ -221,7 +221,7 @@ export function E2EEUnlockModal() {
   if (keySharesQuery.isLoading) {
     return (
       <Dialog open>
-        <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Lock className="h-5 w-5 text-primary" />
@@ -244,7 +244,7 @@ export function E2EEUnlockModal() {
   if (keySharesQuery.error || !keySharesQuery.data) {
     return (
       <Dialog open>
-        <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
@@ -275,7 +275,7 @@ export function E2EEUnlockModal() {
   if (unlockState === 'error') {
     return (
       <Dialog open>
-        <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
@@ -309,7 +309,7 @@ export function E2EEUnlockModal() {
   if (unlockState === 'unlocking') {
     return (
       <Dialog open>
-        <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Lock className="h-5 w-5 text-primary" />
@@ -351,7 +351,7 @@ export function E2EEUnlockModal() {
   if (currentView === 'options') {
     return (
       <Dialog open>
-        <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Lock className="h-5 w-5 text-primary" />
@@ -410,7 +410,7 @@ export function E2EEUnlockModal() {
   if (currentView === 'password') {
     return (
       <Dialog open>
-        <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <KeyRound className="h-5 w-5 text-primary" />
@@ -473,7 +473,7 @@ export function E2EEUnlockModal() {
   if (currentView === 'recovery') {
     return (
       <Dialog open>
-        <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Key className="h-5 w-5 text-primary" />
@@ -531,7 +531,7 @@ export function E2EEUnlockModal() {
   // Reset view
   return (
     <Dialog open>
-      <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+      <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Trash2 className="h-5 w-5 text-destructive" />

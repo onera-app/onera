@@ -82,16 +82,11 @@ export function AppLayout() {
     <TooltipProvider>
       <div
         className={cn(
-          "flex h-dvh w-full bg-background relative overflow-x-hidden overflow-y-hidden",
+          "flex h-dvh w-full relative overflow-x-hidden overflow-y-hidden",
           `chat-density-${chatDensity}`,
         )}
+        style={{ background: "var(--chat-shell-bg)" }}
       >
-        {/* Ambient Background Effects - Neutral */}
-        <div className="absolute inset-0 pointer-events-none z-0">
-          <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-white/5 blur-[120px]" />
-          <div className="absolute top-[40%] -right-[10%] w-[40%] h-[40%] rounded-full bg-white/5 blur-[100px]" />
-          <div className="absolute -bottom-[20%] left-[20%] w-[40%] h-[40%] rounded-full bg-black/5 blur-[100px]" />
-        </div>
         {/* Sidebar */}
         <Sidebar />
 

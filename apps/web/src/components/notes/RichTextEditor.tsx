@@ -48,11 +48,11 @@ export function RichTextEditor({
   }
 
   return (
-    <div className={cn('border border-border rounded-lg', className)}>
+    <div className={cn('relative border border-[var(--chat-divider)] rounded-xl chat-surface overflow-hidden', className)}>
       {/* Toolbar */}
       {editable && (
         <TooltipProvider>
-          <div className="flex flex-wrap gap-1 p-2 border-b border-border bg-muted/50 rounded-t-lg">
+          <div className="flex flex-wrap gap-1 p-2 border-b border-[var(--chat-divider)] bg-[var(--chat-muted)]">
             <ToolbarButton
               onClick={() => editor.chain().focus().toggleBold().run()}
               active={editor.isActive('bold')}

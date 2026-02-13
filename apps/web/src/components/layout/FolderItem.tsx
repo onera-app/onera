@@ -123,7 +123,7 @@ export function FolderItem({
       <Collapsible open={isExpanded} onOpenChange={onToggle}>
         <div
           className={cn(
-            'relative group rounded-lg transition-all duration-200',
+            'relative group rounded-xl transition-all duration-200',
             isDragOver && 'bg-sidebar-accent ring-1 ring-ring ring-inset'
           )}
           onDragOver={handleDragOver}
@@ -150,7 +150,7 @@ export function FolderItem({
             <CollapsibleTrigger asChild>
               <button
                 className={cn(
-                  'flex items-center gap-2 w-full py-2 px-2 rounded-lg text-left',
+                'flex items-center gap-2 w-full py-2 px-2.5 rounded-xl text-left',
                   'text-sidebar-foreground/75 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring'
                 )}
               >
@@ -171,7 +171,7 @@ export function FolderItem({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="p-1 rounded text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+                    className="p-1.5 rounded-xl text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <MoreHorizontal className="h-4 w-4" />

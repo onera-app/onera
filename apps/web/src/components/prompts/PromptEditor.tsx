@@ -96,7 +96,7 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
 
   if (isLoading && !isNew) {
     return (
-      <div className="flex flex-col h-full bg-background p-6">
+      <div className="flex flex-col h-full bg-[var(--chat-shell-bg)] p-6">
         <div className="space-y-4">
           <Skeleton className="h-8 w-1/3" />
           <Skeleton className="h-4 w-1/4" />
@@ -120,15 +120,16 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
   }
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-[var(--chat-shell-bg)] p-3 sm:p-4">
+      <div className="flex flex-col h-full chat-surface-elevated border border-[var(--chat-divider)] rounded-2xl overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-        <div className="flex items-center gap-4">
-          <h2 className="text-lg font-semibold">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[var(--chat-divider)]">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+          <h2 className="text-base sm:text-lg font-semibold">
             {isNew ? 'New Prompt' : 'Edit Prompt'}
           </h2>
           {!isNew && prompt && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground truncate">
               Updated {dayjs(prompt.updatedAt).format('MMM D, YYYY h:mm A')}
             </span>
           )}
@@ -137,7 +138,7 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-end sm:self-auto">
           {(isNew || onCancel) && (
             <Button
               size="sm"
@@ -159,7 +160,7 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
       </div>
 
       {/* Form */}
-      <div className="flex-1 p-6 overflow-y-auto space-y-6">
+      <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-6">
         {/* Name */}
         <div className="space-y-2">
           <Label htmlFor="name">
@@ -171,6 +172,7 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
             value={name}
             onChange={(e) => handleChange(setName)(e.target.value)}
             placeholder="e.g., Code Review Helper"
+            className="chat-surface border-[var(--chat-divider)] rounded-xl"
           />
         </div>
 
@@ -183,6 +185,7 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
             value={description}
             onChange={(e) => handleChange(setDescription)(e.target.value)}
             placeholder="Brief description of what this prompt does"
+            className="chat-surface border-[var(--chat-divider)] rounded-xl"
           />
         </div>
 
@@ -200,9 +203,10 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
             onChange={(e) => handleChange(setContent)(e.target.value)}
             placeholder="Enter your prompt template here..."
             rows={12}
-            className="font-mono text-sm resize-none"
+            className="font-mono text-sm resize-none chat-surface border-[var(--chat-divider)] rounded-xl"
           />
         </div>
+      </div>
       </div>
     </div>
   );

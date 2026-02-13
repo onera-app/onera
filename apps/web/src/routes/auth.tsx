@@ -75,15 +75,18 @@ export function AuthPage() {
   const isButtonLoading = isLoading || loadingProvider !== null;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-white dark:bg-background selection:bg-neutral-900 selection:text-white dark:selection:bg-white dark:selection:text-neutral-900">
-      <div className="w-full max-w-[360px] relative z-10 flex flex-col items-center text-center">
+    <div
+      className="min-h-screen flex flex-col items-center justify-center p-4 selection:bg-neutral-900 selection:text-white dark:selection:bg-white dark:selection:text-neutral-900"
+      style={{ background: "var(--chat-shell-bg)" }}
+    >
+      <div className="w-full max-w-[380px] relative z-10 flex flex-col items-center text-center rounded-3xl chat-surface-elevated p-7 sm:p-8 shadow-[0_24px_72px_rgba(20,20,22,0.16)]">
         {/* Logo */}
         <div className="mb-10">
           <OneraLogo size={64} className="text-neutral-900 dark:text-white" />
         </div>
 
         {/* Heading */}
-        <div className="mb-12 space-y-2">
+        <div className="mb-10 space-y-2">
           <h1 className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-white">
             Sign in to Onera
           </h1>
@@ -96,7 +99,7 @@ export function AuthPage() {
         <div className="w-full space-y-3">
           <Button
             variant="outline"
-            className="w-full h-12 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all active:scale-[0.98] shadow-sm"
+            className="w-full h-12 rounded-2xl chat-surface text-neutral-900 dark:text-white hover:bg-foreground/[0.05] transition-all active:scale-[0.98] shadow-sm"
             onClick={handleGoogleSignIn}
             disabled={!isLoaded || isButtonLoading}
           >
@@ -112,7 +115,7 @@ export function AuthPage() {
 
           <Button
             variant="outline"
-            className="w-full h-12 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all active:scale-[0.98] shadow-sm"
+            className="w-full h-12 rounded-2xl chat-surface text-neutral-900 dark:text-white hover:bg-foreground/[0.05] transition-all active:scale-[0.98] shadow-sm"
             onClick={handleAppleSignIn}
             disabled={!isLoaded || isButtonLoading}
           >

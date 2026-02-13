@@ -457,12 +457,10 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
       <div
         ref={containerRef}
         className={cn(
-          "relative rounded-3xl overflow-hidden",
-          "bg-background/80 backdrop-blur-2xl",
-          "border border-border",
-          "shadow-lg shadow-black/5 dark:shadow-black/20",
+          "relative rounded-3xl overflow-hidden chat-surface-elevated",
+          "shadow-[0_10px_36px_rgba(28,28,30,0.14)]",
           "transition-all duration-200",
-          "focus-within:ring-1 focus-within:ring-ring focus-within:border-foreground/20",
+          "focus-within:ring-2 focus-within:ring-[var(--chat-focus)]",
           disabled && "opacity-60",
         )}
         onDragEnter={handleDragEnter}
@@ -522,7 +520,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
                   <Button
                     onClick={onStop}
                     size="icon"
-                    className="h-9 w-9 rounded-2xl bg-red-500 text-white hover:bg-red-600 transition-all duration-200 shadow-md"
+                    className="h-9 w-9 rounded-2xl bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 shadow-md"
                   >
                     <Square className="h-3.5 w-3.5 fill-current" />
                   </Button>
@@ -540,7 +538,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
                       "h-9 w-9 rounded-2xl transition-all duration-200 shadow-md",
                       canSend && !disabled
                         ? "bg-foreground text-background hover:bg-foreground/90 hover:scale-105"
-                        : "bg-muted text-muted-foreground cursor-not-allowed",
+                        : "bg-[var(--chat-muted)] text-muted-foreground cursor-not-allowed",
                     )}
                   >
                     <ArrowUp className="h-4 w-4" strokeWidth={2.5} />

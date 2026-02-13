@@ -280,7 +280,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
           onClick={() => setIsOpen(!isOpen)}
           disabled={isLoading || models.length === 0}
           className={cn(
-            "flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-[13px] transition-all duration-150",
+            "flex max-w-[190px] sm:max-w-[240px] items-center gap-1.5 h-8 px-2.5 rounded-lg text-[13px] transition-all duration-150",
             "hover:bg-foreground/[0.06] active:bg-foreground/10",
             "disabled:opacity-40 disabled:cursor-not-allowed",
             isOpen && "bg-foreground/[0.06]",
@@ -295,7 +295,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
             <span className="text-muted-foreground">No models</span>
           ) : (
             <>
-              <span className="truncate text-foreground max-w-[160px] sm:max-w-[200px]">
+              <span className="truncate text-foreground max-w-[142px] sm:max-w-[192px]">
                 {selectedModel?.name || "Select model"}
               </span>
               <ChevronDown
@@ -310,7 +310,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
 
         {/* Dropdown panel - Apple style: subtle glass, soft shadow */}
         {isOpen && models.length > 0 && (
-          <div className="absolute left-0 mt-1 w-56 sm:w-64 max-w-[calc(100vw-2rem)] z-50 bg-popover backdrop-blur-2xl rounded-xl shadow-lg border border-border overflow-hidden">
+          <div className="absolute left-0 mt-1 w-60 sm:w-72 max-w-[calc(100vw-2rem)] z-50 bg-popover backdrop-blur-2xl rounded-xl shadow-lg border border-border overflow-hidden">
             {/* Search input - cleaner, more subtle */}
             <div className="p-2 pb-1">
               <div className="relative">

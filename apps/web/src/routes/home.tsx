@@ -143,9 +143,12 @@ export function HomePage() {
 
   // Show welcome screen
   return (
-    <div className="flex flex-col h-full w-full min-w-0 bg-background overflow-x-hidden">
+    <div
+      className="relative flex flex-col h-full w-full min-w-0 overflow-x-hidden"
+      style={{ background: "var(--chat-shell-bg)" }}
+    >
       {/* Minimal header with model selector */}
-      <header className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 h-14 w-full">
+      <header className="absolute top-1 z-10 left-1/2 -translate-x-1/2 sm:left-4 sm:right-4 sm:translate-x-0 flex items-center gap-2 sm:gap-3 px-2 sm:px-4 h-12 w-fit max-w-[calc(100vw-1.5rem)] sm:w-auto">
         {/* Menu button - visible when sidebar is closed */}
         {!sidebarOpen && (
           <Button
@@ -165,7 +168,7 @@ export function HomePage() {
       </header>
 
       {/* Centered welcome content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 -mt-8 sm:-mt-16 min-w-0 w-full">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 pt-14 sm:pt-12 min-w-0 w-full">
         <div className="w-full max-w-2xl min-w-0">
           {/* Brand mark */}
           <div className="text-center mb-8 sm:mb-10">
@@ -179,7 +182,7 @@ export function HomePage() {
 
           {/* No connections warning - only show if no private models either */}
           {!canChat && !isLoading && isUnlocked && (
-            <Alert className="mb-6 sm:mb-8 bg-muted/50 border-border rounded-2xl">
+            <Alert className="mb-6 sm:mb-8 chat-surface border-[var(--chat-divider)] rounded-2xl">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
               <AlertTitle className="text-foreground text-[14px] sm:text-[15px]">
                 No Models Available

@@ -155,9 +155,9 @@ export const ChatItem = memo(function ChatItem({
           params={{ chatId: id }}
           search={{ pending: false }}
           className={cn(
-            "relative flex items-center w-full h-9 px-2.5 rounded-lg text-sm transition-colors overflow-hidden",
+            "relative flex items-center w-full h-9 px-2.5 rounded-xl text-sm transition-colors overflow-hidden",
             isActive
-              ? "bg-sidebar-accent text-sidebar-foreground"
+              ? "bg-sidebar-accent/85 text-sidebar-foreground shadow-sm"
               : "text-sidebar-foreground/90 hover:text-sidebar-foreground hover:bg-sidebar-accent",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background",
           )}
@@ -191,7 +191,7 @@ export const ChatItem = memo(function ChatItem({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className="p-1.5 rounded-lg text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+                className="p-1.5 rounded-xl text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
                 onClick={(e) => e.preventDefault()}
               >
                 <MoreHorizontal className="h-4 w-4" />

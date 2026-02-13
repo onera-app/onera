@@ -51,14 +51,17 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const step = steps[currentStep];
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{ background: "var(--chat-shell-bg)" }}
+    >
       {/* Background decoration */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -left-1/4 -top-1/4 h-1/2 w-1/2 rounded-full bg-gradient-to-br from-primary/5 to-transparent blur-3xl" />
-        <div className="absolute -bottom-1/4 -right-1/4 h-1/2 w-1/2 rounded-full bg-gradient-to-tl from-primary/5 to-transparent blur-3xl" />
+        <div className="absolute -left-1/4 -top-1/4 h-1/2 w-1/2 rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute -bottom-1/4 -right-1/4 h-1/2 w-1/2 rounded-full bg-black/5 blur-3xl" />
       </div>
 
-      <div className="relative w-full max-w-lg">
+      <div className="relative w-full max-w-lg rounded-3xl chat-surface-elevated p-6 sm:p-8">
         {/* Progress indicator */}
         <div className="mb-8 flex justify-center gap-2">
           {steps.map((_, index) => (
@@ -130,7 +133,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 function WelcomeStep() {
   return (
     <div className="text-center">
-      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-white/[0.04] ring-1 ring-white/[0.08]">
+      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl chat-surface">
         <MessageSquare className="h-9 w-9 text-foreground/80" />
       </div>
       <h1 className="text-3xl font-bold tracking-tight mb-3">
@@ -157,7 +160,7 @@ function WelcomeStep() {
 function RecoveryStep() {
   return (
     <div className="text-center">
-      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/20 via-orange-500/20 to-red-500/10 ring-1 ring-amber-500/20">
+      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/15 via-orange-500/15 to-red-500/10 ring-1 ring-amber-500/20">
         <Lock className="h-10 w-10 text-amber-600 dark:text-amber-400" />
       </div>
       <h1 className="text-3xl font-bold tracking-tight mb-3">
@@ -167,7 +170,7 @@ function RecoveryStep() {
         In the next step, you'll receive a recovery phrase. This is important.
       </p>
 
-      <div className="rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/5 via-amber-500/10 to-orange-500/5 p-4 text-left space-y-3">
+      <div className="rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/5 via-amber-500/8 to-orange-500/5 p-4 text-left space-y-3">
         <div className="flex gap-3">
           <Shield className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
           <div>
@@ -209,8 +212,8 @@ function Feature({
   text: string;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-lg border bg-card/50 p-3">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+    <div className="flex items-center gap-3 rounded-xl chat-surface p-3">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/12">
         <Icon className="h-4 w-4 text-primary" />
       </div>
       <span className="text-sm font-medium">{text}</span>

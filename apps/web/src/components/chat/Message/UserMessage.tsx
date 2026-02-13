@@ -197,7 +197,7 @@ export const UserMessage = memo(function UserMessage({
               }}
               className={cn(
                 "w-full px-4 py-3.5 rounded-xl resize-none",
-                "border-2 border-ring",
+                "border-2 border-[var(--chat-focus)] bg-[var(--chat-surface-elevated)]",
                 "text-body leading-relaxed",
               )}
               rows={1}
@@ -299,7 +299,7 @@ export const UserMessage = memo(function UserMessage({
 
           {/* Text bubble - refined with subtle background, fully rounded */}
           {textContent && (
-            <div className="inline-block w-fit rounded-[22px] px-4 py-2.5 text-left bg-foreground/10 text-foreground select-text">
+            <div className="inline-block w-fit rounded-[22px] px-4 py-2.5 text-left bg-[var(--chat-pill)] text-foreground select-text chat-soft-border">
               <span className="whitespace-pre-wrap break-words text-[15px] leading-[1.55] tracking-[-0.01em]">
                 {textContent}
               </span>

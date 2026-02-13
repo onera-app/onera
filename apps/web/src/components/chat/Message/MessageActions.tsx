@@ -50,7 +50,7 @@ export const MessageActions = memo(function MessageActions({
               variant="ghost"
               size="icon-sm"
               onClick={onCopy}
-              className="text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground rounded-xl hover:bg-[var(--chat-muted)]"
             >
               <Copy className="h-4 w-4" />
             </Button>
@@ -66,7 +66,7 @@ export const MessageActions = memo(function MessageActions({
               variant="ghost"
               size="icon-sm"
               onClick={onEdit}
-              className="text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground rounded-xl hover:bg-[var(--chat-muted)]"
             >
               <Pencil className="h-4 w-4" />
             </Button>
@@ -93,7 +93,7 @@ export const MessageActions = memo(function MessageActions({
               variant="ghost"
               size="icon-sm"
               onClick={onDelete}
-              className="text-muted-foreground hover:text-destructive"
+              className="text-muted-foreground hover:text-destructive rounded-xl hover:bg-[var(--chat-muted)]"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
