@@ -29,7 +29,7 @@ const faqs = [
   },
   {
     question: "Is Onera free to try?",
-    answer: "Yes. Onera is free during early access.",
+    answer: "Yes. Onera includes a free plan, with paid tiers for higher limits.",
   },
   {
     question: "Can I use Onera on multiple devices?",

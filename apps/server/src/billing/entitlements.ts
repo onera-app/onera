@@ -1,6 +1,7 @@
 import { eq, and, or, inArray, gt } from "drizzle-orm";
 import { db } from "../db/client";
 import { subscriptions, plans } from "../db/schema";
+import { getCanonicalPlan } from "../db/plan-catalog";
 
 export interface Entitlements {
   planId: string;
@@ -51,14 +52,21 @@ export async function getEntitlements(userId: string): Promise<Entitlements> {
       return getFreePlanEntitlements();
     }
 
+    const canonical = getCanonicalPlan(result.planId);
+
     return {
       planId: result.planId,
-      planName: result.planName,
-      inferenceRequestsLimit: result.inferenceRequestsLimit,
-      byokInferenceRequestsLimit: result.byokInferenceRequestsLimit,
-      storageLimitMb: result.storageLimitMb,
-      maxEnclaves: result.maxEnclaves,
-      features: (result.features as Record<string, boolean>) || {},
+      planName: canonical?.name ?? result.planName,
+      inferenceRequestsLimit:
+        canonical?.inferenceRequestsLimit ?? result.inferenceRequestsLimit,
+      byokInferenceRequestsLimit:
+        canonical?.byokInferenceRequestsLimit ??
+        result.byokInferenceRequestsLimit,
+      storageLimitMb: canonical?.storageLimitMb ?? result.storageLimitMb,
+      maxEnclaves: canonical?.maxEnclaves ?? result.maxEnclaves,
+      features:
+        canonical?.features ||
+        ((result.features as Record<string, boolean>) || {}),
       usageBasedBilling: result.usageBasedBilling,
       dodoCustomerId: result.dodoCustomerId,
     };
@@ -74,10 +82,10 @@ function getHardcodedFreeEntitlements(): Entitlements {
   return {
     planId: "free",
     planName: "Free",
-    inferenceRequestsLimit: -1,
-    byokInferenceRequestsLimit: -1,
-    storageLimitMb: -1,
-    maxEnclaves: -1,
+    inferenceRequestsLimit: 100,
+    byokInferenceRequestsLimit: 500,
+    storageLimitMb: 1000,
+    maxEnclaves: 0,
     features: {
       voiceCalls: true,
       voiceInput: true,
@@ -106,14 +114,20 @@ async function getFreePlanEntitlements(): Promise<Entitlements> {
       .limit(1);
 
     if (freePlan) {
+      const canonical = getCanonicalPlan(freePlan.id);
       cachedFreeEntitlements = {
         planId: freePlan.id,
-        planName: freePlan.name,
-        inferenceRequestsLimit: freePlan.inferenceRequestsLimit,
-        byokInferenceRequestsLimit: freePlan.byokInferenceRequestsLimit,
-        storageLimitMb: freePlan.storageLimitMb,
-        maxEnclaves: freePlan.maxEnclaves,
-        features: (freePlan.features as Record<string, boolean>) || {},
+        planName: canonical?.name ?? freePlan.name,
+        inferenceRequestsLimit:
+          canonical?.inferenceRequestsLimit ?? freePlan.inferenceRequestsLimit,
+        byokInferenceRequestsLimit:
+          canonical?.byokInferenceRequestsLimit ??
+          freePlan.byokInferenceRequestsLimit,
+        storageLimitMb: canonical?.storageLimitMb ?? freePlan.storageLimitMb,
+        maxEnclaves: canonical?.maxEnclaves ?? freePlan.maxEnclaves,
+        features:
+          canonical?.features ||
+          ((freePlan.features as Record<string, boolean>) || {}),
         usageBasedBilling: false,
         dodoCustomerId: null,
       };

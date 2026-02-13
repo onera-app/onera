@@ -17,9 +17,9 @@ export function BillingPage() {
   const hasError = subscriptionError || usageError;
 
   const features = [
-    "Unlimited inference requests",
-    "Unlimited BYOK inference",
-    "Unlimited storage",
+    "Private inference",
+    "BYOK inference",
+    "Storage quotas",
     "End-to-end encryption",
   ];
 
@@ -66,11 +66,11 @@ export function BillingPage() {
                 <div
                   className={cn(
                     "w-10 h-10 rounded-xl flex items-center justify-center",
-                    currentPlan?.id === "privacy_max"
+                    currentPlan?.id === "pro"
                       ? "bg-primary/15"
-                      : currentPlan?.id === "pro"
+                      : currentPlan?.id === "team"
                         ? "bg-primary/15"
-                        : currentPlan?.id === "starter"
+                      : currentPlan?.id === "starter"
                           ? "bg-status-success/15"
                           : currentPlan?.id === "team"
                             ? "bg-status-warning/15"
@@ -82,11 +82,11 @@ export function BillingPage() {
                   <CreditCard
                     className={cn(
                       "w-5 h-5",
-                      currentPlan?.id === "privacy_max"
+                      currentPlan?.id === "pro"
                         ? "text-primary"
-                        : currentPlan?.id === "pro"
+                        : currentPlan?.id === "team"
                           ? "text-primary"
-                          : currentPlan?.id === "starter"
+                        : currentPlan?.id === "starter"
                             ? "text-status-success-text"
                             : currentPlan?.id === "team"
                               ? "text-status-warning-text"
@@ -106,8 +106,8 @@ export function BillingPage() {
                   </p>
                 </div>
               </div>
-              <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium bg-status-success/10 text-status-success-text">
-                Early Access
+              <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium bg-primary/10 text-primary">
+                Current plan
               </span>
             </div>
 
@@ -159,11 +159,6 @@ export function BillingPage() {
           </div>
         </section>
 
-        {/* Footer Note */}
-        <p className="text-xs text-muted-foreground text-center mt-8 px-4">
-          Paid plans coming soon. We'll give plenty of notice before any
-          changes.
-        </p>
       </div>
     </div>
   );

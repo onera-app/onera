@@ -12,7 +12,7 @@ import {
 // --- Plans ---
 
 export const plans = pgTable("plans", {
-  id: text("id").primaryKey(), // 'free', 'starter', 'pro', 'privacy_max', 'team'
+  id: text("id").primaryKey(), // 'free', 'starter', 'pro', 'team'
   name: text("name").notNull(),
   description: text("description").notNull(),
   monthlyPrice: integer("monthly_price").notNull(), // cents
@@ -22,7 +22,7 @@ export const plans = pgTable("plans", {
   storageLimitMb: integer("storage_limit_mb").notNull(),
   maxEnclaves: integer("max_enclaves").notNull(),
   features: jsonb("features").$type<Record<string, boolean>>().notNull(),
-  tier: integer("tier").notNull().default(0), // 0=free, 1=starter, 2=pro, 3=privacy_max, 4=team
+  tier: integer("tier").notNull().default(0), // 0=free, 1=starter, 2=pro, 3=team
   dodoPriceIdMonthly: text("dodo_price_id_monthly"),
   dodoPriceIdYearly: text("dodo_price_id_yearly"),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),

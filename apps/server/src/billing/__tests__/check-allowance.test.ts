@@ -71,12 +71,12 @@ describe("checkInferenceAllowance — private inference", () => {
     expect(result.remaining).toBe(0); // 5000 - 4999 - 1 = 0 remaining after this one
   });
 
-  it("should allow unlimited plan with any usage", async () => {
-    const { userId, periodStart, periodEnd } = await setupUser("privacy_max");
+  it("should deny team user who exceeded limit", async () => {
+    const { userId, periodStart, periodEnd } = await setupUser("team");
     await addUsage(userId, 999999, periodStart, periodEnd, "inference_request");
     const result = await checkInferenceAllowance(userId, "private");
-    expect(result.allowed).toBe(true);
-    expect(result.remaining).toBe(-1); // unlimited
+    expect(result.allowed).toBe(false);
+    expect(result.remaining).toBe(0);
   });
 
   it("should record usage when allowed", async () => {

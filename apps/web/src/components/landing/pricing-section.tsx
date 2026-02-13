@@ -1,11 +1,20 @@
-import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
+import { trpc } from "@/lib/trpc";
 
 const setupSteps = ["Create your account", "Add a passkey", "Start private chat"];
 
 export function PricingSection() {
-  const { isAuthenticated } = useAuth();
+  const { data: plans } = trpc.billing.getPlans.useQuery();
+
+  const lowestMonthlyCents = plans && plans.length > 0
+    ? Math.min(...plans.map((plan) => plan.monthlyPrice))
+    : 0;
+  const lowestMonthlyDollars = Math.round(lowestMonthlyCents / 100);
+  const lowestPriceLabel = `$${lowestMonthlyDollars}`;
+
+  const lowestPlan =
+    plans?.find((plan) => plan.monthlyPrice === lowestMonthlyCents) || null;
 
   return (
     <section id="pricing" className="px-4 py-8 pb-20 sm:px-5 sm:pb-24 md:px-8 md:py-12 md:pb-28">
@@ -30,7 +39,7 @@ export function PricingSection() {
           </ul>
 
           <p className="mt-5 inline-flex rounded-full bg-white/70 px-4 py-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm text-[#555861] sm:mt-6 sm:text-lg">
-            Free during early access.
+            Plans from {lowestPriceLabel}/month.
           </p>
 
           <div className="pointer-events-none absolute bottom-4 right-4 hidden h-60 w-44 rotate-[13deg] rounded-[28px] border border-[#bdc5d3] bg-[#fbfcff] p-4 shadow-[0_22px_40px_rgba(33,37,44,0.22)] md:block">
@@ -51,16 +60,16 @@ export function PricingSection() {
           </p>
 
           <p className="mt-6 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-6xl font-semibold leading-none sm:mt-8 sm:text-7xl md:text-9xl">
-            $0
+            {lowestPriceLabel}
           </p>
 
           <p className="mt-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base text-white/80 sm:text-xl">
-            Early access
+            {lowestPlan ? `${lowestPlan.name} plan` : "Starting plan"}
           </p>
 
-          <Link to={isAuthenticated ? "/app" : "/auth"}>
+          <Link to="/pricing">
             <Button className="mt-8 h-11 rounded-full bg-white px-8 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base font-medium text-[#1f1f20] hover:bg-white/90 sm:mt-12 sm:h-14 sm:px-10 sm:text-xl">
-              {isAuthenticated ? "Open app" : "Get started for free"}
+              View plans
             </Button>
           </Link>
         </article>

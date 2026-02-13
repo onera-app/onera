@@ -656,16 +656,14 @@ export function Sidebar() {
                       <span
                         className={cn(
                           "text-xs",
-                          subData?.plan?.id === "privacy_max"
+                          subData?.plan?.id === "pro"
                             ? "text-primary"
-                            : subData?.plan?.id === "pro"
-                              ? "text-primary"
-                              : subData?.plan?.id === "starter"
+                            : subData?.plan?.id === "team"
+                              ? "text-status-warning-text"
+                            : subData?.plan?.id === "starter"
                                 ? "text-status-success-text"
-                                : subData?.plan?.id === "team"
-                                  ? "text-status-warning-text"
-                                  : subData?.plan?.id === "enterprise"
-                                    ? "text-primary"
+                                : subData?.plan?.id === "enterprise"
+                                  ? "text-primary"
                                     : "text-sidebar-foreground/70",
                         )}
                       >
@@ -688,16 +686,14 @@ export function Sidebar() {
                       <CreditCard
                         className={cn(
                           "h-4 w-4",
-                          subData?.plan?.id === "privacy_max"
+                          subData?.plan?.id === "pro"
                             ? "text-primary"
-                            : subData?.plan?.id === "pro"
-                              ? "text-primary"
-                              : subData?.plan?.id === "starter"
+                            : subData?.plan?.id === "team"
+                              ? "text-status-warning"
+                            : subData?.plan?.id === "starter"
                                 ? "text-status-success"
-                                : subData?.plan?.id === "team"
-                                  ? "text-status-warning"
-                                  : subData?.plan?.id === "enterprise"
-                                    ? "text-primary"
+                                : subData?.plan?.id === "enterprise"
+                                  ? "text-primary"
                                     : "text-sidebar-foreground/50",
                         )}
                       />

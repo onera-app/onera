@@ -112,7 +112,7 @@ export function AdminUsersPage() {
                       <span
                         className={cn(
                           "inline-flex rounded-full px-2 py-0.5 text-xs font-medium",
-                          user.subscription?.planId === "privacy_max" || user.subscription?.planId === "enterprise"
+                          user.subscription?.planId === "pro" || user.subscription?.planId === "enterprise"
                             ? "bg-primary/10 text-primary"
                             : user.subscription?.planId === "pro"
                               ? "bg-primary/10 text-primary"

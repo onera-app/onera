@@ -1,17 +1,14 @@
 import { describe, it, expect } from "bun:test";
 import { planData } from "../plan-data";
 
-// NOTE: These tests reflect the temporary early-access state where only the
-// free plan exists with unlimited limits. Update when paid plans are re-enabled.
-
 describe("Plan Seed Data", () => {
-  it("should have 1 plan (early access)", () => {
-    expect(planData).toHaveLength(1);
+  it("should have all active plans", () => {
+    expect(planData).toHaveLength(4);
   });
 
-  it("should only contain the free plan", () => {
+  it("should contain expected plan IDs", () => {
     const ids = planData.map((p) => p.id);
-    expect(ids).toEqual(["free"]);
+    expect(ids).toEqual(["free", "starter", "pro", "team"]);
   });
 
   it("should have free plan at $0", () => {
@@ -20,12 +17,12 @@ describe("Plan Seed Data", () => {
     expect(free.yearlyPrice).toBe(0);
   });
 
-  it("should have unlimited limits on free plan during early access", () => {
+  it("should have bounded limits on free plan", () => {
     const free = planData.find((p) => p.id === "free")!;
-    expect(free.inferenceRequestsLimit).toBe(-1);
-    expect(free.byokInferenceRequestsLimit).toBe(-1);
-    expect(free.storageLimitMb).toBe(-1);
-    expect(free.maxEnclaves).toBe(-1);
+    expect(free.inferenceRequestsLimit).toBe(100);
+    expect(free.byokInferenceRequestsLimit).toBe(500);
+    expect(free.storageLimitMb).toBe(1000);
+    expect(free.maxEnclaves).toBe(0);
   });
 
   it("should have valid feature flags on all plans", () => {
@@ -47,7 +44,7 @@ describe("Plan Seed Data", () => {
     }
   });
 
-  it("should have correct features on free plan during early access", () => {
+  it("should have correct features on free plan", () => {
     const free = planData.find((p) => p.id === "free")!;
     expect(free.features.voiceCalls).toBe(true);
     expect(free.features.voiceInput).toBe(true);
@@ -66,7 +63,12 @@ describe("Plan Seed Data", () => {
     for (const plan of planData) {
       expect(typeof plan.byokInferenceRequestsLimit).toBe("number");
     }
-    const free = planData.find((p) => p.id === "free")!;
-    expect(free.byokInferenceRequestsLimit).toBe(-1); // unlimited during early access
+  });
+
+  it("should have Dodo product IDs on paid plans", () => {
+    for (const plan of planData.filter((p) => p.id !== "free")) {
+      expect(plan.dodoPriceIdMonthly).toBeTruthy();
+      expect(plan.dodoPriceIdYearly).toBeTruthy();
+    }
   });
 });

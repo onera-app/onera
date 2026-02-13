@@ -23,8 +23,8 @@ export function BillingTab() {
             <p className="text-sm text-muted-foreground">Current plan</p>
             <p className="text-lg font-semibold">{currentPlan?.name || 'Free'}</p>
           </div>
-          <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-500/10 text-green-600">
-            Early Access
+          <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium bg-primary/10 text-primary">
+            Active
           </span>
         </div>
 
@@ -53,7 +53,7 @@ export function BillingTab() {
         )}
 
         <p className="text-xs text-muted-foreground">
-          All features are unlimited during early access. Paid plans coming soon.
+          Manage your subscription details in the Billing page.
         </p>
       </div>
     </div>

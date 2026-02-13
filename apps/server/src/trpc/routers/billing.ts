@@ -9,9 +9,11 @@ import { randomUUID } from "crypto";
 import { checkInferenceAllowance } from "../../billing/usage";
 import { getEntitlements } from "../../billing/entitlements";
 import { planData } from "../../db/plan-data";
+import { normalizePlanRow } from "../../db/plan-catalog";
 
 // Only return plans that are actively seeded (excludes retired plans like enterprise)
 const activePlanIds = planData.map((p) => p.id);
+const CONTACT_ONLY_PLAN_IDS = new Set(["team"]);
 
 /** Count overage usage records for a user within a billing period. */
 async function getOverageCount(userId: string, periodStart: Date, periodEnd: Date): Promise<number> {
@@ -35,11 +37,13 @@ async function getOverageCount(userId: string, periodStart: Date, periodEnd: Dat
 export const billingRouter = router({
   // List available plans (public — pricing page is unauthenticated) (#4)
   getPlans: publicProcedure.query(async () => {
-    return db
+    const rows = await db
       .select()
       .from(plans)
       .where(inArray(plans.id, activePlanIds))
       .orderBy(plans.monthlyPrice);
+
+    return rows.map((plan) => normalizePlanRow(plan)!);
   }),
 
   // Get current user's subscription
@@ -61,7 +65,7 @@ export const billingRouter = router({
 
         return {
           subscription: null,
-          plan: freePlan || null,
+          plan: normalizePlanRow(freePlan || null),
           pendingPlan: null,
         };
       }
@@ -91,8 +95,8 @@ export const billingRouter = router({
           currentPeriodStart: subscription.currentPeriodStart?.getTime() ?? null,
           currentPeriodEnd: subscription.currentPeriodEnd?.getTime() ?? null,
         },
-        plan: plan || null,
-        pendingPlan,
+        plan: normalizePlanRow(plan || null),
+        pendingPlan: normalizePlanRow(pendingPlan),
       };
     } catch (err) {
       // If billing tables don't exist yet, return free plan defaults
@@ -130,6 +134,13 @@ export const billingRouter = router({
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Cannot checkout for free plan",
+        });
+      }
+
+      if (CONTACT_ONLY_PLAN_IDS.has(plan.id)) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "This plan is available by contact only. Please contact us to get started.",
         });
       }
 
@@ -252,6 +263,13 @@ export const billingRouter = router({
 
       if (!targetPlan) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Plan not found" });
+      }
+
+      if (CONTACT_ONLY_PLAN_IDS.has(targetPlan.id)) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "This plan is available by contact only. Please contact us to get started.",
+        });
       }
 
       const priceId =
