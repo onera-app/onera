@@ -83,7 +83,6 @@ function getHardcodedFreeEntitlements(): Entitlements {
       voiceInput: true,
       prioritySupport: false,
       dedicatedEnclaves: false,
-      customModels: false,
       customEndpoints: true,
       largeModels: false,
       priorityQueue: false,

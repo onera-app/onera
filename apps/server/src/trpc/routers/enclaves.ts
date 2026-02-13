@@ -163,7 +163,7 @@ export const enclavesRouter = router({
       if (tier === 'dedicated' && !ctx.entitlements.features.dedicatedEnclaves) {
         throw new TRPCError({
           code: 'FORBIDDEN',
-          message: 'Dedicated enclaves require a Pro plan or higher. Please upgrade.',
+          message: 'Private model access requires a Pro plan or higher. Please upgrade.',
         });
       }
 

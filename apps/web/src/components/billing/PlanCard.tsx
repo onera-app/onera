@@ -37,16 +37,19 @@ function formatStorage(mb: number): string {
 }
 
 const featureLabels: Record<string, string> = {
-  voiceInput: "Voice input",
   prioritySupport: "Priority support",
-  dedicatedEnclaves: "Dedicated enclaves",
-  customModels: "Custom models",
-  customEndpoints: "Custom API endpoints",
   priorityQueue: "Priority inference queue",
 };
 
 // Features included in all plans — not shown as differentiators
 const universalFeatures = new Set(["voiceCalls", "largeModels"]);
+const removedFeatureKeys = new Set([
+  "voiceInput",
+  "voiceCalls",
+  "customEndpoints",
+  "largeModels",
+  "dedicatedEnclaves",
+]);
 
 export function PlanCard({
   name,
@@ -112,14 +115,8 @@ export function PlanCard({
           <Check className="h-4 w-4 text-primary flex-shrink-0" />
           {formatStorage(limits.storageMb)}
         </li>
-        {limits.maxEnclaves !== 0 && (
-          <li className="flex items-center gap-2 text-sm">
-            <Check className="h-4 w-4 text-primary flex-shrink-0" />
-            {formatLimit(limits.maxEnclaves, "dedicated enclaves")}
-          </li>
-        )}
         {Object.entries(features).map(([key, enabled]) =>
-          enabled && !universalFeatures.has(key) ? (
+          enabled && !universalFeatures.has(key) && !removedFeatureKeys.has(key) ? (
             <li key={key} className="flex items-center gap-2 text-sm">
               <Check className="h-4 w-4 text-primary flex-shrink-0" />
               {featureLabels[key] || key}

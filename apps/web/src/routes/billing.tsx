@@ -21,11 +21,6 @@ export function BillingPage() {
     "Unlimited BYOK inference",
     "Unlimited storage",
     "End-to-end encryption",
-    "Voice input & calls",
-    "Custom API endpoints",
-    "Custom models",
-    "Large models (70B+) in TEE",
-    "Dedicated enclaves",
   ];
 
   return (

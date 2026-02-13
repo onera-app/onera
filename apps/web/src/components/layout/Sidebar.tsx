@@ -54,6 +54,7 @@ import {
   PanelLeftOpen,
   Plus,
   Pin,
+  CreditCard,
   Settings,
   Shield,
   LogOut,
@@ -684,20 +685,20 @@ export function Sidebar() {
                 >
                   <DropdownMenuItem asChild>
                     <Link to="/app/billing" className="gap-2 cursor-pointer">
-                      <span
+                      <CreditCard
                         className={cn(
-                          "w-2 h-2 rounded-full",
+                          "h-4 w-4",
                           subData?.plan?.id === "privacy_max"
-                            ? "bg-primary"
+                            ? "text-primary"
                             : subData?.plan?.id === "pro"
-                              ? "bg-primary"
+                              ? "text-primary"
                               : subData?.plan?.id === "starter"
-                                ? "bg-status-success"
+                                ? "text-status-success"
                                 : subData?.plan?.id === "team"
-                                  ? "bg-status-warning"
+                                  ? "text-status-warning"
                                   : subData?.plan?.id === "enterprise"
-                                    ? "bg-primary"
-                                    : "bg-sidebar-foreground/40",
+                                    ? "text-primary"
+                                    : "text-sidebar-foreground/50",
                         )}
                       />
                       Manage plan

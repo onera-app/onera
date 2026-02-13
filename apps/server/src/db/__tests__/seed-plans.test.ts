@@ -34,7 +34,6 @@ describe("Plan Seed Data", () => {
       "voiceInput",
       "prioritySupport",
       "dedicatedEnclaves",
-      "customModels",
       "customEndpoints",
       "largeModels",
       "priorityQueue",
@@ -54,7 +53,6 @@ describe("Plan Seed Data", () => {
     expect(free.features.voiceInput).toBe(true);
     expect(free.features.customEndpoints).toBe(true);
     expect(free.features.dedicatedEnclaves).toBe(false);
-    expect(free.features.customModels).toBe(false);
     expect(free.features.largeModels).toBe(false);
   });
 

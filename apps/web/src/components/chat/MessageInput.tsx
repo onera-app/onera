@@ -341,7 +341,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
         )}
 
         {/* Textarea at top - OpenWebUI style */}
-        <div className="px-4 pt-4 pb-2">
+        <div className="px-4 pt-2.5 pb-1">
           <Textarea
             ref={textareaRef}
             value={value}
@@ -357,7 +357,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
             className={cn(
               "w-full bg-transparent resize-none border-0 shadow-none p-0",
               "disabled:cursor-not-allowed",
-              "max-h-[150px] sm:max-h-[200px] min-h-[24px]",
+              "max-h-[96px] sm:max-h-[120px] min-h-[24px]",
               "text-base lg:text-lg leading-relaxed",
               "placeholder:text-muted-foreground text-foreground",
             )}
@@ -365,7 +365,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
         </div>
 
         {/* Bottom toolbar - OpenWebUI style */}
-        <div className="flex items-center justify-between px-3 pb-3 pt-1">
+        <div className="flex items-center justify-between px-3 pb-2 pt-1">
           {/* Left side: attach + separator + tools */}
           <div className="flex items-center gap-1">
             <AttachmentButton

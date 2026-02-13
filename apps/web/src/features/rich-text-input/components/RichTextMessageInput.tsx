@@ -218,7 +218,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
       attributes: {
         class: cn(
           "prose prose-base dark:prose-invert max-w-none",
-          "focus:outline-none min-h-[24px] max-h-[200px]",
+          "focus:outline-none min-h-[24px] max-h-[120px]",
           "[&_p]:my-0 [&_code]:bg-muted [&_code]:px-1 [&_code]:rounded",
           "[&_pre]:bg-muted [&_pre]:p-2 [&_pre]:rounded-lg [&_pre]:text-base",
           "overflow-y-auto",
@@ -482,28 +482,25 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
           </div>
         )}
 
-        {/* Editor row */}
-        <div className="flex items-end">
-          {/* TipTap Editor */}
-          <div className="flex-1 w-full px-4 py-4">
-            <EditorContent
-              editor={editor}
-              className={cn(
-                "text-body leading-relaxed",
-                disabled && "cursor-not-allowed",
-              )}
-            />
-          </div>
+        {/* TipTap Editor */}
+        <div className="w-full px-4 py-2.5">
+          <EditorContent
+            editor={editor}
+            className={cn(
+              "text-body leading-relaxed",
+              disabled && "cursor-not-allowed",
+            )}
+          />
+        </div>
 
-          {/* Right side actions */}
-          <div className="flex items-center gap-1 pr-3 pb-3">
-            {/* Attach file button */}
+        {/* Bottom toolbar */}
+        <div className="flex items-center justify-between px-3 pb-2 pt-1">
+          <div className="flex items-center gap-1">
             <AttachmentButton
               onFilesSelected={handleFilesSelected}
               disabled={disabled || isStreaming}
             />
-
-            {/* Search toggle */}
+            <div className="w-px h-5 bg-[var(--chat-divider)] mx-1" />
             <SearchToggle
               enabled={searchEnabled}
               onToggle={setSearchEnabled}
@@ -512,8 +509,9 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
               isSearching={isSearching}
               disabled={disabled || isStreaming}
             />
+          </div>
 
-            {/* Send/Stop button */}
+          <div className="flex items-center gap-2">
             {isStreaming ? (
               <Tooltip>
                 <TooltipTrigger asChild>

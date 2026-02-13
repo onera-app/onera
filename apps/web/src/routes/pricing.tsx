@@ -8,12 +8,6 @@ const freeFeatures = [
   "Unlimited BYOK inference",
   "Unlimited storage",
   "End-to-end encryption",
-  "Voice input",
-  "Voice calls",
-  "Custom API endpoints",
-  "Custom models",
-  "Large models (70B+) in TEE",
-  "Dedicated enclaves",
 ];
 
 export function PricingPage() {
