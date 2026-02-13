@@ -22,6 +22,10 @@ interface PlanSeedRecord {
   dodoPriceIdYearly: string | null;
 }
 
+function getDodoEnvironment(): "live_mode" | "test_mode" {
+  return process.env.NODE_ENV === "production" ? "live_mode" : "test_mode";
+}
+
 function buildPlanProductEnvVarName(
   planId: string,
   interval: BillingInterval,
@@ -84,6 +88,56 @@ function inferPlanIdFromProduct(
   );
 }
 
+function buildRecurringPrice(
+  amountCents: number,
+  interval: BillingInterval,
+): DodoPayments.Products.Price.RecurringPrice {
+  const isMonthly = interval === "monthly";
+  return {
+    type: "recurring_price",
+    currency: "USD",
+    discount: 0,
+    price: amountCents,
+    purchasing_power_parity: false,
+    payment_frequency_count: 1,
+    payment_frequency_interval: isMonthly ? "Month" : "Year",
+    subscription_period_count: 1,
+    subscription_period_interval: isMonthly ? "Month" : "Year",
+    trial_period_days: 0,
+    tax_inclusive: false,
+  };
+}
+
+function buildProductName(plan: PlanSeedRecord, interval: BillingInterval): string {
+  const suffix = interval === "monthly" ? "Monthly" : "Yearly";
+  return `Onera ${plan.name} (${suffix})`;
+}
+
+async function createRecurringProduct(
+  dodo: DodoPayments,
+  plan: PlanSeedRecord,
+  interval: BillingInterval,
+): Promise<string> {
+  const priceCents = interval === "monthly" ? plan.monthlyPrice : plan.yearlyPrice;
+  if (priceCents <= 0) {
+    throw new Error(`Cannot create ${interval} Dodo product for free plan '${plan.id}'.`);
+  }
+
+  const product = await dodo.products.create({
+    name: buildProductName(plan, interval),
+    description: plan.description,
+    tax_category: "saas",
+    price: buildRecurringPrice(priceCents, interval),
+    metadata: {
+      planId: plan.id,
+      billingInterval: interval,
+      source: "onera-seed-plans",
+    },
+  });
+
+  return product.product_id;
+}
+
 async function resolvePlanDataWithDodoProducts(
   basePlans: PlanSeedRecord[],
 ): Promise<PlanSeedRecord[]> {
@@ -97,9 +151,10 @@ async function resolvePlanDataWithDodoProducts(
 
   const dodo = new DodoPayments({
     bearerToken: apiKey,
-    environment:
-      process.env.NODE_ENV === "production" ? "live_mode" : "test_mode",
+    environment: getDodoEnvironment(),
   });
+  const environment = getDodoEnvironment();
+  const allowStaticFallback = environment !== "live_mode";
 
   const planIds = new Set(basePlans.map((plan) => plan.id));
   const discoveredByPlan = new Map<
@@ -126,21 +181,36 @@ async function resolvePlanDataWithDodoProducts(
     discoveredByPlan.set(planId, byInterval);
   }
 
-  return basePlans.map((plan) => {
+  return Promise.all(basePlans.map(async (plan) => {
     const discovered = discoveredByPlan.get(plan.id) ?? {};
+    const isPaidPlan = plan.monthlyPrice > 0 || plan.yearlyPrice > 0;
 
-    const monthly =
-      getPlanProductFromEnv(plan.id, "monthly") ??
-      discovered.monthly ??
-      plan.dodoPriceIdMonthly;
+    const monthlyOverride = getPlanProductFromEnv(plan.id, "monthly");
+    const yearlyOverride = getPlanProductFromEnv(plan.id, "yearly");
+    let monthly = monthlyOverride ?? discovered.monthly ?? null;
+    let yearly = yearlyOverride ?? discovered.yearly ?? null;
 
-    const yearly =
-      getPlanProductFromEnv(plan.id, "yearly") ??
-      discovered.yearly ??
-      plan.dodoPriceIdYearly;
+    if (isPaidPlan && !monthly) {
+      monthly = await createRecurringProduct(dodo, plan, "monthly");
+      console.log(
+        `Created Dodo ${environment} monthly product for plan '${plan.id}': ${monthly}`,
+      );
+    }
+
+    if (isPaidPlan && !yearly) {
+      yearly = await createRecurringProduct(dodo, plan, "yearly");
+      console.log(
+        `Created Dodo ${environment} yearly product for plan '${plan.id}': ${yearly}`,
+      );
+    }
+
+    if (allowStaticFallback) {
+      monthly = monthly ?? plan.dodoPriceIdMonthly;
+      yearly = yearly ?? plan.dodoPriceIdYearly;
+    }
 
     // Paid plans should always have both monthly and yearly Dodo product IDs.
-    if ((plan.monthlyPrice > 0 || plan.yearlyPrice > 0) && (!monthly || !yearly)) {
+    if (isPaidPlan && (!monthly || !yearly)) {
       throw new Error(
         `Missing Dodo product mapping for paid plan '${plan.id}'. ` +
           `Set product metadata (planId/plan_id) for monthly/yearly products, ` +
@@ -153,7 +223,7 @@ async function resolvePlanDataWithDodoProducts(
       dodoPriceIdMonthly: monthly,
       dodoPriceIdYearly: yearly,
     };
-  });
+  }));
 }
 
 async function ensureBillingTables() {
