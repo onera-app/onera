@@ -353,7 +353,7 @@ export function Sidebar() {
       <nav
         id="sidebar"
         className={cn(
-          "flex flex-col h-full transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] flex-shrink-0 bg-sidebar-background/95 backdrop-blur-xl border-r border-[var(--chat-divider)]",
+          "flex flex-col h-full transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] flex-shrink-0 bg-sidebar-background/95 backdrop-blur-xl",
           // Mobile: fixed overlay that slides in from left
           "fixed md:relative z-40 md:z-20",
           // Width handling
@@ -367,10 +367,9 @@ export function Sidebar() {
         }}
       >
         {/* Content */}
-        <div className="h-full overflow-y-auto overflow-x-hidden">
-          <div className="flex flex-col min-h-full">
+        <div className="flex flex-col h-full overflow-hidden">
           {/* Header - OpenWebUI style */}
-          <header className="flex items-center justify-between px-4 h-14 border-b border-[var(--chat-divider)]">
+          <header className="flex items-center justify-between px-4 h-14">
             <Link to="/app" className="flex items-center gap-2 group">
               <div className="w-7 h-7 rounded-full overflow-hidden">
                 <OneraLogo size={30} />
@@ -436,8 +435,8 @@ export function Sidebar() {
             )}
           </div>
 
-          {/* Main Content */}
-          <div className="flex-1 px-3 mt-3">
+          {/* Main Content (scrollable) */}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 mt-3">
             <div className="pb-4">
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-16 gap-3">
@@ -629,7 +628,7 @@ export function Sidebar() {
 
           {/* User Profile Section - Apple style: clean, no dividers */}
           {user && (
-            <div className="px-2.5 pb-2.5 pt-1 mt-auto">
+            <div className="px-2.5 pb-2.5 pt-2 border-t border-[var(--chat-divider)]">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-3 w-full px-2 py-2 rounded-xl hover:bg-foreground/[0.06] active:scale-[0.98] transition-all duration-150 ease-out text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background">
@@ -719,7 +718,6 @@ export function Sidebar() {
               </DropdownMenu>
             </div>
           )}
-          </div>
         </div>
       </nav>
 

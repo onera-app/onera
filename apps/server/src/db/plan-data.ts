@@ -13,8 +13,6 @@ export const planData = [
     storageLimitMb: 1000,
     maxEnclaves: 0,
     features: {
-      voiceCalls: true,
-      voiceInput: true,
       prioritySupport: false,
       dedicatedEnclaves: false,
       customEndpoints: true,
@@ -36,8 +34,6 @@ export const planData = [
     storageLimitMb: 2000,
     maxEnclaves: 0,
     features: {
-      voiceCalls: true,
-      voiceInput: true,
       prioritySupport: false,
       dedicatedEnclaves: false,
       customEndpoints: true,
@@ -59,8 +55,6 @@ export const planData = [
     storageLimitMb: 20000,
     maxEnclaves: 0,
     features: {
-      voiceCalls: true,
-      voiceInput: true,
       prioritySupport: false,
       dedicatedEnclaves: true,
       customEndpoints: true,
@@ -82,8 +76,6 @@ export const planData = [
     storageLimitMb: 20000,
     maxEnclaves: -1,
     features: {
-      voiceCalls: true,
-      voiceInput: true,
       prioritySupport: true,
       dedicatedEnclaves: true,
       customEndpoints: true,

@@ -87,8 +87,6 @@ function getHardcodedFreeEntitlements(): Entitlements {
     storageLimitMb: 1000,
     maxEnclaves: 0,
     features: {
-      voiceCalls: true,
-      voiceInput: true,
       prioritySupport: false,
       dedicatedEnclaves: false,
       customEndpoints: true,

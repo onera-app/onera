@@ -92,7 +92,7 @@ const tabs: Tab[] = [
     id: 'audio',
     label: 'Audio',
     icon: Volume2,
-    keywords: ['voice', 'speech', 'tts', 'stt', 'text to speech'],
+    keywords: ['audio', 'tts', 'text to speech'],
     component: AudioTab,
   },
   {

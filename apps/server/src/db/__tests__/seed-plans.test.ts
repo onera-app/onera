@@ -27,8 +27,6 @@ describe("Plan Seed Data", () => {
 
   it("should have valid feature flags on all plans", () => {
     const requiredFeatures = [
-      "voiceCalls",
-      "voiceInput",
       "prioritySupport",
       "dedicatedEnclaves",
       "customEndpoints",
@@ -46,8 +44,6 @@ describe("Plan Seed Data", () => {
 
   it("should have correct features on free plan", () => {
     const free = planData.find((p) => p.id === "free")!;
-    expect(free.features.voiceCalls).toBe(true);
-    expect(free.features.voiceInput).toBe(true);
     expect(free.features.customEndpoints).toBe(true);
     expect(free.features.dedicatedEnclaves).toBe(false);
     expect(free.features.largeModels).toBe(false);

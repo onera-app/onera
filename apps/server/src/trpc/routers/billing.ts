@@ -272,18 +272,6 @@ export const billingRouter = router({
         });
       }
 
-      const priceId =
-        input.billingInterval === "monthly"
-          ? targetPlan.dodoPriceIdMonthly
-          : targetPlan.dodoPriceIdYearly;
-
-      if (!priceId) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Target plan pricing not configured",
-        });
-      }
-
       // Get current plan to compare prices
       const [currentPlan] = await db
         .select()
@@ -294,8 +282,21 @@ export const billingRouter = router({
       const currentTier = currentPlan?.tier ?? 0;
       const targetTier = targetPlan.tier;
       const isDowngrade = targetTier < currentTier;
+      const priceId =
+        input.billingInterval === "monthly"
+          ? targetPlan.dodoPriceIdMonthly
+          : targetPlan.dodoPriceIdYearly;
 
       if (isDowngrade) {
+        // Free plan is a valid downgrade target and has no Dodo product ID.
+        // Paid downgrade targets must be configured in Dodo.
+        if (targetPlan.id !== "free" && !priceId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Target plan pricing not configured",
+          });
+        }
+
         // Downgrade: schedule for end of billing period, don't change Dodo plan yet
         await db
           .update(subscriptions)
@@ -307,6 +308,13 @@ export const billingRouter = router({
           .where(eq(subscriptions.userId, ctx.user.id));
 
         return { success: true, pendingDowngrade: true };
+      }
+
+      if (!priceId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Target plan pricing not configured",
+        });
       }
 
       // Upgrade: apply immediately via Dodo

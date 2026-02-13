@@ -42,10 +42,8 @@ const featureLabels: Record<string, string> = {
 };
 
 // Features included in all plans — not shown as differentiators
-const universalFeatures = new Set(["voiceCalls", "largeModels"]);
+const universalFeatures = new Set(["largeModels"]);
 const removedFeatureKeys = new Set([
-  "voiceInput",
-  "voiceCalls",
   "customEndpoints",
   "largeModels",
   "dedicatedEnclaves",
