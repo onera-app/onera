@@ -36,7 +36,7 @@ export function ComparisonSection() {
           <p className="mx-auto inline-flex rounded-full border border-white/70 bg-white/50 px-5 py-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg text-[#5f5a58]">
             Privacy mode explained
           </p>
-          <h2 className="mt-7 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[2.4rem] font-semibold leading-[1.08] tracking-tight text-[#2f2c2c] md:text-[4.2rem]">
+          <h2 className="mt-7 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-4xl font-semibold leading-[1.08] tracking-tight text-[#2f2c2c] md:text-6xl">
             One switch. Different exposure.
           </h2>
           <p className="mx-auto mt-6 max-w-[680px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl leading-relaxed text-[#6f6a67]">

@@ -85,7 +85,7 @@ export function PrivacySection() {
                   {/* Your prompt */}
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/4 sm:-translate-x-1/3 z-10">
                     <div className="size-14 sm:size-16 rounded-2xl bg-white flex items-center justify-center shadow-lg shadow-white/5">
-                      <span className="font-bold text-neutral-900 text-[9px] sm:text-[10px] text-center leading-tight">
+                      <span className="font-bold text-neutral-900 text-xs sm:text-xs text-center leading-tight">
                         YOUR
                         <br />
                         PROMPT
@@ -110,7 +110,7 @@ export function PrivacySection() {
                   {/* Secure enclave */}
                   <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/4 sm:translate-x-1/3 z-10">
                     <div className="size-14 sm:size-16 rounded-2xl bg-emerald-950 border border-emerald-800/60 flex items-center justify-center shadow-lg">
-                      <span className="font-mono text-emerald-400 text-[9px] sm:text-[10px] text-center leading-tight">
+                      <span className="font-mono text-emerald-400 text-xs sm:text-xs text-center leading-tight">
                         SECURE
                         <br />
                         ENCLAVE

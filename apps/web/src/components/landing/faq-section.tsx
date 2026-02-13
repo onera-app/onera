@@ -46,7 +46,7 @@ export function FAQSection() {
           <p className="mx-auto inline-flex rounded-full border border-white/70 bg-white/50 px-4 py-1.5 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm text-[#615b58] sm:px-5 sm:py-2 sm:text-lg">
             FAQ
           </p>
-          <h2 className="mt-6 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[1.9rem] font-semibold leading-[1.08] tracking-tight text-[#2c2a2a] sm:mt-7 sm:text-[2.4rem] md:text-[4.2rem]">
+          <h2 className="mt-6 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-3xl font-semibold leading-[1.08] tracking-tight text-[#2c2a2a] sm:mt-7 sm:text-4xl md:text-6xl">
             Frequently asked questions
           </h2>
         </div>

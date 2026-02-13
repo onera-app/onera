@@ -136,17 +136,13 @@ export function Hero() {
   return (
     <section id="home" className="px-4 pb-10 pt-24 sm:px-5 sm:pb-12 sm:pt-28 md:px-8 md:pt-36">
       <div className="mx-auto max-w-[1180px] text-center">
-        <p className="mx-auto inline-flex items-center rounded-full border border-white/60 bg-white/40 px-4 py-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm text-[#4f4a47] shadow-[0_8px_30px_rgba(95,89,83,0.08)] backdrop-blur sm:px-6 sm:py-3 sm:text-base md:text-lg">
-          Alpha is live
-        </p>
-
-        <h1 className="mx-auto mt-8 max-w-[920px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[2rem] font-semibold leading-[1.08] tracking-tight text-[#2b2929] sm:mt-10 sm:text-[2.8rem] md:text-[5.2rem]">
+        <h1 className="mx-auto max-w-[920px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-3xl font-semibold leading-[1.08] tracking-tight text-[#2b2929] sm:text-5xl md:text-7xl">
           Protect your data.
           <br />
           Keep your productivity.
         </h1>
 
-        <p className="mx-auto mt-6 max-w-[640px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base leading-relaxed text-[#706b68] sm:mt-8 sm:text-lg md:text-[1.8rem]">
+        <p className="mx-auto mt-6 max-w-[640px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base leading-relaxed text-[#706b68] sm:mt-8 sm:text-lg md:text-3xl">
           Onera gives you secure AI chat with end-to-end encryption, passkeys,
           and control over which models you use.
         </p>

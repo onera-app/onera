@@ -24,7 +24,7 @@ export function HowItWorks() {
           <p className="mx-auto inline-flex rounded-full border border-white/60 bg-white/40 px-4 py-1.5 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm text-[#5f5b59] sm:px-5 sm:py-2 sm:text-lg">
             How it works
           </p>
-          <h2 className="mt-5 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[1.9rem] font-semibold leading-[1.08] tracking-tight text-[#2d2b2a] sm:mt-6 sm:text-[2.4rem] md:text-[4.2rem]">
+          <h2 className="mt-5 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-3xl font-semibold leading-[1.08] tracking-tight text-[#2d2b2a] sm:mt-6 sm:text-4xl md:text-6xl">
             Start securely in three steps
           </h2>
         </div>

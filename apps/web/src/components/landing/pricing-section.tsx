@@ -11,7 +11,7 @@ export function PricingSection() {
     <section id="pricing" className="px-4 py-8 pb-20 sm:px-5 sm:pb-24 md:px-8 md:py-12 md:pb-28">
       <div className="mx-auto grid max-w-[1180px] gap-6 md:grid-cols-[1fr_0.72fr]">
         <article className="relative overflow-hidden rounded-[28px] bg-[#d9e8fa] p-6 sm:rounded-[34px] sm:p-8 md:p-10">
-          <h2 className="max-w-[420px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[1.9rem] font-semibold leading-[1.08] tracking-tight text-[#2a2b31] sm:text-[2.4rem] md:text-[4rem]">
+          <h2 className="max-w-[420px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-3xl font-semibold leading-[1.08] tracking-tight text-[#2a2b31] sm:text-4xl md:text-6xl">
             Start in minutes
           </h2>
 
@@ -44,13 +44,13 @@ export function PricingSection() {
         </article>
 
         <article className="rounded-[28px] bg-[#1f1f20] p-6 text-white sm:rounded-[34px] sm:p-8 md:p-10">
-          <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[1.9rem] font-semibold leading-[1.08] tracking-tight sm:text-[2.4rem] md:text-[4rem]">
+          <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-3xl font-semibold leading-[1.08] tracking-tight sm:text-4xl md:text-6xl">
             Private AI.
             <br />
             Simple pricing.
           </p>
 
-          <p className="mt-6 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[3.8rem] font-semibold leading-none sm:mt-8 sm:text-[5rem] md:text-[7rem]">
+          <p className="mt-6 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-6xl font-semibold leading-none sm:mt-8 sm:text-7xl md:text-9xl">
             $0
           </p>
 

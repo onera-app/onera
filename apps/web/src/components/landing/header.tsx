@@ -11,7 +11,7 @@ export function Header() {
       <div className="mx-auto flex h-16 w-full max-w-[1180px] items-center justify-between px-4 sm:h-20 sm:px-5 md:h-24 md:px-8">
         <Link to="/" className="flex items-center gap-3">
           <OneraLogo size={34} className="rounded-xl" />
-          <span className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl font-semibold leading-none tracking-tight text-[#2f2d2d] sm:text-2xl md:text-[2rem]">
+          <span className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl font-semibold leading-none tracking-tight text-[#2f2d2d] sm:text-2xl md:text-3xl">
             Onera
           </span>
         </Link>
