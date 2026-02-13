@@ -343,7 +343,7 @@ export function Sidebar() {
       {/* Mobile overlay backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 md:hidden animate-in fade-in duration-300"
+          className="fixed inset-0 bg-background/60 backdrop-blur-sm z-30 md:hidden animate-in fade-in duration-300"
           onClick={toggleSidebar}
           aria-hidden="true"
         />
@@ -369,11 +369,11 @@ export function Sidebar() {
         <div className="flex flex-col h-full">
           {/* Header - OpenWebUI style */}
           <header className="flex items-center justify-between px-4 h-14 border-b border-[var(--chat-divider)]">
-            <Link to="/app" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-full overflow-hidden">
-                <OneraLogo size={32} />
+            <Link to="/app" className="flex items-center gap-2 group">
+              <div className="w-7 h-7 rounded-full overflow-hidden">
+                <OneraLogo size={30} />
               </div>
-              <span className="font-medium text-base text-sidebar-foreground tracking-tight">
+              <span className="font-semibold text-base text-sidebar-foreground tracking-tight">
                 Onera
               </span>
             </Link>
@@ -394,31 +394,31 @@ export function Sidebar() {
           </header>
 
           {/* Navigation Menu - OpenWebUI style, tighter spacing */}
-          <div className="px-3 py-1">
+          <div className="px-3 py-1.5">
             {/* New Chat */}
             <Link
               to="/app"
-              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground hover:text-sidebar-foreground group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background"
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground hover:text-sidebar-foreground group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-[17px] w-[17px]" />
               <span className="text-sm">New Chat</span>
             </Link>
 
             {/* Search */}
             <button
               onClick={() => setSearchModalOpen(true)}
-              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground hover:text-sidebar-foreground group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background"
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground hover:text-sidebar-foreground group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background"
             >
-              <Search className="h-4 w-4" />
+              <Search className="h-[17px] w-[17px]" />
               <span className="text-sm">Search</span>
             </button>
 
             {/* Notes */}
             <Link
               to="/app/notes"
-              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground hover:text-sidebar-foreground group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background"
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground hover:text-sidebar-foreground group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background"
             >
-              <FileText className="h-4 w-4" />
+              <FileText className="h-[17px] w-[17px]" />
               <span className="text-sm">Notes</span>
             </Link>
 
@@ -426,9 +426,9 @@ export function Sidebar() {
             {isAdmin && (
               <Link
                 to="/app/admin"
-                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground hover:text-sidebar-foreground group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground hover:text-sidebar-foreground group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background"
               >
-                <Shield className="h-4 w-4" />
+                <Shield className="h-[17px] w-[17px]" />
                 <span className="text-sm">Admin</span>
               </Link>
             )}
@@ -445,10 +445,10 @@ export function Sidebar() {
               ) : chats.length === 0 && foldersWithState.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
                   <MessageSquare className="w-8 h-8 text-sidebar-foreground/40 mb-3" />
-                  <p className="text-sm text-sidebar-foreground/80 mb-1">
+                  <p className="text-base text-sidebar-foreground/80 mb-1">
                     No conversations yet
                   </p>
-                  <p className="text-xs text-sidebar-foreground/65">
+                  <p className="text-sm text-sidebar-foreground/65">
                     Start a new chat to begin
                   </p>
                 </div>
@@ -460,7 +460,7 @@ export function Sidebar() {
                     onOpenChange={setFoldersExpanded}
                   >
                     <div className="flex items-center justify-between">
-                      <CollapsibleTrigger className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background rounded-md">
+                      <CollapsibleTrigger className="flex items-center gap-1.5 px-2 py-1 text-sm font-medium text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background rounded-md">
                         <ChevronRight
                           className={cn(
                             "h-3 w-3 transition-transform duration-200",
@@ -487,7 +487,7 @@ export function Sidebar() {
                     <CollapsibleContent className="space-y-0.5 mt-1">
                       {foldersWithState.length === 0 ? (
                         <div className="py-2 px-3 ml-5">
-                          <p className="text-xs text-sidebar-foreground/65 italic">
+                          <p className="text-sm text-sidebar-foreground/65 italic">
                             No folders yet
                           </p>
                         </div>
@@ -512,7 +512,7 @@ export function Sidebar() {
                             >
                               {folderChats.length === 0 ? (
                                 <div className="py-1.5 px-3 ml-5">
-                                  <p className="text-xs text-sidebar-foreground/65 italic">
+                                  <p className="text-sm text-sidebar-foreground/65 italic">
                                     Empty
                                   </p>
                                 </div>
@@ -548,7 +548,7 @@ export function Sidebar() {
                     open={chatsExpanded}
                     onOpenChange={setChatsExpanded}
                   >
-                    <CollapsibleTrigger className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background rounded-md">
+                    <CollapsibleTrigger className="flex items-center gap-1.5 px-2 py-1 text-sm font-medium text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background rounded-md">
                       <ChevronRight
                         className={cn(
                           "h-3 w-3 transition-transform duration-200",
@@ -562,7 +562,7 @@ export function Sidebar() {
                       {/* Pinned Section */}
                       {pinnedChats.length > 0 && (
                         <div className="mb-2">
-                          <div className="flex items-center gap-1.5 px-2 py-1 text-xs text-sidebar-foreground/65">
+                          <div className="flex items-center gap-1.5 px-2 py-1 text-sm text-sidebar-foreground/65">
                             <Pin className="h-3 w-3" />
                             <span>Pinned</span>
                           </div>
@@ -588,7 +588,7 @@ export function Sidebar() {
                       {Array.from(groupedChats.entries()).map(
                         ([group, groupChats]) => (
                           <div key={group} className="mt-3">
-                            <div className="px-2 py-1 text-xs text-sidebar-foreground/65">
+                            <div className="px-2 py-1 text-sm text-sidebar-foreground/65">
                               {DATE_GROUP_LABELS[group as DateGroup]}
                             </div>
                             <div className="space-y-0.5 mt-1">
@@ -613,7 +613,7 @@ export function Sidebar() {
                       {/* Empty state */}
                       {pinnedChats.length === 0 && groupedChats.size === 0 && (
                         <div className="py-2 px-3 ml-5">
-                          <p className="text-[11px] text-sidebar-foreground/65 italic">
+                          <p className="text-sm text-sidebar-foreground/65 italic">
                             No chats yet
                           </p>
                         </div>
@@ -636,10 +636,10 @@ export function Sidebar() {
                       <img
                         src={user.imageUrl}
                         alt={user.name || "User"}
-                        className="w-9 h-9 rounded-full object-cover flex-shrink-0"
+                        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-[14px] font-semibold flex-shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-[var(--chat-pill)] flex items-center justify-center text-foreground text-base font-semibold flex-shrink-0">
                         {(user.name || user.email || "U")
                           .charAt(0)
                           .toUpperCase()}
@@ -648,12 +648,12 @@ export function Sidebar() {
 
                     {/* Name and Plan */}
                     <div className="flex-1 min-w-0">
-                      <span className="block text-[13px] font-medium text-sidebar-foreground truncate">
+                      <span className="block text-sm font-medium text-sidebar-foreground truncate">
                         {user.name || "User"}
                       </span>
                       <span
                         className={cn(
-                          "text-[11px]",
+                          "text-xs",
                           subData?.plan?.id === "privacy_max"
                             ? "text-primary"
                             : subData?.plan?.id === "pro"

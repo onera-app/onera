@@ -188,7 +188,7 @@ function ArtifactContent({ artifact, isEditable, onSave }: ArtifactContentProps)
         <div className="rounded-lg border border-border overflow-hidden">
           <iframe
             srcDoc={artifact.content}
-            className="w-full min-h-[400px] bg-white"
+            className="w-full min-h-[400px] bg-background"
             sandbox="allow-scripts"
             title={artifact.title}
           />

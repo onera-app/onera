@@ -56,7 +56,7 @@ export const MessageInput = memo(function MessageInput({
   // Use rich text input if enabled
   if (useRichTextInput) {
     return (
-      <div className="w-full max-w-5xl mx-auto">
+      <div className="w-full max-w-7xl mx-auto">
         <RichTextMessageInput
           onSend={onSend}
           disabled={disabled}
@@ -70,7 +70,7 @@ export const MessageInput = memo(function MessageInput({
 
   // Fallback to simple textarea input
   return (
-    <div className="w-full max-w-5xl mx-auto">
+    <div className="w-full max-w-7xl mx-auto">
       <SimpleMessageInput
         onSend={onSend}
         disabled={disabled}
@@ -358,7 +358,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
               "w-full bg-transparent resize-none border-0 shadow-none p-0",
               "disabled:cursor-not-allowed",
               "max-h-[150px] sm:max-h-[200px] min-h-[24px]",
-              "text-base leading-relaxed",
+              "text-base lg:text-lg leading-relaxed",
               "placeholder:text-muted-foreground text-foreground",
             )}
           />
@@ -391,7 +391,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
                   <Button
                     onClick={onStop}
                     size="icon"
-                    className="h-9 w-9 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                    className="h-10 w-10 lg:h-11 lg:w-11 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
                   >
                     <Square className="h-3.5 w-3.5 fill-current" />
                   </Button>
@@ -406,7 +406,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
                     disabled={!canSend}
                     size="icon"
                     className={cn(
-                      "h-9 w-9 rounded-full transition-colors",
+                      "h-10 w-10 lg:h-11 lg:w-11 rounded-full transition-colors",
                       canSend
                         ? "bg-foreground text-background hover:bg-foreground/90"
                         : "bg-[var(--chat-muted)] text-muted-foreground cursor-not-allowed",

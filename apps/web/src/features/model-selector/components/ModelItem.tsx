@@ -55,7 +55,7 @@ export const ModelItem = memo(function ModelItem({
       onClick={handleSelect}
       onKeyDown={handleKeyDown}
       className={cn(
-        "w-full flex items-center gap-2 mx-1.5 px-2 py-1.5 rounded-md text-left text-[13px] group cursor-pointer",
+        "w-full flex items-center gap-2 mx-1.5 px-2.5 py-2 rounded-md text-left text-sm group cursor-pointer",
         "transition-colors duration-100",
         // Use foreground opacity for theme-aware colors
         isHighlighted && "bg-foreground/10",
@@ -85,16 +85,16 @@ export const ModelItem = memo(function ModelItem({
               type="button"
               onClick={handleTogglePin}
               className={cn(
-                "h-6 w-6 flex items-center justify-center rounded transition-all duration-100",
+                "h-7 w-7 flex items-center justify-center rounded transition-all duration-100",
                 isPinned
                   ? "opacity-100 text-amber-500 hover:text-amber-600 hover:bg-foreground/10"
                   : "opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground hover:bg-foreground/10",
               )}
             >
               {isPinned ? (
-                <PinOff className="h-3 w-3" />
+                <PinOff className="h-3.5 w-3.5" />
               ) : (
-                <Pin className="h-3 w-3" />
+                <Pin className="h-3.5 w-3.5" />
               )}
             </button>
           </TooltipTrigger>
@@ -104,9 +104,9 @@ export const ModelItem = memo(function ModelItem({
         </Tooltip>
 
         {/* Selected checkmark - Apple style: simple, clean */}
-        <div className="w-5 flex items-center justify-center">
+        <div className="w-6 flex items-center justify-center">
           {isSelected && (
-            <Check className="h-3.5 w-3.5 text-primary" strokeWidth={2.5} />
+            <Check className="h-4 w-4 text-primary" strokeWidth={2.5} />
           )}
         </div>
       </div>

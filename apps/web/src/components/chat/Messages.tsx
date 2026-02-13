@@ -291,10 +291,10 @@ export const Messages = memo(function Messages({
       <div className="flex flex-col items-center justify-center h-full px-4">
         {/* Empty state - clean and minimal */}
         <div className="text-center max-w-lg mx-auto px-2">
-          <h1 className="text-[26px] sm:text-[32px] font-semibold tracking-[-0.02em] mb-2 sm:mb-3 text-foreground/90">
+          <h1 className="text-3xl sm:text-3xl font-semibold tracking-[-0.02em] mb-2 sm:mb-3 text-foreground/90">
             How can I help you today?
           </h1>
-          <p className="text-[14px] sm:text-[15px] text-muted-foreground/60 leading-relaxed">
+          <p className="text-sm sm:text-base text-muted-foreground/60 leading-relaxed">
             Start a conversation below.
           </p>
         </div>
@@ -306,7 +306,7 @@ export const Messages = memo(function Messages({
     <div className="relative h-full">
       <div ref={containerRef} className="h-full overflow-y-auto chat-scrollbar">
         {/* Messages container */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-5 md:px-6 pb-36 sm:pb-40 pt-20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-5 md:px-6 pb-36 sm:pb-40 pt-20">
           <div className="space-y-5 sm:space-y-6 md:space-y-7">
             {messages.map((message, index) => {
               const textContent = getMessageText(message);
@@ -447,7 +447,7 @@ export const Messages = memo(function Messages({
           <Button
             variant="outline"
             size="icon"
-            className="h-9 w-9 rounded-full shadow-lg bg-background/80 backdrop-blur-xl border-white/[0.08] hover:bg-background/90 hover:border-white/[0.12] hover:shadow-xl transition-all duration-200 hover:scale-105"
+            className="h-9 w-9 rounded-full shadow-lg chat-surface backdrop-blur-xl border-[var(--chat-divider)] hover:bg-[var(--chat-surface-elevated)] hover:shadow-xl transition-all duration-200 hover:scale-105"
             onClick={() => scrollToBottom("smooth")}
           >
             <ArrowDown className="h-4 w-4 text-muted-foreground" />

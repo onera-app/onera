@@ -119,7 +119,7 @@ Delete this file after storing the phrase safely.
                   )}
                   style={{ animationDelay: `${index * 30}ms` }}
                 >
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-primary/10 text-[10px] font-semibold tabular-nums text-primary">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-primary/10 text-xs font-semibold tabular-nums text-primary">
                     {index + 1}
                   </span>
                   <span className="font-mono text-xs font-medium tracking-tight truncate">

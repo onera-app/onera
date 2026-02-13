@@ -143,24 +143,24 @@ export function FolderItem({
                 }}
                 onBlur={handleSaveEdit}
                 placeholder="Folder name"
-                className="w-full h-9 px-3 rounded-lg bg-sidebar-accent text-sm text-sidebar-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring transition-all"
+                className="w-full h-10 lg:h-11 px-3.5 rounded-lg bg-sidebar-accent text-base lg:text-base text-sidebar-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring transition-all"
               />
             </div>
           ) : (
             <CollapsibleTrigger asChild>
               <button
                 className={cn(
-                'flex items-center gap-2 w-full py-2 px-2.5 rounded-xl text-left',
+                'flex items-center gap-2.5 w-full py-2.5 lg:py-3 px-3 rounded-xl text-left',
                   'text-sidebar-foreground/75 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring'
                 )}
               >
                 <ChevronRight
                   className={cn(
-                    'h-3.5 w-3.5 text-sidebar-foreground/65 transition-transform duration-200 flex-shrink-0',
+                    'h-4 w-4 text-sidebar-foreground/65 transition-transform duration-200 flex-shrink-0',
                     isExpanded && 'rotate-90'
                   )}
                 />
-                <span className="flex-1 text-sm truncate">{name}</span>
+                <span className="flex-1 text-base lg:text-base truncate">{name}</span>
               </button>
             </CollapsibleTrigger>
           )}

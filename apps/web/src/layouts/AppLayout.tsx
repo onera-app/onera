@@ -68,7 +68,7 @@ export function AppLayout() {
   if (state.kind === "loading") {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="w-8 h-8 rounded-full border-2 border-white/[0.08] border-t-white/40 animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-[var(--chat-divider)] border-t-foreground/50 animate-spin" />
       </div>
     );
   }

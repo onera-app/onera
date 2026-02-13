@@ -176,7 +176,7 @@ export const UserMessage = memo(function UserMessage({
   if (isEditing) {
     return (
       <div className="flex justify-end animate-in fade-in-scale">
-        <div className="max-w-[85%] w-full">
+        <div className="max-w-[90%] w-full">
           <div className="relative">
             <Textarea
               ref={textareaRef}
@@ -198,7 +198,7 @@ export const UserMessage = memo(function UserMessage({
               className={cn(
                 "w-full px-4 py-3.5 rounded-xl resize-none",
                 "border-2 border-[var(--chat-focus)] bg-[var(--chat-surface-elevated)]",
-                "text-body leading-relaxed",
+                "text-base leading-relaxed",
               )}
               rows={1}
             />
@@ -237,14 +237,14 @@ export const UserMessage = memo(function UserMessage({
             onNextBranch={hasNextBranch ? onNextBranch : undefined}
           />
           {copied && (
-            <span className="text-[11px] text-emerald-500 animate-in fade-in">
+            <span className="text-xs text-emerald-500 animate-in fade-in">
               Copied!
             </span>
           )}
         </div>
 
         {/* Message content */}
-        <div className="flex flex-col items-end max-w-[85%] sm:max-w-[min(fit-content,75%)]">
+        <div className="flex flex-col items-end max-w-[90%] sm:max-w-[min(fit-content,80%)]">
           {/* Attachments/Images */}
           {images.length > 0 && (
             <div className="flex flex-row justify-end gap-2 mb-2">
@@ -300,13 +300,13 @@ export const UserMessage = memo(function UserMessage({
           {/* Text bubble - refined with subtle background, fully rounded */}
           {textContent && (
             <div className="inline-block w-fit rounded-[22px] px-4 py-2.5 text-left bg-[var(--chat-pill)] text-foreground select-text chat-soft-border">
-              <span className="whitespace-pre-wrap break-words text-[15px] leading-[1.55] tracking-[-0.01em]">
+              <span className="whitespace-pre-wrap break-words text-base lg:text-lg leading-[1.55] tracking-[-0.01em]">
                 {textContent}
               </span>
             </div>
           )}
           {edited && (
-            <span className="text-[11px] text-muted-foreground mt-1 text-right">
+            <span className="text-xs text-muted-foreground mt-1 text-right">
               edited
             </span>
           )}

@@ -281,7 +281,7 @@ export const AssistantMessage = memo(function AssistantMessage({
         >
           {/* Model name indicator */}
           {name && (
-            <span className="text-[12px] font-medium text-muted-foreground/70 tracking-[-0.01em]">
+            <span className="text-xs font-medium text-muted-foreground/70 tracking-[-0.01em]">
               {name}
             </span>
           )}
@@ -301,7 +301,7 @@ export const AssistantMessage = memo(function AssistantMessage({
           {displayContent ? (
             <div
               className={cn(
-                "text-left transition-opacity duration-200 text-[15px] leading-[1.65] tracking-[-0.01em] text-foreground/95",
+                "text-left transition-opacity duration-200 text-base lg:text-lg leading-[1.65] tracking-[-0.01em] text-foreground/95",
                 isLoading && "streaming-cursor",
               )}
             >
@@ -332,7 +332,7 @@ export const AssistantMessage = memo(function AssistantMessage({
                   onNextBranch={hasNextBranch ? onNextBranch : undefined}
                 />
                 {copied && (
-                  <span className="text-[11px] text-emerald-500 ml-1.5 animate-in fade-in">
+                  <span className="text-xs text-emerald-500 ml-1.5 animate-in fade-in">
                     Copied!
                   </span>
                 )}

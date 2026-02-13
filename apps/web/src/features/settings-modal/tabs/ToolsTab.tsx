@@ -234,7 +234,7 @@ export function ToolsTab() {
                         <Label className="text-xs font-medium">
                           Image understanding
                         </Label>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                        <p className="text-xs text-muted-foreground mt-0.5">
                           Allow Grok to analyze images from search results
                         </p>
                       </div>

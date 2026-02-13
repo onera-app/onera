@@ -54,7 +54,7 @@ export function PromptsPage() {
       <div className={cn(
         'border-r border-[var(--chat-divider)] bg-[var(--chat-surface)] flex-shrink-0 transition-all duration-200',
         // Mobile: full width or hidden
-        'w-full md:w-80',
+        'w-full md:w-88',
         // Hide on mobile when prompt is selected or creating
         !showList && 'hidden md:block'
       )}>

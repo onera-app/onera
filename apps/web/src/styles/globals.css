@@ -259,7 +259,7 @@
   .pressable {
     @apply cursor-pointer select-none transition-all duration-200;
     transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
-    @apply hover:bg-white/[0.04];
+    @apply hover:bg-[var(--chat-muted)];
     @apply active:scale-[0.97] active:opacity-80;
   }
 
@@ -278,17 +278,17 @@
 
   /* Glassmorphism Utilities - refined for Apple aesthetic (increased opacity for better visibility) */
   .glass-panel {
-    @apply bg-white/[0.08] backdrop-blur-2xl border border-white/[0.12] shadow-2xl;
+    @apply bg-[var(--chat-surface)] backdrop-blur-2xl border border-[var(--chat-divider)] shadow-2xl;
   }
 
   .glass-button {
-    @apply bg-white/[0.08] border border-white/[0.15] backdrop-blur-xl transition-all duration-200 ease-out cursor-pointer select-none;
-    @apply hover:bg-white/[0.15];
-    @apply active:bg-white/[0.08] active:scale-[0.97];
+    @apply bg-[var(--chat-surface)] border border-[var(--chat-divider)] backdrop-blur-xl transition-all duration-200 ease-out cursor-pointer select-none;
+    @apply hover:bg-[var(--chat-muted)];
+    @apply active:bg-[var(--chat-surface)] active:scale-[0.97];
   }
 
   .glass-input {
-    @apply bg-white/[0.08] border-white/[0.15] focus:border-white/[0.25] focus:ring-white/[0.12] backdrop-blur-xl transition-all duration-200;
+    @apply bg-[var(--chat-surface)] border-[var(--chat-divider)] focus:border-[var(--chat-focus)] focus:ring-[var(--chat-focus)] backdrop-blur-xl transition-all duration-200;
   }
 
   /* Glow Effects */

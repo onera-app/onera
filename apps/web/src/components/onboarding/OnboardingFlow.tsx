@@ -57,8 +57,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     >
       {/* Background decoration */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -left-1/4 -top-1/4 h-1/2 w-1/2 rounded-full bg-white/5 blur-3xl" />
-        <div className="absolute -bottom-1/4 -right-1/4 h-1/2 w-1/2 rounded-full bg-black/5 blur-3xl" />
+        <div className="absolute -left-1/4 -top-1/4 h-1/2 w-1/2 rounded-full bg-[var(--chat-muted)]/25 blur-3xl" />
+        <div className="absolute -bottom-1/4 -right-1/4 h-1/2 w-1/2 rounded-full bg-[var(--chat-muted)]/20 blur-3xl" />
       </div>
 
       <div className="relative w-full max-w-lg rounded-3xl chat-surface-elevated p-6 sm:p-8">

@@ -217,10 +217,10 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
     editorProps: {
       attributes: {
         class: cn(
-          "prose prose-sm dark:prose-invert max-w-none",
+          "prose prose-base dark:prose-invert max-w-none",
           "focus:outline-none min-h-[24px] max-h-[200px]",
           "[&_p]:my-0 [&_code]:bg-muted [&_code]:px-1 [&_code]:rounded",
-          "[&_pre]:bg-muted [&_pre]:p-2 [&_pre]:rounded-lg [&_pre]:text-sm",
+          "[&_pre]:bg-muted [&_pre]:p-2 [&_pre]:rounded-lg [&_pre]:text-base",
           "overflow-y-auto",
         ),
       },
@@ -520,7 +520,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
                   <Button
                     onClick={onStop}
                     size="icon"
-                    className="h-9 w-9 rounded-2xl bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 shadow-md"
+                    className="h-10 w-10 lg:h-11 lg:w-11 rounded-2xl bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 shadow-md"
                   >
                     <Square className="h-3.5 w-3.5 fill-current" />
                   </Button>
@@ -535,7 +535,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
                     disabled={!canSend || disabled}
                     size="icon"
                     className={cn(
-                      "h-9 w-9 rounded-2xl transition-all duration-200 shadow-md",
+                      "h-10 w-10 lg:h-11 lg:w-11 rounded-2xl transition-all duration-200 shadow-md",
                       canSend && !disabled
                         ? "bg-foreground text-background hover:bg-foreground/90 hover:scale-105"
                         : "bg-[var(--chat-muted)] text-muted-foreground cursor-not-allowed",

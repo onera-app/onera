@@ -230,7 +230,7 @@ export function ConnectionsTab() {
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground hover:text-primary hover:underline mt-1"
+                            className="inline-flex items-center gap-0.5 text-xs text-muted-foreground hover:text-primary hover:underline mt-1"
                           >
                             Get API Key <ExternalLink className="w-2 h-2" />
                           </a>

@@ -176,7 +176,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                   placeholder="Search conversations..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-12 pl-12 pr-12 rounded-xl bg-muted border border-border text-foreground text-[15px] placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-all"
+                  className="w-full h-12 pl-12 pr-12 rounded-xl bg-muted border border-border text-foreground text-base placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-all"
                 />
                 {searchQuery && (
                   <button
@@ -274,13 +274,13 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             <div className="px-4 py-3 border-t border-border">
               <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1.5">
-                  <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-[10px]">
+                  <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-xs">
                     ↵
                   </kbd>
                   <span>open</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-[10px]">
+                  <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-xs">
                     esc
                   </kbd>
                   <span>close</span>
@@ -294,7 +294,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             {selectedChat ? (
               <div className="flex-1 flex flex-col p-5">
                 {/* Chat icon */}
-                <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mb-4">
+                <div className="w-12 h-12 rounded-xl chat-surface flex items-center justify-center mb-4">
                   <MessageSquare className="h-5 w-5 text-muted-foreground" />
                 </div>
 

@@ -169,13 +169,13 @@ export function HomePage() {
 
       {/* Centered welcome content */}
       <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 pt-14 sm:pt-12 min-w-0 w-full">
-        <div className="w-full max-w-2xl min-w-0">
+        <div className="w-full max-w-3xl min-w-0">
           {/* Brand mark */}
           <div className="text-center mb-8 sm:mb-10">
-            <h1 className="text-[26px] sm:text-[32px] font-semibold tracking-[-0.02em] mb-2 sm:mb-3 text-foreground/90">
+            <h1 className="text-3xl sm:text-3xl font-semibold tracking-[-0.02em] mb-2 sm:mb-3 text-foreground/90">
               What can I help with?
             </h1>
-            <p className="text-muted-foreground/70 text-[14px] sm:text-[15px] leading-relaxed">
+            <p className="text-muted-foreground/70 text-sm sm:text-base leading-relaxed">
               Your conversations are end-to-end encrypted
             </p>
           </div>
@@ -184,10 +184,10 @@ export function HomePage() {
           {!canChat && !isLoading && isUnlocked && (
             <Alert className="mb-6 sm:mb-8 chat-surface border-[var(--chat-divider)] rounded-2xl">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
-              <AlertTitle className="text-foreground text-[14px] sm:text-[15px]">
+              <AlertTitle className="text-foreground text-sm sm:text-base">
                 No Models Available
               </AlertTitle>
-              <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-muted-foreground text-[13px] sm:text-[14px]">
+              <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-muted-foreground text-sm sm:text-sm">
                 <span>Add an API key to start chatting with AI models.</span>
                 <Button
                   variant="link"
@@ -223,7 +223,7 @@ export function HomePage() {
 
       {/* Footer - minimal */}
       <footer className="px-4 py-4 sm:py-5 text-center w-full">
-        <p className="text-[11px] text-muted-foreground/50 flex items-center justify-center gap-1.5">
+        <p className="text-xs text-muted-foreground/50 flex items-center justify-center gap-1.5">
           <Lock className="h-3 w-3" />
           End-to-end encrypted
         </p>

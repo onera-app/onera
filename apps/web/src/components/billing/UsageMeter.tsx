@@ -29,8 +29,8 @@ export function UsageMeter({
     <div className="space-y-2">
       {/* Label and Value */}
       <div className="flex items-center justify-between">
-        <span className="text-[13px] text-foreground">{label}</span>
-        <span className="text-[13px] text-muted-foreground">
+        <span className="text-sm text-foreground">{label}</span>
+        <span className="text-sm text-muted-foreground">
           {isUnlimited ? (
             <>
               {used.toLocaleString()} {unit}

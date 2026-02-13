@@ -47,7 +47,7 @@ export const ChatNavbar = memo(function ChatNavbar({
           className="text-muted-foreground hover:text-foreground hover:bg-foreground/[0.06] hidden sm:flex h-8 px-3 rounded-xl transition-all duration-200 gap-1.5"
         >
           <Plus className="h-4 w-4" />
-          <span className="text-[13px]">New</span>
+          <span className="text-sm">New</span>
         </Button>
 
         <Button

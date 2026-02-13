@@ -44,7 +44,7 @@ export function AdminLayout() {
   return (
     <div className="flex h-full" style={{ background: "var(--chat-shell-bg)" }}>
       {/* Admin Sidebar */}
-      <aside className="w-56 flex-shrink-0 border-r border-[var(--chat-divider)] bg-[var(--chat-surface)] p-4 space-y-1">
+      <aside className="w-60 flex-shrink-0 border-r border-[var(--chat-divider)] bg-[var(--chat-surface)] p-4 space-y-1">
         <div className="flex items-center gap-2 mb-6">
           <Button variant="ghost" size="icon-sm" asChild>
             <Link to="/app">

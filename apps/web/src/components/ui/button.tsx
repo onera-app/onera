@@ -18,7 +18,7 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 hover:-translate-y-0.5",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        glass: "glass-button text-foreground hover:text-primary hover:bg-white/10",
+        glass: "glass-button text-foreground hover:text-primary hover:bg-[var(--chat-muted)]",
       },
       size: {
         default: "h-10 px-5 py-2",

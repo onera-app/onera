@@ -103,7 +103,7 @@ export const ChatItem = memo(function ChatItem({
 
     const dragImage = document.createElement("div");
     dragImage.className =
-      "px-3 py-2 bg-card rounded-lg text-sm text-foreground shadow-lg max-w-[200px] truncate";
+      "px-3 py-2 bg-card rounded-lg text-base text-foreground shadow-lg max-w-[220px] truncate";
     dragImage.textContent =
       title.length > 30 ? title.slice(0, 30) + "..." : title;
     dragImage.style.position = "absolute";
@@ -133,7 +133,7 @@ export const ChatItem = memo(function ChatItem({
             if (e.key === "Escape") handleCancelEdit();
           }}
           onBlur={handleCancelEdit}
-          className="w-full h-9 px-3 rounded-lg bg-sidebar-accent text-sm text-sidebar-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring transition-colors"
+          className="w-full h-10 lg:h-11 px-3.5 rounded-lg bg-sidebar-accent text-base lg:text-base text-sidebar-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring transition-colors"
         />
       </div>
     );
@@ -155,7 +155,7 @@ export const ChatItem = memo(function ChatItem({
           params={{ chatId: id }}
           search={{ pending: false }}
           className={cn(
-            "relative flex items-center w-full h-9 px-2.5 rounded-xl text-sm transition-colors overflow-hidden",
+            "relative flex items-center w-full h-10 lg:h-11 px-3 rounded-xl text-base lg:text-base transition-colors overflow-hidden",
             isActive
               ? "bg-sidebar-accent/85 text-sidebar-foreground shadow-sm"
               : "text-sidebar-foreground/90 hover:text-sidebar-foreground hover:bg-sidebar-accent",
@@ -164,7 +164,7 @@ export const ChatItem = memo(function ChatItem({
         >
           {/* Lock indicator */}
           {isLocked && (
-            <Lock className="w-3.5 h-3.5 mr-2 flex-shrink-0 text-sidebar-foreground/60" />
+            <Lock className="w-4 h-4 mr-2 flex-shrink-0 text-sidebar-foreground/60" />
           )}
 
           {/* Title container */}
