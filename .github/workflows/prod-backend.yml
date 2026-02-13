@@ -47,6 +47,8 @@ jobs:
         working-directory: apps/server
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DODO_PAYMENTS_API_KEY: ${{ secrets.DODO_PAYMENTS_API_KEY }}
+          DODO_PAYMENTS_ENV: live_mode
         run: bun run db:seed-plans
 
       - name: Prepare deployment package
@@ -97,10 +99,12 @@ jobs:
         env:
           DODO_API_KEY: ${{ secrets.DODO_PAYMENTS_API_KEY }}
           DODO_WEBHOOK_SECRET: ${{ secrets.DODO_PAYMENTS_WEBHOOK_SECRET }}
+          DODO_ENV: live_mode
         run: |
           az webapp config appsettings set \
             --name onera-backend \
             --resource-group onera \
             --settings \
               DODO_PAYMENTS_API_KEY="$DODO_API_KEY" \
-              DODO_PAYMENTS_WEBHOOK_SECRET="$DODO_WEBHOOK_SECRET"
+              DODO_PAYMENTS_WEBHOOK_SECRET="$DODO_WEBHOOK_SECRET" \
+              DODO_PAYMENTS_ENV="$DODO_ENV"
