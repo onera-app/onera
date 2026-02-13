@@ -1,65 +1,50 @@
-import { ArrowDown } from "lucide-react";
-
 const steps = [
   {
-    number: "01",
-    title: "Start a chat",
-    description:
-      "Open the app and start typing. No sign-up required for basic usage.",
+    step: "01",
+    title: "Create your account",
+    detail: "Sign up and secure your account with a passkey.",
   },
   {
-    number: "02",
-    title: "Encryption in flight",
-    description:
-      "Your message is encrypted on your device before it ever hits the network.",
+    step: "02",
+    title: "Start chatting",
+    detail: "Use AI in a private workspace built for real tasks.",
   },
   {
-    number: "03",
-    title: "Secure Enclave",
-    description:
-      "The message is decrypted only inside a hardware enclave where code is verified.",
-  },
-  {
-    number: "04",
-    title: "Blind Processing",
-    description:
-      "The AI generates a response, which is immediately re-encrypted for your device.",
+    step: "03",
+    title: "Stay synced",
+    detail: "Access conversations across devices with protected sync.",
   },
 ];
 
 export function HowItWorks() {
   return (
-    <section
-      id="how-it-works"
-      className="py-32 px-4 overflow-hidden bg-white dark:bg-background"
-    >
-      <div className="max-w-[980px] mx-auto">
-        <div className="mb-24">
-          <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-neutral-900 dark:text-white mb-8">
+    <section id="how-it-works" className="px-5 py-16 md:px-8 md:py-24">
+      <div className="mx-auto max-w-[1180px] rounded-[42px] bg-[#ecebe8] px-7 py-12 md:px-10 md:py-16">
+        <div className="mx-auto max-w-[760px] text-center">
+          <p className="mx-auto inline-flex rounded-full border border-white/60 bg-white/40 px-5 py-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg text-[#5f5b59]">
             How it works
+          </p>
+          <h2 className="mt-6 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[2.4rem] font-semibold leading-[1.08] tracking-tight text-[#2d2b2a] md:text-[4.2rem]">
+            Start securely in three steps
           </h2>
-          <div className="h-px w-full bg-neutral-200 dark:bg-neutral-800" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16">
-          {steps.map((step, i) => (
-            <div key={i} className="relative group">
-              <span className="block text-6xl md:text-7xl font-bold text-neutral-200 dark:text-neutral-600 mb-8 group-hover:text-neutral-300 dark:group-hover:text-neutral-500 transition-colors select-none">
-                {step.number}
-              </span>
-              <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-4">
-                {step.title}
-              </h3>
-              <p className="text-neutral-500 dark:text-neutral-300 leading-relaxed text-sm">
-                {step.description}
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
+          {steps.map((item) => (
+            <article
+              key={item.step}
+              className="rounded-[24px] border border-[#d8d4d0] bg-[#f8f8f6] p-6"
+            >
+              <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-semibold tracking-[0.08em] text-[#88817d]">
+                STEP {item.step}
               </p>
-
-              {i < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-12 -right-4 text-neutral-200 dark:text-neutral-600">
-                  <ArrowDown className="w-6 h-6 -rotate-90" />
-                </div>
-              )}
-            </div>
+              <h3 className="mt-5 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-3xl font-semibold leading-tight text-[#2f2c2b]">
+                {item.title}
+              </h3>
+              <p className="mt-4 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg leading-relaxed text-[#6f6a68]">
+                {item.detail}
+              </p>
+            </article>
           ))}
         </div>
       </div>

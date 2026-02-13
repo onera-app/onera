@@ -1,142 +1,144 @@
 "use client";
 
-import { X, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { ArrowRight, Lock, LockOpen, ShieldCheck } from "lucide-react";
 
-const traditionalAI = [
-  "Your data trains their models",
-  "Closed-source, unverifiable claims",
-  "Conversations stored indefinitely",
-  "Data breaches expose your prompts",
-];
-
-const privateAI = [
-  "Zero data retention policy",
-  "Open-source, verifiable encryption",
-  "End-to-end encrypted storage",
-  "Hardware-secured enclaves",
+const principles = [
+  "End-to-end encryption",
+  "Passkey authentication",
+  "Private sync",
+  "Multi-provider AI support",
+  "No model training on your chats",
+  "Built for teams and individuals",
 ];
 
 export function ComparisonSection() {
+  const [isPrivateMode, setIsPrivateMode] = useState(false);
+
+  const modeLabel = isPrivateMode ? "Protected" : "Unprotected";
+  const modeTone = isPrivateMode
+    ? "border-[#bcd6c0] bg-[#e8f3ea] text-[#2f6c3b]"
+    : "border-[#c5d0e2] bg-gradient-to-b from-[#eef3fb] to-[#e5edf9] text-[#2d3a53]";
+  const exposureCopy = isPrivateMode
+    ? "In Private mode, conversation content stays protected end to end."
+    : "In standard mode, conversation content may be accessible to external services.";
+  const statusCopy = isPrivateMode
+    ? "Private mode is on: messages are encrypted and protected."
+    : "Switch to Private mode to keep conversations protected end to end.";
+  const statusTone = isPrivateMode
+    ? "border-[#bcd6c0] bg-[#e8f3ea] text-[#2f6c3b]"
+    : "border-[#bfcde0] bg-[#eaf0fa] text-[#4f5e7a]";
+
   return (
-    <section className="py-16 md:py-32">
-      <div className="mx-auto max-w-6xl px-4 md:px-6">
-        {/* Header */}
-        <div className="text-center">
-          <h2 className="text-3xl font-medium sm:text-4xl md:text-5xl lg:text-6xl text-neutral-900 dark:text-white">
-            Traditional AI vs Private AI
+    <section id="coverage" className="px-5 py-20 md:px-8 md:py-28">
+      <div className="mx-auto max-w-[1180px] overflow-hidden rounded-[46px] bg-[#f0efec] px-6 py-14 md:px-12 md:py-20">
+        <div className="mx-auto max-w-[840px] text-center">
+          <p className="mx-auto inline-flex rounded-full border border-white/70 bg-white/50 px-5 py-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg text-[#5f5a58]">
+            Privacy mode explained
+          </p>
+          <h2 className="mt-7 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[2.4rem] font-semibold leading-[1.08] tracking-tight text-[#2f2c2c] md:text-[4.2rem]">
+            One switch. Different exposure.
           </h2>
-          <p className="mx-auto mt-4 max-w-3xl text-lg text-muted-foreground sm:mt-6 sm:text-xl">
-            The AI you use shouldn't own your data. Choose privacy and
-            transparency.
+          <p className="mx-auto mt-6 max-w-[680px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl leading-relaxed text-[#6f6a67]">
+            Onera makes privacy visible so teams can understand risk before they
+            send.
           </p>
         </div>
 
-        {/* Comparison Grid */}
-        <div className="relative mt-8 grid gap-6 sm:mt-10 md:mt-12 lg:grid-cols-2 lg:gap-10 xl:gap-14">
-          {/* Traditional AI Card */}
-          <div className="relative h-full">
-            <div className="relative aspect-[4/5] min-h-[400px] overflow-hidden rounded-2xl bg-zinc-900 sm:aspect-[0.9] sm:min-h-[480px] sm:rounded-3xl md:min-h-[520px]">
-              {/* Background Image */}
-              <img
-                src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=80"
-                alt="Traditional AI"
-                className="absolute inset-0 h-full w-full object-cover opacity-60"
-              />
-              {/* Gradient Overlay */}
-              <div className="absolute inset-x-0 bottom-0 h-[70%] bg-gradient-to-t from-black via-black/80 to-transparent" />
-
-              {/* Provider Tags */}
-              <div className="absolute left-4 top-4 flex flex-wrap gap-2 sm:left-6 sm:top-6">
-                {["ChatGPT", "Claude", "Gemini", "Copilot"].map((name) => (
-                  <span
-                    key={name}
-                    className="rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm"
-                  >
-                    {name}
-                  </span>
-                ))}
-              </div>
-
-              {/* Content */}
-              <div className="absolute bottom-0 w-full space-y-4 p-4 sm:p-6 lg:p-8 xl:p-10">
-                <h3 className="text-xl font-semibold text-white sm:text-2xl lg:text-3xl">
-                  Traditional AI
-                </h3>
-                <ul className="space-y-2 text-sm text-white/70 sm:text-base">
-                  {traditionalAI.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <X className="mt-0.5 size-4 shrink-0 text-red-400" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+        <div className="mx-auto mt-12 max-w-[980px] rounded-[36px] border border-[#d9d5d1] bg-[#f7f8f6] p-6 md:p-8">
+          <div className="flex justify-center">
+            <div className="inline-flex items-center rounded-full border border-[#cfd5df] bg-white p-1 shadow-[0_8px_24px_rgba(65,70,84,0.09)]">
+              <button
+                type="button"
+                onClick={() => setIsPrivateMode(false)}
+                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-semibold md:text-base ${
+                  !isPrivateMode
+                    ? "bg-[#2f2d2d] text-white"
+                    : "text-[#616778] hover:bg-[#f4f5f7]"
+                }`}
+                aria-pressed={!isPrivateMode}
+              >
+                <LockOpen className="h-4 w-4" />
+                Standard mode
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsPrivateMode(true)}
+                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-semibold md:text-base ${
+                  isPrivateMode
+                    ? "bg-[#2f2d2d] text-white"
+                    : "text-[#616778] hover:bg-[#f4f5f7]"
+                }`}
+                aria-pressed={isPrivateMode}
+              >
+                <Lock className="h-4 w-4" />
+                Private mode
+              </button>
             </div>
           </div>
 
-          {/* Private AI Card */}
-          <div className="relative h-full">
-            <div className="relative aspect-[4/5] min-h-[400px] overflow-hidden rounded-2xl sm:aspect-[0.9] sm:min-h-[480px] sm:rounded-3xl md:min-h-[520px]">
-              {/* Background Image */}
-              <img
-                src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&auto=format&fit=crop&q=80"
-                alt="Private AI"
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-              {/* Gradient Overlay */}
-              <div className="absolute inset-x-0 bottom-0 h-[70%] bg-gradient-to-t from-emerald-950 via-emerald-950/80 to-transparent" />
+          <div className="mt-10 grid items-center gap-4 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
+            <div className="rounded-2xl border border-[#cdc8c3] bg-white/95 p-5 text-center shadow-[0_8px_22px_rgba(71,66,60,0.06)]">
+              <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-medium text-[#636a78]">
+                Your message
+              </p>
+              <p className="mt-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg leading-snug text-[#3e3e44]">
+                "Please summarize our internal hiring plan for next quarter..."
+              </p>
+            </div>
 
-              {/* Provider Tags */}
-              <div className="absolute left-4 top-4 flex flex-wrap gap-2 sm:left-6 sm:top-6">
-                {["GPT-4o", "Claude 3.5", "Gemini Pro", "Llama 3"].map(
-                  (name) => (
-                    <span
-                      key={name}
-                      className="rounded-full bg-emerald-900/80 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm"
-                    >
-                      {name}
-                    </span>
-                  ),
-                )}
-              </div>
+            <div className="hidden justify-center md:flex">
+              <ArrowRight className="h-6 w-6 text-[#4e5563]" />
+            </div>
 
-              {/* Content */}
-              <div className="absolute bottom-0 w-full space-y-4 p-4 sm:p-6 lg:p-8 xl:p-10">
-                <h3 className="text-xl font-semibold text-white sm:text-2xl lg:text-3xl">
-                  Onera Private AI
-                </h3>
-                <ul className="space-y-2 text-sm text-white/90 sm:text-base">
-                  {privateAI.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <Check className="mt-0.5 size-4 shrink-0 text-emerald-400" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            <div
+              className={`rounded-2xl border p-5 text-center shadow-[0_8px_22px_rgba(66,82,114,0.08)] ${modeTone}`}
+            >
+              <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-medium text-[#54607a]">
+                AI processing
+              </p>
+              <p className="mt-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-2xl font-semibold">
+                {modeLabel}
+              </p>
+            </div>
+
+            <div className="hidden justify-center md:flex">
+              <ArrowRight className="h-6 w-6 text-[#4e5563]" />
+            </div>
+
+            <div className="rounded-2xl border border-[#cdc8c3] bg-white/95 p-5 text-center shadow-[0_8px_22px_rgba(71,66,60,0.06)]">
+              <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-medium text-[#636a78]">
+                Model response
+              </p>
+              <p className="mt-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg leading-snug text-[#3e3e44]">
+                "Here is a concise summary you can share with leadership..."
+              </p>
             </div>
           </div>
 
-          {/* VS Badge */}
-          <div className="absolute left-1/2 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 lg:block">
-            <div className="flex size-16 items-center justify-center rounded-full border-4 border-white bg-neutral-900 text-sm font-bold text-white shadow-xl dark:border-neutral-700 dark:bg-white dark:text-neutral-900">
-              VS
+          <p className="mt-8 text-center font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl font-medium text-[#2f3340]">
+            {exposureCopy}
+          </p>
+
+          <div className={`mt-7 rounded-3xl border px-5 py-4 ${statusTone}`}>
+            <div className="flex items-center gap-3">
+              <ShieldCheck className="h-5 w-5" />
+              <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg">
+                {statusCopy}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* CTA */}
-        <div className="mt-10 text-center sm:mt-12">
-          <Link to="/auth">
-            <Button
-              size="lg"
-              className="h-10 rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90"
+        <div className="mx-auto mt-8 flex max-w-[950px] flex-wrap justify-center gap-3">
+          {principles.map((item) => (
+            <span
+              key={item}
+              className="rounded-full border border-[#ddd9d5] bg-white px-5 py-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg text-[#4d4846] shadow-[0_8px_18px_rgba(95,89,83,0.06)]"
             >
-              Try Private AI Free
-            </Button>
-          </Link>
+              {item}
+            </span>
+          ))}
         </div>
       </div>
     </section>

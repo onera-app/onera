@@ -1,82 +1,69 @@
 import { useAuth } from "@/hooks/useAuth";
-import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 
-const features = [
-  "Unlimited inference requests",
-  "Unlimited BYOK inference",
-  "Unlimited storage",
-  "End-to-end encryption",
-  "Voice input",
-  "Voice calls",
-  "Custom API endpoints",
-  "Custom models",
-  "Large models (70B+) in TEE",
-  "Dedicated enclaves",
-];
+const setupSteps = ["Create your account", "Add a passkey", "Start private chat"];
 
 export function PricingSection() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <section
-      id="pricing"
-      className="py-16 px-4 bg-neutral-50 dark:bg-neutral-900/50"
-    >
-      <div className="max-w-[980px] mx-auto">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-neutral-900 dark:text-white mb-4">
-            Free during early access
+    <section id="pricing" className="px-5 py-8 pb-24 md:px-8 md:py-12 md:pb-28">
+      <div className="mx-auto grid max-w-[1180px] gap-6 md:grid-cols-[1fr_0.72fr]">
+        <article className="relative overflow-hidden rounded-[34px] bg-[#d9e8fa] p-8 md:p-10">
+          <h2 className="max-w-[420px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[2.4rem] font-semibold leading-[1.08] tracking-tight text-[#2a2b31] md:text-[4rem]">
+            Start in minutes
           </h2>
-          <p className="text-lg text-neutral-500 dark:text-neutral-300 max-w-2xl mx-auto text-balance">
-            All features are free while we're in early access. No credit card
-            required.
+
+          <ul className="mt-8 max-w-[420px] space-y-3">
+            {setupSteps.map((step, idx) => (
+              <li
+                key={step}
+                className="flex items-center gap-4 rounded-2xl bg-[#edf4fd] px-4 py-4 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl text-[#34363d]"
+              >
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-lg font-semibold text-[#45464d]">
+                  {idx + 1}
+                </span>
+                {step}
+              </li>
+            ))}
+          </ul>
+
+          <p className="mt-6 inline-flex rounded-full bg-white/70 px-4 py-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg text-[#555861]">
+            Free during early access.
           </p>
-        </div>
 
-        <div className="max-w-md mx-auto">
-          <div className="rounded-3xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
-            <div className="mb-6 text-center">
-              <p className="text-base font-medium text-neutral-900 dark:text-white mb-1">
-                Free
-              </p>
-              <p className="text-xs text-neutral-500 dark:text-neutral-300">
-                Encrypted AI chat — all features included
-              </p>
+          <div className="pointer-events-none absolute bottom-4 right-4 hidden h-60 w-44 rotate-[13deg] rounded-[28px] border border-[#bdc5d3] bg-[#fbfcff] p-4 shadow-[0_22px_40px_rgba(33,37,44,0.22)] md:block">
+            <div className="h-6 w-28 rounded-full bg-[#e6ebf4]" />
+            <div className="mt-4 h-24 rounded-2xl bg-[#eef3fb]" />
+            <div className="mt-4 space-y-2">
+              <div className="h-3 rounded-full bg-[#e6ebf4]" />
+              <div className="h-3 w-3/4 rounded-full bg-[#e6ebf4]" />
             </div>
-
-            <div className="flex items-baseline justify-center gap-1 mb-6">
-              <span className="text-4xl font-bold text-neutral-900 dark:text-white tracking-tight">
-                $0
-              </span>
-              <span className="text-neutral-400 font-medium">/mo</span>
-            </div>
-
-            <div className="space-y-2 mb-6">
-              {features.map((feature) => (
-                <div key={feature} className="flex items-center gap-2">
-                  <div className="flex-shrink-0 w-4 h-4 rounded-full bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center">
-                    <Check className="size-2.5 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <span className="text-neutral-600 dark:text-neutral-300 text-sm">
-                    {feature}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <Link to={isAuthenticated ? "/app" : "/auth"}>
-              <Button className="w-full h-10 rounded-full bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100 font-medium text-sm transition-transform hover:scale-[1.02]">
-                {isAuthenticated ? "Open App" : "Get Started"}
-              </Button>
-            </Link>
-
-            <p className="mt-4 text-xs text-center text-neutral-400 dark:text-neutral-300">
-              Your conversations stay private with end-to-end encryption
-            </p>
           </div>
-        </div>
+        </article>
+
+        <article className="rounded-[34px] bg-[#1f1f20] p-8 text-white md:p-10">
+          <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[2.4rem] font-semibold leading-[1.08] tracking-tight md:text-[4rem]">
+            Private AI.
+            <br />
+            Simple pricing.
+          </p>
+
+          <p className="mt-8 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[5rem] font-semibold leading-none md:text-[7rem]">
+            $0
+          </p>
+
+          <p className="mt-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl text-white/80">
+            Early access
+          </p>
+
+          <Link to={isAuthenticated ? "/app" : "/auth"}>
+            <Button className="mt-12 h-14 rounded-full bg-white px-10 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl font-medium text-[#1f1f20] hover:bg-white/90">
+              {isAuthenticated ? "Open app" : "Get started for free"}
+            </Button>
+          </Link>
+        </article>
       </div>
     </section>
   );

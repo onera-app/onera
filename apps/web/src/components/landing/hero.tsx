@@ -1,89 +1,175 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { ArrowRight, Lock, LockOpen, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+
+const quickFacts = [
+  {
+    title: "Protect your conversations",
+    detail: "End-to-end encryption keeps your chat content private.",
+  },
+  {
+    title: "Sign in securely",
+    detail: "Passkeys improve account safety without extra friction.",
+  },
+  {
+    title: "Work with any model",
+    detail: "Use top AI providers in one secure workspace.",
+  },
+];
+
+function FloatingPreview() {
+  const [isPrivateMode, setIsPrivateMode] = useState(true);
+
+  const modeTitle = isPrivateMode ? "Protected" : "Unprotected";
+  const modeTone = isPrivateMode
+    ? "border-[#bdd6c1] bg-[#e8f3ea] text-[#2f6c3b]"
+    : "border-[#c5d0e2] bg-[#eef3fb] text-[#2d3a53]";
+  const promptPreview = isPrivateMode
+    ? "\"[Encrypted] Internal workforce planning for next quarter...\""
+    : "\"Internal workforce planning and layoff scenarios for next quarter...\"";
+  const footerCopy = isPrivateMode
+    ? "Private mode on: message content is protected end to end."
+    : "Standard mode: external services may access message content.";
+
+  return (
+    <div className="relative mx-auto mt-16 w-full max-w-[980px] md:h-[620px]">
+      <div className="absolute left-1/2 top-[28%] hidden h-72 w-72 -translate-x-[82%] rounded-full bg-[#f0b9b0]/45 blur-3xl md:block" />
+      <div className="absolute left-1/2 top-[46%] hidden h-72 w-72 -translate-x-[2%] rounded-full bg-[#b8d8ba]/45 blur-3xl md:block" />
+      <div className="absolute left-1/2 top-[36%] hidden h-60 w-60 -translate-x-[36%] rounded-full bg-[#c8d9f4]/38 blur-3xl md:block" />
+
+      <article className="relative z-20 mx-auto w-[96%] rounded-[34px] border border-[#c8c4be] bg-[#f9f9f8] p-6 shadow-[0_32px_90px_rgba(40,38,36,0.14)] md:absolute md:inset-x-0 md:top-[10%] md:w-[900px] md:p-8">
+        <p className="text-center font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-medium tracking-[0.06em] text-[#66615f] uppercase">
+          Privacy Playground
+        </p>
+        <h3 className="mt-2 text-center font-['Manrope','Avenir_Next','Inter','sans-serif'] text-2xl font-semibold text-[#2f2d2d] md:text-3xl">
+          See what changes when you switch modes
+        </h3>
+
+        <div className="mt-5 flex justify-center">
+          <div className="inline-flex items-center rounded-full border border-[#cfd5df] bg-white p-1 shadow-[0_8px_24px_rgba(65,70,84,0.09)]">
+            <button
+              type="button"
+              onClick={() => setIsPrivateMode(false)}
+              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-semibold md:text-base ${
+                !isPrivateMode
+                  ? "bg-[#2f2d2d] text-white"
+                  : "text-[#616778] hover:bg-[#f4f5f7]"
+              }`}
+              aria-pressed={!isPrivateMode}
+            >
+              <LockOpen className="h-4 w-4" />
+              Standard
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsPrivateMode(true)}
+              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-semibold md:text-base ${
+                isPrivateMode
+                  ? "bg-[#2f2d2d] text-white"
+                  : "text-[#616778] hover:bg-[#f4f5f7]"
+              }`}
+              aria-pressed={isPrivateMode}
+            >
+              <Lock className="h-4 w-4" />
+              Private
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-8 grid items-center gap-4 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
+          <div className="rounded-2xl border border-[#cdc8c3] bg-white/95 p-5 text-center shadow-[0_8px_22px_rgba(71,66,60,0.06)]">
+            <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-medium text-[#636a78]">
+              Your message
+            </p>
+            <p className="mt-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base leading-snug text-[#3e3e44] md:text-lg">
+              {promptPreview}
+            </p>
+          </div>
+
+          <div className="hidden justify-center md:flex">
+            <ArrowRight className="h-6 w-6 text-[#4e5563]" />
+          </div>
+
+          <div
+            className={`rounded-2xl border p-5 text-center shadow-[0_8px_22px_rgba(66,82,114,0.08)] ${modeTone}`}
+          >
+            <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-medium">
+              AI processing
+            </p>
+            <p className="mt-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-2xl font-semibold">
+              {modeTitle}
+            </p>
+          </div>
+
+          <div className="hidden justify-center md:flex">
+            <ArrowRight className="h-6 w-6 text-[#4e5563]" />
+          </div>
+
+          <div className="rounded-2xl border border-[#cdc8c3] bg-white/95 p-5 text-center shadow-[0_8px_22px_rgba(71,66,60,0.06)]">
+            <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-medium text-[#636a78]">
+              Model response
+            </p>
+            <p className="mt-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base leading-snug text-[#3e3e44] md:text-lg">
+              "Here is a concise summary you can share with leadership..."
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-7 rounded-3xl border border-[#bfcde0] bg-[#eaf0fa] px-5 py-4 text-left">
+          <div className="flex items-center gap-3">
+            <ShieldCheck className="h-5 w-5 text-[#3e5a8a]" />
+            <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base text-[#4f5e7a] md:text-lg">
+              {footerCopy}
+            </p>
+          </div>
+        </div>
+      </article>
+    </div>
+  );
+}
 
 export function Hero() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
-      <div className="relative z-10 max-w-[980px] mx-auto px-4 flex flex-col items-center text-center">
-        <h1
-          className="text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tight text-neutral-900 dark:text-white leading-[1.05] md:leading-[1.05] animate-slide-up-fade max-w-4xl"
-          style={{ animationDelay: "100ms" }}
-        >
-          Chat with AI.
-          <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-br from-neutral-500 to-neutral-800 dark:from-neutral-200 dark:to-neutral-500">
-            Keep your privacy.
-          </span>
-        </h1>
-
-        <p
-          className="mt-8 text-xl md:text-2xl text-neutral-500 dark:text-neutral-300 max-w-2xl leading-relaxed text-balance animate-slide-up-fade"
-          style={{ animationDelay: "200ms" }}
-        >
-          Have conversations you'd never type into ChatGPT. Onera processes your
-          chats in a secure enclave where no one—not even us—can see them.
+    <section id="home" className="px-5 pb-12 pt-32 md:px-8 md:pt-36">
+      <div className="mx-auto max-w-[1180px] text-center">
+        <p className="mx-auto inline-flex items-center rounded-full border border-white/60 bg-white/40 px-6 py-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg text-[#4f4a47] shadow-[0_8px_30px_rgba(95,89,83,0.08)] backdrop-blur">
+          Alpha is live
         </p>
 
-        <div
-          className="mt-10 flex flex-col sm:flex-row items-center gap-4 animate-slide-up-fade"
-          style={{ animationDelay: "300ms" }}
-        >
-          {!isAuthenticated ? (
-            <Link to="/auth">
-              <Button
-                size="lg"
-                className="h-12 px-8 rounded-full bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100 text-lg transition-all hover:scale-105"
-              >
-                Get Started
-              </Button>
-            </Link>
-          ) : (
-            <Link to="/app">
-              <Button
-                size="lg"
-                className="h-12 px-8 rounded-full bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100 text-lg transition-all hover:scale-105"
-              >
-                Open App
-              </Button>
-            </Link>
-          )}
-        </div>
+        <h1 className="mx-auto mt-10 max-w-[920px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[2.8rem] font-semibold leading-[1.05] tracking-tight text-[#2b2929] md:text-[5.2rem]">
+          Protect your data.
+          <br />
+          Keep your productivity.
+        </h1>
 
-        {/* Secondary actions */}
-        <div
-          className="mt-8 flex items-center gap-6 animate-slide-up-fade"
-          style={{ animationDelay: "400ms" }}
-        >
-          <a
-            href="https://github.com/onera-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white transition-colors"
-          >
-            <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M12 2C6.477 2 2 6.463 2 11.97c0 4.404 2.865 8.14 6.839 9.458.5.092.682-.216.682-.48 0-.236-.008-.864-.013-1.695-2.782.602-3.369-1.337-3.369-1.337-.454-1.151-1.11-1.458-1.11-1.458-.908-.618.069-.606.069-.606 1.003.07 1.531 1.027 1.531 1.027.892 1.524 2.341 1.084 2.91.828.092-.643.35-1.083.636-1.332-2.22-.251-4.555-1.107-4.555-4.927 0-1.088.39-1.979 1.029-2.675-.103-.252-.446-1.266.098-2.638 0 0 .84-.268 2.75 1.022A9.606 9.606 0 0112 6.82c.85.004 1.705.114 2.504.336 1.909-1.29 2.747-1.022 2.747-1.022.546 1.372.202 2.386.1 2.638.64.696 1.028 1.587 1.028 2.675 0 3.83-2.339 4.673-4.566 4.92.359.307.678.915.678 1.846 0 1.332-.012 2.407-.012 2.734 0 .267.18.577.688.48C19.137 20.107 22 16.373 22 11.969 22 6.463 17.522 2 12 2z"
-              />
-            </svg>
-            GitHub
-          </a>
-          <span className="text-neutral-200 dark:text-neutral-500">·</span>
-          <a
-            href="https://apps.apple.com/us/app/onera-private-ai-chat/id6758128954"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white transition-colors"
-          >
-            <svg className="size-4" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 21.99 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.1 21.99C7.79 22.03 6.8 20.68 5.96 19.47C4.25 16.99 2.97 12.5 4.7 9.56C5.55 8.08 7.13 7.16 8.82 7.14C10.1 7.12 11.32 8.01 12.11 8.01C12.89 8.01 14.37 6.94 15.92 7.1C16.57 7.13 18.39 7.36 19.56 9.07C19.47 9.13 17.29 10.39 17.31 13.05C17.34 16.24 20.06 17.27 20.09 17.28C20.06 17.35 19.67 18.72 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.09 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z" />
-            </svg>
-            App Store
-          </a>
+        <p className="mx-auto mt-8 max-w-[640px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl leading-relaxed text-[#706b68] md:text-[1.8rem]">
+          Onera gives you secure AI chat with end-to-end encryption, passkeys,
+          and control over which models you use.
+        </p>
+
+        <Link to={isAuthenticated ? "/app" : "/auth"}>
+          <Button className="mt-10 h-14 rounded-full bg-[#2f2d2d] px-12 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl font-medium text-white hover:bg-[#1f1d1d]">
+            {isAuthenticated ? "Open app" : "Get started for free"}
+          </Button>
+        </Link>
+
+        <FloatingPreview />
+
+        <div className="mt-14 grid gap-8 border-t border-[#ddd9d6] pt-10 md:grid-cols-3">
+          {quickFacts.map((item) => (
+            <div key={item.title} className="text-center md:text-left">
+              <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-3xl font-semibold text-[#2f2d2d]">
+                {item.title}
+              </p>
+              <p className="mt-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg leading-relaxed text-[#706b68]">
+                {item.detail}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </section>

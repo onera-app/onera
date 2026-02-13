@@ -9,85 +9,64 @@ import {
 
 const faqs = [
   {
-    question: "How is this different from ChatGPT?",
+    question: "What makes Onera private?",
     answer:
-      "ChatGPT can see everything you type. Onera is built so we physically cannot access your conversations — it's not just a policy, it's how the technology works.",
+      "Onera uses end-to-end encryption and passkey authentication to protect your account and conversations.",
   },
   {
-    question: "Do I need API keys?",
+    question: "Who can access my chats?",
     answer:
-      "Nope. Just sign up and start chatting. If you want to use your own OpenAI or Anthropic keys, that's optional.",
+      "Your chats are private to you and people you explicitly choose to collaborate with.",
   },
   {
-    question: "How do I know you really can't see my chats?",
+    question: "Can I use different AI models?",
     answer:
-      "Your browser automatically verifies our servers before every session. For the technical details, check Settings after signing up.",
+      "Yes. Onera supports multiple providers so you can choose the model that fits each task.",
   },
   {
-    question: "What happens to my chat history?",
-    answer:
-      "It's encrypted with a key only you have. We store data we can't read.",
+    question: "Is setup complicated?",
+    answer: "No. Create an account, add a passkey, and start chatting.",
   },
   {
-    question: "What if I lose my recovery key?",
-    answer:
-      "We can't help you recover it — that's the point. Only you can access your data. Store your recovery key somewhere safe, like a password manager.",
+    question: "Is Onera free to try?",
+    answer: "Yes. Onera is free during early access.",
   },
   {
-    question: "What encryption do you use?",
+    question: "Can I use Onera on multiple devices?",
     answer:
-      "Industry-standard encryption (AES-256) for stored chats, plus hardware-level protection for processing. All open source.",
-  },
-  {
-    question: "Is it really free?",
-    answer:
-      "Yes, during early access. We'll add paid tiers later for power features, but basic private chat will stay accessible.",
+      "Yes. Onera supports protected sync so your chats are available wherever you sign in.",
   },
 ];
 
 export function FAQSection() {
   return (
-    <section id="faq" className="py-24 px-4 bg-white dark:bg-background">
-      <div className="max-w-[800px] mx-auto">
-        <div className="text-center mb-16">
-          <p className="text-xs font-semibold text-neutral-500 dark:text-neutral-300 mb-4 tracking-widest uppercase">
-            Questions? We've got answers.
+    <section id="faq" className="px-5 py-24 md:px-8 md:py-28">
+      <div className="mx-auto max-w-[980px]">
+        <div className="text-center">
+          <p className="mx-auto inline-flex rounded-full border border-white/70 bg-white/50 px-5 py-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg text-[#615b58]">
+            FAQ
           </p>
-          <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-neutral-900 dark:text-white mb-6">
-            Everything you need to know about Onera
+          <h2 className="mt-7 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[2.4rem] font-semibold leading-[1.08] tracking-tight text-[#2c2a2a] md:text-[4.2rem]">
+            Frequently asked questions
           </h2>
         </div>
 
-        <div className="max-w-3xl mx-auto">
-          <Accordion type="single" collapsible className="space-y-0">
-            {faqs.map((faq, index) => (
-              <AccordionItem
-                key={index}
-                value={`item-${index}`}
-                className="border-b border-neutral-200 dark:border-neutral-700 px-0"
-              >
-                <div className="py-2">
-                  <AccordionTrigger className="text-left text-xl font-medium py-6 hover:no-underline text-neutral-900 dark:text-white transition-colors [&>svg]:size-5 [&>svg]:text-neutral-400">
-                    {faq.question}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-neutral-500 dark:text-neutral-300 pb-6 text-lg leading-relaxed max-w-2xl">
-                    {faq.answer}
-                  </AccordionContent>
-                </div>
-              </AccordionItem>
-            ))}
-          </Accordion>
-
-          <p className="mt-16 text-center text-sm text-neutral-500 dark:text-neutral-300">
-            Still have questions?{" "}
-            <a
-              href="mailto:hello@onera.ai"
-              className="text-neutral-900 dark:text-white font-medium hover:underline underline-offset-4"
+        <Accordion type="single" collapsible className="mt-12 space-y-4">
+          {faqs.map((faq, index) => (
+            <AccordionItem
+              key={faq.question}
+              value={`faq-${index}`}
+              className="rounded-3xl border border-[#e2ded9] bg-[#f5f4f2] px-6"
             >
-              Reach out to us
-            </a>
-          </p>
-        </div>
+              <AccordionTrigger className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-left text-2xl font-semibold text-[#353232] hover:no-underline md:text-3xl [&>svg]:h-6 [&>svg]:w-6 [&>svg]:text-[#87817d]">
+                {faq.question}
+              </AccordionTrigger>
+              <AccordionContent className="pb-7 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg leading-relaxed text-[#6f6966]">
+                {faq.answer}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       </div>
     </section>
   );

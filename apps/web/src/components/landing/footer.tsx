@@ -1,143 +1,117 @@
 import { Link } from "@tanstack/react-router";
 import { OneraLogo } from "@/components/ui/onera-logo";
 
+const productLinks = [
+  { label: "Home", href: "#home" },
+  { label: "Why Onera", href: "#features" },
+  { label: "How it works", href: "#how-it-works" },
+  { label: "FAQ", href: "#faq" },
+];
+
+const companyLinks = [
+  { label: "Privacy", to: "/privacy" },
+  { label: "Terms", to: "/terms" },
+  { label: "GitHub", href: "https://github.com/onera-app/onera" },
+];
+
+const platformLinks = [
+  { label: "Web app", href: "/app" },
+  {
+    label: "iOS app",
+    href: "https://apps.apple.com/us/app/onera-private-ai-chat/id6758128954",
+  },
+  { label: "X", href: "https://x.com" },
+];
+
 export function Footer() {
   return (
-    <footer className="bg-white dark:bg-background border-t border-neutral-200 dark:border-neutral-700">
-      <div className="max-w-[980px] mx-auto px-4 py-16 md:py-24">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
-          <div className="col-span-2 md:col-span-1">
-            <Link to="/" className="flex items-center gap-2 mb-6">
-              <OneraLogo size={32} />
-              <span className="font-semibold text-lg tracking-tight text-neutral-900 dark:text-white">
+    <footer className="relative overflow-hidden bg-[#141414] px-5 pb-16 pt-20 text-[#eceae7] md:px-8 md:pt-24">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-35"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.07) 1px, transparent 0)",
+          backgroundSize: "3px 3px",
+        }}
+      />
+
+      <div className="relative mx-auto max-w-[1180px]">
+        <div className="grid gap-10 md:grid-cols-4">
+          <div>
+            <div className="inline-flex items-center gap-3 rounded-xl bg-white p-2 pr-3 text-[#141414]">
+              <OneraLogo size={28} />
+              <span className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-semibold tracking-tight text-[#1f1f20]">
                 Onera
-              </span>
-            </Link>
-            <p className="text-sm text-neutral-500 dark:text-neutral-300 leading-relaxed mb-4 max-w-xs">
-              Private AI chat that actually keeps your secrets.
-            </p>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-neutral-900 dark:text-white mb-6">
-              Product
-            </h4>
-            <ul className="space-y-4 text-sm text-neutral-500 dark:text-neutral-300">
-              <li>
-                <a
-                  href="#features"
-                  className="hover:text-neutral-900 dark:hover:text-white transition-colors"
-                >
-                  Features
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#how-it-works"
-                  className="hover:text-neutral-900 dark:hover:text-white transition-colors"
-                >
-                  How it Works
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#pricing"
-                  className="hover:text-neutral-900 dark:hover:text-white transition-colors"
-                >
-                  Pricing
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#faq"
-                  className="hover:text-neutral-900 dark:hover:text-white transition-colors"
-                >
-                  FAQ
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-neutral-900 dark:text-white mb-6">
-              Company
-            </h4>
-            <ul className="space-y-4 text-sm text-neutral-500 dark:text-neutral-300">
-              <li>
-                <a
-                  href="https://github.com/onera-app"
-                  className="hover:text-neutral-900 dark:hover:text-white transition-colors"
-                >
-                  GitHub
-                </a>
-              </li>
-              <li>
-                <Link
-                  to="/privacy"
-                  className="hover:text-neutral-900 dark:hover:text-white transition-colors"
-                >
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/terms"
-                  className="hover:text-neutral-900 dark:hover:text-white transition-colors"
-                >
-                  Terms of Service
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-neutral-900 dark:text-white mb-6">
-              Platforms
-            </h4>
-            <ul className="space-y-4 text-sm text-neutral-500 dark:text-neutral-300">
-              <li>
-                <Link
-                  to="/app"
-                  className="hover:text-neutral-900 dark:hover:text-white transition-colors"
-                >
-                  Web
-                </Link>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="hover:text-neutral-900 dark:hover:text-white transition-colors"
-                >
-                  iOS App
-                </a>
-              </li>
-              <li>
-                <span className="opacity-50 cursor-not-allowed">
-                  Android (Coming Soon)
-                </span>
-              </li>
-              <li>
-                <span className="opacity-50 cursor-not-allowed">
-                  Desktop (Coming Soon)
-                </span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="pt-8 border-t border-neutral-100 dark:border-neutral-700 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-neutral-400 dark:text-neutral-400">
-            © {new Date().getFullYear()} Onera Inc. All rights reserved.
-          </p>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-xs text-neutral-500 dark:text-neutral-300">
-                All systems operational
               </span>
             </div>
           </div>
+
+          <div>
+            <h3 className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl font-semibold text-white">
+              Product
+            </h3>
+            <ul className="mt-6 space-y-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-2xl text-[#a6a3a1]">
+              {productLinks.map((item) => (
+                <li key={item.label}>
+                  <a href={item.href} className="transition-colors hover:text-white">
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl font-semibold text-white">
+              Company
+            </h3>
+            <ul className="mt-6 space-y-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-2xl text-[#a6a3a1]">
+              {companyLinks.map((item) => (
+                <li key={item.label}>
+                  {"to" in item ? (
+                    <Link to={item.to} className="transition-colors hover:text-white">
+                      {item.label}
+                    </Link>
+                  ) : (
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="transition-colors hover:text-white"
+                    >
+                      {item.label}
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl font-semibold text-white">
+              Platforms
+            </h3>
+            <ul className="mt-6 space-y-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-2xl text-[#a6a3a1]">
+              {platformLinks.map((item) => (
+                <li key={item.label}>
+                  <a
+                    href={item.href}
+                    target={item.href.startsWith("http") ? "_blank" : undefined}
+                    rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                    className="transition-colors hover:text-white"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
+
+        <div className="mt-20 border-t border-white/10 pt-8 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base text-[#8f8a87]">
+          © {new Date().getFullYear()} Onera. Privacy-first AI chat.
+        </div>
+
       </div>
     </footer>
   );

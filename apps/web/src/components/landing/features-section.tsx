@@ -1,69 +1,161 @@
-import { BentoGrid, BentoCard } from "./bento-grid";
-import { Shield, Fingerprint, Lock, Key } from "lucide-react";
+import { Check, X } from "lucide-react";
 
-const features = [
+type CellValue = "yes" | "no" | "low" | "high";
+
+type ComparisonColumn = {
+  name: string;
+  sub: string;
+  highlight?: boolean;
+};
+
+type ComparisonRow = {
+  section?: string;
+  label: string;
+  values: [CellValue, CellValue, CellValue];
+};
+
+const columns: ComparisonColumn[] = [
   {
-    title: "Enclave Encrypted",
-    description:
-      "Your chats are processed inside a secure enclave. The hardware guarantees that no one—not even us—can see your data.",
-    icon: <Shield className="w-6 h-6" />,
-    className: "md:col-span-2",
+    name: "Typical AI",
+    sub: "Hosted models",
   },
   {
-    title: "Verifiable Code",
-    description:
-      "Don't trust, verify. Your browser cryptographically checks that our server runs exactly the code we published.",
-    icon: <Fingerprint className="w-6 h-6" />,
-    className: "md:col-span-1",
+    name: "Self-hosted",
+    sub: "On-prem deployment",
   },
   {
-    title: "End-to-End Private",
-    description:
-      "History is encrypted with a key only you hold. We store opaque blobs of data that are mathematically impossible for us to read.",
-    icon: <Lock className="w-6 h-6" />,
-    className: "md:col-span-1",
+    name: "Onera",
+    sub: "Private AI workspace",
+    highlight: true,
+  },
+] as const;
+
+const rows: ComparisonRow[] = [
+  {
+    section: "Data privacy",
+    label: "Zero data retention controls",
+    values: ["no", "yes", "yes"],
   },
   {
-    title: "BYO Keys",
-    description:
-      "Connect your own Anthropic or OpenAI API keys. We act as a blind tunnel, never seeing the content of your requests.",
-    icon: <Key className="w-6 h-6" />,
-    className: "md:col-span-2",
+    section: "Features",
+    label: "Cloud convenience",
+    values: ["yes", "no", "yes"],
   },
-];
+  {
+    label: "Setup cost",
+    values: ["low", "high", "low"],
+  },
+  {
+    label: "Operational complexity",
+    values: ["low", "high", "low"],
+  },
+] as const;
+
+function ValueCell({
+  value,
+}: {
+  value: CellValue;
+}) {
+  if (value === "yes") {
+    return <Check className="mx-auto h-5 w-5 text-[#4aa37a]" />;
+  }
+
+  if (value === "no") {
+    return <X className="mx-auto h-5 w-5 text-[#b35a5a]" />;
+  }
+
+  return (
+    <span
+      className={`font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base font-medium ${
+        value === "low" ? "text-[#4aa37a]" : "text-[#b35a5a]"
+      }`}
+    >
+      {value === "low" ? "Low" : "High"}
+    </span>
+  );
+}
 
 export function FeaturesSection() {
   return (
-    <section
-      id="features"
-      className="py-24 px-4 bg-neutral-50/50 dark:bg-neutral-900/50"
-    >
-      <div className="max-w-[980px] mx-auto">
-        <div className="mb-16 text-center">
-          <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-neutral-900 dark:text-white mb-6">
-            Privacy isn't a policy.
+    <section id="features" className="px-5 py-24 md:px-8 md:py-30">
+      <div className="mx-auto max-w-[1180px]">
+        <div className="mx-auto max-w-[860px] text-center">
+          <p className="mx-auto inline-flex rounded-full border border-white/70 bg-white/50 px-5 py-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg text-[#5f5a58]">
+            Why teams switch
+          </p>
+          <h2 className="mt-7 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[2.4rem] font-semibold leading-[1.08] tracking-tight text-[#2f2c2c] md:text-[4.2rem]">
+            Privacy of on-prem.
             <br />
-            <span className="text-neutral-500 dark:text-neutral-300">
-              It's physics.
-            </span>
+            Speed of cloud.
           </h2>
-          <p className="text-xl text-neutral-500 dark:text-neutral-300 max-w-2xl mx-auto text-balance">
-            We architected Onera so we physically cannot access your data, even
-            if compelled.
+          <p className="mx-auto mt-6 max-w-[700px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl leading-relaxed text-[#6f6a67]">
+            Onera gives teams strong privacy controls without the cost and
+            complexity of self-hosting.
           </p>
         </div>
 
-        <BentoGrid>
-          {features.map((feature, i) => (
-            <BentoCard
-              key={i}
-              title={feature.title}
-              description={feature.description}
-              icon={feature.icon}
-              className={feature.className}
-            />
-          ))}
-        </BentoGrid>
+        <div className="mt-14 overflow-hidden rounded-[30px] border border-[#d9d5d1] bg-[#f6f6f4]">
+          <div className="grid grid-cols-[1.4fr_repeat(3,1fr)] border-b border-[#ddd9d6]">
+            <div className="p-6 md:p-7" />
+            {columns.map((col) => (
+              <div
+                key={col.name}
+                className={`border-l border-[#ddd9d6] p-6 text-center md:p-7 ${
+                  col.highlight ? "bg-[#e8efe9]" : ""
+                }`}
+              >
+                <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-2xl font-semibold text-[#2f2d2d]">
+                  {col.name}
+                </p>
+                <p className="mt-1 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm text-[#6c6765]">
+                  {col.sub}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div>
+            {rows.map((row, rowIndex) => (
+              <div key={`${row.section ?? "row"}-${row.label}`}>
+                {row.section ? (
+                  <div className="grid grid-cols-[1.4fr_repeat(3,1fr)] border-b border-[#ddd9d6]">
+                    <div className="px-6 py-5 md:px-7">
+                      <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg font-semibold uppercase tracking-[0.05em] text-[#3b3938]">
+                        {row.section}
+                      </p>
+                    </div>
+                    <div className="border-l border-[#ddd9d6]" />
+                    <div className="border-l border-[#ddd9d6]" />
+                    <div className="border-l border-[#ddd9d6] bg-[#e8efe9]" />
+                  </div>
+                ) : null}
+
+                <div
+                  className={`grid grid-cols-[1.4fr_repeat(3,1fr)] ${
+                    rowIndex === rows.length - 1 ? "" : "border-b border-[#ddd9d6]"
+                  }`}
+                >
+                  <div className="px-6 py-6 md:px-7">
+                    <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-2xl text-[#353332]">
+                      {row.label}
+                    </p>
+                  </div>
+
+                  {row.values.map((value, idx) => (
+                    <div
+                      key={`${row.label}-${idx}`}
+                      className={`flex items-center justify-center border-l border-[#ddd9d6] px-4 py-6 ${
+                        idx === 2 ? "bg-[#e8efe9]" : ""
+                      }`}
+                    >
+                      <ValueCell value={value} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
