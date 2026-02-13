@@ -1,6 +1,13 @@
 import DodoPayments from "dodopayments";
 
 const apiKey = process.env.DODO_PAYMENTS_API_KEY;
+const configuredEnv = (process.env.DODO_PAYMENTS_ENV || "").trim().toLowerCase();
+
+function resolveDodoEnvironment(): "live_mode" | "test_mode" {
+  if (configuredEnv === "live_mode" || configuredEnv === "live") return "live_mode";
+  if (configuredEnv === "test_mode" || configuredEnv === "test") return "test_mode";
+  return process.env.NODE_ENV === "production" ? "live_mode" : "test_mode";
+}
 
 if (!apiKey) {
   console.warn(
@@ -11,8 +18,7 @@ if (!apiKey) {
 export const dodoClient = apiKey
   ? new DodoPayments({
       bearerToken: apiKey,
-      environment:
-        process.env.NODE_ENV === "production" ? "live_mode" : "test_mode",
+      environment: resolveDodoEnvironment(),
     })
   : null;
 
