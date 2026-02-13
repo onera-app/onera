@@ -42,6 +42,7 @@ jobs:
       - name: Seed plans
         working-directory: apps/server
         env:
+          NODE_ENV: development
           DATABASE_URL: ${{ secrets.DATABASE_URL_STAGE }}
           DODO_PAYMENTS_API_KEY: ${{ secrets.DODO_PAYMENTS_API_KEY_STAGE }}
           DODO_PAYMENTS_ENV: test_mode
