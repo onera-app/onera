@@ -2,6 +2,159 @@ import { db } from "./client";
 import { plans } from "./schema";
 import { planData } from "./plan-data";
 import { sql } from "drizzle-orm";
+import DodoPayments from "dodopayments";
+
+type BillingInterval = "monthly" | "yearly";
+
+interface PlanSeedRecord {
+  id: string;
+  name: string;
+  description: string;
+  tier: number;
+  monthlyPrice: number;
+  yearlyPrice: number;
+  inferenceRequestsLimit: number;
+  byokInferenceRequestsLimit: number;
+  storageLimitMb: number;
+  maxEnclaves: number;
+  features: Record<string, boolean>;
+  dodoPriceIdMonthly: string | null;
+  dodoPriceIdYearly: string | null;
+}
+
+function buildPlanProductEnvVarName(
+  planId: string,
+  interval: BillingInterval,
+): string {
+  const normalizedPlanId = planId.toUpperCase().replace(/[^A-Z0-9]/g, "_");
+  const normalizedInterval = interval.toUpperCase();
+  return `DODO_PLAN_${normalizedPlanId}_${normalizedInterval}_PRODUCT_ID`;
+}
+
+function getPlanProductFromEnv(
+  planId: string,
+  interval: BillingInterval,
+): string | null {
+  const envVar = buildPlanProductEnvVarName(planId, interval);
+  const value = process.env[envVar]?.trim();
+  return value && value.length > 0 ? value : null;
+}
+
+function inferIntervalFromProduct(
+  product: DodoPayments.ProductListResponse,
+): BillingInterval | null {
+  const detail = product.price_detail;
+  if (!detail) return null;
+
+  if (detail.type !== "recurring_price" && detail.type !== "usage_based_price") {
+    return null;
+  }
+
+  // Match standard monthly billing cadence.
+  if (
+    detail.payment_frequency_interval === "Month" &&
+    detail.payment_frequency_count === 1
+  ) {
+    return "monthly";
+  }
+
+  // Match standard yearly billing cadence.
+  if (
+    (detail.payment_frequency_interval === "Year" &&
+      detail.payment_frequency_count === 1) ||
+    (detail.payment_frequency_interval === "Month" &&
+      detail.payment_frequency_count === 12)
+  ) {
+    return "yearly";
+  }
+
+  return null;
+}
+
+function inferPlanIdFromProduct(
+  product: DodoPayments.ProductListResponse,
+): string | null {
+  const metadata = product.metadata || {};
+  return (
+    metadata.planId ||
+    metadata.plan_id ||
+    metadata.plan ||
+    metadata.tier_id ||
+    null
+  );
+}
+
+async function resolvePlanDataWithDodoProducts(
+  basePlans: PlanSeedRecord[],
+): Promise<PlanSeedRecord[]> {
+  const apiKey = process.env.DODO_PAYMENTS_API_KEY?.trim();
+  if (!apiKey) {
+    console.log(
+      "DODO_PAYMENTS_API_KEY not set. Seeding plans with static Dodo product IDs.",
+    );
+    return basePlans;
+  }
+
+  const dodo = new DodoPayments({
+    bearerToken: apiKey,
+    environment:
+      process.env.NODE_ENV === "production" ? "live_mode" : "test_mode",
+  });
+
+  const planIds = new Set(basePlans.map((plan) => plan.id));
+  const discoveredByPlan = new Map<
+    string,
+    Partial<Record<BillingInterval, string>>
+  >();
+
+  for await (const product of dodo.products.list({ recurring: true })) {
+    const planId = inferPlanIdFromProduct(product);
+    if (!planId || !planIds.has(planId)) continue;
+
+    const interval = inferIntervalFromProduct(product);
+    if (!interval) continue;
+
+    const byInterval = discoveredByPlan.get(planId) ?? {};
+    const existing = byInterval[interval];
+    if (existing && existing !== product.product_id) {
+      throw new Error(
+        `Multiple Dodo products found for plan=${planId}, interval=${interval}: ${existing}, ${product.product_id}`,
+      );
+    }
+
+    byInterval[interval] = product.product_id;
+    discoveredByPlan.set(planId, byInterval);
+  }
+
+  return basePlans.map((plan) => {
+    const discovered = discoveredByPlan.get(plan.id) ?? {};
+
+    const monthly =
+      getPlanProductFromEnv(plan.id, "monthly") ??
+      discovered.monthly ??
+      plan.dodoPriceIdMonthly;
+
+    const yearly =
+      getPlanProductFromEnv(plan.id, "yearly") ??
+      discovered.yearly ??
+      plan.dodoPriceIdYearly;
+
+    // Paid plans should always have both monthly and yearly Dodo product IDs.
+    if ((plan.monthlyPrice > 0 || plan.yearlyPrice > 0) && (!monthly || !yearly)) {
+      throw new Error(
+        `Missing Dodo product mapping for paid plan '${plan.id}'. ` +
+          `Set product metadata (planId/plan_id) for monthly/yearly products, ` +
+          `or provide overrides with ${buildPlanProductEnvVarName(plan.id, "monthly")} and ${buildPlanProductEnvVarName(plan.id, "yearly")}.`,
+      );
+    }
+
+    return {
+      ...plan,
+      dodoPriceIdMonthly: monthly,
+      dodoPriceIdYearly: yearly,
+    };
+  });
+}
 
 async function ensureBillingTables() {
   // Ensure all billing tables exist before seeding.
@@ -96,7 +249,11 @@ async function seed() {
 
   await ensureBillingTables();
 
-  for (const plan of planData) {
+  const resolvedPlanData = await resolvePlanDataWithDodoProducts(
+    planData as PlanSeedRecord[],
+  );
+
+  for (const plan of resolvedPlanData) {
     await db
       .insert(plans)
       .values(plan)
@@ -118,7 +275,9 @@ async function seed() {
           updatedAt: new Date(),
         },
       });
-    console.log(`  Seeded plan: ${plan.id}`);
+    console.log(
+      `  Seeded plan: ${plan.id} (monthly=${plan.dodoPriceIdMonthly ?? "n/a"}, yearly=${plan.dodoPriceIdYearly ?? "n/a"})`,
+    );
   }
 
   console.log("Plans seeded!");
