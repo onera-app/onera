@@ -10,6 +10,7 @@ import { startStaleAssignmentCleanup } from "./jobs/cleanupStaleAssignments";
 import { webhookApp } from "./billing/webhook";
 
 const app = new Hono();
+// Deployment touch: non-functional change to retrigger backend CI/CD.
 
 // CORS configuration
 // In production, requests come through nginx proxy (same origin), so we need to handle that
