@@ -8,10 +8,10 @@ export function PricingSection() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <section id="pricing" className="px-5 py-8 pb-24 md:px-8 md:py-12 md:pb-28">
+    <section id="pricing" className="px-4 py-8 pb-20 sm:px-5 sm:pb-24 md:px-8 md:py-12 md:pb-28">
       <div className="mx-auto grid max-w-[1180px] gap-6 md:grid-cols-[1fr_0.72fr]">
-        <article className="relative overflow-hidden rounded-[34px] bg-[#d9e8fa] p-8 md:p-10">
-          <h2 className="max-w-[420px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[2.4rem] font-semibold leading-[1.08] tracking-tight text-[#2a2b31] md:text-[4rem]">
+        <article className="relative overflow-hidden rounded-[28px] bg-[#d9e8fa] p-6 sm:rounded-[34px] sm:p-8 md:p-10">
+          <h2 className="max-w-[420px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[1.9rem] font-semibold leading-[1.08] tracking-tight text-[#2a2b31] sm:text-[2.4rem] md:text-[4rem]">
             Start in minutes
           </h2>
 
@@ -19,9 +19,9 @@ export function PricingSection() {
             {setupSteps.map((step, idx) => (
               <li
                 key={step}
-                className="flex items-center gap-4 rounded-2xl bg-[#edf4fd] px-4 py-4 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl text-[#34363d]"
+                className="flex items-center gap-3 rounded-2xl bg-[#edf4fd] px-3 py-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base text-[#34363d] sm:gap-4 sm:px-4 sm:py-4 sm:text-xl"
               >
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-lg font-semibold text-[#45464d]">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-semibold text-[#45464d] sm:h-9 sm:w-9 sm:text-lg">
                   {idx + 1}
                 </span>
                 {step}
@@ -29,7 +29,7 @@ export function PricingSection() {
             ))}
           </ul>
 
-          <p className="mt-6 inline-flex rounded-full bg-white/70 px-4 py-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg text-[#555861]">
+          <p className="mt-5 inline-flex rounded-full bg-white/70 px-4 py-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm text-[#555861] sm:mt-6 sm:text-lg">
             Free during early access.
           </p>
 
@@ -43,23 +43,23 @@ export function PricingSection() {
           </div>
         </article>
 
-        <article className="rounded-[34px] bg-[#1f1f20] p-8 text-white md:p-10">
-          <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[2.4rem] font-semibold leading-[1.08] tracking-tight md:text-[4rem]">
+        <article className="rounded-[28px] bg-[#1f1f20] p-6 text-white sm:rounded-[34px] sm:p-8 md:p-10">
+          <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[1.9rem] font-semibold leading-[1.08] tracking-tight sm:text-[2.4rem] md:text-[4rem]">
             Private AI.
             <br />
             Simple pricing.
           </p>
 
-          <p className="mt-8 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[5rem] font-semibold leading-none md:text-[7rem]">
+          <p className="mt-6 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[3.8rem] font-semibold leading-none sm:mt-8 sm:text-[5rem] md:text-[7rem]">
             $0
           </p>
 
-          <p className="mt-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl text-white/80">
+          <p className="mt-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base text-white/80 sm:text-xl">
             Early access
           </p>
 
           <Link to={isAuthenticated ? "/app" : "/auth"}>
-            <Button className="mt-12 h-14 rounded-full bg-white px-10 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl font-medium text-[#1f1f20] hover:bg-white/90">
+            <Button className="mt-8 h-11 rounded-full bg-white px-8 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base font-medium text-[#1f1f20] hover:bg-white/90 sm:mt-12 sm:h-14 sm:px-10 sm:text-xl">
               {isAuthenticated ? "Open app" : "Get started for free"}
             </Button>
           </Link>

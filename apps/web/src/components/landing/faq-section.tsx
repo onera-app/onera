@@ -40,28 +40,28 @@ const faqs = [
 
 export function FAQSection() {
   return (
-    <section id="faq" className="px-5 py-24 md:px-8 md:py-28">
+    <section id="faq" className="px-4 py-16 sm:px-5 sm:py-24 md:px-8 md:py-28">
       <div className="mx-auto max-w-[980px]">
         <div className="text-center">
-          <p className="mx-auto inline-flex rounded-full border border-white/70 bg-white/50 px-5 py-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg text-[#615b58]">
+          <p className="mx-auto inline-flex rounded-full border border-white/70 bg-white/50 px-4 py-1.5 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm text-[#615b58] sm:px-5 sm:py-2 sm:text-lg">
             FAQ
           </p>
-          <h2 className="mt-7 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[2.4rem] font-semibold leading-[1.08] tracking-tight text-[#2c2a2a] md:text-[4.2rem]">
+          <h2 className="mt-6 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[1.9rem] font-semibold leading-[1.08] tracking-tight text-[#2c2a2a] sm:mt-7 sm:text-[2.4rem] md:text-[4.2rem]">
             Frequently asked questions
           </h2>
         </div>
 
-        <Accordion type="single" collapsible className="mt-12 space-y-4">
+        <Accordion type="single" collapsible className="mt-8 space-y-3 sm:mt-12 sm:space-y-4">
           {faqs.map((faq, index) => (
             <AccordionItem
               key={faq.question}
               value={`faq-${index}`}
-              className="rounded-3xl border border-[#e2ded9] bg-[#f5f4f2] px-6"
+              className="rounded-2xl border border-[#e2ded9] bg-[#f5f4f2] px-4 sm:rounded-3xl sm:px-6"
             >
-              <AccordionTrigger className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-left text-2xl font-semibold text-[#353232] hover:no-underline md:text-3xl [&>svg]:h-6 [&>svg]:w-6 [&>svg]:text-[#87817d]">
+              <AccordionTrigger className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-left text-lg font-semibold text-[#353232] hover:no-underline sm:text-xl md:text-3xl [&>svg]:h-5 [&>svg]:w-5 sm:[&>svg]:h-6 sm:[&>svg]:w-6 [&>svg]:text-[#87817d]">
                 {faq.question}
               </AccordionTrigger>
-              <AccordionContent className="pb-7 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg leading-relaxed text-[#6f6966]">
+              <AccordionContent className="pb-5 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base leading-relaxed text-[#6f6966] sm:pb-7 sm:text-lg">
                 {faq.answer}
               </AccordionContent>
             </AccordionItem>

@@ -8,10 +8,10 @@ export function Header() {
 
   return (
     <header className="absolute inset-x-0 top-0 z-50">
-      <div className="mx-auto flex h-24 w-full max-w-[1180px] items-center justify-between px-5 md:px-8">
+      <div className="mx-auto flex h-16 w-full max-w-[1180px] items-center justify-between px-4 sm:h-20 sm:px-5 md:h-24 md:px-8">
         <Link to="/" className="flex items-center gap-3">
           <OneraLogo size={34} className="rounded-xl" />
-          <span className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[2rem] font-semibold leading-none tracking-tight text-[#2f2d2d]">
+          <span className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl font-semibold leading-none tracking-tight text-[#2f2d2d] sm:text-2xl md:text-[2rem]">
             Onera
           </span>
         </Link>
@@ -32,7 +32,7 @@ export function Header() {
         </nav>
 
         <Link to={isAuthenticated ? "/app" : "/auth"}>
-          <Button className="h-12 rounded-full bg-[#2f2d2d] px-7 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg font-medium text-white hover:bg-[#1f1d1d]">
+          <Button className="h-10 rounded-full bg-[#2f2d2d] px-4 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-medium text-white hover:bg-[#1f1d1d] sm:h-11 sm:px-6 sm:text-base md:h-12 md:px-7 md:text-lg">
             {isAuthenticated ? "Open app" : "Get started"}
           </Button>
         </Link>

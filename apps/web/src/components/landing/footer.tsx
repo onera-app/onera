@@ -25,7 +25,7 @@ const platformLinks = [
 
 export function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-[#141414] px-5 pb-16 pt-20 text-[#eceae7] md:px-8 md:pt-24">
+    <footer className="relative overflow-hidden bg-[#141414] px-4 pb-14 pt-14 text-[#eceae7] sm:px-5 sm:pb-16 sm:pt-20 md:px-8 md:pt-24">
       <div
         className="pointer-events-none absolute inset-0 opacity-35"
         style={{
@@ -36,7 +36,7 @@ export function Footer() {
       />
 
       <div className="relative mx-auto max-w-[1180px]">
-        <div className="grid gap-10 md:grid-cols-4">
+        <div className="grid gap-8 sm:gap-10 md:grid-cols-4">
           <div>
             <div className="inline-flex items-center gap-3 rounded-xl bg-white p-2 pr-3 text-[#141414]">
               <OneraLogo size={28} />
@@ -47,10 +47,10 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl font-semibold text-white">
+            <h3 className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg font-semibold text-white sm:text-xl">
               Product
             </h3>
-            <ul className="mt-6 space-y-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-2xl text-[#a6a3a1]">
+            <ul className="mt-4 space-y-2.5 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base text-[#a6a3a1] sm:mt-6 sm:space-y-3 sm:text-2xl">
               {productLinks.map((item) => (
                 <li key={item.label}>
                   <a href={item.href} className="transition-colors hover:text-white">
@@ -62,10 +62,10 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl font-semibold text-white">
+            <h3 className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg font-semibold text-white sm:text-xl">
               Company
             </h3>
-            <ul className="mt-6 space-y-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-2xl text-[#a6a3a1]">
+            <ul className="mt-4 space-y-2.5 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base text-[#a6a3a1] sm:mt-6 sm:space-y-3 sm:text-2xl">
               {companyLinks.map((item) => (
                 <li key={item.label}>
                   {"to" in item ? (
@@ -88,10 +88,10 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl font-semibold text-white">
+            <h3 className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg font-semibold text-white sm:text-xl">
               Platforms
             </h3>
-            <ul className="mt-6 space-y-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-2xl text-[#a6a3a1]">
+            <ul className="mt-4 space-y-2.5 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base text-[#a6a3a1] sm:mt-6 sm:space-y-3 sm:text-2xl">
               {platformLinks.map((item) => (
                 <li key={item.label}>
                   <a
@@ -108,7 +108,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-20 border-t border-white/10 pt-8 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base text-[#8f8a87]">
+        <div className="mt-14 border-t border-white/10 pt-6 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm text-[#8f8a87] sm:mt-20 sm:pt-8 sm:text-base">
           © {new Date().getFullYear()} Onera. Privacy-first AI chat.
         </div>
 

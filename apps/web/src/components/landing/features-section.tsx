@@ -77,24 +77,25 @@ function ValueCell({
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="px-5 py-24 md:px-8 md:py-30">
+    <section id="features" className="px-4 py-16 sm:px-5 sm:py-20 md:px-8 md:py-30">
       <div className="mx-auto max-w-[1180px]">
         <div className="mx-auto max-w-[860px] text-center">
-          <p className="mx-auto inline-flex rounded-full border border-white/70 bg-white/50 px-5 py-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg text-[#5f5a58]">
+          <p className="mx-auto inline-flex rounded-full border border-white/70 bg-white/50 px-4 py-1.5 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm text-[#5f5a58] sm:px-5 sm:py-2 sm:text-lg">
             Why teams switch
           </p>
-          <h2 className="mt-7 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[2.4rem] font-semibold leading-[1.08] tracking-tight text-[#2f2c2c] md:text-[4.2rem]">
+          <h2 className="mt-6 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[1.9rem] font-semibold leading-[1.08] tracking-tight text-[#2f2c2c] sm:mt-7 sm:text-[2.4rem] md:text-[4.2rem]">
             Privacy of on-prem.
             <br />
             Speed of cloud.
           </h2>
-          <p className="mx-auto mt-6 max-w-[700px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl leading-relaxed text-[#6f6a67]">
+          <p className="mx-auto mt-4 max-w-[700px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base leading-relaxed text-[#6f6a67] sm:mt-6 sm:text-xl">
             Onera gives teams strong privacy controls without the cost and
             complexity of self-hosting.
           </p>
         </div>
 
-        <div className="mt-14 overflow-hidden rounded-[30px] border border-[#d9d5d1] bg-[#f6f6f4]">
+        <div className="mt-10 overflow-x-auto rounded-[24px] border border-[#d9d5d1] bg-[#f6f6f4] sm:mt-14 sm:rounded-[30px]">
+          <div className="min-w-[760px]">
           <div className="grid grid-cols-[1.4fr_repeat(3,1fr)] border-b border-[#ddd9d6]">
             <div className="p-6 md:p-7" />
             {columns.map((col) => (
@@ -104,7 +105,7 @@ export function FeaturesSection() {
                   col.highlight ? "bg-[#e8efe9]" : ""
                 }`}
               >
-                <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-2xl font-semibold text-[#2f2d2d]">
+                <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl font-semibold text-[#2f2d2d] md:text-2xl">
                   {col.name}
                 </p>
                 <p className="mt-1 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm text-[#6c6765]">
@@ -120,7 +121,7 @@ export function FeaturesSection() {
                 {row.section ? (
                   <div className="grid grid-cols-[1.4fr_repeat(3,1fr)] border-b border-[#ddd9d6]">
                     <div className="px-6 py-5 md:px-7">
-                      <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg font-semibold uppercase tracking-[0.05em] text-[#3b3938]">
+                      <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base font-semibold uppercase tracking-[0.05em] text-[#3b3938] md:text-lg">
                         {row.section}
                       </p>
                     </div>
@@ -136,7 +137,7 @@ export function FeaturesSection() {
                   }`}
                 >
                   <div className="px-6 py-6 md:px-7">
-                    <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-2xl text-[#353332]">
+                    <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl text-[#353332] md:text-2xl">
                       {row.label}
                     </p>
                   </div>
@@ -154,6 +155,7 @@ export function FeaturesSection() {
                 </div>
               </div>
             ))}
+          </div>
           </div>
         </div>
       </div>

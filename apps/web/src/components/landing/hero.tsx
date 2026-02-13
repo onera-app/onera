@@ -34,16 +34,16 @@ function FloatingPreview() {
     : "Standard mode: external services may access message content.";
 
   return (
-    <div className="relative mx-auto mt-16 w-full max-w-[980px] md:h-[620px]">
+    <div className="relative mx-auto mt-10 w-full max-w-[980px] md:mt-16 md:h-[620px]">
       <div className="absolute left-1/2 top-[28%] hidden h-72 w-72 -translate-x-[82%] rounded-full bg-[#f0b9b0]/45 blur-3xl md:block" />
       <div className="absolute left-1/2 top-[46%] hidden h-72 w-72 -translate-x-[2%] rounded-full bg-[#b8d8ba]/45 blur-3xl md:block" />
       <div className="absolute left-1/2 top-[36%] hidden h-60 w-60 -translate-x-[36%] rounded-full bg-[#c8d9f4]/38 blur-3xl md:block" />
 
       <article className="relative z-20 mx-auto w-[96%] rounded-[34px] border border-[#c8c4be] bg-[#f9f9f8] p-6 shadow-[0_32px_90px_rgba(40,38,36,0.14)] md:absolute md:inset-x-0 md:top-[10%] md:w-[900px] md:p-8">
-        <p className="text-center font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-medium tracking-[0.06em] text-[#66615f] uppercase">
+        <p className="text-center font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xs font-medium tracking-[0.06em] text-[#66615f] uppercase sm:text-sm">
           Privacy Playground
         </p>
-        <h3 className="mt-2 text-center font-['Manrope','Avenir_Next','Inter','sans-serif'] text-2xl font-semibold text-[#2f2d2d] md:text-3xl">
+        <h3 className="mt-2 text-center font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl font-semibold text-[#2f2d2d] sm:text-2xl md:text-3xl">
           See what changes when you switch modes
         </h3>
 
@@ -52,7 +52,7 @@ function FloatingPreview() {
             <button
               type="button"
               onClick={() => setIsPrivateMode(false)}
-              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-semibold md:text-base ${
+              className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xs font-semibold sm:px-4 sm:py-2 sm:text-sm md:text-base ${
                 !isPrivateMode
                   ? "bg-[#2f2d2d] text-white"
                   : "text-[#616778] hover:bg-[#f4f5f7]"
@@ -65,7 +65,7 @@ function FloatingPreview() {
             <button
               type="button"
               onClick={() => setIsPrivateMode(true)}
-              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-semibold md:text-base ${
+              className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xs font-semibold sm:px-4 sm:py-2 sm:text-sm md:text-base ${
                 isPrivateMode
                   ? "bg-[#2f2d2d] text-white"
                   : "text-[#616778] hover:bg-[#f4f5f7]"
@@ -83,7 +83,7 @@ function FloatingPreview() {
             <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-medium text-[#636a78]">
               Your message
             </p>
-            <p className="mt-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base leading-snug text-[#3e3e44] md:text-lg">
+            <p className="mt-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm leading-snug text-[#3e3e44] sm:text-base md:text-lg">
               {promptPreview}
             </p>
           </div>
@@ -98,7 +98,7 @@ function FloatingPreview() {
             <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-medium">
               AI processing
             </p>
-            <p className="mt-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-2xl font-semibold">
+            <p className="mt-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl font-semibold sm:text-2xl">
               {modeTitle}
             </p>
           </div>
@@ -111,7 +111,7 @@ function FloatingPreview() {
             <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-medium text-[#636a78]">
               Model response
             </p>
-            <p className="mt-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base leading-snug text-[#3e3e44] md:text-lg">
+            <p className="mt-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm leading-snug text-[#3e3e44] sm:text-base md:text-lg">
               "Here is a concise summary you can share with leadership..."
             </p>
           </div>
@@ -120,7 +120,7 @@ function FloatingPreview() {
         <div className="mt-7 rounded-3xl border border-[#bfcde0] bg-[#eaf0fa] px-5 py-4 text-left">
           <div className="flex items-center gap-3">
             <ShieldCheck className="h-5 w-5 text-[#3e5a8a]" />
-            <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base text-[#4f5e7a] md:text-lg">
+            <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm text-[#4f5e7a] sm:text-base md:text-lg">
               {footerCopy}
             </p>
           </div>
@@ -134,38 +134,38 @@ export function Hero() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <section id="home" className="px-5 pb-12 pt-32 md:px-8 md:pt-36">
+    <section id="home" className="px-4 pb-10 pt-24 sm:px-5 sm:pb-12 sm:pt-28 md:px-8 md:pt-36">
       <div className="mx-auto max-w-[1180px] text-center">
-        <p className="mx-auto inline-flex items-center rounded-full border border-white/60 bg-white/40 px-6 py-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg text-[#4f4a47] shadow-[0_8px_30px_rgba(95,89,83,0.08)] backdrop-blur">
+        <p className="mx-auto inline-flex items-center rounded-full border border-white/60 bg-white/40 px-4 py-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm text-[#4f4a47] shadow-[0_8px_30px_rgba(95,89,83,0.08)] backdrop-blur sm:px-6 sm:py-3 sm:text-base md:text-lg">
           Alpha is live
         </p>
 
-        <h1 className="mx-auto mt-10 max-w-[920px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[2.8rem] font-semibold leading-[1.05] tracking-tight text-[#2b2929] md:text-[5.2rem]">
+        <h1 className="mx-auto mt-8 max-w-[920px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-[2rem] font-semibold leading-[1.08] tracking-tight text-[#2b2929] sm:mt-10 sm:text-[2.8rem] md:text-[5.2rem]">
           Protect your data.
           <br />
           Keep your productivity.
         </h1>
 
-        <p className="mx-auto mt-8 max-w-[640px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl leading-relaxed text-[#706b68] md:text-[1.8rem]">
+        <p className="mx-auto mt-6 max-w-[640px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base leading-relaxed text-[#706b68] sm:mt-8 sm:text-lg md:text-[1.8rem]">
           Onera gives you secure AI chat with end-to-end encryption, passkeys,
           and control over which models you use.
         </p>
 
         <Link to={isAuthenticated ? "/app" : "/auth"}>
-          <Button className="mt-10 h-14 rounded-full bg-[#2f2d2d] px-12 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl font-medium text-white hover:bg-[#1f1d1d]">
+          <Button className="mt-8 h-11 rounded-full bg-[#2f2d2d] px-8 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base font-medium text-white hover:bg-[#1f1d1d] sm:mt-10 sm:h-14 sm:px-12 sm:text-xl">
             {isAuthenticated ? "Open app" : "Get started for free"}
           </Button>
         </Link>
 
         <FloatingPreview />
 
-        <div className="mt-14 grid gap-8 border-t border-[#ddd9d6] pt-10 md:grid-cols-3">
+        <div className="mt-12 grid gap-6 border-t border-[#ddd9d6] pt-8 sm:mt-14 sm:gap-8 sm:pt-10 md:grid-cols-3">
           {quickFacts.map((item) => (
             <div key={item.title} className="text-center md:text-left">
-              <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-3xl font-semibold text-[#2f2d2d]">
+              <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl font-semibold text-[#2f2d2d] sm:text-2xl md:text-3xl">
                 {item.title}
               </p>
-              <p className="mt-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-lg leading-relaxed text-[#706b68]">
+              <p className="mt-2 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base leading-relaxed text-[#706b68] sm:mt-3 sm:text-lg">
                 {item.detail}
               </p>
             </div>
