@@ -1,24 +1,27 @@
-name: docs-deploy
+name: Docs Deploy
 
 on:
   push:
     branches:
       - staging
     paths:
-      - 'apps/docs/**'
-      - '.github/workflows/docs.yml'
+      - "apps/docs/**"
+      - ".github/workflows/docs.yml"
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
       - staging
     paths:
-      - 'apps/docs/**'
-      - '.github/workflows/docs.yml'
+      - "apps/docs/**"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
 
 jobs:
   build_and_deploy_job:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     name: Build and Deploy Job
     steps:
       - uses: actions/checkout@v4
@@ -32,14 +35,14 @@ jobs:
           bun-version: latest
 
       - name: Install dependencies
-        run: bun install
         working-directory: ./apps/docs
+        run: bun install
 
       - name: Build docs
-        run: bun run build
         working-directory: ./apps/docs
+        run: bun run build
 
-      - name: Build And Deploy
+      - name: Build and Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
@@ -53,6 +56,8 @@ jobs:
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     name: Close Pull Request Job
     steps:
       - name: Close Pull Request

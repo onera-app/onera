@@ -72,7 +72,7 @@ services:
         VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
         VITE_WS_URL: ${VITE_WS_URL:-http://localhost:3000}
         VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:?VITE_SUPABASE_URL is required}
-        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY:?VITE_SUPABASE_ANON_KEY is required}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:?VITE_SUPABASE_PUBLISHABLE_KEY is required}
     container_name: onera-web
     restart: unless-stopped
     depends_on:

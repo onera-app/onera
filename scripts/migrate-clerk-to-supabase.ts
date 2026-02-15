@@ -41,6 +41,39 @@ interface UserMapping {
   imageUrl: string | null;
 }
 
+async function loadSupabaseUsersByEmail(): Promise<Map<string, string>> {
+  const usersByEmail = new Map<string, string>();
+  let page = 1;
+  const perPage = 200;
+
+  while (true) {
+    const { data, error } = await supabase.auth.admin.listUsers({
+      page,
+      perPage,
+    });
+
+    if (error) {
+      throw new Error(`Failed to list Supabase users: ${error.message}`);
+    }
+
+    const users = data?.users ?? [];
+    for (const user of users) {
+      const email = user.email?.toLowerCase();
+      if (email) {
+        usersByEmail.set(email, user.id);
+      }
+    }
+
+    if (users.length < perPage) {
+      break;
+    }
+
+    page += 1;
+  }
+
+  return usersByEmail;
+}
+
 async function main() {
   console.log("=== Clerk → Supabase User Migration ===\n");
 
@@ -61,6 +94,7 @@ async function main() {
 
   // Step 2: Create users in Supabase Auth and build mapping
   console.log("Step 2: Creating users in Supabase Auth...");
+  const supabaseUsersByEmail = await loadSupabaseUsersByEmail();
   const mappings: UserMapping[] = [];
   const errors: { clerkId: string; error: string }[] = [];
 
@@ -85,6 +119,21 @@ async function main() {
         : "user";
 
     try {
+      // Idempotency: if user already exists in Supabase Auth, reuse that ID.
+      const existingSupabaseUserId = supabaseUsersByEmail.get(email.toLowerCase()) ?? null;
+      if (existingSupabaseUserId) {
+        mappings.push({
+          clerkId: clerkUser.id,
+          supabaseId: existingSupabaseUserId,
+          email,
+          name,
+          role,
+          imageUrl: clerkUser.imageUrl,
+        });
+        console.log(`  ${email}: ${clerkUser.id} -> ${existingSupabaseUserId} (existing)`);
+        continue;
+      }
+
       const { data, error } = await supabase.auth.admin.createUser({
         email,
         email_confirm: true,
@@ -97,6 +146,23 @@ async function main() {
       });
 
       if (error) {
+        // Retry lookup from refreshed list in case createUser raced or returned duplicate-user.
+        const refreshedSupabaseUsersByEmail = await loadSupabaseUsersByEmail();
+        const fallbackSupabaseUserId =
+          refreshedSupabaseUsersByEmail.get(email.toLowerCase()) ?? null;
+        if (fallbackSupabaseUserId) {
+          mappings.push({
+            clerkId: clerkUser.id,
+            supabaseId: fallbackSupabaseUserId,
+            email,
+            name,
+            role,
+            imageUrl: clerkUser.imageUrl,
+          });
+          console.log(`  ${email}: ${clerkUser.id} -> ${fallbackSupabaseUserId} (resolved after create error)`);
+          continue;
+        }
+
         errors.push({ clerkId: clerkUser.id, error: error.message });
         continue;
       }
@@ -109,6 +175,7 @@ async function main() {
         role,
         imageUrl: clerkUser.imageUrl,
       });
+      supabaseUsersByEmail.set(email.toLowerCase(), data.user.id);
 
       console.log(`  ${email}: ${clerkUser.id} -> ${data.user.id}`);
     } catch (err) {
@@ -141,11 +208,12 @@ async function main() {
 
     // Create temporary mapping table
     await client.query(`
-      CREATE TEMP TABLE user_id_mapping (
+      CREATE TEMP TABLE IF NOT EXISTS user_id_mapping (
         clerk_id TEXT PRIMARY KEY,
         supabase_id TEXT NOT NULL
-      )
+      ) ON COMMIT DROP
     `);
+    await client.query(`TRUNCATE TABLE user_id_mapping`);
 
     // Insert mappings
     for (const m of mappings) {
@@ -160,6 +228,7 @@ async function main() {
       { table: "key_shares", column: "user_id" },
       { table: "devices", column: "user_id" },
       { table: "webauthn_credentials", column: "user_id" },
+      { table: "user_keys", column: "user_id" },
       { table: "folders", column: "user_id" },
       { table: "chats", column: "user_id" },
       { table: "notes", column: "user_id" },
@@ -188,7 +257,12 @@ async function main() {
       await client.query(
         `INSERT INTO users (id, email, name, image_url, role, created_at, updated_at)
          VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
-         ON CONFLICT (id) DO NOTHING`,
+         ON CONFLICT (id) DO UPDATE SET
+           email = EXCLUDED.email,
+           name = EXCLUDED.name,
+           image_url = EXCLUDED.image_url,
+           role = EXCLUDED.role,
+           updated_at = NOW()`,
         [m.supabaseId, m.email, m.name, m.imageUrl, m.role]
       );
     }

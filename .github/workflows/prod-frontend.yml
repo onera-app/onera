@@ -4,18 +4,33 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "apps/web/**"
+      - "packages/**"
+      - "package.json"
+      - "bun.lock"
+      - ".github/workflows/prod-frontend.yml"
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
       - main
+    paths:
+      - "apps/web/**"
+      - "packages/**"
+      - "package.json"
+      - "bun.lock"
+      - ".github/workflows/prod-frontend.yml"
+  workflow_dispatch:
 
 jobs:
   build_and_deploy_job:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: blacksmith-4vcpu-ubuntu-2404
+    permissions:
+      contents: read
     name: Build and Deploy Job
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
           lfs: false
@@ -29,13 +44,14 @@ jobs:
         run: bun install
 
       - name: Build frontend
-        run: bun run build
         working-directory: apps/web
         env:
           VITE_API_URL: https://api.onera.chat
           VITE_WS_URL: https://api.onera.chat
-          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY_PROD }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL_PROD }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY_PROD }}
           NODE_OPTIONS: --max-old-space-size=4096
+        run: bun run build
 
       - name: Copy SWA config
         run: cp apps/web/staticwebapp.config.json apps/web/dist/
@@ -53,6 +69,8 @@ jobs:
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: blacksmith-4vcpu-ubuntu-2404
+    permissions:
+      contents: read
     name: Close Pull Request Job
     steps:
       - name: Close Pull Request
