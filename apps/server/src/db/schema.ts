@@ -60,7 +60,7 @@ export const keyShares = pgTable(
   "key_shares",
   {
     id: uuidPrimaryKey("id"),
-    userId: text("user_id").notNull().unique(), // Supabase Auth user ID (e.g., "user_2abc123")
+    userId: text("user_id").notNull().unique(), // Supabase Auth user ID (UUID)
 
     // Auth share (plaintext, protected by Supabase session authentication)
     // Security: Only released via tRPC protectedProcedure to authenticated users

@@ -4,10 +4,10 @@
  *
  * Security Model:
  * - Auth share is stored as PLAINTEXT on the server
- * - Security comes from Clerk authentication, NOT encryption
- * - The auth share is ONLY released to authenticated Clerk sessions via protectedProcedure
+ * - Security comes from Supabase authentication, NOT encryption
+ * - The auth share is ONLY released to authenticated Supabase sessions via protectedProcedure
  * - Even with full database access, an attacker cannot decrypt user data without:
- *   1. A valid Clerk session (to get auth share)
+ *   1. A valid Supabase session (to get auth share)
  *   2. Device access (to get device share from localStorage)
  *   3. Recovery phrase (optional, for recovery share)
  */
@@ -94,7 +94,7 @@ export const keySharesRouter = router({
    * Get key shares for the authenticated user
    * Used during login to reconstruct the master key
    *
-   * SECURITY: This endpoint is protected by Clerk authentication.
+   * SECURITY: This endpoint is protected by Supabase authentication.
    * The auth share is only released to authenticated users.
    */
   get: protectedProcedure.query(async ({ ctx }) => {
@@ -111,7 +111,7 @@ export const keySharesRouter = router({
       });
     }
 
-    // Return plaintext auth share - security is provided by Clerk authentication
+    // Return plaintext auth share - security is provided by Supabase authentication
     return {
       authShare: shares.authShare,
       encryptedRecoveryShare: shares.encryptedRecoveryShare,

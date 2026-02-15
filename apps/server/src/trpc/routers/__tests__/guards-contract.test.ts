@@ -18,12 +18,10 @@ const mockedEntitlements = {
   dodoCustomerId: null,
 };
 
-mock.module("../../../auth/clerk", () => ({
-  getUserMetadata: async () => ({
-    publicMetadata: role ? { role } : {},
-    privateMetadata: {},
-    unsafeMetadata: {},
-  }),
+mock.module("../../../auth/supabase", () => ({
+  getUserRole: async () => role,
+  authenticateRequest: async () => null,
+  extractBearerToken: () => null,
 }));
 
 mock.module("../../../billing/entitlements", () => ({

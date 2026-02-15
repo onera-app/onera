@@ -6,25 +6,9 @@
  * Maintains the same User interface for backward compatibility.
  */
 
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "../lib/supabase";
 import { db, users } from "../db/client";
 import { eq } from "drizzle-orm";
-
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error(
-    "SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables are required"
-  );
-}
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
 
 /**
  * User representation for our application

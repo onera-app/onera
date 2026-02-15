@@ -13,7 +13,7 @@ export function useKeySharesCheck(enabled = true) {
 
 /**
  * Get user's key shares (Privy-style server-protected)
- * The auth share is returned as plaintext - security comes from Clerk authentication
+ * The auth share is returned as plaintext - security comes from Supabase authentication
  */
 export function useKeyShares() {
   const query = trpc.keyShares.get.useQuery(undefined, {
