@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { useAuth, useSignInWithE2EE } from "@/providers/ClerkAuthProvider";
+import { useAuth, useSignInWithE2EE } from "@/providers/SupabaseAuthProvider";
 import { Button } from "@/components/ui/button";
 import { OneraLogo } from "@/components/ui/onera-logo";
 import { Spinner } from "@/components/ui/spinner";
