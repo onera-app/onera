@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useCallback, type ReactNode } from 'react';
-import { useAuth } from '@/providers/ClerkAuthProvider';
+import { useAuth } from '@/providers/SupabaseAuthProvider';
 import { useKeySharesCheck } from '@/hooks/queries/useKeyShares';
 import { useE2EEStore, type E2EEStatus } from '@/stores/e2eeStore';
 import {
