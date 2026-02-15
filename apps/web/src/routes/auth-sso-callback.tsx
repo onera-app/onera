@@ -1,13 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { useClerk, useSignIn, useSignUp } from "@clerk/clerk-react";
+import { useSSOCallback } from "@/providers/SupabaseAuthProvider";
 import { toast } from "sonner";
 import {
-  setupUserKeysWithSharding,
-  getOrCreateDeviceId,
-  setDecryptedKeys,
   getDecryptedMasterKey,
-  encryptDeviceName,
   type RecoveryKeyInfo,
 } from "@onera/crypto";
 import { trpc } from "@/lib/trpc";
@@ -31,7 +27,7 @@ import {
   Lock,
   ShieldCheck,
 } from "lucide-react";
-import { AppError, normalizeAppError } from "@/lib/errors/app-error";
+import { normalizeAppError } from "@/lib/errors/app-error";
 
 type CallbackView = "processing" | "onboarding" | "passkey" | "password" | "recovery" | "error";
 
@@ -44,10 +40,6 @@ type CallbackStage =
   | "recovery_ack"
   | "done"
   | "error";
-
-interface AuthResolution {
-  userId: string | null;
-}
 
 function getDeviceName(): string {
   const ua = navigator.userAgent;
@@ -71,9 +63,12 @@ function getDeviceName(): string {
 
 export function SSOCallbackPage() {
   const navigate = useNavigate();
-  const clerk = useClerk();
-  const { signUp, setActive: setSignUpActive } = useSignUp();
-  const { signIn, setActive: setSignInActive } = useSignIn();
+  const {
+    isReady,
+    isProcessing: isSSOProcessing,
+    error: ssoError,
+    processCallback,
+  } = useSSOCallback();
   const [view, setView] = useState<CallbackView>("processing");
   const [stage, setStage] = useState<CallbackStage>("oauth_complete");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -90,16 +85,6 @@ export function SSOCallbackPage() {
   const { setupPasswordEncryption, isSettingUp: isSettingUpPassword } = usePasswordSetup();
 
   const trpcUtils = trpc.useUtils();
-  const onboardingStatusQuery = trpc.keyShares.getOnboardingStatus.useQuery(undefined, { enabled: false });
-  const createKeySharesMutation = trpc.keyShares.create.useMutation({
-    onSuccess: () => {
-      trpcUtils.keyShares.check.invalidate();
-      trpcUtils.keyShares.get.invalidate();
-      trpcUtils.keyShares.getOnboardingStatus.invalidate();
-    },
-  });
-  const registerDeviceMutation = trpc.devices.register.useMutation();
-  const updateLastSeenMutation = trpc.devices.updateLastSeen.useMutation();
 
   const stageLabel = useMemo(() => {
     const map: Record<CallbackStage, string> = {
@@ -122,99 +107,12 @@ export function SSOCallbackPage() {
     setView("error");
   }, [stage]);
 
-  const resolveOAuthSession = useCallback(async (): Promise<AuthResolution> => {
-    const externalAccountError = signUp?.verifications?.externalAccount?.error;
-
-    if (externalAccountError?.code === "external_account_exists") {
-      const result = await signIn?.create({ transfer: true });
-      if (result?.status === "complete" && result.createdSessionId && setSignInActive) {
-        await setSignInActive({ session: result.createdSessionId });
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        return { userId: clerk.user?.id || null };
-      }
-    }
-
-    if (signUp?.status === "complete" && signUp.createdSessionId && setSignUpActive) {
-      await setSignUpActive({ session: signUp.createdSessionId });
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      return { userId: clerk.user?.id || null };
-    }
-
-    if (signIn?.status === "complete" && signIn.createdSessionId && setSignInActive) {
-      await setSignInActive({ session: signIn.createdSessionId });
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      return { userId: clerk.user?.id || null };
-    }
-
-    if (clerk.user) {
-      return { userId: clerk.user.id };
-    }
-
-    return { userId: null };
-  }, [clerk.user, setSignInActive, setSignUpActive, signIn, signUp]);
-
-  const runExistingUserPath = useCallback(async (): Promise<void> => {
-    const deviceId = getOrCreateDeviceId();
-    await updateLastSeenMutation.mutateAsync({ deviceId }).catch(() => {
-      // Device may not be registered yet.
-    });
-    toast.info("Please unlock your encryption to continue.");
-    setStage("done");
-    navigate({ to: "/app" });
-  }, [navigate, updateLastSeenMutation]);
-
-  const runNewUserPath = useCallback(async (): Promise<void> => {
-    setStage("device_registration");
-    const deviceId = getOrCreateDeviceId();
-    const plaintextDeviceName = getDeviceName();
-    const deviceResult = await registerDeviceMutation.mutateAsync({
-      deviceId,
-      userAgent: navigator.userAgent,
-    });
-
-    setStage("key_setup");
-    const keyBundle = await setupUserKeysWithSharding(deviceResult.deviceSecret);
-    await createKeySharesMutation.mutateAsync({
-      authShare: keyBundle.storableKeys.authShare,
-      encryptedRecoveryShare: keyBundle.storableKeys.encryptedRecoveryShare,
-      recoveryShareNonce: keyBundle.storableKeys.recoveryShareNonce,
-      publicKey: keyBundle.storableKeys.publicKey,
-      encryptedPrivateKey: keyBundle.storableKeys.encryptedPrivateKey,
-      privateKeyNonce: keyBundle.storableKeys.privateKeyNonce,
-      masterKeyRecovery: keyBundle.storableKeys.masterKeyRecovery,
-      masterKeyRecoveryNonce: keyBundle.storableKeys.masterKeyRecoveryNonce,
-      encryptedRecoveryKey: keyBundle.storableKeys.encryptedRecoveryKey,
-      recoveryKeyNonce: keyBundle.storableKeys.recoveryKeyNonce,
-    });
-
-    setDecryptedKeys({
-      masterKey: keyBundle.masterKey,
-      publicKey: keyBundle.keyPair.publicKey,
-      privateKey: keyBundle.keyPair.privateKey,
-    });
-
-    try {
-      const encryptedName = encryptDeviceName(plaintextDeviceName);
-      await registerDeviceMutation.mutateAsync({
-        deviceId,
-        encryptedDeviceName: encryptedName.encryptedDeviceName,
-        deviceNameNonce: encryptedName.deviceNameNonce,
-        userAgent: navigator.userAgent,
-      });
-    } catch (error) {
-      console.warn("Failed to encrypt device name:", error);
-    }
-
-    setRecoveryInfo(keyBundle.recoveryInfo);
-    setStage("unlock_method_setup");
-    setView("onboarding");
-    toast.success("Account created! Let's get your secure unlock set up.");
-  }, [createKeySharesMutation, registerDeviceMutation]);
-
   // This initialization must run once per callback entry.
+  // Supabase handles OAuth session resolution automatically via onAuthStateChange.
+  // We just wait for isReady (authenticated user exists) then process the callback.
   useEffect(() => {
     const initialize = async () => {
-      if (processingRef.current || !clerk.loaded) {
+      if (processingRef.current || !isReady) {
         return;
       }
       processingRef.current = true;
@@ -222,45 +120,29 @@ export function SSOCallbackPage() {
       setStage("oauth_complete");
 
       try {
-        const resolved = await resolveOAuthSession();
-        if (!resolved.userId) {
-          throw new AppError({
-            code: "AuthError",
-            message: "No authenticated user after OAuth callback",
-            userMessage: "Sign in session could not be established. Please try again.",
-            retryable: true,
-            blocking: true,
-          });
-        }
-
         setStage("keyshare_status_check");
-        const onboardingStatusResult = await onboardingStatusQuery.refetch().catch(() => null);
-        const onboardingStatus = onboardingStatusResult?.data;
+        const result = await processCallback();
 
-        if (onboardingStatus?.hasKeyShares) {
-          await runExistingUserPath();
+        if (!result.isNewUser) {
+          // Existing user - redirect to app (E2EE unlock modal will handle the rest)
+          toast.info("Please unlock your encryption to continue.");
+          setStage("done");
+          navigate({ to: "/app" });
           return;
         }
 
-        await runNewUserPath();
+        // New user - show onboarding flow
+        setRecoveryInfo(result.recoveryInfo || null);
+        setStage("unlock_method_setup");
+        setView("onboarding");
+        toast.success("Account created! Let's get your secure unlock set up.");
       } catch (error) {
         failWith(error, "E2EE setup failed");
       }
     };
 
     initialize();
-  }, [
-    clerk.loaded,
-    failWith,
-    onboardingStatusQuery,
-    resolveOAuthSession,
-    runExistingUserPath,
-    runNewUserPath,
-    signIn,
-    signUp,
-    setSignInActive,
-    setSignUpActive,
-  ]);
+  }, [isReady, failWith, processCallback, navigate]);
 
   useEffect(() => {
     if (view === "passkey" && !isCheckingPasskeySupport && !passkeySupported) {
