@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
-import { useAuth } from "@/providers/ClerkAuthProvider";
+import { useAuth } from "@/providers/SupabaseAuthProvider";
 import { trpc } from "@/lib/trpc";
 
 // WebSocket URL - empty string or undefined means connect to same origin

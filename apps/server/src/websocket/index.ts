@@ -1,6 +1,6 @@
 import { Server as HTTPServer } from "http";
 import { Server, Socket } from "socket.io";
-import { verifyClerkToken } from "../auth/clerk";
+import { authenticateRequest } from "../auth/supabase";
 
 // Track connected users and their sockets
 const userSockets = new Map<string, Set<Socket>>();
@@ -33,7 +33,7 @@ export function initWebSocket(httpServer: HTTPServer) {
     },
   });
 
-  // Authentication middleware - Clerk JWT verification
+  // Authentication middleware - Supabase JWT verification
   io.use(async (socket, next) => {
     try {
       // Get JWT token from query params or auth header
@@ -46,15 +46,15 @@ export function initWebSocket(httpServer: HTTPServer) {
         return next(new Error("No authentication token"));
       }
 
-      // Verify the Clerk JWT token
-      const payload = await verifyClerkToken(token);
+      // Verify the Supabase JWT token
+      const user = await authenticateRequest(`Bearer ${token}`);
 
-      if (!payload || !payload.sub) {
+      if (!user) {
         return next(new Error("Invalid token"));
       }
 
-      socket.data.userId = payload.sub;
-      socket.data.email = payload.email;
+      socket.data.userId = user.id;
+      socket.data.email = user.email;
       next();
     } catch (err) {
       next(new Error("Authentication failed"));
