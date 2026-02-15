@@ -13,7 +13,7 @@ import { routeTree } from './routeTree.gen';
 if (import.meta.env.DEV) {
   scan({ enabled: true });
 }
-import { ClerkAuthProvider, AuthContextProvider } from './providers/ClerkAuthProvider';
+import { SupabaseAuthProvider } from './providers/SupabaseAuthProvider';
 import { TRPCProvider } from './providers/TRPCProvider';
 import { E2EEProvider } from './providers/E2EEProvider';
 import { ThemeProvider } from './providers/ThemeProvider';
@@ -43,20 +43,18 @@ function RealtimeUpdatesInitializer({ children }: { children: React.ReactNode })
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AppErrorBoundary>
-      <ClerkAuthProvider>
+      <SupabaseAuthProvider>
         <TRPCProvider>
-          <AuthContextProvider>
-            <ThemeProvider>
-              <E2EEProvider>
-                <RealtimeUpdatesInitializer>
-                  <RouterProvider router={router} />
-                  <Toaster position="top-right" richColors />
-                </RealtimeUpdatesInitializer>
-              </E2EEProvider>
-            </ThemeProvider>
-          </AuthContextProvider>
+          <ThemeProvider>
+            <E2EEProvider>
+              <RealtimeUpdatesInitializer>
+                <RouterProvider router={router} />
+                <Toaster position="top-right" richColors />
+              </RealtimeUpdatesInitializer>
+            </E2EEProvider>
+          </ThemeProvider>
         </TRPCProvider>
-      </ClerkAuthProvider>
+      </SupabaseAuthProvider>
     </AppErrorBoundary>
   </StrictMode>
 );
