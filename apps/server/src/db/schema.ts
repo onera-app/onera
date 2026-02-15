@@ -15,9 +15,26 @@ const uuidPrimaryKey = (name: string) =>
   uuid(name).primaryKey().defaultRandom();
 
 // ============================================
-// Clerk Auth - No tables needed (managed by Clerk)
-// User ID is the Clerk user ID (string like "user_xxx")
+// Users (synced from Supabase Auth)
 // ============================================
+
+export const users = pgTable(
+  "users",
+  {
+    id: text("id").primaryKey(), // Supabase Auth UUID
+    email: text("email").notNull(),
+    name: text("name"),
+    imageUrl: text("image_url"),
+    role: text("role").default("user").notNull(), // "user" | "admin"
+    createdAt: timestamp("created_at", { mode: "date" })
+      .default(sql`now()`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .default(sql`now()`)
+      .notNull(),
+  },
+  (table) => [uniqueIndex("idx_users_email").on(table.email)]
+);
 
 // ============================================
 // Key Shares (E2EE with 3-share system)
@@ -27,25 +44,25 @@ const uuidPrimaryKey = (name: string) =>
  * Key shares for the 3-share E2EE system (Privy-style server-protected)
  *
  * Security model:
- * - Auth share: Stored as PLAINTEXT on server, protected by Clerk authentication
- *   The server only releases the auth share to authenticated Clerk sessions.
+ * - Auth share: Stored as PLAINTEXT on server, protected by Supabase authentication
+ *   The server only releases the auth share to authenticated Supabase sessions.
  *   Even with database access, an attacker cannot decrypt user data without
- *   also compromising Clerk authentication.
+ *   also compromising Supabase authentication.
  * - Device share: Stored encrypted in localStorage (not in DB)
  * - Recovery share: Stored encrypted with recovery key derived from mnemonic
  *
  * To decrypt user data, an attacker must compromise THREE independent systems:
  * 1. Database (auth share + recovery share)
  * 2. Device (device share in localStorage)
- * 3. Clerk authentication (valid session token)
+ * 3. Supabase authentication (valid session token)
  */
 export const keyShares = pgTable(
   "key_shares",
   {
     id: uuidPrimaryKey("id"),
-    userId: text("user_id").notNull().unique(), // Clerk user ID (e.g., "user_2abc123")
+    userId: text("user_id").notNull().unique(), // Supabase Auth user ID (e.g., "user_2abc123")
 
-    // Auth share (plaintext, protected by Clerk session authentication)
+    // Auth share (plaintext, protected by Supabase session authentication)
     // Security: Only released via tRPC protectedProcedure to authenticated users
     authShare: text("auth_share").notNull(),
 
@@ -99,7 +116,7 @@ export const devices = pgTable(
   "devices",
   {
     id: uuidPrimaryKey("id"),
-    userId: text("user_id").notNull(), // Clerk user ID
+    userId: text("user_id").notNull(), // Supabase Auth user ID
     deviceId: text("device_id").notNull(), // Browser-generated device ID
     userAgent: text("user_agent"), // Browser user agent for identification
 
@@ -146,7 +163,7 @@ export const webauthnCredentials = pgTable(
   "webauthn_credentials",
   {
     id: uuidPrimaryKey("id"),
-    userId: text("user_id").notNull(), // Clerk user ID
+    userId: text("user_id").notNull(), // Supabase Auth user ID
 
     // WebAuthn credential data
     credentialId: text("credential_id").notNull(), // Base64URL encoded
@@ -186,7 +203,7 @@ export const folders = pgTable(
   "folders",
   {
     id: uuidPrimaryKey("id"),
-    userId: text("user_id").notNull(), // Clerk user ID
+    userId: text("user_id").notNull(), // Supabase Auth user ID
 
     // Encrypted name (XSalsa20-Poly1305 with master key)
     encryptedName: text("encrypted_name"),
@@ -214,7 +231,7 @@ export const chats = pgTable(
   "chats",
   {
     id: uuidPrimaryKey("id"),
-    userId: text("user_id").notNull(), // Clerk user ID
+    userId: text("user_id").notNull(), // Supabase Auth user ID
     // Encryption metadata
     isEncrypted: boolean("is_encrypted").default(true).notNull(),
     encryptedChatKey: text("encrypted_chat_key"),
@@ -250,7 +267,7 @@ export const notes = pgTable(
   "notes",
   {
     id: uuidPrimaryKey("id"),
-    userId: text("user_id").notNull(), // Clerk user ID
+    userId: text("user_id").notNull(), // Supabase Auth user ID
     // Encrypted content
     encryptedTitle: text("encrypted_title").notNull(),
     titleNonce: text("title_nonce").notNull(),
@@ -282,7 +299,7 @@ export const credentials = pgTable(
   "credentials",
   {
     id: uuidPrimaryKey("id"),
-    userId: text("user_id").notNull(), // Clerk user ID
+    userId: text("user_id").notNull(), // Supabase Auth user ID
 
     // Encrypted name (XSalsa20-Poly1305 with master key)
     encryptedName: text("encrypted_name"),
@@ -311,7 +328,7 @@ export const prompts = pgTable(
   "prompts",
   {
     id: uuidPrimaryKey("id"),
-    userId: text("user_id").notNull(), // Clerk user ID
+    userId: text("user_id").notNull(), // Supabase Auth user ID
 
     // Encrypted name (XSalsa20-Poly1305 with master key)
     encryptedName: text("encrypted_name"),
@@ -397,6 +414,10 @@ export type NewPrompt = typeof prompts.$inferInsert;
 // Legacy types (for migration)
 export type UserKey = typeof userKeys.$inferSelect;
 export type NewUserKey = typeof userKeys.$inferInsert;
+
+// User types
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
 
 // ============================================
 // TEE Enclave Management

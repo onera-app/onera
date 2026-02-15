@@ -25,6 +25,7 @@ export { schema };
 
 // Re-export individual tables for convenient imports in routers
 export const {
+  users,
   keyShares,
   devices,
   webauthnCredentials,
