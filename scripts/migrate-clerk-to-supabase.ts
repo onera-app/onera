@@ -1,7 +1,7 @@
 /**
  * Clerk → Supabase User Migration Script
  *
- * Usage: CLERK_SECRET_KEY=xxx SUPABASE_URL=xxx SUPABASE_SERVICE_ROLE_KEY=xxx DATABASE_URL=xxx bun run scripts/migrate-clerk-to-supabase.ts
+ * Usage: CLERK_SECRET_KEY=xxx SUPABASE_URL=xxx SUPABASE_SECRET_KEY=xxx DATABASE_URL=xxx bun run scripts/migrate-clerk-to-supabase.ts
  *
  * This script:
  * 1. Exports all users from Clerk
@@ -24,7 +24,7 @@ const clerkClient = createClerkClient({
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  process.env.SUPABASE_SECRET_KEY!,
   { auth: { autoRefreshToken: false, persistSession: false } }
 );
 

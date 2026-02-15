@@ -40,7 +40,7 @@ services:
     environment:
       DATABASE_URL: postgresql://onera:${POSTGRES_PASSWORD}@postgres:5432/onera
       SUPABASE_URL: ${SUPABASE_URL:?SUPABASE_URL is required}
-      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:?SUPABASE_SERVICE_ROLE_KEY is required}
+      SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY:?SUPABASE_SECRET_KEY is required}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
       PORT: 3000
       NODE_ENV: production
