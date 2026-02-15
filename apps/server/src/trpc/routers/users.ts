@@ -1,4 +1,3 @@
-import { eq } from "drizzle-orm";
 import { router, protectedProcedure } from "../trpc";
 import { db, users } from "../../db/client";
 

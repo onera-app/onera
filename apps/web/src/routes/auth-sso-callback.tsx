@@ -65,8 +65,6 @@ export function SSOCallbackPage() {
   const navigate = useNavigate();
   const {
     isReady,
-    isProcessing: isSSOProcessing,
-    error: ssoError,
     processCallback,
   } = useSSOCallback();
   const [view, setView] = useState<CallbackView>("processing");
