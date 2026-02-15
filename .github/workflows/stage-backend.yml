@@ -114,6 +114,18 @@ jobs:
             --resource-group onera \
             --startup-file "startup.sh"
 
+      - name: Configure Supabase settings
+        env:
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL_STAGE }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY_STAGE }}
+        run: |
+          az webapp config appsettings set \
+            --name onera-backend-stage \
+            --resource-group onera \
+            --settings \
+              SUPABASE_URL="$SUPABASE_URL" \
+              SUPABASE_SECRET_KEY="$SUPABASE_SECRET_KEY"
+
       - name: Configure WebAuthn settings
         run: |
           az webapp config appsettings set \
