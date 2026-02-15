@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "@/providers/SupabaseAuthProvider";
 import { trpc } from "@/lib/trpc";
 
 // In production, VITE_API_URL is "/api" and tRPC endpoint is "/api/trpc"
@@ -19,8 +19,8 @@ function getTrpcUrl(): string {
 }
 
 /**
- * TRPC Provider that includes Clerk JWT in Authorization header
- * Must be used inside ClerkProvider
+ * TRPC Provider that includes Supabase JWT in Authorization header
+ * Must be used inside SupabaseAuthProvider
  */
 export function TRPCProvider({ children }: { children: React.ReactNode }) {
   const { getToken } = useAuth();
@@ -45,7 +45,7 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
           httpBatchLink({
             url: getTrpcUrl(),
             async headers() {
-              // Get JWT token from Clerk
+              // Get JWT token from Supabase
               const token = await getToken();
               if (token) {
                 return {
