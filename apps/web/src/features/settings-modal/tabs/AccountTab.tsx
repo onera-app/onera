@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useUser } from '@clerk/clerk-react';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -14,11 +14,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { User, Mail, Lock, Loader2, ExternalLink } from 'lucide-react';
+import { User, Mail, Lock, Loader2 } from 'lucide-react';
 
 export function AccountTab() {
   const { user } = useAuth();
-  const { user: clerkUser } = useUser();
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
@@ -39,12 +38,12 @@ export function AccountTab() {
 
     setIsChangingPassword(true);
     try {
-      // With Clerk, password changes are handled through their user management
+      // Password changes are handled through Supabase Auth
       // and don't require re-encrypting E2EE keys (sharding system handles this)
-      await clerkUser?.updatePassword({
-        currentPassword: passwordForm.currentPassword,
-        newPassword: passwordForm.newPassword,
+      const { error } = await supabase.auth.updateUser({
+        password: passwordForm.newPassword,
       });
+      if (error) throw error;
 
       toast.success('Password changed successfully');
       setShowPasswordDialog(false);
@@ -86,21 +85,8 @@ export function AccountTab() {
             <AvatarFallback className="text-lg">{initials}</AvatarFallback>
           </Avatar>
           <div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                // Open Clerk's user profile management
-                if (clerkUser) {
-                  toast.info('Opening profile management...');
-                  // Clerk provides user.openUserProfile() for this
-                }
-              }}
-            >
-              Manage Profile
-              <ExternalLink className="ml-2 h-3 w-3" />
-            </Button>
-            <p className="text-xs text-muted-foreground mt-1">Manage via Clerk</p>
+            <p className="text-sm font-medium">{user?.name || 'User'}</p>
+            <p className="text-xs text-muted-foreground">{user?.email || ''}</p>
           </div>
         </div>
 

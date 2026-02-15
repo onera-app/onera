@@ -1,7 +1,6 @@
 import { Link, useLocation, useParams } from "@tanstack/react-router";
 import { useMemo, useState, useCallback, useRef } from "react";
 import { toast } from "sonner";
-import { useUser } from "@clerk/clerk-react";
 import { useUIStore } from "@/stores/uiStore";
 import { useE2EE } from "@/providers/E2EEProvider";
 import { useAuth } from "@/hooks/useAuth";
@@ -89,9 +88,11 @@ export function Sidebar() {
     useUIStore();
   const { isUnlocked } = useE2EE();
   const { user, signOut } = useAuth();
-  const { user: clerkUser } = useUser();
-  const isAdmin =
-    (clerkUser?.publicMetadata as Record<string, unknown>)?.role === "admin";
+  const adminCheck = trpc.admin.checkAccess.useQuery(undefined, {
+    enabled: !!user,
+    retry: false,
+  });
+  const isAdmin = adminCheck.data?.isAdmin === true;
   const { data: subData } = trpc.billing.getSubscription.useQuery(undefined, {
     enabled: !!user,
   });

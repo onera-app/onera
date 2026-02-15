@@ -6,7 +6,7 @@
  * If we reach this state, something went wrong and the user needs to re-authenticate.
  */
 
-import { useClerk } from '@clerk/clerk-react';
+import { useAuth } from '@/providers/SupabaseAuthProvider';
 import {
   Dialog,
   DialogContent,
@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
 
 export function E2EESetupModal() {
-  const { signOut } = useClerk();
+  const { signOut } = useAuth();
 
   const handleSignOut = async () => {
     await signOut();

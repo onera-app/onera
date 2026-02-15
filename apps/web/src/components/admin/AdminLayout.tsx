@@ -1,5 +1,6 @@
 import { Link, Navigate, Outlet, useMatchRoute } from "@tanstack/react-router";
-import { useUser } from "@clerk/clerk-react";
+import { useAuth } from "@/providers/SupabaseAuthProvider";
+import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -23,14 +24,18 @@ const navItems = [
 ] as const;
 
 export function AdminLayout() {
-  const { user, isLoaded } = useUser();
+  const { user, isLoading } = useAuth();
+  const adminCheck = trpc.admin.checkAccess.useQuery(undefined, {
+    enabled: !!user,
+    retry: false,
+  });
   const matchRoute = useMatchRoute();
 
-  if (isLoaded && (!user || (user.publicMetadata as Record<string, unknown>)?.role !== "admin")) {
+  if (!isLoading && adminCheck.isFetched && adminCheck.data?.isAdmin !== true) {
     return <Navigate to="/app" />;
   }
 
-  if (!isLoaded) {
+  if (isLoading || adminCheck.isLoading) {
     return (
       <div
         className="flex items-center justify-center h-full"

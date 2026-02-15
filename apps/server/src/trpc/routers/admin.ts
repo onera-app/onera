@@ -1,18 +1,22 @@
 import { z } from "zod";
 import { router, adminProcedure } from "../trpc";
-import { db } from "../../db/client";
+import { db, users } from "../../db/client";
 import {
   plans,
   subscriptions,
   invoices,
   usageRecords,
 } from "../../db/schema";
-import { eq, desc, sql, and, gte, lt, inArray } from "drizzle-orm";
+import { eq, desc, sql, and, gte, lt, inArray, ilike, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { clerkClient } from "../../auth/clerk";
 import { randomUUID } from "crypto";
 
 export const adminRouter = router({
+  // Simple admin access check (used by client to show/hide admin UI)
+  checkAccess: adminProcedure.query(() => {
+    return { isAdmin: true };
+  }),
+
   // List users with subscription info
   listUsers: adminProcedure
     .input(
@@ -23,13 +27,32 @@ export const adminRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const clerkUsers = await clerkClient.users.getUserList({
-        limit: input.limit,
-        offset: input.offset,
-        query: input.search || undefined,
-      });
+      const conditions = [];
+      if (input.search) {
+        conditions.push(
+          or(
+            ilike(users.email, `%${input.search}%`),
+            ilike(users.name, `%${input.search}%`)
+          )
+        );
+      }
 
-      const userIds = clerkUsers.data.map((u) => u.id);
+      const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+      const userList = await db
+        .select()
+        .from(users)
+        .where(where)
+        .orderBy(desc(users.createdAt))
+        .limit(input.limit)
+        .offset(input.offset);
+
+      const [countResult] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(where);
+
+      const userIds = userList.map((u) => u.id);
 
       const subs =
         userIds.length > 0
@@ -42,18 +65,14 @@ export const adminRouter = router({
       const subMap = new Map(subs.map((s) => [s.userId, s]));
 
       return {
-        users: clerkUsers.data.map((u) => {
+        users: userList.map((u) => {
           const sub = subMap.get(u.id);
-          const primaryEmail = u.emailAddresses.find(
-            (e) => e.id === u.primaryEmailAddressId
-          );
           return {
             id: u.id,
-            email: primaryEmail?.emailAddress || "",
-            name:
-              [u.firstName, u.lastName].filter(Boolean).join(" ") || "User",
+            email: u.email,
+            name: u.name || "User",
             imageUrl: u.imageUrl,
-            createdAt: u.createdAt,
+            createdAt: u.createdAt.getTime(),
             subscription: sub
               ? {
                   planId: sub.planId,
@@ -63,7 +82,7 @@ export const adminRouter = router({
               : null,
           };
         }),
-        totalCount: clerkUsers.totalCount,
+        totalCount: Number(countResult.count),
       };
     }),
 
@@ -71,10 +90,15 @@ export const adminRouter = router({
   getUser: adminProcedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ input }) => {
-      const user = await clerkClient.users.getUser(input.userId);
-      const primaryEmail = user.emailAddresses.find(
-        (e) => e.id === user.primaryEmailAddressId
-      );
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, input.userId))
+        .limit(1);
+
+      if (!user) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+      }
 
       const [sub] = await db
         .select()
@@ -101,7 +125,6 @@ export const adminRouter = router({
       const periodStart =
         sub?.currentPeriodStart ||
         new Date(now.getFullYear(), now.getMonth(), 1);
-      // Use first day of next month for exclusive upper bound (#10)
       const periodEnd =
         sub?.currentPeriodEnd ||
         new Date(now.getFullYear(), now.getMonth() + 1, 1);
@@ -129,12 +152,11 @@ export const adminRouter = router({
       return {
         user: {
           id: user.id,
-          email: primaryEmail?.emailAddress || "",
-          name:
-            [user.firstName, user.lastName].filter(Boolean).join(" ") || "User",
+          email: user.email,
+          name: user.name || "User",
           imageUrl: user.imageUrl,
-          createdAt: user.createdAt,
-          role: (user.publicMetadata as Record<string, unknown>)?.role || null,
+          createdAt: user.createdAt.getTime(),
+          role: user.role,
         },
         subscription: sub
           ? {
@@ -167,13 +189,16 @@ export const adminRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      // Validate that the user exists in Clerk (#8)
-      try {
-        await clerkClient.users.getUser(input.userId);
-      } catch {
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, input.userId))
+        .limit(1);
+
+      if (!user) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "User not found in Clerk",
+          message: "User not found",
         });
       }
 

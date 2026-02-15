@@ -10,7 +10,7 @@
  */
 
 import { useState } from 'react';
-import { useClerk, useUser } from '@clerk/clerk-react';
+import { useAuth } from '@/providers/SupabaseAuthProvider';
 import { toast } from 'sonner';
 import { trpc } from '@/lib/trpc';
 import { useE2EEStore } from '@/stores/e2eeStore';
@@ -45,8 +45,7 @@ type UnlockView = 'options' | 'password' | 'recovery' | 'reset';
 
 export function E2EEUnlockModal() {
   const { setStatus, setError, setNeedsSetup } = useE2EEStore();
-  const { user } = useUser();
-  const { signOut } = useClerk();
+  const { user, signOut } = useAuth();
   const [recoveryPhrase, setRecoveryPhrase] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
