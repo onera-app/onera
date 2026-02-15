@@ -4,7 +4,7 @@ export { router, publicProcedure, protectedProcedure, adminProcedure } from "./t
 import { router } from "./trpc";
 import { usersRouter } from "./routers/users";
 import { userKeysRouter } from "./routers/userKeys"; // Legacy, for migration
-import { keySharesRouter, devicesRouter } from "./routers/keyShares"; // New Clerk-based
+import { keySharesRouter, devicesRouter } from "./routers/keyShares"; // E2EE key management
 import { webauthnRouter } from "./routers/webauthn"; // Passkey-based E2EE unlock
 import { foldersRouter } from "./routers/folders";
 import { chatsRouter } from "./routers/chats";

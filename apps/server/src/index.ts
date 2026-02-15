@@ -60,7 +60,7 @@ app.get("/.well-known/apple-app-site-association", (c) => {
 // Dodo Payments webhook endpoint (no auth — uses signature verification)
 app.route("/webhooks", webhookApp);
 
-// Note: Authentication is handled by Clerk (https://clerk.com)
+// Note: Authentication is handled by Supabase Auth
 // JWT tokens are verified in the tRPC context via the Authorization header
 
 // tRPC routes
@@ -83,7 +83,7 @@ const server = serve(
   (info) => {
     console.log(`Server running on http://localhost:${info.port}`);
     console.log(`tRPC endpoint: http://localhost:${info.port}/trpc`);
-    console.log(`Auth: Clerk JWT verification enabled`);
+    console.log(`Auth: Supabase JWT verification enabled`);
     console.log(`WebSocket enabled`);
   }
 );

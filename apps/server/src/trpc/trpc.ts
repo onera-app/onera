@@ -1,7 +1,7 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import type { Context } from "./context";
-import type { ClerkUser } from "../auth/clerk";
-import { getUserMetadata } from "../auth/clerk";
+import type { User } from "../auth/supabase";
+import { getUserRole } from "../auth/supabase";
 import { getEntitlements, type Entitlements } from "../billing/entitlements";
 
 const t = initTRPC.context<Context>().create();
@@ -13,12 +13,12 @@ export const publicProcedure = t.procedure;
  * Authenticated context with guaranteed user
  */
 interface AuthedContext extends Context {
-  user: ClerkUser;
+  user: User;
 }
 
 /**
  * Middleware to require authentication
- * Verifies that a valid Clerk user is present in the context
+ * Verifies that a valid Supabase user is present in the context
  */
 const isAuthed = t.middleware(({ ctx, next }) => {
   if (!ctx.user) {
@@ -40,7 +40,7 @@ export const protectedProcedure = t.procedure.use(isAuthed);
 
 /**
  * Middleware to require admin role
- * Checks Clerk publicMetadata.role === "admin"
+ * Checks users table role column instead of Clerk metadata
  */
 const isAdmin = t.middleware(async ({ ctx, next }) => {
   if (!ctx.user) {
@@ -50,8 +50,8 @@ const isAdmin = t.middleware(async ({ ctx, next }) => {
     });
   }
 
-  const metadata = await getUserMetadata(ctx.user.id);
-  if (!metadata || metadata.publicMetadata?.role !== "admin") {
+  const role = await getUserRole(ctx.user.id);
+  if (role !== "admin") {
     throw new TRPCError({
       code: "FORBIDDEN",
       message: "Admin access required",
