@@ -21,7 +21,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Alert,
+  AlertDescription,
+} from '@/components/ui/alert';
+import { MandatoryLogoutConfirm } from './MandatoryLogoutConfirm';
 import {
   Loader2,
   ShieldCheck,
@@ -70,6 +74,7 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
   const [showPassword, setShowPassword] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passkeyError, setPasskeyError] = useState<string | null>(null);
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
 
   // tRPC utils for invalidation
   const trpcUtils = trpc.useUtils();
@@ -80,6 +85,13 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
 
   // Password setup
   const { setupPasswordEncryption, isSettingUp: isSettingUpPassword } = usePasswordSetup();
+
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setShowSignOutConfirm(true);
+    }
+  };
 
   const handleSetupPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,10 +113,10 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
         throw new Error('Encryption must be unlocked first');
       }
       await setupPasswordEncryption(password, masterKey);
-      
+
       // Invalidate onboarding status
       trpcUtils.keyShares.getOnboardingStatus.invalidate();
-      
+
       toast.success('Encryption password set!');
       onComplete();
     } catch (err) {
@@ -120,10 +132,10 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
         throw new Error('Encryption must be unlocked first');
       }
       await registerPasskey(masterKey, getDeviceName());
-      
+
       // Invalidate onboarding status
       trpcUtils.keyShares.getOnboardingStatus.invalidate();
-      
+
       toast.success('Passkey registered!');
       onComplete();
     } catch (err) {
@@ -136,229 +148,241 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
     }
   };
 
-  // Select unlock method step
-  if (step === 'select') {
-    return (
-      <Dialog open={open}>
-        <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-primary" />
-              Complete Your Setup
-            </DialogTitle>
-            <DialogDescription>
-              Set up a quick unlock method for your encrypted data.
-            </DialogDescription>
-          </DialogHeader>
+  // Select unlock method view
+  const renderStep = () => {
+    if (step === 'select') {
+      return (
+        <Dialog open={open} onOpenChange={handleOpenChange}>
+          <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+                Complete Your Setup
+              </DialogTitle>
+              <DialogDescription>
+                Set up a quick unlock method for your encrypted data.
+              </DialogDescription>
+            </DialogHeader>
 
-          <div className="py-4 space-y-4">
-            <p className="text-sm text-muted-foreground">
-              You'll use this to unlock your encryption without entering your recovery phrase every time.
-            </p>
+            <div className="py-4 space-y-4">
+              <p className="text-sm text-muted-foreground">
+                You'll use this to unlock your encryption without entering your recovery phrase every time.
+              </p>
 
-            <div className="space-y-3">
-              {/* Passkey option - only show if supported */}
-              {passkeySupported && !isCheckingPasskeySupport && (
+              <div className="space-y-3">
+                {/* Passkey option - only show if supported */}
+                {passkeySupported && !isCheckingPasskeySupport && (
+                  <button
+                    onClick={() => setStep('passkey')}
+                    className="w-full flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent transition-colors text-left"
+                  >
+                    <Fingerprint className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium">Passkey</p>
+                      <p className="text-xs text-muted-foreground">
+                        Use Face ID, Touch ID, or Windows Hello
+                      </p>
+                    </div>
+                  </button>
+                )}
+
+                {/* Password option */}
                 <button
-                  onClick={() => setStep('passkey')}
+                  onClick={() => setStep('password')}
                   className="w-full flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent transition-colors text-left"
                 >
-                  <Fingerprint className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
+                  <KeyRound className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">Passkey</p>
+                    <p className="text-sm font-medium">Encryption Password</p>
                     <p className="text-xs text-muted-foreground">
-                      Use Face ID, Touch ID, or Windows Hello
+                      Set a password to unlock your data
                     </p>
                   </div>
                 </button>
-              )}
+              </div>
 
-              {/* Password option */}
-              <button
-                onClick={() => setStep('password')}
-                className="w-full flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent transition-colors text-left"
-              >
-                <KeyRound className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium">Encryption Password</p>
+              <p className="text-xs text-muted-foreground">
+                Your recovery phrase always works as a backup.
+              </p>
+            </div>
+          </DialogContent>
+        </Dialog>
+      );
+    }
+
+    if (step === 'passkey') {
+      return (
+        <Dialog open={open} onOpenChange={handleOpenChange}>
+          <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Fingerprint className="h-5 w-5 text-primary" />
+                Add a Passkey
+              </DialogTitle>
+              <DialogDescription>
+                Unlock faster with Face ID, Touch ID, or Windows Hello.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4">
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                <Smartphone className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium">Device Passkey</p>
                   <p className="text-xs text-muted-foreground">
-                    Set a password to unlock your data
+                    Works only on this device. Fastest and most secure.
                   </p>
                 </div>
-              </button>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                <Cloud className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium">Synced Passkey</p>
+                  <p className="text-xs text-muted-foreground">
+                    Synced via iCloud or Google. Works across your devices.
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                Your device will automatically choose the best option.
+              </p>
+
+              {passkeyError && (
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>{passkeyError}</AlertDescription>
+                </Alert>
+              )}
             </div>
 
-            <p className="text-xs text-muted-foreground">
-              Your recovery phrase always works as a backup.
-            </p>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setStep('select')} className="w-full sm:w-auto">
+                Back
+              </Button>
+              <Button
+                onClick={handleRegisterPasskey}
+                disabled={isRegisteringPasskey}
+                className="w-full sm:w-auto sm:flex-1"
+              >
+                {isRegisteringPasskey ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating passkey...
+                  </>
+                ) : (
+                  <>
+                    <Fingerprint className="w-4 h-4 mr-2" />
+                    Create Passkey
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      );
+    }
 
-  // Passkey setup step
-  if (step === 'passkey') {
+    // Password step
     return (
-      <Dialog open={open}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Fingerprint className="h-5 w-5 text-primary" />
-              Add a Passkey
+              <KeyRound className="h-5 w-5 text-primary" />
+              Set Encryption Password
             </DialogTitle>
             <DialogDescription>
-              Unlock faster with Face ID, Touch ID, or Windows Hello.
+              This password will unlock your encrypted data.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="py-4 space-y-4">
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-              <Smartphone className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
-              <div>
-                <p className="text-sm font-medium">Device Passkey</p>
-                <p className="text-xs text-muted-foreground">
-                  Works only on this device. Fastest and most secure.
-                </p>
+          <form onSubmit={handleSetupPassword}>
+            <div className="py-4 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter a strong password"
+                    required
+                    autoFocus
+                    minLength={8}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-              <Cloud className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
-              <div>
-                <p className="text-sm font-medium">Synced Passkey</p>
-                <p className="text-xs text-muted-foreground">
-                  Synced via iCloud or Google. Works across your devices.
-                </p>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirm Password</Label>
+                <Input
+                  id="confirm-password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm your password"
+                  required
+                  minLength={8}
+                />
               </div>
-            </div>
 
-            <p className="text-xs text-muted-foreground">
-              Your device will automatically choose the best option.
-            </p>
+              <p className="text-xs text-muted-foreground">
+                Use at least 8 characters. This is separate from your account password.
+              </p>
 
-            {passkeyError && (
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>{passkeyError}</AlertDescription>
-              </Alert>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setStep('select')} className="w-full sm:w-auto">
-              Back
-            </Button>
-            <Button
-              onClick={handleRegisterPasskey}
-              disabled={isRegisteringPasskey}
-              className="w-full sm:w-auto sm:flex-1"
-            >
-              {isRegisteringPasskey ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Creating passkey...
-                </>
-              ) : (
-                <>
-                  <Fingerprint className="w-4 h-4 mr-2" />
-                  Create Passkey
-                </>
+              {passwordError && (
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>{passwordError}</AlertDescription>
+                </Alert>
               )}
-            </Button>
-          </DialogFooter>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setStep('select')}
+                disabled={isSettingUpPassword}
+                className="w-full sm:w-auto"
+              >
+                Back
+              </Button>
+              <Button type="submit" className="w-full sm:w-auto sm:flex-1" disabled={isSettingUpPassword}>
+                {isSettingUpPassword ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Setting up...
+                  </>
+                ) : (
+                  'Set Password'
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     );
-  }
+  };
 
-  // Password setup step
   return (
-    <Dialog open={open}>
-      <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <KeyRound className="h-5 w-5 text-primary" />
-            Set Encryption Password
-          </DialogTitle>
-          <DialogDescription>
-            This password will unlock your encrypted data.
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      {renderStep()}
 
-        <form onSubmit={handleSetupPassword}>
-          <div className="py-4 space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter a strong password"
-                  required
-                  autoFocus
-                  minLength={8}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirm Password</Label>
-              <Input
-                id="confirm-password"
-                type={showPassword ? 'text' : 'password'}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm your password"
-                required
-                minLength={8}
-              />
-            </div>
-
-            <p className="text-xs text-muted-foreground">
-              Use at least 8 characters. This is separate from your account password.
-            </p>
-
-            {passwordError && (
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>{passwordError}</AlertDescription>
-              </Alert>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setStep('select')}
-              disabled={isSettingUpPassword}
-              className="w-full sm:w-auto"
-            >
-              Back
-            </Button>
-            <Button type="submit" className="w-full sm:w-auto sm:flex-1" disabled={isSettingUpPassword}>
-              {isSettingUpPassword ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Setting up...
-                </>
-              ) : (
-                'Set Password'
-              )}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+      <MandatoryLogoutConfirm
+        open={showSignOutConfirm}
+        onOpenChange={setShowSignOutConfirm}
+      />
+    </>
   );
 }

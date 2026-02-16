@@ -1,4 +1,4 @@
-import { Link, useLocation, useParams } from "@tanstack/react-router";
+import { Link, useLocation, useParams, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import { useUIStore } from "@/stores/uiStore";
@@ -83,6 +83,7 @@ interface FolderWithState {
 export function Sidebar() {
   const params = useParams({ strict: false });
   const location = useLocation();
+  const navigate = useNavigate();
   const currentChatId = (params as { chatId?: string }).chatId;
   const { sidebarOpen, sidebarWidth, toggleSidebar, openSettingsModal } =
     useUIStore();
@@ -237,7 +238,10 @@ export function Sidebar() {
 
   const handleDeleteChat = useCallback(async (chatId: string) => {
     await deleteChatRef.current.mutateAsync(chatId);
-  }, []);
+    if (chatId === currentChatId) {
+      navigate({ to: "/app" });
+    }
+  }, [currentChatId, navigate]);
 
   // Folder actions
   const handleNewFolder = async () => {
@@ -660,11 +664,11 @@ export function Sidebar() {
                             ? "text-primary"
                             : subData?.plan?.id === "team"
                               ? "text-status-warning-text"
-                            : subData?.plan?.id === "starter"
+                              : subData?.plan?.id === "starter"
                                 ? "text-status-success-text"
                                 : subData?.plan?.id === "enterprise"
                                   ? "text-primary"
-                                    : "text-sidebar-foreground/70",
+                                  : "text-sidebar-foreground/70",
                         )}
                       >
                         {subData?.plan?.name || "Free"} plan
@@ -690,11 +694,11 @@ export function Sidebar() {
                             ? "text-primary"
                             : subData?.plan?.id === "team"
                               ? "text-status-warning"
-                            : subData?.plan?.id === "starter"
+                              : subData?.plan?.id === "starter"
                                 ? "text-status-success"
                                 : subData?.plan?.id === "enterprise"
                                   ? "text-primary"
-                                    : "text-sidebar-foreground/50",
+                                  : "text-sidebar-foreground/50",
                         )}
                       />
                       Manage plan

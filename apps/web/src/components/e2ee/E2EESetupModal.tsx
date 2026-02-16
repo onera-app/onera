@@ -6,7 +6,7 @@
  * If we reach this state, something went wrong and the user needs to re-authenticate.
  */
 
-import { useAuth } from '@/providers/SupabaseAuthProvider';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -17,41 +17,49 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
+import { MandatoryLogoutConfirm } from './MandatoryLogoutConfirm';
 
 export function E2EESetupModal() {
-  const { signOut } = useAuth();
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
 
-  const handleSignOut = async () => {
-    await signOut();
+  const handleSignOut = () => {
     window.location.href = '/auth';
   };
 
   return (
-    <Dialog open>
-      <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-destructive" />
-            Encryption Setup Required
-          </DialogTitle>
-          <DialogDescription>
-            Your encryption keys were not properly initialized.
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open onOpenChange={(open) => !open && setShowSignOutConfirm(true)}>
+        <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Encryption Setup Required
+            </DialogTitle>
+            <DialogDescription>
+              Your encryption keys were not properly initialized.
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="py-4">
-          <p className="text-sm text-muted-foreground">
-            This can happen if your initial sign-in was interrupted. Please sign out
-            and sign in again to complete the encryption setup.
-          </p>
-        </div>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground">
+              This can happen if your initial sign-in was interrupted. Please sign out
+              and sign in again to complete the encryption setup.
+            </p>
+          </div>
 
-        <DialogFooter>
-          <Button onClick={handleSignOut} className="w-full sm:w-auto" variant="destructive">
-            Sign Out and Re-authenticate
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <DialogFooter>
+            <Button onClick={handleSignOut} className="w-full sm:w-auto" variant="destructive">
+              Sign Out and Re-authenticate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <MandatoryLogoutConfirm
+        open={showSignOutConfirm}
+        onOpenChange={setShowSignOutConfirm}
+        description="Your encryption keys were not properly initialized. If you exit now, you will be signed out."
+      />
+    </>
   );
 }
