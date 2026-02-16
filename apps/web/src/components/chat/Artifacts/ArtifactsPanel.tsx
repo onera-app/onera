@@ -70,83 +70,83 @@ export function ArtifactsPanel({
   return (
     <div
       className={cn(
-        'w-[500px] border-l border-border bg-background flex flex-col',
+        'w-full md:w-[500px] border-l border-border bg-background flex flex-col',
         'animate-in slide-in-from-right duration-200',
         className
       )}
     >
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
-            <div className="flex flex-col">
-              <span className="font-medium text-sm">
-                {activeArtifact?.title || 'Artifact'}
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+          <div className="flex flex-col">
+            <span className="font-medium text-sm">
+              {activeArtifact?.title || 'Artifact'}
+            </span>
+            {artifacts.length > 1 && (
+              <span className="text-xs text-muted-foreground">
+                {activeIndex + 1} of {artifacts.length}
               </span>
-              {artifacts.length > 1 && (
-                <span className="text-xs text-muted-foreground">
-                  {activeIndex + 1} of {artifacts.length}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Artifact navigation */}
-          {artifacts.length > 1 && (
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={handlePrev}
-                disabled={activeIndex === 0}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={handleNext}
-                disabled={activeIndex === artifacts.length - 1}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {/* Tabs - show when more than 3 artifacts */}
-        {artifacts.length > 3 && (
-          <div className="flex gap-1 px-4 py-2 border-b border-border overflow-x-auto">
-            {artifacts.map((artifact) => (
-              <Button
-                key={artifact.id}
-                variant={activeArtifactId === artifact.id ? 'secondary' : 'ghost'}
-                size="sm"
-                onClick={() => setActiveArtifactId(artifact.id)}
-                className="whitespace-nowrap text-xs"
-              >
-                {artifact.title}
-              </Button>
-            ))}
-          </div>
-        )}
-
-        {/* Content */}
-        <ScrollArea className="flex-1">
-          <div className="p-4">
-            {activeArtifact && (
-              <ArtifactContent
-                artifact={activeArtifact}
-                isEditable={isEditable}
-                onSave={handleSave}
-              />
             )}
           </div>
-        </ScrollArea>
+        </div>
+
+        {/* Artifact navigation */}
+        {artifacts.length > 1 && (
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handlePrev}
+              disabled={activeIndex === 0}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handleNext}
+              disabled={activeIndex === artifacts.length - 1}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Tabs - show when more than 3 artifacts */}
+      {artifacts.length > 3 && (
+        <div className="flex gap-1 px-4 py-2 border-b border-border overflow-x-auto">
+          {artifacts.map((artifact) => (
+            <Button
+              key={artifact.id}
+              variant={activeArtifactId === artifact.id ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveArtifactId(artifact.id)}
+              className="whitespace-nowrap text-xs"
+            >
+              {artifact.title}
+            </Button>
+          ))}
+        </div>
+      )}
+
+      {/* Content */}
+      <ScrollArea className="flex-1">
+        <div className="p-4">
+          {activeArtifact && (
+            <ArtifactContent
+              artifact={activeArtifact}
+              isEditable={isEditable}
+              onSave={handleSave}
+            />
+          )}
+        </div>
+      </ScrollArea>
     </div>
   );
 }

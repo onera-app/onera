@@ -143,14 +143,14 @@ export type MessagePart =
   | ToolInvocationPart
   | SourcePart
   | {
-      type: "file";
-      data: string;
-      mediaType: string;
-      url?: string;
-      filename?: string;
-    }
+    type: "file";
+    data: string;
+    mediaType: string;
+    url?: string;
+    filename?: string;
+  }
   // Catch-all for other AI SDK part types
-  | { type: string; [key: string]: unknown };
+  | { type: string;[key: string]: unknown };
 
 // Message metadata for token usage, timing, etc.
 export interface MessageMetadata {
@@ -210,6 +210,15 @@ export const Messages = memo(function Messages({
   // Use observer-based scroll handling instead of useEffect on messages
   const { containerRef, endRef, isAtBottom, scrollToBottom } =
     useScrollToBottom();
+
+  // Scroll to bottom on mount and when messages change (if at bottom or initial load)
+  useEffect(() => {
+    // Small timeout to ensure DOM is rendered
+    const timeoutId = setTimeout(() => {
+      scrollToBottom();
+    }, 100);
+    return () => clearTimeout(timeoutId);
+  }, [messages.length, scrollToBottom]);
 
   // Smooth scroll button visibility with animation
   const { shouldRender: showScrollButton, isVisible: scrollButtonVisible } =

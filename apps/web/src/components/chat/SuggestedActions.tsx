@@ -30,11 +30,7 @@ function PureSuggestedActions({ onSend, disabled }: SuggestedActionsProps) {
         <div
           key={suggestedAction}
           className={cn(
-            'animate-in fade-in slide-in-from-bottom-4',
-            index === 0 && 'animation-delay-[0ms]',
-            index === 1 && 'animation-delay-[50ms]',
-            index === 2 && 'animation-delay-[100ms]',
-            index === 3 && 'animation-delay-[150ms]'
+            'animate-in fade-in slide-in-from-bottom-4'
           )}
           style={{ animationDelay: `${index * 50}ms` }}
         >

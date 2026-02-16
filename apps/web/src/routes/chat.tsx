@@ -9,13 +9,16 @@ import {
   useChat,
   useUpdateChat,
   useDeleteChat,
+  useCreateChat,
 } from "@/hooks/queries/useChats";
+import { trpc } from "@/lib/trpc";
 import {
   getChatKey,
   decryptChatTitle,
   decryptChatContent,
   encryptChatContent,
   encryptChatTitle,
+  createEncryptedChat,
 } from "@onera/crypto";
 import type { ChatMessage, MessageContent, ChatHistory } from "@onera/types";
 import {
@@ -117,9 +120,23 @@ export function ChatPage() {
   const rawChat = useChat(chatId || "");
   const updateChatMutation = useUpdateChat();
   const deleteChatMutation = useDeleteChat();
+  const createChatMutation = useCreateChat();
+  const utils = trpc.useUtils();
 
   // Decrypt chat data
   const chat = useMemo((): DecryptedChat | null => {
+    // Lazy creation: if no chatId, return a virtual empty chat
+    if (!chatId) {
+      return {
+        id: "new",
+        title: "New Chat",
+        messages: [],
+        history: { currentId: null, messages: {} },
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+    }
+
     if (!rawChat) return null;
     void decryptAttempt;
 
@@ -130,23 +147,23 @@ export function ChatPage() {
         const title =
           rawChat.encryptedTitle && rawChat.titleNonce
             ? decryptChatTitle(
-                rawChat.id,
-                rawChat.encryptedChatKey,
-                rawChat.chatKeyNonce,
-                rawChat.encryptedTitle,
-                rawChat.titleNonce,
-              )
+              rawChat.id,
+              rawChat.encryptedChatKey,
+              rawChat.chatKeyNonce,
+              rawChat.encryptedTitle,
+              rawChat.titleNonce,
+            )
             : "Untitled";
 
         const history: ChatHistory =
           rawChat.encryptedChat && rawChat.chatNonce
             ? (decryptChatContent(
-                rawChat.id,
-                rawChat.encryptedChatKey,
-                rawChat.chatKeyNonce,
-                rawChat.encryptedChat,
-                rawChat.chatNonce,
-              ) as unknown as ChatHistory)
+              rawChat.id,
+              rawChat.encryptedChatKey,
+              rawChat.chatKeyNonce,
+              rawChat.encryptedChat,
+              rawChat.chatNonce,
+            ) as unknown as ChatHistory)
             : { currentId: null, messages: {} };
 
         // Get linear messages from history for display
@@ -190,9 +207,9 @@ export function ChatPage() {
       encryptedChatKey: rawChat.encryptedChatKey,
       chatKeyNonce: rawChat.chatKeyNonce,
     };
-  }, [rawChat, isUnlocked, decryptAttempt]);
+  }, [rawChat, isUnlocked, decryptAttempt, chatId]);
 
-  const isLoading = rawChat === undefined;
+  const isLoading = !!chatId && rawChat === undefined;
 
   // Ref to track pending user message for persistence (ref needed for async callbacks)
   const pendingUserMessageRef = useRef<ChatMessage | null>(null);
@@ -716,14 +733,15 @@ export function ChatPage() {
   // Handle sending a message with optional attachments and search
   const handleSendMessage = useCallback(
     async (content: string, options?: MessageInputOptions) => {
-      if (!isUnlocked || !chat || !selectedModelId || !chatId) {
+      // Allow sending if we are in "new chat" mode (no chatId)
+      if (!isUnlocked || (!chat && chatId) || !selectedModelId) {
         if (!selectedModelId) {
           toast.error("Please select a model first");
         }
         return;
       }
 
-      if (!isReady) {
+      if (!isReady && chatId) {
         if (isLoadingCredentials) {
           toast.error("Loading credentials...");
         } else {
@@ -736,6 +754,72 @@ export function ChatPage() {
       setFollowUps([]);
       if (!options?.searchEnabled) {
         setSearchSources([]);
+      }
+
+      let currentChatId = chatId;
+      let encryptionKeys = {
+        encryptedChatKey: chat?.encryptedChatKey,
+        chatKeyNonce: chat?.chatKeyNonce,
+      };
+
+      // Lazy creation: Create chat if it doesn't exist yet
+      if (!currentChatId) {
+        try {
+          setIsGeneratingFollowUps(true); // Show loading state
+
+          // Generate initial title from user message
+          const initialTitle =
+            content.slice(0, 50) + (content.length > 50 ? "..." : "");
+
+          // We'll construct the real message content later, but for initial creation we need something
+          // The empty history is fine because handleFinish will add the messages properly
+          const history: ChatHistory = {
+            currentId: null,
+            messages: {},
+          };
+
+          // Encrypt and create chat
+          const { data: encryptedData } = await createEncryptedChat(
+            initialTitle,
+            history as unknown as Record<string, unknown>,
+          );
+
+          const createdChat = await createChatMutation.mutateAsync({
+            encryptedChatKey: encryptedData.encryptedChatKey,
+            chatKeyNonce: encryptedData.chatKeyNonce,
+            encryptedTitle: encryptedData.encryptedTitle,
+            titleNonce: encryptedData.titleNonce,
+            encryptedChat: encryptedData.encryptedChat,
+            chatNonce: encryptedData.chatNonce,
+          });
+
+          currentChatId = createdChat.id;
+          encryptionKeys = {
+            encryptedChatKey: createdChat.encryptedChatKey,
+            chatKeyNonce: createdChat.chatKeyNonce,
+          };
+
+          // Pre-populate the cache to avoid loading flicker
+          utils.chats.get.setData({ chatId: createdChat.id }, createdChat);
+
+          // Update URL without reloading (replace history)
+          navigate({
+            to: "/app/c/$chatId",
+            params: { chatId: createdChat.id },
+            search: { pending: false },
+            replace: true,
+          });
+
+          // Update refs for this new chat
+          lastChatIdRef.current = createdChat.id;
+          encryptionKeysRef.current = encryptionKeys;
+
+        } catch (err) {
+          console.error("Failed to create chat:", err);
+          toast.error("Failed to create new chat");
+          setIsGeneratingFollowUps(false);
+          return;
+        }
       }
 
       try {
@@ -1077,9 +1161,9 @@ export function ChatPage() {
           typeof userMessage.content === "string"
             ? userMessage.content
             : userMessage.content
-                .filter((c) => c.type === "text")
-                .map((c) => c.text)
-                .join("\n");
+              .filter((c) => c.type === "text")
+              .map((c) => c.text)
+              .join("\n");
 
         // Apply modifier if provided (e.g., "Please be more concise")
         if (options?.modifier) {

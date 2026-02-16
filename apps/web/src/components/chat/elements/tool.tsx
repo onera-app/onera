@@ -20,6 +20,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 export type ToolState =
   | 'input-streaming'
@@ -45,7 +46,7 @@ export type ToolHeaderProps = {
   className?: string;
 };
 
-function getToolDisplayName(toolName: string): string {
+export function getToolDisplayName(toolName: string): string {
   // Remove common prefixes like 'tool-' or 'tool_'
   const cleaned = toolName.replace(/^tool[-_]/, '');
   // Convert camelCase/snake_case to readable name
@@ -183,19 +184,18 @@ export type ToolApprovalProps = {
 
 export const ToolApproval = ({ onApprove, onDeny }: ToolApprovalProps) => (
   <div className="flex items-center justify-end gap-2 border-t px-4 py-3">
-    <button
-      className="rounded-md px-3 py-1.5 text-muted-foreground text-sm transition-colors hover:bg-muted hover:text-foreground"
+    <Button
+      variant="ghost"
+      size="sm"
       onClick={onDeny}
-      type="button"
     >
       Deny
-    </button>
-    <button
-      className="rounded-md bg-primary px-3 py-1.5 text-primary-foreground text-sm transition-colors hover:bg-primary/90"
+    </Button>
+    <Button
+      size="sm"
       onClick={onApprove}
-      type="button"
     >
       Allow
-    </button>
+    </Button>
   </div>
 );

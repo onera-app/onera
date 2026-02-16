@@ -98,4 +98,4 @@ export const MessageMetadata = memo(function MessageMetadata({
   );
 });
 
-export default MessageMetadata;
+

@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { cn } from '@/lib/utils';
 import { ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface FollowUpsProps {
   followUps: string[];
@@ -14,22 +15,23 @@ export const FollowUps = memo(function FollowUps({ followUps, onSelect, classNam
   return (
     <div className={cn('flex flex-col items-start gap-2 sm:gap-2.5', className)}>
       {followUps.map((followUp, idx) => (
-        <button
+        <Button
           key={idx}
+          variant="outline"
           onClick={() => onSelect(followUp)}
           className={cn(
-            'group inline-flex items-center gap-2 text-left',
+            'group h-auto justify-start whitespace-normal text-left',
             'px-3 sm:px-4 py-2.5 sm:py-2.5 rounded-xl',
-            'bg-muted/50 hover:bg-muted active:bg-muted',
-            'border border-border hover:border-border/80',
-            'text-sm text-muted-foreground hover:text-foreground',
+            'bg-muted/50 hover:bg-muted',
+            'border-border hover:border-border/80',
+            'text-muted-foreground hover:text-foreground',
             'transition-all duration-150',
             'max-w-full'
           )}
         >
-          <ArrowRight className="h-4 w-4 text-muted-foreground/60 group-hover:text-muted-foreground shrink-0 transition-colors" />
+          <ArrowRight className="h-4 w-4 mr-2 text-muted-foreground/60 group-hover:text-muted-foreground shrink-0 transition-colors" />
           <span className="line-clamp-2">{followUp}</span>
-        </button>
+        </Button>
       ))}
     </div>
   );

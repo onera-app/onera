@@ -695,11 +695,70 @@
   }
 }
 
+/* ── Chat animation keyframes ────────────────────────────────────── */
+
+@keyframes typing-pulse {
+
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.85);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes streaming-blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes content-appear {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(200%);
+  }
+}
+
 @layer utilities {
 
-  /* Typing indicator with smooth pulse */
+  /* Typing indicator — fast snappy bounce */
   .typing-dot {
-    animation: typing-pulse 1.2s ease-in-out infinite;
+    animation: typing-pulse 0.8s ease-in-out infinite;
+  }
+
+  /* Blinking cursor while streaming */
+  .streaming-cursor::after {
+    content: "▎";
+    display: inline;
+    animation: streaming-blink 0.7s steps(2) infinite;
+    color: currentColor;
+    margin-left: 1px;
   }
 
   /* Message content that just finished streaming */

@@ -172,11 +172,7 @@ export function MessageAttachment({
         <img
           src={dataUrl}
           alt={fileName}
-          className="max-w-full h-auto"
-          style={{
-            maxHeight: "300px",
-            objectFit: "contain",
-          }}
+          className="max-w-full h-auto max-h-[300px] object-contain"
         />
       </div>
     );

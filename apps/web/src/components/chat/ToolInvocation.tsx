@@ -6,16 +6,11 @@
 import { memo, useState } from 'react';
 import { ChevronRight, Wrench, Loader2, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { type ToolState, getToolDisplayName } from './elements/tool';
 
-export type ToolState =
-  | 'input-streaming'
-  | 'input-available'
-  | 'approval-requested'
-  | 'approval-responded'
-  | 'output-available'
-  | 'output-error'
-  | 'output-denied';
+export type { ToolState };
 
 export interface ToolInvocationData {
   toolCallId: string;
@@ -33,16 +28,7 @@ interface ToolInvocationProps {
   onDeny?: (toolCallId: string) => void;
 }
 
-function getToolDisplayName(toolName: string): string {
-  // Convert camelCase/snake_case to readable name
-  return toolName
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/_/g, ' ')
-    .replace(/^\s+/, '')
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-}
+
 
 function getStateIcon(state: ToolState) {
   switch (state) {
@@ -103,9 +89,9 @@ export const ToolInvocation = memo(function ToolInvocation({
       <div className={cn(
         'mb-3 rounded-lg border overflow-hidden',
         hasError ? 'border-destructive/50 bg-destructive/5' :
-        wasDenied ? 'border-status-warning/40 bg-status-warning/10' :
-        needsApproval ? 'border-status-warning/40 bg-status-warning/10 ring-1 ring-status-warning/30' :
-        'border-border/50 bg-muted/30'
+          wasDenied ? 'border-status-warning/40 bg-status-warning/10' :
+            needsApproval ? 'border-status-warning/40 bg-status-warning/10 ring-1 ring-status-warning/30' :
+              'border-border/50 bg-muted/30'
       )}>
         <CollapsibleTrigger className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-muted/50 transition-colors">
           <ChevronRight
@@ -181,20 +167,19 @@ export const ToolInvocation = memo(function ToolInvocation({
             {/* Approval buttons */}
             {needsApproval && onApprove && onDeny && (
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/50 mt-3">
-                <button
-                  className="rounded-md px-3 py-1.5 text-muted-foreground text-sm transition-colors hover:bg-muted hover:text-foreground"
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => onDeny(tool.toolCallId)}
-                  type="button"
                 >
                   Deny
-                </button>
-                <button
-                  className="rounded-md bg-primary px-3 py-1.5 text-primary-foreground text-sm transition-colors hover:bg-primary/90"
+                </Button>
+                <Button
+                  size="sm"
                   onClick={() => onApprove(tool.toolCallId)}
-                  type="button"
                 >
                   Allow
-                </button>
+                </Button>
               </div>
             )}
           </div>

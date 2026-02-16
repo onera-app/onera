@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -17,7 +17,7 @@ interface CitationsProps {
   className?: string;
 }
 
-export function Citations({ citations, className }: CitationsProps) {
+export const Citations = memo(function Citations({ citations, className }: CitationsProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (citations.length === 0) return null;
@@ -46,7 +46,7 @@ export function Citations({ citations, className }: CitationsProps) {
       )}
     </div>
   );
-}
+});
 
 function CitationCard({ citation, index }: { citation: Citation; index: number }) {
   return (

@@ -332,7 +332,7 @@ export const AssistantMessage = memo(function AssistantMessage({
                   onNextBranch={hasNextBranch ? onNextBranch : undefined}
                 />
                 {copied && (
-                  <span className="text-xs text-emerald-500 ml-1.5 animate-in fade-in">
+                  <span className="text-xs text-status-success-text ml-1.5 animate-in fade-in">
                     Copied!
                   </span>
                 )}
@@ -354,23 +354,24 @@ export const AssistantMessage = memo(function AssistantMessage({
 
 /**
  * ThinkingMessage - shown while waiting for initial response
- * Apple-style minimal typing indicator with gentle pulsing dots
+ * Modern shimmer bar with bouncing dots for snappy feedback
  */
 export const ThinkingMessage = () => {
   return (
-    <div className="flex items-center h-5 text-muted-foreground/40">
-      <span className="inline-flex items-center gap-1">
+    <div className="flex items-center gap-3 h-6">
+      {/* Bouncing dots */}
+      <span className="inline-flex items-center gap-[5px]">
         <span
-          className="w-[5px] h-[5px] bg-current rounded-full typing-dot"
+          className="w-[6px] h-[6px] rounded-full bg-primary/60 typing-dot"
           style={{ animationDelay: "0ms" }}
         />
         <span
-          className="w-[5px] h-[5px] bg-current rounded-full typing-dot"
-          style={{ animationDelay: "150ms" }}
+          className="w-[6px] h-[6px] rounded-full bg-primary/60 typing-dot"
+          style={{ animationDelay: "160ms" }}
         />
         <span
-          className="w-[5px] h-[5px] bg-current rounded-full typing-dot"
-          style={{ animationDelay: "300ms" }}
+          className="w-[6px] h-[6px] rounded-full bg-primary/60 typing-dot"
+          style={{ animationDelay: "320ms" }}
         />
       </span>
     </div>
