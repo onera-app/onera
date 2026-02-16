@@ -92,6 +92,9 @@ export function ChatPage() {
   // Track the last processed chatId to detect chat changes
   const lastChatIdRef = useRef<string | undefined>(undefined);
 
+  // Track if stop was called internally (by user clicking stop button)
+  const isInternalStopRef = useRef(false);
+
   // Follow-up suggestions state
   const [followUps, setFollowUps] = useState<string[]>([]);
   const [isGeneratingFollowUps, setIsGeneratingFollowUps] = useState(false);
@@ -362,6 +365,12 @@ export function ChatPage() {
           },
         });
 
+        // If the generation was stopped by the user, don't generate follow-ups
+        if (isInternalStopRef.current) {
+          isInternalStopRef.current = false;
+          return;
+        }
+
         // Generate follow-up suggestions asynchronously and persist them
         if (selectedModelId) {
           setIsGeneratingFollowUps(true);
@@ -473,7 +482,7 @@ export function ChatPage() {
     setMessages,
     sendMessage,
     status,
-    stop,
+    stop: stopRaw,
     isReady,
     isLoadingCredentials,
   } = useDirectChat({
@@ -490,6 +499,12 @@ export function ChatPage() {
     },
     nativeSearch,
   });
+
+  // Wrap stop to track internal stop state
+  const stop = useCallback(() => {
+    isInternalStopRef.current = true;
+    stopRaw();
+  }, [stopRaw]);
 
   // Sync decrypted messages to AI SDK state when chat loads
   // Skip syncing if this is a pending chat - we'll let the AI SDK handle messages naturally
@@ -752,6 +767,7 @@ export function ChatPage() {
 
       // Clear follow-ups and search sources when sending a new message
       setFollowUps([]);
+      isInternalStopRef.current = false;
       if (!options?.searchEnabled) {
         setSearchSources([]);
       }
@@ -1155,6 +1171,7 @@ export function ChatPage() {
 
         // Clear follow-ups
         setFollowUps([]);
+        isInternalStopRef.current = false;
 
         // Get the user message content
         let userContent =
