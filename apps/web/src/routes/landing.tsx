@@ -10,7 +10,7 @@ import {
 
 export function LandingPage() {
   return (
-    <main className="min-h-screen bg-[#f2f2f0] text-[#262525] selection:bg-[#262525] selection:text-[#f2f2f0]">
+    <main className="min-h-screen bg-landing text-landing-foreground selection:bg-landing-foreground selection:text-landing">
       <Header />
       <Hero />
       <FeaturesSection />

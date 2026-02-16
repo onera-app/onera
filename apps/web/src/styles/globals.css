@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap");
 @source "../node_modules/streamdown/dist/*.js";
 
 /*
@@ -101,6 +101,34 @@
     -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter",
     ui-sans-serif, system-ui, sans-serif;
   --font-mono: "SF Mono", "JetBrains Mono", ui-monospace, monospace;
+  --font-landing: "Manrope", "Avenir Next", "Inter", sans-serif;
+
+  /* Landing Page Tokens */
+  --color-landing: #f2f2f0;
+  --color-landing-foreground: #2b2929;
+  --color-landing-card: #f6f6f4;
+  --color-landing-muted: #ecebe8;
+  --color-landing-muted-foreground: #706b68;
+  --color-landing-border: #ddd9d6;
+  --color-landing-accent: #2f2d2d;
+  --color-landing-accent-foreground: #ffffff;
+  --color-landing-success: #4aa37a;
+  --color-landing-error: #b35a5a;
+  --color-landing-green-bg: #e8f3ea;
+  --color-landing-green-border: #bdd6c1;
+  --color-landing-green-text: #2f6c3b;
+  --color-landing-blue-bg: #eaf0fa;
+  --color-landing-blue-border: #bfcde0;
+  --color-landing-blue-text: #4f5e7a;
+  --color-landing-warning-bg: #fef3cd;
+  --color-landing-warning-border: #e6c35c;
+  --color-landing-warning-text: #7a5d13;
+  --color-landing-pill: rgba(255, 255, 255, 0.5);
+  --color-landing-pill-border: rgba(255, 255, 255, 0.7);
+  --color-landing-pricing-blue: #d9e8fa;
+  --color-landing-footer: #141414;
+  --color-landing-footer-foreground: #eceae7;
+  --color-landing-footer-muted: #a6a3a1;
 }
 
 @layer utilities {
@@ -237,6 +265,7 @@
     @apply h-full;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
   }
 
   body {
@@ -255,6 +284,7 @@
 }
 
 @layer utilities {
+
   /* Pressable / Interactive Element Utility - Apple-style micro-interactions */
   .pressable {
     @apply cursor-pointer select-none transition-all duration-200;
@@ -412,6 +442,7 @@
 }
 
 @keyframes pulse-soft {
+
   0%,
   100% {
     opacity: 0.4;
@@ -426,6 +457,7 @@
 
 /* Premium gradient animations for landing page */
 @keyframes gradient-float {
+
   0%,
   100% {
     transform: translate(0, 0) scale(1);
@@ -449,6 +481,7 @@
 }
 
 @keyframes gradient-float-delayed {
+
   0%,
   100% {
     transform: translate(0, 0) scale(1);
@@ -467,6 +500,7 @@
 }
 
 @keyframes gradient-float-slow {
+
   0%,
   100% {
     transform: translate(0, 0) scale(1) rotate(0deg);
@@ -480,6 +514,7 @@
 }
 
 @keyframes gradient-float-reverse {
+
   0%,
   100% {
     transform: translate(0, 0) scale(1);
@@ -599,6 +634,7 @@
 
 /* Streaming animations */
 @keyframes cursor-blink {
+
   0%,
   100% {
     opacity: 0.7;
@@ -646,6 +682,7 @@
 
 /* Typing indicator pulse - Apple-style gentle pulse */
 @keyframes typing-pulse {
+
   0%,
   100% {
     opacity: 0.25;
@@ -659,6 +696,7 @@
 }
 
 @layer utilities {
+
   /* Typing indicator with smooth pulse */
   .typing-dot {
     animation: typing-pulse 1.2s ease-in-out infinite;
@@ -671,6 +709,7 @@
 
   /* Reduce motion for accessibility */
   @media (prefers-reduced-motion: reduce) {
+
     .streaming-cursor::after,
     .typing-dot {
       animation: none;

@@ -57,18 +57,17 @@ function ValueCell({
   value: CellValue;
 }) {
   if (value === "yes") {
-    return <Check className="mx-auto h-5 w-5 text-[#4aa37a]" />;
+    return <Check className="mx-auto h-5 w-5 text-landing-success" />;
   }
 
   if (value === "no") {
-    return <X className="mx-auto h-5 w-5 text-[#b35a5a]" />;
+    return <X className="mx-auto h-5 w-5 text-landing-error" />;
   }
 
   return (
     <span
-      className={`font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base font-medium ${
-        value === "low" ? "text-[#4aa37a]" : "text-[#b35a5a]"
-      }`}
+      className={`font-landing text-base font-medium ${value === "low" ? "text-landing-success" : "text-landing-error"
+        }`}
     >
       {value === "low" ? "Low" : "High"}
     </span>
@@ -80,82 +79,79 @@ export function FeaturesSection() {
     <section id="features" className="px-4 py-16 sm:px-5 sm:py-20 md:px-8 md:py-30">
       <div className="mx-auto max-w-[1180px]">
         <div className="mx-auto max-w-[860px] text-center">
-          <p className="mx-auto inline-flex rounded-full border border-white/70 bg-white/50 px-4 py-1.5 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm text-[#5f5a58] sm:px-5 sm:py-2 sm:text-lg">
+          <p className="mx-auto inline-flex rounded-full border border-landing-pill-border bg-landing-pill px-4 py-1.5 font-landing text-sm text-landing-muted-foreground sm:px-5 sm:py-2 sm:text-lg">
             Why teams switch
           </p>
-          <h2 className="mt-6 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-3xl font-semibold leading-[1.08] tracking-tight text-[#2f2c2c] sm:mt-7 sm:text-4xl md:text-6xl">
+          <h2 className="mt-6 font-landing text-3xl font-semibold leading-[1.08] tracking-tight text-landing-foreground sm:mt-7 sm:text-4xl md:text-6xl">
             Privacy of on-prem.
             <br />
             Speed of cloud.
           </h2>
-          <p className="mx-auto mt-4 max-w-[700px] font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base leading-relaxed text-[#6f6a67] sm:mt-6 sm:text-xl">
+          <p className="mx-auto mt-4 max-w-[700px] font-landing text-base leading-relaxed text-landing-muted-foreground sm:mt-6 sm:text-xl">
             Onera gives teams strong privacy controls without the cost and
             complexity of self-hosting.
           </p>
         </div>
 
-        <div className="mt-10 overflow-x-auto rounded-[24px] border border-[#d9d5d1] bg-[#f6f6f4] sm:mt-14 sm:rounded-[30px]">
+        <div className="mt-10 overflow-x-auto rounded-[24px] border border-landing-border bg-landing-card sm:mt-14 sm:rounded-[30px]">
           <div className="min-w-[760px]">
-          <div className="grid grid-cols-[1.4fr_repeat(3,1fr)] border-b border-[#ddd9d6]">
-            <div className="p-6 md:p-7" />
-            {columns.map((col) => (
-              <div
-                key={col.name}
-                className={`border-l border-[#ddd9d6] p-6 text-center md:p-7 ${
-                  col.highlight ? "bg-[#e8efe9]" : ""
-                }`}
-              >
-                <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl font-semibold text-[#2f2d2d] md:text-2xl">
-                  {col.name}
-                </p>
-                <p className="mt-1 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm text-[#6c6765]">
-                  {col.sub}
-                </p>
-              </div>
-            ))}
-          </div>
+            <div className="grid grid-cols-[1.4fr_repeat(3,1fr)] border-b border-landing-border">
+              <div className="p-6 md:p-7" />
+              {columns.map((col) => (
+                <div
+                  key={col.name}
+                  className={`border-l border-landing-border p-6 text-center md:p-7 ${col.highlight ? "bg-landing-green-bg" : ""
+                    }`}
+                >
+                  <p className="font-landing text-xl font-semibold text-landing-foreground md:text-2xl">
+                    {col.name}
+                  </p>
+                  <p className="mt-1 font-landing text-sm text-landing-muted-foreground">
+                    {col.sub}
+                  </p>
+                </div>
+              ))}
+            </div>
 
-          <div>
-            {rows.map((row, rowIndex) => (
-              <div key={`${row.section ?? "row"}-${row.label}`}>
-                {row.section ? (
-                  <div className="grid grid-cols-[1.4fr_repeat(3,1fr)] border-b border-[#ddd9d6]">
-                    <div className="px-6 py-5 md:px-7">
-                      <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base font-semibold uppercase tracking-[0.05em] text-[#3b3938] md:text-lg">
-                        {row.section}
+            <div>
+              {rows.map((row, rowIndex) => (
+                <div key={`${row.section ?? "row"}-${row.label}`}>
+                  {row.section ? (
+                    <div className="grid grid-cols-[1.4fr_repeat(3,1fr)] border-b border-landing-border">
+                      <div className="px-6 py-5 md:px-7">
+                        <p className="font-landing text-base font-semibold uppercase tracking-[0.05em] text-landing-foreground md:text-lg">
+                          {row.section}
+                        </p>
+                      </div>
+                      <div className="border-l border-landing-border" />
+                      <div className="border-l border-landing-border" />
+                      <div className="border-l border-landing-border bg-landing-green-bg" />
+                    </div>
+                  ) : null}
+
+                  <div
+                    className={`grid grid-cols-[1.4fr_repeat(3,1fr)] ${rowIndex === rows.length - 1 ? "" : "border-b border-landing-border"
+                      }`}
+                  >
+                    <div className="px-6 py-6 md:px-7">
+                      <p className="font-landing text-xl text-landing-foreground md:text-2xl">
+                        {row.label}
                       </p>
                     </div>
-                    <div className="border-l border-[#ddd9d6]" />
-                    <div className="border-l border-[#ddd9d6]" />
-                    <div className="border-l border-[#ddd9d6] bg-[#e8efe9]" />
-                  </div>
-                ) : null}
 
-                <div
-                  className={`grid grid-cols-[1.4fr_repeat(3,1fr)] ${
-                    rowIndex === rows.length - 1 ? "" : "border-b border-[#ddd9d6]"
-                  }`}
-                >
-                  <div className="px-6 py-6 md:px-7">
-                    <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-xl text-[#353332] md:text-2xl">
-                      {row.label}
-                    </p>
+                    {row.values.map((value, idx) => (
+                      <div
+                        key={`${row.label}-${idx}`}
+                        className={`flex items-center justify-center border-l border-landing-border px-4 py-6 ${idx === 2 ? "bg-landing-green-bg" : ""
+                          }`}
+                      >
+                        <ValueCell value={value} />
+                      </div>
+                    ))}
                   </div>
-
-                  {row.values.map((value, idx) => (
-                    <div
-                      key={`${row.label}-${idx}`}
-                      className={`flex items-center justify-center border-l border-[#ddd9d6] px-4 py-6 ${
-                        idx === 2 ? "bg-[#e8efe9]" : ""
-                      }`}
-                    >
-                      <ValueCell value={value} />
-                    </div>
-                  ))}
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

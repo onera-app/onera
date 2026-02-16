@@ -1,14 +1,7 @@
 export { Header } from "./header";
 export { Hero } from "./hero";
 export { HowItWorks } from "./how-it-works";
-export { PrivacySection } from "./privacy-section";
 export { FeaturesSection } from "./features-section";
 export { PricingSection } from "./pricing-section";
 export { FAQSection } from "./faq-section";
 export { Footer } from "./footer";
-export { ThemeToggle } from "./theme-toggle";
-export { ComparisonSection } from "./comparison-section";
-export { UseCasesSection } from "./use-cases-section";
-export { TestimonialsSection } from "./testimonials-section";
-export { ComplianceSection } from "./compliance-section";
-export * from "./bento-grid";

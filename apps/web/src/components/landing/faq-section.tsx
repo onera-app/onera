@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Accordion,
   AccordionContent,
@@ -43,10 +41,10 @@ export function FAQSection() {
     <section id="faq" className="px-4 py-16 sm:px-5 sm:py-24 md:px-8 md:py-28">
       <div className="mx-auto max-w-[980px]">
         <div className="text-center">
-          <p className="mx-auto inline-flex rounded-full border border-white/70 bg-white/50 px-4 py-1.5 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm text-[#615b58] sm:px-5 sm:py-2 sm:text-lg">
+          <p className="mx-auto inline-flex rounded-full border border-landing-pill-border bg-landing-pill px-4 py-1.5 font-landing text-sm text-landing-muted-foreground sm:px-5 sm:py-2 sm:text-lg">
             FAQ
           </p>
-          <h2 className="mt-6 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-3xl font-semibold leading-[1.08] tracking-tight text-[#2c2a2a] sm:mt-7 sm:text-4xl md:text-6xl">
+          <h2 className="mt-6 font-landing text-3xl font-semibold leading-[1.08] tracking-tight text-landing-foreground sm:mt-7 sm:text-4xl md:text-6xl">
             Frequently asked questions
           </h2>
         </div>
@@ -56,12 +54,12 @@ export function FAQSection() {
             <AccordionItem
               key={faq.question}
               value={`faq-${index}`}
-              className="rounded-2xl border border-[#e2ded9] bg-[#f5f4f2] px-4 sm:rounded-3xl sm:px-6"
+              className="rounded-2xl border border-landing-border bg-landing-card px-4 sm:rounded-3xl sm:px-6"
             >
-              <AccordionTrigger className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-left text-lg font-semibold text-[#353232] hover:no-underline sm:text-xl md:text-3xl [&>svg]:h-5 [&>svg]:w-5 sm:[&>svg]:h-6 sm:[&>svg]:w-6 [&>svg]:text-[#87817d]">
+              <AccordionTrigger className="font-landing text-left text-lg font-semibold text-landing-foreground hover:no-underline sm:text-xl md:text-2xl [&>svg]:h-5 [&>svg]:w-5 sm:[&>svg]:h-6 sm:[&>svg]:w-6 [&>svg]:text-landing-muted-foreground">
                 {faq.question}
               </AccordionTrigger>
-              <AccordionContent className="pb-5 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base leading-relaxed text-[#6f6966] sm:pb-7 sm:text-lg">
+              <AccordionContent className="pb-5 font-landing text-base leading-relaxed text-landing-muted-foreground sm:pb-7 sm:text-lg">
                 {faq.answer}
               </AccordionContent>
             </AccordionItem>

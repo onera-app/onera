@@ -19,12 +19,12 @@ const steps = [
 export function HowItWorks() {
   return (
     <section id="how-it-works" className="px-4 py-12 sm:px-5 sm:py-16 md:px-8 md:py-24">
-      <div className="mx-auto max-w-[1180px] rounded-[28px] bg-[#ecebe8] px-5 py-10 sm:rounded-[42px] sm:px-7 sm:py-12 md:px-10 md:py-16">
+      <div className="mx-auto max-w-[1180px] rounded-[28px] bg-landing-muted px-5 py-10 sm:rounded-[42px] sm:px-7 sm:py-12 md:px-10 md:py-16">
         <div className="mx-auto max-w-[760px] text-center">
-          <p className="mx-auto inline-flex rounded-full border border-white/60 bg-white/40 px-4 py-1.5 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm text-[#5f5b59] sm:px-5 sm:py-2 sm:text-lg">
+          <p className="mx-auto inline-flex rounded-full border border-landing-pill-border bg-landing-pill px-4 py-1.5 font-landing text-sm text-landing-muted-foreground sm:px-5 sm:py-2 sm:text-lg">
             How it works
           </p>
-          <h2 className="mt-5 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-3xl font-semibold leading-[1.08] tracking-tight text-[#2d2b2a] sm:mt-6 sm:text-4xl md:text-6xl">
+          <h2 className="mt-5 font-landing text-3xl font-semibold leading-[1.08] tracking-tight text-landing-foreground sm:mt-6 sm:text-4xl md:text-6xl">
             Start securely in three steps
           </h2>
         </div>
@@ -33,15 +33,15 @@ export function HowItWorks() {
           {steps.map((item) => (
             <article
               key={item.step}
-              className="rounded-[24px] border border-[#d8d4d0] bg-[#f8f8f6] p-6"
+              className="rounded-[24px] border border-landing-border bg-landing-card p-6"
             >
-              <p className="font-['Manrope','Avenir_Next','Inter','sans-serif'] text-sm font-semibold tracking-[0.08em] text-[#88817d]">
+              <p className="font-landing text-sm font-semibold tracking-[0.08em] text-landing-muted-foreground">
                 STEP {item.step}
               </p>
-              <h3 className="mt-4 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-2xl font-semibold leading-tight text-[#2f2c2b] sm:mt-5 sm:text-3xl">
+              <h3 className="mt-4 font-landing text-2xl font-semibold leading-tight text-landing-foreground sm:mt-5 sm:text-3xl">
                 {item.title}
               </h3>
-              <p className="mt-3 font-['Manrope','Avenir_Next','Inter','sans-serif'] text-base leading-relaxed text-[#6f6a68] sm:mt-4 sm:text-lg">
+              <p className="mt-3 font-landing text-base leading-relaxed text-landing-muted-foreground sm:mt-4 sm:text-lg">
                 {item.detail}
               </p>
             </article>
