@@ -29,6 +29,8 @@ export function useCreateNote() {
 
   return {
     mutateAsync: async (data: {
+      encryptedNoteKey?: string;
+      noteKeyNonce?: string;
       encryptedTitle: string;
       titleNonce: string;
       encryptedContent: string;
@@ -38,6 +40,8 @@ export function useCreateNote() {
       return mutation.mutateAsync(data);
     },
     mutate: (data: {
+      encryptedNoteKey?: string;
+      noteKeyNonce?: string;
       encryptedTitle: string;
       titleNonce: string;
       encryptedContent: string;
@@ -66,6 +70,8 @@ export function useUpdateNote() {
     }: {
       id: string;
       data: {
+        encryptedNoteKey?: string;
+        noteKeyNonce?: string;
         encryptedTitle?: string;
         titleNonce?: string;
         encryptedContent?: string;
@@ -86,6 +92,8 @@ export function useUpdateNote() {
     }: {
       id: string;
       data: {
+        encryptedNoteKey?: string;
+        noteKeyNonce?: string;
         encryptedTitle?: string;
         titleNonce?: string;
         encryptedContent?: string;

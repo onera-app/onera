@@ -11,6 +11,7 @@ import { fromBase64 } from './utils';
 import { generateVerificationId } from './recoveryKey';
 import { getPrivateKey, getPublicKey, isUnlocked } from './keyManager';
 import { getChatKey } from './chatEncryption';
+import { getNoteKey } from './notesEncryption';
 
 /**
  * Encrypt a chat key for sharing with another user
@@ -31,9 +32,31 @@ export function encryptChatKeyForRecipient(
 }
 
 /**
- * Decrypt a shared chat key
+ * Encrypt a note key for sharing with another user
  */
-export function decryptReceivedChatKey(encryptedChatKey: string): Uint8Array {
+export function encryptNoteKeyForRecipient(
+	noteId: string,
+	encryptedNoteKey: string,
+	noteKeyNonce: string,
+	recipientPublicKey: string
+): string {
+	if (!isUnlocked()) {
+		throw new Error('E2EE not unlocked');
+	}
+
+	if (!encryptedNoteKey || !noteKeyNonce) {
+		throw new Error('Cannot share legacy notes. Please save the note first to upgrade its security.');
+	}
+
+	const noteKey = getNoteKey(noteId, encryptedNoteKey, noteKeyNonce);
+	const recipientPubKey = fromBase64(recipientPublicKey);
+	return encryptKeyForRecipient(noteKey, recipientPubKey);
+}
+
+/**
+ * Decrypt a shared key (chat or note)
+ */
+export function decryptReceivedKey(encryptedKey: string): Uint8Array {
 	if (!isUnlocked()) {
 		throw new Error('E2EE not unlocked');
 	}
@@ -41,7 +64,21 @@ export function decryptReceivedChatKey(encryptedChatKey: string): Uint8Array {
 	const publicKey = getPublicKey();
 	const privateKey = getPrivateKey();
 
-	return decryptSharedKey(encryptedChatKey, publicKey, privateKey);
+	return decryptSharedKey(encryptedKey, publicKey, privateKey);
+}
+
+/**
+ * Decrypt a shared chat key (Legacy alias)
+ */
+export function decryptReceivedChatKey(encryptedChatKey: string): Uint8Array {
+	return decryptReceivedKey(encryptedChatKey);
+}
+
+/**
+ * Decrypt a shared note key
+ */
+export function decryptReceivedNoteKey(encryptedNoteKey: string): Uint8Array {
+	return decryptReceivedKey(encryptedNoteKey);
 }
 
 /**

@@ -19,6 +19,7 @@ import {
   decryptNoteContent,
   encryptNoteTitle,
   encryptNoteContent,
+  createEncryptedNote,
 } from '@onera/crypto';
 import { FileText, Archive, ArchiveRestore, Save } from 'lucide-react';
 
@@ -41,8 +42,24 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
   // Load note data
   useEffect(() => {
     if (note) {
-      setTitle(decryptNoteTitle(note.encryptedTitle, note.titleNonce));
-      setContent(decryptNoteContent(note.encryptedContent, note.contentNonce));
+      setTitle(
+        decryptNoteTitle(
+          note.id,
+          note.encryptedTitle,
+          note.titleNonce,
+          note.encryptedNoteKey ?? undefined,
+          note.noteKeyNonce ?? undefined,
+        ),
+      );
+      setContent(
+        decryptNoteContent(
+          note.id,
+          note.encryptedContent,
+          note.contentNonce,
+          note.encryptedNoteKey ?? undefined,
+          note.noteKeyNonce ?? undefined,
+        ),
+      );
       setFolderId(note.folderId);
       setHasChanges(false);
     }
@@ -72,19 +89,57 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
 
     setIsSaving(true);
     try {
-      const encryptedTitle = encryptNoteTitle(title);
-      const encryptedContent = encryptNoteContent(content);
+      let encryptedNoteKey = note.encryptedNoteKey ?? undefined;
+      let noteKeyNonce = note.noteKeyNonce ?? undefined;
+      let newIsolatedKeyData: any = null;
 
-      await updateNote.mutateAsync({
-        id: note.id,
-        data: {
-          encryptedTitle: encryptedTitle.encryptedTitle,
-          titleNonce: encryptedTitle.titleNonce,
-          encryptedContent: encryptedContent.encryptedContent,
-          contentNonce: encryptedContent.contentNonce,
-          folderId: folderId || undefined,
-        },
-      });
+      // Migration: If this is a legacy note (no isolated key), generate one now
+      if (!encryptedNoteKey || !noteKeyNonce) {
+        console.log('Migrating legacy note to isolated key...');
+        const newEncryptedNote = createEncryptedNote(note.id, title, content);
+        newIsolatedKeyData = {
+          encryptedNoteKey: newEncryptedNote.encryptedNoteKey,
+          noteKeyNonce: newEncryptedNote.noteKeyNonce,
+          encryptedTitle: newEncryptedNote.encryptedTitle,
+          titleNonce: newEncryptedNote.titleNonce,
+          encryptedContent: newEncryptedNote.encryptedContent,
+          contentNonce: newEncryptedNote.contentNonce,
+        };
+      }
+
+      if (newIsolatedKeyData) {
+        await updateNote.mutateAsync({
+          id: note.id,
+          data: {
+            ...newIsolatedKeyData,
+            folderId: folderId || undefined,
+          },
+        });
+      } else {
+        const encryptedTitle = encryptNoteTitle(
+          note.id,
+          title,
+          encryptedNoteKey,
+          noteKeyNonce,
+        );
+        const encryptedContent = encryptNoteContent(
+          note.id,
+          content,
+          encryptedNoteKey,
+          noteKeyNonce,
+        );
+
+        await updateNote.mutateAsync({
+          id: note.id,
+          data: {
+            encryptedTitle: encryptedTitle.encryptedTitle,
+            titleNonce: encryptedTitle.titleNonce,
+            encryptedContent: encryptedContent.encryptedContent,
+            contentNonce: encryptedContent.contentNonce,
+            folderId: folderId || undefined,
+          },
+        });
+      }
       setHasChanges(false);
     } finally {
       setIsSaving(false);
@@ -142,87 +197,87 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-900 p-3 sm:p-4">
       <div className="flex flex-col h-full bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850 rounded-2xl overflow-hidden">
-      {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-gray-100 dark:border-gray-850">
-        <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
-          {/* Folder selector */}
-          <Select
-            value={folderId || 'none'}
-            onValueChange={handleFolderChange}
-          >
-            <SelectTrigger className="w-40 bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850 rounded-xl">
-              <SelectValue placeholder="No folder" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">No folder</SelectItem>
-              {folders.map((folder) => (
-                <SelectItem key={folder.id} value={folder.id}>
-                  {folder.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {/* Header */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-gray-100 dark:border-gray-850">
+          <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+            {/* Folder selector */}
+            <Select
+              value={folderId || 'none'}
+              onValueChange={handleFolderChange}
+            >
+              <SelectTrigger className="w-40 bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850 rounded-xl">
+                <SelectValue placeholder="No folder" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No folder</SelectItem>
+                {folders.map((folder) => (
+                  <SelectItem key={folder.id} value={folder.id}>
+                    {folder.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-          {/* Last updated */}
-          <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
-            Updated {dayjs(note.updatedAt).format('MMM D, YYYY h:mm A')}
-          </span>
+            {/* Last updated */}
+            <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
+              Updated {dayjs(note.updatedAt).format('MMM D, YYYY h:mm A')}
+            </span>
 
-          {/* Unsaved indicator */}
-          {hasChanges && (
-            <Badge variant="warning">Unsaved changes</Badge>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2 self-end sm:self-auto">
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={handleToggleArchive}
-          >
-            {note.archived ? (
-              <>
-                <ArchiveRestore className="h-4 w-4 mr-1" />
-                Unarchive
-              </>
-            ) : (
-              <>
-                <Archive className="h-4 w-4 mr-1" />
-                Archive
-              </>
+            {/* Unsaved indicator */}
+            {hasChanges && (
+              <Badge variant="warning">Unsaved changes</Badge>
             )}
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleSave}
-            disabled={!hasChanges || isSaving}
-          >
-            <Save className="h-4 w-4 mr-1" />
-            {isSaving ? 'Saving...' : 'Save'}
-          </Button>
+          </div>
+
+          <div className="flex items-center gap-2 self-end sm:self-auto">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleToggleArchive}
+            >
+              {note.archived ? (
+                <>
+                  <ArchiveRestore className="h-4 w-4 mr-1" />
+                  Unarchive
+                </>
+              ) : (
+                <>
+                  <Archive className="h-4 w-4 mr-1" />
+                  Archive
+                </>
+              )}
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSave}
+              disabled={!hasChanges || isSaving}
+            >
+              <Save className="h-4 w-4 mr-1" />
+              {isSaving ? 'Saving...' : 'Save'}
+            </Button>
+          </div>
         </div>
-      </div>
 
-      {/* Title */}
-      <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-gray-100 dark:border-gray-850">
-        <Input
-          type="text"
-          value={title}
-          onChange={(e) => handleTitleChange(e.target.value)}
-          placeholder="Note title"
-          className="text-2xl font-bold border-none shadow-none px-0 focus-visible:ring-0 h-auto"
-        />
-      </div>
+        {/* Title */}
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-gray-100 dark:border-gray-850">
+          <Input
+            type="text"
+            value={title}
+            onChange={(e) => handleTitleChange(e.target.value)}
+            placeholder="Note title"
+            className="text-2xl font-bold border-none shadow-none px-0 focus-visible:ring-0 h-auto"
+          />
+        </div>
 
-      {/* Content Editor */}
-      <div className="flex-1 px-4 sm:px-6 pb-4 sm:pb-6 overflow-y-auto">
-        <RichTextEditor
-          content={content}
-          onChange={handleContentChange}
-          placeholder="Start writing..."
-          className="h-full"
-        />
-      </div>
+        {/* Content Editor */}
+        <div className="flex-1 px-4 sm:px-6 pb-4 sm:pb-6 overflow-y-auto">
+          <RichTextEditor
+            content={content}
+            onChange={handleContentChange}
+            placeholder="Start writing..."
+            className="h-full"
+          />
+        </div>
       </div>
     </div>
   );
