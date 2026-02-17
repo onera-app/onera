@@ -27,7 +27,7 @@ export function PricingPage() {
 
   return (
     <main className="min-h-screen bg-landing text-landing-foreground selection:bg-landing-foreground selection:text-landing">
-      <Header variant="pricing" activeNav="pricing" />
+      <Header />
 
       <section className="px-4 pb-20 pt-28 sm:px-5 sm:pt-32 sm:pb-24 md:px-8 md:pt-36 md:pb-28">
         <div className="mx-auto max-w-[1180px]">

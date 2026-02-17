@@ -81,18 +81,44 @@ export function Hero() {
           AI chat that encrypts everything before it leaves your device. No provider, no server, not even Onera can read what you send.
         </p>
 
-        <div className="mt-8 flex items-center justify-center gap-4 sm:mt-10">
-          <Link
-            to={isAuthenticated ? "/app" : "/auth"}
-            className="inline-flex h-11 items-center rounded-full bg-landing-pricing-blue px-7 font-landing text-sm font-medium text-white transition-opacity hover:opacity-85"
-          >
-            {isAuthenticated ? "Open app" : "Get started"}
-          </Link>
+        <div className="mt-8 flex flex-col items-center gap-5 sm:mt-10">
+          <div className="flex items-center justify-center gap-3">
+            <Link
+              to={isAuthenticated ? "/app" : "/auth"}
+              className="inline-flex h-12 items-center rounded-full bg-landing-foreground px-8 font-landing text-base font-medium text-landing transition-opacity hover:opacity-85"
+            >
+              {isAuthenticated ? "Open App" : "Get Started"}
+            </Link>
+            <a
+              href="https://docs.onera.chat"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-12 items-center rounded-full border border-landing-foreground/20 px-8 font-landing text-base font-medium text-landing-foreground transition-colors hover:bg-landing-foreground/5"
+            >
+              Docs
+            </a>
+          </div>
+
           <a
-            href="#features"
-            className="font-landing text-sm text-landing-pricing-blue transition-opacity hover:opacity-70"
+            href="https://apps.apple.com/app/onera"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2.5 transition-opacity hover:opacity-70"
+            aria-label="Download on the App Store"
           >
-            Learn more &rsaquo;
+            <svg
+              viewBox="0 0 120 40"
+              className="h-10"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <rect width="120" height="40" rx="6" fill="currentColor" className="text-landing-foreground" />
+              <g fill="currentColor" className="text-landing">
+                <path d="M24.77 20.3a4.95 4.95 0 0 1 2.36-4.15 5.07 5.07 0 0 0-3.99-2.16c-1.68-.18-3.31 1.01-4.17 1.01-.87 0-2.18-.99-3.6-.96a5.31 5.31 0 0 0-4.47 2.72c-1.93 3.34-.49 8.27 1.36 10.97.93 1.33 2.01 2.82 3.43 2.76 1.39-.06 1.91-.88 3.58-.88 1.66 0 2.14.88 3.59.85 1.49-.02 2.42-1.33 3.32-2.67a11 11 0 0 0 1.52-3.09 4.78 4.78 0 0 1-2.93-4.4zM22.04 12.21a4.87 4.87 0 0 0 1.12-3.49 4.96 4.96 0 0 0-3.21 1.66 4.64 4.64 0 0 0-1.14 3.37 4.11 4.11 0 0 0 3.23-1.54z" />
+                <text x="36" y="15" fontSize="8" fontFamily="-apple-system, system-ui, sans-serif" fontWeight="400" letterSpacing="0.02em">Download on the</text>
+                <text x="36" y="28" fontSize="14" fontFamily="-apple-system, system-ui, sans-serif" fontWeight="600" letterSpacing="-0.01em">App Store</text>
+              </g>
+            </svg>
           </a>
         </div>
 
