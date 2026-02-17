@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/tooltip";
 import { ArrowUp, Square } from "lucide-react";
 import { toast } from "sonner";
-import { AttachmentButton, DragDropOverlay } from "./AttachmentButton";
+import { AttachmentButton } from "./AttachmentButton";
 import { AttachmentPreview, type PendingAttachment } from "./AttachmentPreview";
 import { SearchToggle } from "./SearchToggle";
 import { processFile } from "@/lib/fileProcessing";
@@ -305,20 +305,29 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
       <div
         ref={containerRef}
         className={cn(
-          "relative flex-1 flex flex-col w-full shadow-lg rounded-3xl border transition px-1",
+          "relative flex-1 flex flex-col w-full shadow-lg rounded-3xl border transition px-1 cursor-text",
           "bg-white dark:bg-gray-500/5 text-gray-900 dark:text-gray-100",
           isFocused
             ? "border-gray-100 dark:border-gray-800"
             : "border-gray-100/30 dark:border-gray-850/30 hover:border-gray-200 dark:hover:border-gray-800",
-          disabled && "opacity-50",
+          disabled && "opacity-50 cursor-not-allowed",
         )}
+        onClick={() => textareaRef.current?.focus()}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       >
         {/* Drag and drop overlay */}
-        <DragDropOverlay isVisible={isDragging} />
+        <div className="pointer-events-none absolute inset-0 z-50 rounded-3xl bg-primary/10 border-2 border-primary border-dashed transition-opacity duration-200"
+          style={{ opacity: isDragging ? 1 : 0 }}
+        >
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="bg-background/80 backdrop-blur-sm px-4 py-2 rounded-lg shadow-sm">
+              <span className="text-sm font-medium text-primary">Drop files to attach</span>
+            </div>
+          </div>
+        </div>
 
         {/* Attachment previews */}
         {attachments.length > 0 && (

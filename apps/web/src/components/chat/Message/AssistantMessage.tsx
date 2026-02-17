@@ -308,7 +308,7 @@ export const AssistantMessage = memo(function AssistantMessage({
               <Streamdown>{displayContent}</Streamdown>
             </div>
           ) : isLoading && !hasReasoning ? (
-            <div className="animate-in fade-in duration-300">
+            <div className="animate-in fade-in duration-300 min-h-[24px] flex items-center">
               <ThinkingMessage />
             </div>
           ) : null}

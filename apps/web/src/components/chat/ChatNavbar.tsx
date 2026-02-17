@@ -16,8 +16,8 @@ export const ChatNavbar = memo(function ChatNavbar({
   const { sidebarOpen, toggleSidebar } = useUIStore();
 
   return (
-    <header className="absolute top-1 z-10 flex items-center justify-between px-2 sm:px-4 h-12 left-1/2 -translate-x-1/2 w-fit max-w-[calc(100vw-1.5rem)] sm:left-4 sm:right-4 sm:translate-x-0 sm:w-auto">
-      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+    <header className="absolute top-2 z-10 flex items-center justify-between px-3 sm:px-4 h-12 left-0 right-0 w-full max-w-5xl mx-auto pointer-events-none">
+      <div className="flex items-center gap-2 pointer-events-auto">
         {/* Menu button (shown when sidebar is closed) */}
         {!sidebarOpen && (
           <Button
@@ -36,7 +36,7 @@ export const ChatNavbar = memo(function ChatNavbar({
       </div>
 
       {/* New chat button */}
-      <div className="flex items-center flex-shrink-0">
+      <div className="flex items-center flex-shrink-0 pointer-events-auto">
         <Button
           variant="ghost"
           size="sm"
