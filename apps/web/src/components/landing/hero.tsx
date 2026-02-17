@@ -69,15 +69,15 @@ export function Hero() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <section id="home" className="px-4 pb-16 pt-28 sm:px-6 sm:pb-24 sm:pt-36 md:pt-44">
+    <section id="home" className="px-4 pb-24 pt-36 sm:px-6 sm:pb-32 sm:pt-44 md:pb-40 md:pt-52">
       <div className="mx-auto max-w-[980px] text-center">
-        <h1 className="mx-auto max-w-[760px] font-landing text-4xl font-semibold leading-[1.05] tracking-tight text-landing-foreground sm:text-6xl md:text-7xl">
+        <h1 className="mx-auto max-w-[820px] font-landing text-5xl font-semibold leading-[1.05] tracking-tight text-landing-foreground sm:text-7xl md:text-8xl">
           Your prompts are
           <br />
           nobody's business.
         </h1>
 
-        <p className="mx-auto mt-5 max-w-[520px] font-landing text-base leading-relaxed text-landing-muted-foreground sm:mt-6 sm:text-lg">
+        <p className="mx-auto mt-6 max-w-[540px] font-landing text-lg leading-relaxed text-landing-muted-foreground sm:mt-8 sm:text-xl">
           AI chat that encrypts everything before it leaves your device. No provider, no server, not even Onera can read what you send.
         </p>
 
