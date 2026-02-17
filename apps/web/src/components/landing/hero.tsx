@@ -1,64 +1,116 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
-import { Lock, LockOpen, ShieldCheck } from "lucide-react";
+import { LockOpen, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 function FloatingPreview() {
-  const [isPrivateMode, setIsPrivateMode] = useState(true);
+  const [phase, setPhase] = useState<"plaintext" | "scrambling" | "encrypted">("plaintext");
+  const [displayText, setDisplayText] = useState("");
+
+  const plaintext = "Confidential: projected Q3 revenue decline and restructuring options...";
+  const ciphertext = "xK9mZTv3nRqW8jLpY2aHdB5cVf9kL2pZ5mX8nRqW3jLpY2aHdB5cVf9kL2pZ5mX8...";
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    let scrambleInterval: NodeJS.Timeout;
+
+    const runAnimation = () => {
+      // PHASE 1: Plaintext (Start)
+      setPhase("plaintext");
+      setDisplayText(plaintext);
+
+      timeout = setTimeout(() => {
+        // PHASE 2: Scrambling
+        setPhase("scrambling");
+        let contrast = 0;
+
+        scrambleInterval = setInterval(() => {
+          contrast += 2;
+          if (contrast > 100) {
+            clearInterval(scrambleInterval);
+            // PHASE 3: Encrypted
+            setPhase("encrypted");
+            setDisplayText(ciphertext);
+
+            timeout = setTimeout(() => {
+              // Loop back to start
+              runAnimation();
+            }, 3000); // Hold encrypted for 3s
+            return;
+          }
+
+          // Generate scrambled text
+          const scrambled = plaintext.split('').map((char) => {
+            if (char === ' ') return ' ';
+            // Progressive scrambling: earlier chars scramble first, or random
+            return Math.random() * 100 < contrast ? chars[Math.floor(Math.random() * chars.length)] : char;
+          }).join('');
+
+          setDisplayText(scrambled);
+        }, 50);
+
+      }, 3000); // Hold plaintext for 3s
+    };
+
+    runAnimation();
+
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(scrambleInterval);
+    };
+  }, []);
 
   return (
     <div className="mx-auto mt-16 w-full max-w-[680px] sm:mt-20">
-      <div className="flex justify-center">
-        <div className="inline-flex items-center gap-0.5 rounded-full bg-landing-muted p-0.5">
-          <button
-            type="button"
-            onClick={() => setIsPrivateMode(false)}
-            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 font-landing text-xs font-medium transition-all ${!isPrivateMode
-              ? "bg-white text-landing-foreground shadow-sm"
-              : "text-landing-muted-foreground"
-              }`}
-            aria-pressed={!isPrivateMode}
+      {/* Status Badges */}
+      <div className="flex justify-center h-8 mb-6">
+        <div className="relative">
+          {/* Plaintext Badge */}
+          <div
+            className={`absolute left-1/2 top-0 -translate-x-1/2 whitespace-nowrap inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 font-landing text-xs font-medium transition-all duration-500 ${phase === "plaintext" || phase === "scrambling"
+              ? "opacity-100 transform-none"
+              : "opacity-0 translate-y-2"
+              } bg-landing-warning-bg text-landing-warning-text`}
           >
             <LockOpen className="h-3 w-3" />
-            Standard
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsPrivateMode(true)}
-            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 font-landing text-xs font-medium transition-all ${isPrivateMode
-              ? "bg-white text-landing-foreground shadow-sm"
-              : "text-landing-muted-foreground"
-              }`}
-            aria-pressed={isPrivateMode}
+            Visible to provider
+          </div>
+
+          {/* Encrypted Badge */}
+          <div
+            className={`absolute left-1/2 top-0 -translate-x-1/2 whitespace-nowrap inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 font-landing text-xs font-medium transition-all duration-500 delay-100 ${phase === "encrypted"
+              ? "opacity-100 transform-none scale-100"
+              : "opacity-0 -translate-y-2 scale-95"
+              } bg-landing-green-bg text-landing-green-text`}
           >
-            <Lock className="h-3 w-3" />
-            Private
-          </button>
+            <ShieldCheck className="h-3.5 w-3.5" />
+            <span className="font-semibold">Zero-knowledge encrypted by Onera</span>
+          </div>
         </div>
       </div>
 
-      <div className="mt-6 rounded-2xl bg-landing-muted/60 p-6">
-        <p className="font-landing text-[11px] font-medium uppercase tracking-widest text-landing-muted-foreground">
-           What leaves your device
+      <div className="rounded-2xl bg-landing-muted/60 p-6 relative overflow-hidden group border border-transparent transition-colors duration-500 data-[phase=encrypted]:border-landing-green-border/30" data-phase={phase}>
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:animate-shimmer" />
+
+        <p className="font-landing text-[11px] font-medium uppercase tracking-widest text-[#6e6e73] flex justify-between items-center">
+          <span>What leaves your device</span>
+          <span className={`transition-colors duration-300 ${phase === 'encrypted' ? 'text-landing-green-text font-semibold' : 'text-landing-warning-text'}`}>
+            {phase === 'encrypted' ? 'PROTECTED' : 'UNSECURE'}
+          </span>
         </p>
 
-        <p className="mt-4 font-landing text-lg leading-relaxed text-landing-foreground sm:text-xl">
-          {isPrivateMode ? (
-            <span className="font-mono text-sm text-landing-muted-foreground sm:text-base">
-              xK9mZTv3nRqW8jLpY2aHdB5cVf...
-            </span>
-          ) : (
-            "Confidential: projected Q3 revenue decline and restructuring options..."
-          )}
+        <p className="mt-4 font-landing text-lg leading-relaxed text-landing-foreground sm:text-xl min-h-[3.5rem] break-all">
+          <span className={`${phase === 'encrypted' ? 'font-mono text-sm sm:text-base text-landing-muted-foreground' : ''} transition-all duration-300`}>
+            {displayText}
+          </span>
         </p>
 
-        <div className={`mt-5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-landing text-[11px] font-medium ${
-          isPrivateMode
-            ? "bg-landing-green-bg text-landing-green-text"
-            : "bg-landing-warning-bg text-landing-warning-text"
-        }`}>
-          <ShieldCheck className="h-3 w-3" />
-          {isPrivateMode ? "Zero-knowledge encrypted" : "Visible to the provider"}
+        {/* Progress Bar / Visual Indicator */}
+        <div className="mt-5 h-1 w-full bg-landing-muted-foreground/10 rounded-full overflow-hidden">
+          <div
+            className={`h-full transition-all duration-1000 ease-in-out ${phase === 'encrypted' ? 'bg-landing-green-text w-full' : 'bg-landing-warning-text w-[10%]'}`}
+          />
         </div>
       </div>
     </div>
@@ -97,7 +149,7 @@ export function Hero() {
             Docs
           </a>
           <a
-            href="https://apps.apple.com/app/onera"
+            href="https://apps.apple.com/us/app/onera-private-ai-chat/id6758128954"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-landing-foreground/20 text-landing-foreground transition-colors hover:bg-landing-foreground/5"

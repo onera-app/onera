@@ -106,7 +106,7 @@
     "Helvetica Neue", "Helvetica", "Arial", sans-serif;
 
   /* Landing Page Tokens (unchanged) */
-  --color-landing: #fbfbfd;
+  --color-landing: #F6F6F6;
   --color-landing-foreground: #1d1d1f;
   --color-landing-card: #ffffff;
   --color-landing-muted: #f5f5f7;
@@ -278,6 +278,7 @@
 
 /* ── Utility Classes ───────────────────────────────────────────── */
 @layer utilities {
+
   /* Font primary — Archivo display font (sidebar, nav, input) */
   .font-primary {
     font-family: "Archivo", "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -471,12 +472,10 @@
   }
 
   .dark .shimmer {
-    background: linear-gradient(
-      90deg,
-      #818286 25%,
-      #eae5e5 50%,
-      #818286 75%
-    );
+    background: linear-gradient(90deg,
+        #818286 25%,
+        #eae5e5 50%,
+        #818286 75%);
     background-size: 200% 100%;
     background-clip: text;
     -webkit-background-clip: text;
@@ -529,6 +528,7 @@
   0% {
     transform: translateX(0);
   }
+
   100% {
     transform: translateX(-50%);
   }
@@ -539,6 +539,7 @@
     opacity: 0;
     transform: translateY(10px) scale(0.98);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -549,17 +550,20 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
 }
 
 @keyframes pulse-soft {
+
   0%,
   100% {
     opacity: 0.4;
     transform: scale(1);
   }
+
   50% {
     opacity: 0.7;
     transform: scale(1.05);
@@ -567,19 +571,23 @@
 }
 
 @keyframes gradient-float {
+
   0%,
   100% {
     transform: translate(0, 0) scale(1);
     opacity: 0.8;
   }
+
   25% {
     transform: translate(5%, 5%) scale(1.05);
     opacity: 1;
   }
+
   50% {
     transform: translate(2%, -3%) scale(0.95);
     opacity: 0.7;
   }
+
   75% {
     transform: translate(-3%, 2%) scale(1.02);
     opacity: 0.9;
@@ -587,15 +595,18 @@
 }
 
 @keyframes gradient-float-delayed {
+
   0%,
   100% {
     transform: translate(0, 0) scale(1);
     opacity: 0.7;
   }
+
   33% {
     transform: translate(-4%, 6%) scale(1.08);
     opacity: 1;
   }
+
   66% {
     transform: translate(3%, -4%) scale(0.92);
     opacity: 0.6;
@@ -603,11 +614,13 @@
 }
 
 @keyframes gradient-float-slow {
+
   0%,
   100% {
     transform: translate(0, 0) scale(1) rotate(0deg);
     opacity: 0.6;
   }
+
   50% {
     transform: translate(-2%, 4%) scale(1.1) rotate(2deg);
     opacity: 0.9;
@@ -615,15 +628,18 @@
 }
 
 @keyframes gradient-float-reverse {
+
   0%,
   100% {
     transform: translate(0, 0) scale(1);
     opacity: 0.5;
   }
+
   40% {
     transform: translate(6%, -3%) scale(1.06);
     opacity: 0.8;
   }
+
   80% {
     transform: translate(-4%, 5%) scale(0.94);
     opacity: 0.6;
@@ -634,6 +650,7 @@
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }
@@ -644,6 +661,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -651,11 +669,13 @@
 }
 
 @keyframes typing-pulse {
+
   0%,
   100% {
     opacity: 0.25;
     transform: scale(0.85);
   }
+
   50% {
     opacity: 1;
     transform: scale(1);
@@ -663,10 +683,12 @@
 }
 
 @keyframes streaming-blink {
+
   0%,
   100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0;
   }
@@ -677,6 +699,7 @@
     opacity: 0;
     transform: translateY(4px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -684,10 +707,12 @@
 }
 
 @keyframes cursor-blink {
+
   0%,
   100% {
     opacity: 0.7;
   }
+
   50% {
     opacity: 0;
   }
@@ -698,6 +723,7 @@
     opacity: 0;
     transform: translateX(-50%) translateY(8px) scale(0.9);
   }
+
   100% {
     opacity: 1;
     transform: translateX(-50%) translateY(0) scale(1);
@@ -709,6 +735,7 @@
     opacity: 1;
     transform: translateX(-50%) translateY(0) scale(1);
   }
+
   100% {
     opacity: 0;
     transform: translateX(-50%) translateY(8px) scale(0.9);
@@ -719,6 +746,7 @@
   0% {
     transform: translateX(-100%);
   }
+
   100% {
     transform: translateX(200%);
   }
@@ -729,6 +757,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
