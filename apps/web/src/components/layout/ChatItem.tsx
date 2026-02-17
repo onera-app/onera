@@ -103,7 +103,7 @@ export const ChatItem = memo(function ChatItem({
 
     const dragImage = document.createElement("div");
     dragImage.className =
-      "px-3 py-2 bg-gray-850 dark:bg-gray-800 rounded-xl text-sm text-gray-200 shadow-lg max-w-[220px] truncate";
+      "px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm text-gray-800 dark:text-gray-200 shadow-lg max-w-[220px] truncate";
     dragImage.textContent =
       title.length > 30 ? title.slice(0, 30) + "..." : title;
     dragImage.style.position = "absolute";

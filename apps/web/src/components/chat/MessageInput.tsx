@@ -306,7 +306,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
         ref={containerRef}
         className={cn(
           "relative flex-1 flex flex-col w-full shadow-lg rounded-3xl border transition px-1",
-          "bg-white/5 dark:bg-gray-500/5 dark:text-gray-100",
+          "bg-white dark:bg-gray-500/5 text-gray-700 dark:text-gray-100",
           isFocused
             ? "border-gray-100 dark:border-gray-800"
             : "border-gray-100/30 dark:border-gray-850/30 hover:border-gray-200 dark:hover:border-gray-800",
@@ -349,7 +349,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
               "disabled:cursor-not-allowed",
               "max-h-[96px] sm:max-h-[120px] min-h-[24px]",
               "text-base lg:text-lg leading-relaxed",
-              "placeholder:text-muted-foreground text-foreground",
+              "placeholder:text-gray-300 dark:placeholder:text-gray-600",
             )}
           />
         </div>
@@ -397,7 +397,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
                       "transition rounded-full p-1.5 self-center",
                       canSend
                         ? "bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-100"
-                        : "text-white bg-gray-200 dark:text-gray-900 dark:bg-gray-700 cursor-not-allowed",
+                        : "text-gray-400 bg-gray-200 dark:text-gray-600 dark:bg-gray-700 cursor-not-allowed",
                     )}
                   >
                     <ArrowUp className="h-4 w-4" strokeWidth={2.5} />

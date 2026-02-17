@@ -238,7 +238,7 @@ export function SettingsModal({ open, onOpenChange, initialTab = 'general' }: Se
         <div className="flex flex-col md:flex-row flex-1 min-h-0 w-full pt-1 pb-4">
           {/* Sidebar navigation — Open WebUI tab style */}
           <div className={cn(
-            "tabs flex flex-row overflow-x-auto gap-2.5 mx-3 md:pr-4 md:gap-1 md:flex-col flex-1 md:flex-none md:w-[200px] md:min-h-[42rem] md:max-h-[42rem] dark:text-gray-200 text-sm text-left mb-1 md:mb-0",
+            "tabs flex flex-row overflow-x-auto gap-2.5 mx-3 md:pr-4 md:gap-1 md:flex-col flex-1 md:flex-none md:w-[200px] md:overflow-y-auto md:scrollbar-hidden text-gray-700 dark:text-gray-200 text-sm text-left mb-1 md:mb-0",
             mobileShowContent && "hidden md:flex"
           )}>
             {/* Search — desktop only */}
@@ -288,7 +288,7 @@ export function SettingsModal({ open, onOpenChange, initialTab = 'general' }: Se
 
           {/* Tab content */}
           <ScrollArea className={cn(
-            "flex-1 px-3.5 md:pl-0 md:pr-[1.125rem] md:min-h-[42rem] md:max-h-[42rem]",
+            "flex-1 px-3.5 md:pl-0 md:pr-[1.125rem]",
             !mobileShowContent && "hidden sm:block"
           )}>
             <div className="py-1">

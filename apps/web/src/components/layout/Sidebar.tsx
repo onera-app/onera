@@ -656,7 +656,7 @@ export function Sidebar() {
                         className="size-7 rounded-full object-cover flex-shrink-0"
                       />
                     ) : (
-                      <div className="size-7 rounded-full bg-gray-800 dark:bg-gray-700 flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
+                      <div className="size-7 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-white text-xs font-medium flex-shrink-0">
                         {(user.name || user.email || "U")
                           .charAt(0)
                           .toUpperCase()}
