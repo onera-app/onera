@@ -81,43 +81,36 @@ export function Hero() {
           AI chat that encrypts everything before it leaves your device. No provider, no server, not even Onera can read what you send.
         </p>
 
-        <div className="mt-8 flex flex-col items-center gap-5 sm:mt-10">
-          <div className="flex items-center justify-center gap-3">
-            <Link
-              to={isAuthenticated ? "/app" : "/auth"}
-              className="inline-flex h-12 items-center rounded-full bg-landing-foreground px-8 font-landing text-base font-medium text-landing transition-opacity hover:opacity-85"
-            >
-              {isAuthenticated ? "Open App" : "Get Started"}
-            </Link>
-            <a
-              href="https://docs.onera.chat"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-12 items-center rounded-full border border-landing-foreground/20 px-8 font-landing text-base font-medium text-landing-foreground transition-colors hover:bg-landing-foreground/5"
-            >
-              Docs
-            </a>
-          </div>
-
+        <div className="mt-8 flex items-center justify-center gap-3 sm:mt-10">
+          <Link
+            to={isAuthenticated ? "/app" : "/auth"}
+            className="inline-flex h-12 items-center rounded-full bg-landing-foreground px-8 font-landing text-base font-medium text-landing transition-opacity hover:opacity-85"
+          >
+            {isAuthenticated ? "Open App" : "Get Started"}
+          </Link>
+          <a
+            href="https://docs.onera.chat"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-12 items-center rounded-full border border-landing-foreground/20 px-8 font-landing text-base font-medium text-landing-foreground transition-colors hover:bg-landing-foreground/5"
+          >
+            Docs
+          </a>
           <a
             href="https://apps.apple.com/app/onera"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2.5 transition-opacity hover:opacity-70"
+            className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-landing-foreground/20 text-landing-foreground transition-colors hover:bg-landing-foreground/5"
             aria-label="Download on the App Store"
           >
             <svg
-              viewBox="0 0 120 40"
-              className="h-10"
+              viewBox="0 0 17 20"
+              className="h-5 w-[17px]"
+              fill="currentColor"
               xmlns="http://www.w3.org/2000/svg"
               aria-hidden="true"
             >
-              <rect width="120" height="40" rx="6" fill="currentColor" className="text-landing-foreground" />
-              <g fill="currentColor" className="text-landing">
-                <path d="M24.77 20.3a4.95 4.95 0 0 1 2.36-4.15 5.07 5.07 0 0 0-3.99-2.16c-1.68-.18-3.31 1.01-4.17 1.01-.87 0-2.18-.99-3.6-.96a5.31 5.31 0 0 0-4.47 2.72c-1.93 3.34-.49 8.27 1.36 10.97.93 1.33 2.01 2.82 3.43 2.76 1.39-.06 1.91-.88 3.58-.88 1.66 0 2.14.88 3.59.85 1.49-.02 2.42-1.33 3.32-2.67a11 11 0 0 0 1.52-3.09 4.78 4.78 0 0 1-2.93-4.4zM22.04 12.21a4.87 4.87 0 0 0 1.12-3.49 4.96 4.96 0 0 0-3.21 1.66 4.64 4.64 0 0 0-1.14 3.37 4.11 4.11 0 0 0 3.23-1.54z" />
-                <text x="36" y="15" fontSize="8" fontFamily="-apple-system, system-ui, sans-serif" fontWeight="400" letterSpacing="0.02em">Download on the</text>
-                <text x="36" y="28" fontSize="14" fontFamily="-apple-system, system-ui, sans-serif" fontWeight="600" letterSpacing="-0.01em">App Store</text>
-              </g>
+              <path d="M14.94 10.56a4.77 4.77 0 0 1 2.27-4 4.89 4.89 0 0 0-3.85-2.08c-1.62-.17-3.19.97-4.02.97-.84 0-2.1-.95-3.47-.93a5.12 5.12 0 0 0-4.31 2.63c-1.86 3.22-.47 7.97 1.31 10.58.9 1.28 1.94 2.71 3.31 2.66 1.34-.06 1.84-.85 3.45-.85 1.6 0 2.06.85 3.46.82 1.44-.02 2.34-1.28 3.2-2.57a10.6 10.6 0 0 0 1.47-2.98 4.61 4.61 0 0 1-2.82-4.25zM12.31 2.72A4.7 4.7 0 0 0 13.39.36 4.78 4.78 0 0 0 10.3 1.96a4.47 4.47 0 0 0-1.1 3.25 3.96 3.96 0 0 0 3.11-1.49z" />
             </svg>
           </a>
         </div>
