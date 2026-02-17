@@ -453,8 +453,8 @@ export function Sidebar() {
             <div className="pb-4">
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-16 gap-3">
-                  <Spinner size="lg" className="text-gray-500" />
-                  <span className="text-xs text-gray-500">Loading...</span>
+                  <Spinner size="lg" className="text-gray-500 dark:text-gray-400" />
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Loading...</span>
                 </div>
               ) : chats.length === 0 && foldersWithState.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
@@ -462,7 +462,7 @@ export function Sidebar() {
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
                     No conversations yet
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     Start a new chat to begin
                   </p>
                 </div>
@@ -474,7 +474,7 @@ export function Sidebar() {
                     onOpenChange={setFoldersExpanded}
                   >
                     <div className="flex items-center justify-between">
-                      <CollapsibleTrigger className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors focus-visible:outline-none rounded-md">
+                      <CollapsibleTrigger className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors focus-visible:outline-none rounded-md">
                         <ChevronRight
                           className={cn(
                             "h-3 w-3 transition-transform duration-200",
@@ -487,7 +487,7 @@ export function Sidebar() {
                         <TooltipTrigger asChild>
                           <button
                             onClick={handleNewFolder}
-                            className="p-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors focus-visible:outline-none"
+                            className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors focus-visible:outline-none"
                           >
                             <Plus className="h-3.5 w-3.5" />
                           </button>
@@ -531,7 +531,7 @@ export function Sidebar() {
                                   </p>
                                 </div>
                               ) : (
-                                <div className="ml-5 space-y-0.5 mt-0.5">
+                                <div className="ml-3 pl-1 space-y-0.5 mt-[1px] border-s border-gray-100 dark:border-gray-900">
                                   {folderChats.map((chat) => (
                                     <ChatItem
                                       key={chat.id}
@@ -562,7 +562,7 @@ export function Sidebar() {
                     open={chatsExpanded}
                     onOpenChange={setChatsExpanded}
                   >
-                    <CollapsibleTrigger className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors w-full focus-visible:outline-none rounded-md">
+                    <CollapsibleTrigger className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors w-full focus-visible:outline-none rounded-md">
                       <ChevronRight
                         className={cn(
                           "h-3 w-3 transition-transform duration-200",
@@ -576,7 +576,7 @@ export function Sidebar() {
                       {/* Pinned Section */}
                       {pinnedChats.length > 0 && (
                         <div className="mb-2">
-                          <div className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-gray-500 dark:text-gray-500 font-medium">
+                          <div className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-gray-500 dark:text-gray-400 font-medium">
                             <Pin className="h-3 w-3" />
                             <span>Pinned</span>
                           </div>
@@ -602,7 +602,7 @@ export function Sidebar() {
                       {Array.from(groupedChats.entries()).map(
                         ([group, groupChats]) => (
                           <div key={group} className="mt-3">
-                            <div className="w-full pl-2.5 text-xs text-gray-500 dark:text-gray-500 font-medium pb-1.5">
+                            <div className="w-full pl-2.5 text-xs text-gray-500 dark:text-gray-400 font-medium pb-1.5">
                               {DATE_GROUP_LABELS[group as DateGroup]}
                             </div>
                             <div className="space-y-0.5 mt-0.5">
@@ -644,7 +644,7 @@ export function Sidebar() {
 
           {/* User Profile Section — Open WebUI style */}
           {user && (
-            <div className="px-1.5 pt-1.5 pb-2 sticky bottom-0 z-10 border-t border-gray-50 dark:border-gray-850">
+            <div className="px-1.5 pt-1.5 pb-2 sticky bottom-0 z-10 -mt-3">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center rounded-2xl py-2 px-1.5 w-full hover:bg-gray-100/50 dark:hover:bg-gray-900/50 transition text-left group focus-visible:outline-none">
@@ -679,7 +679,7 @@ export function Sidebar() {
                                 ? "text-status-success-text"
                                 : subData?.plan?.id === "enterprise"
                                   ? "text-primary"
-                                  : "text-gray-500",
+                                  : "text-gray-500 dark:text-gray-400",
                         )}
                       >
                         {subData?.plan?.name || "Free"} plan
@@ -709,7 +709,7 @@ export function Sidebar() {
                                 ? "text-status-success"
                                 : subData?.plan?.id === "enterprise"
                                   ? "text-primary"
-                                  : "text-gray-500",
+                                  : "text-gray-500 dark:text-gray-400",
                         )}
                       />
                       Manage plan

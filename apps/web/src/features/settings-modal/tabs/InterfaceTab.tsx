@@ -49,7 +49,7 @@ export function InterfaceTab() {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium">Interface Settings</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Customize the appearance and behavior
         </p>
       </div>
@@ -72,7 +72,7 @@ export function InterfaceTab() {
               <CardContent className="flex flex-col items-center gap-2 p-3">
                 <div
                   className={cn(
-                    theme === t.value ? 'text-primary' : 'text-muted-foreground'
+                    theme === t.value ? 'text-primary' : 'text-gray-500 dark:text-gray-400'
                   )}
                 >
                   {t.icon}
@@ -80,7 +80,7 @@ export function InterfaceTab() {
                 <span
                   className={cn(
                     'text-xs font-medium',
-                    theme === t.value ? 'text-primary' : 'text-muted-foreground'
+                    theme === t.value ? 'text-primary' : 'text-gray-500 dark:text-gray-400'
                   )}
                 >
                   {t.label}
@@ -95,7 +95,7 @@ export function InterfaceTab() {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label>UI Scale</Label>
-          <span className="text-sm text-muted-foreground">{(uiScale * 100).toFixed(0)}%</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400">{(uiScale * 100).toFixed(0)}%</span>
         </div>
         <Slider
           value={[uiScale]}
@@ -104,7 +104,7 @@ export function InterfaceTab() {
           max={1.5}
           step={0.05}
         />
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-gray-500 dark:text-gray-400">
           Adjust the overall size of text and UI elements
         </p>
       </div>
@@ -121,14 +121,14 @@ export function InterfaceTab() {
                 'px-4 py-2 rounded-md text-sm font-medium transition-colors',
                 chatDensity === d.value
                   ? 'bg-primary text-primary-foreground'
-                  : 'bg-gray-100 dark:bg-gray-850 text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800'
+                  : 'bg-gray-100 dark:bg-gray-850 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
               )}
             >
               {d.label}
             </button>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-gray-500 dark:text-gray-400">
           Control spacing between messages
         </p>
       </div>
@@ -154,7 +154,7 @@ export function InterfaceTab() {
       <div className="flex items-center justify-between">
         <div className="space-y-0.5">
           <Label htmlFor="rich-text">Rich Text Input</Label>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             Enable formatting and @mentions in the message input
           </p>
         </div>
@@ -174,7 +174,7 @@ export function InterfaceTab() {
             <Label htmlFor="widescreen" className="font-normal">
               Widescreen Mode
             </Label>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               Use full width for chat messages
             </p>
           </div>
@@ -186,7 +186,7 @@ export function InterfaceTab() {
             <Label htmlFor="timestamps" className="font-normal">
               Show Timestamps
             </Label>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               Display time for each message
             </p>
           </div>
@@ -198,7 +198,7 @@ export function InterfaceTab() {
             <Label htmlFor="code-collapse" className="font-normal">
               Collapse Code Blocks
             </Label>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               Collapse long code blocks by default
             </p>
           </div>

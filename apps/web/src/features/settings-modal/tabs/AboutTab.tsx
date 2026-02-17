@@ -12,7 +12,7 @@ export function AboutTab() {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium">About Onera</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Version information and links
         </p>
       </div>
@@ -26,11 +26,11 @@ export function AboutTab() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <p className="text-muted-foreground">Version</p>
+              <p className="text-gray-500 dark:text-gray-400">Version</p>
               <p className="font-mono">{APP_VERSION}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Build Date</p>
+              <p className="text-gray-500 dark:text-gray-400">Build Date</p>
               <p className="font-mono">{BUILD_DATE}</p>
             </div>
           </div>
@@ -38,7 +38,7 @@ export function AboutTab() {
           <Separator />
 
           <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Onera is an open-source AI chat interface that puts privacy first. Your API keys and
               conversations are encrypted end-to-end.
             </p>
@@ -93,11 +93,11 @@ export function AboutTab() {
         <h4 className="text-sm font-medium">Credits</h4>
         <Card>
           <CardContent className="pt-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Built with React, TanStack Router, tRPC, and Tailwind CSS. Inspired by open-webui
               and other excellent open-source AI interfaces.
             </p>
-            <div className="flex items-center gap-1 mt-3 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1 mt-3 text-sm text-gray-500 dark:text-gray-400">
               <span>Made with</span>
               <Heart className="h-4 w-4 text-red-500 fill-red-500" />
               <span>by the Onera team</span>
@@ -109,7 +109,7 @@ export function AboutTab() {
       {/* License */}
       <div className="space-y-3">
         <h4 className="text-sm font-medium">License</h4>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           Onera is open-source software licensed under the GNU Affero General Public License v3.0.
         </p>
       </div>
@@ -119,19 +119,19 @@ export function AboutTab() {
         <h4 className="text-sm font-medium">Keyboard Shortcuts</h4>
         <div className="grid gap-2 text-sm">
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">New Chat</span>
+            <span className="text-gray-500 dark:text-gray-400">New Chat</span>
             <kbd className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-850 rounded">⌘ N</kbd>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Toggle Sidebar</span>
+            <span className="text-gray-500 dark:text-gray-400">Toggle Sidebar</span>
             <kbd className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-850 rounded">⌘ B</kbd>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Settings</span>
+            <span className="text-gray-500 dark:text-gray-400">Settings</span>
             <kbd className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-850 rounded">⌘ ,</kbd>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Search Chats</span>
+            <span className="text-gray-500 dark:text-gray-400">Search Chats</span>
             <kbd className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-850 rounded">⌘ K</kbd>
           </div>
         </div>

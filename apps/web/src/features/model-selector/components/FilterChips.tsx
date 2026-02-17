@@ -53,7 +53,7 @@ export const FilterChips = memo(function FilterChips({
             'h-7 px-2.5 text-xs font-medium whitespace-nowrap transition-colors',
             currentFilter === filter
               ? 'bg-gray-100 dark:bg-gray-850 text-gray-900 dark:text-gray-100'
-              : 'text-muted-foreground hover:text-foreground'
+              : 'text-gray-500 dark:text-gray-400 hover:text-foreground'
           )}
         >
           {FILTER_LABELS[filter] || filter}

@@ -82,14 +82,14 @@ export function AdminSubscriptionsPage() {
                             ? "bg-status-success/10 text-status-success-text"
                             : sub.status === "on_hold"
                               ? "bg-status-warning/10 text-status-warning-text"
-                              : "bg-gray-100 dark:bg-gray-800 text-muted-foreground"
+                              : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
                         )}
                       >
                         {sub.status}
                       </span>
                     </td>
                     <td className="p-3">{sub.billingInterval}</td>
-                    <td className="p-3 text-muted-foreground">
+                    <td className="p-3 text-gray-500 dark:text-gray-400">
                       {sub.currentPeriodEnd
                         ? new Date(sub.currentPeriodEnd).toLocaleDateString()
                         : "\u2014"}
@@ -98,7 +98,7 @@ export function AdminSubscriptionsPage() {
                 ))}
             {!isLoading && !error && data?.subscriptions.length === 0 && (
               <tr>
-                <td colSpan={5} className="p-4 text-center text-muted-foreground">
+                <td colSpan={5} className="p-4 text-center text-gray-500 dark:text-gray-400">
                   No subscriptions found for this filter.
                 </td>
               </tr>
@@ -115,7 +115,7 @@ export function AdminSubscriptionsPage() {
 
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-gray-500 dark:text-gray-400">
             Page {page + 1} of {totalPages}
           </span>
           <div className="flex gap-2">

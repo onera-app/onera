@@ -61,7 +61,7 @@ export function GeneralTab() {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium">General Settings</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Configure default model parameters and system prompt
         </p>
       </div>
@@ -76,7 +76,7 @@ export function GeneralTab() {
           placeholder="You are a helpful assistant..."
           className="min-h-[100px] resize-y"
         />
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-gray-500 dark:text-gray-400">
           This prompt is sent at the beginning of every conversation
         </p>
       </div>
@@ -85,7 +85,7 @@ export function GeneralTab() {
       <div className="flex items-center justify-between">
         <div className="space-y-0.5">
           <Label htmlFor="stream-response">Stream Response</Label>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             Show responses as they're generated
           </p>
         </div>
@@ -114,7 +114,7 @@ export function GeneralTab() {
             {/* OpenAI Settings - only show if user has OpenAI credentials */}
             {enabledProviders.has('openai') && (
               <div className="space-y-4">
-                <h4 className="text-sm font-medium text-muted-foreground">OpenAI</h4>
+                <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">OpenAI</h4>
 
                 {/* Reasoning Summary */}
                 <div className="space-y-2">
@@ -134,7 +134,7 @@ export function GeneralTab() {
                       <SelectItem value="none">None</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     Controls reasoning output for o1, o3, and gpt-5 models
                   </p>
                 </div>
@@ -157,7 +157,7 @@ export function GeneralTab() {
                       <SelectItem value="high">High</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     How much effort the model spends on reasoning
                   </p>
                 </div>
@@ -167,13 +167,13 @@ export function GeneralTab() {
             {/* Anthropic Settings - only show if user has Anthropic credentials */}
             {enabledProviders.has('anthropic') && (
               <div className="space-y-4">
-                <h4 className="text-sm font-medium text-muted-foreground">Anthropic</h4>
+                <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">Anthropic</h4>
 
                 {/* Extended Thinking */}
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label htmlFor="extended-thinking">Extended Thinking</Label>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Enable extended thinking for Claude models
                     </p>
                   </div>
@@ -209,7 +209,7 @@ export function GeneralTab() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label>Temperature</Label>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 {globalParams.temperature.toFixed(2)}
               </span>
             </div>
@@ -220,7 +220,7 @@ export function GeneralTab() {
               max={2}
               step={0.01}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               Higher values make output more random, lower values more focused
             </p>
           </div>
@@ -229,7 +229,7 @@ export function GeneralTab() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label>Top P (Nucleus Sampling)</Label>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 {globalParams.topP.toFixed(2)}
               </span>
             </div>
@@ -240,7 +240,7 @@ export function GeneralTab() {
               max={1}
               step={0.01}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               Consider tokens with top_p probability mass
             </p>
           </div>
@@ -249,7 +249,7 @@ export function GeneralTab() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label>Top K</Label>
-              <span className="text-sm text-muted-foreground">{globalParams.topK}</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">{globalParams.topK}</span>
             </div>
             <Slider
               value={[globalParams.topK]}
@@ -258,7 +258,7 @@ export function GeneralTab() {
               max={100}
               step={1}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               Consider only top K tokens for each step
             </p>
           </div>
@@ -279,7 +279,7 @@ export function GeneralTab() {
               placeholder="Model default"
               min={1}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               Maximum number of tokens to generate (leave empty for model default)
             </p>
           </div>
@@ -288,7 +288,7 @@ export function GeneralTab() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label>Frequency Penalty</Label>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 {globalParams.frequencyPenalty.toFixed(2)}
               </span>
             </div>
@@ -299,7 +299,7 @@ export function GeneralTab() {
               max={2}
               step={0.01}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               Reduce repetition of frequent tokens
             </p>
           </div>
@@ -308,7 +308,7 @@ export function GeneralTab() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label>Presence Penalty</Label>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 {globalParams.presencePenalty.toFixed(2)}
               </span>
             </div>
@@ -319,7 +319,7 @@ export function GeneralTab() {
               max={2}
               step={0.01}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               Encourage talking about new topics
             </p>
           </div>
@@ -337,7 +337,7 @@ export function GeneralTab() {
               placeholder="Random"
               min={0}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               Set for reproducible outputs (leave empty for random)
             </p>
           </div>

@@ -87,7 +87,7 @@ export function DataTab() {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium">Data Controls</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Export, import, and manage your chat data
         </p>
       </div>
@@ -95,7 +95,7 @@ export function DataTab() {
       {/* Export Section */}
       <div className="space-y-3">
         <Label>Export Chats</Label>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           Download all your conversations as a JSON file
         </p>
         <Button
@@ -112,7 +112,7 @@ export function DataTab() {
       {/* Import Section */}
       <div className="space-y-3">
         <Label>Import Chats</Label>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           Import conversations from a previously exported file
         </p>
         <div className="flex items-center gap-3">
@@ -123,21 +123,21 @@ export function DataTab() {
             disabled={isImporting}
             className="max-w-xs"
           />
-          {isImporting && <span className="text-sm text-muted-foreground">Importing...</span>}
+          {isImporting && <span className="text-sm text-gray-500 dark:text-gray-400">Importing...</span>}
         </div>
       </div>
 
       {/* Archive Section */}
       <div className="space-y-3">
         <Label>Archive Chats</Label>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           Archive all conversations to hide them from the sidebar
         </p>
         <Button variant="outline" disabled className="w-full sm:w-auto">
           <Archive className="h-4 w-4 mr-2" />
           Archive All Chats
         </Button>
-        <p className="text-xs text-muted-foreground">Coming soon</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">Coming soon</p>
       </div>
 
       {/* Delete Section */}
@@ -173,7 +173,7 @@ export function DataTab() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteAllChats}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-white hover:bg-destructive/90"
             >
               Delete All
             </AlertDialogAction>

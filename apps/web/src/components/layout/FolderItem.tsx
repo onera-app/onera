@@ -123,7 +123,7 @@ export function FolderItem({
       <Collapsible open={isExpanded} onOpenChange={onToggle}>
         <div
           className={cn(
-            'relative group rounded-2xl transition-all duration-200',
+            'relative group rounded-xl transition-all duration-200',
             isDragOver && 'bg-gray-100 dark:bg-gray-900 ring-1 ring-ring ring-inset'
           )}
           onDragOver={handleDragOver}
@@ -150,7 +150,7 @@ export function FolderItem({
             <CollapsibleTrigger asChild>
               <button
                 className={cn(
-                  'flex items-center gap-2.5 w-full py-2 px-2.5 rounded-2xl text-left',
+                  'flex items-center gap-1.5 w-full py-1 px-1.5 rounded-xl text-left',
                   'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900 transition-all duration-150 focus-visible:outline-none'
                 )}
               >
@@ -213,7 +213,7 @@ export function FolderItem({
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-white hover:bg-destructive/90"
             >
               Delete
             </AlertDialogAction>

@@ -15,7 +15,7 @@ export function AudioTab() {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium">Audio Settings</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Configure text-to-speech
         </p>
       </div>
@@ -40,7 +40,7 @@ export function AudioTab() {
               <Label htmlFor="tts-enabled" className="font-normal">
                 Enable TTS
               </Label>
-              <p className="text-xs text-muted-foreground">Read responses aloud</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Read responses aloud</p>
             </div>
             <Switch id="tts-enabled" disabled />
           </div>
@@ -76,7 +76,7 @@ export function AudioTab() {
               <Label htmlFor="auto-play" className="font-normal">
                 Auto-play Responses
               </Label>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Automatically read new responses
               </p>
             </div>

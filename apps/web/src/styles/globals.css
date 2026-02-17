@@ -775,7 +775,7 @@
 }
 
 .prose blockquote {
-  @apply border-l-2 pl-4 italic text-muted-foreground;
+  @apply border-l-2 pl-4 italic text-gray-500 dark:text-gray-400;
   border-color: var(--color-gray-600);
 }
 
@@ -786,7 +786,7 @@
 
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
-  @apply text-muted-foreground pointer-events-none float-left h-0;
+  @apply text-gray-500 dark:text-gray-400 pointer-events-none float-left h-0;
   color: #676767;
 }
 

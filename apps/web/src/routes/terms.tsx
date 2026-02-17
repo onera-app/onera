@@ -17,7 +17,7 @@ export function TermsPage() {
           </Link>
           <Link 
             to="/" 
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-foreground transition-colors"
           >
             <ArrowLeft className="size-4" />
             Back to Home
@@ -30,7 +30,7 @@ export function TermsPage() {
         <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
           Terms of Service
         </h1>
-        <p className="text-muted-foreground mb-8">
+        <p className="text-gray-500 dark:text-gray-400 mb-8">
           Last updated: January 21, 2026
         </p>
 
@@ -39,7 +39,7 @@ export function TermsPage() {
             <h2 className="text-xl font-semibold text-foreground mb-4">
               1. Acceptance of Terms
             </h2>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
               By accessing or using Onera, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
             </p>
           </section>
@@ -48,10 +48,10 @@ export function TermsPage() {
             <h2 className="text-xl font-semibold text-foreground mb-4">
               2. Description of Service
             </h2>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
               Onera is a privacy-focused AI assistant platform that provides:
             </p>
-            <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
+            <ul className="list-disc list-inside text-gray-500 dark:text-gray-400 space-y-2 mb-4">
               <li>End-to-end encrypted conversations with AI models</li>
               <li>Secure storage for notes and prompts</li>
               <li>Integration with various AI providers using your own API keys</li>
@@ -63,10 +63,10 @@ export function TermsPage() {
             <h2 className="text-xl font-semibold text-foreground mb-4">
               3. User Accounts
             </h2>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
               To use Onera, you must:
             </p>
-            <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
+            <ul className="list-disc list-inside text-gray-500 dark:text-gray-400 space-y-2 mb-4">
               <li>Create an account with accurate information</li>
               <li>Maintain the security of your account credentials</li>
               <li>Be responsible for all activities under your account</li>
@@ -78,10 +78,10 @@ export function TermsPage() {
             <h2 className="text-xl font-semibold text-foreground mb-4">
               4. Your API Keys
             </h2>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
               When using your own AI provider API keys:
             </p>
-            <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
+            <ul className="list-disc list-inside text-gray-500 dark:text-gray-400 space-y-2 mb-4">
               <li>You are responsible for obtaining and managing your API keys</li>
               <li>You must comply with the terms of service of your AI providers</li>
               <li>Any costs incurred through your API keys are your responsibility</li>
@@ -93,10 +93,10 @@ export function TermsPage() {
             <h2 className="text-xl font-semibold text-foreground mb-4">
               5. Acceptable Use
             </h2>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
               You agree not to use Onera to:
             </p>
-            <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
+            <ul className="list-disc list-inside text-gray-500 dark:text-gray-400 space-y-2 mb-4">
               <li>Violate any applicable laws or regulations</li>
               <li>Generate or distribute harmful, illegal, or malicious content</li>
               <li>Attempt to circumvent security measures</li>
@@ -109,10 +109,10 @@ export function TermsPage() {
             <h2 className="text-xl font-semibold text-foreground mb-4">
               6. Encryption and Data Access
             </h2>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
               You understand and acknowledge that:
             </p>
-            <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
+            <ul className="list-disc list-inside text-gray-500 dark:text-gray-400 space-y-2 mb-4">
               <li>Your data is end-to-end encrypted and only accessible with your encryption keys</li>
               <li>If you lose access to your encryption keys and recovery phrase, we cannot recover your data</li>
               <li>You are solely responsible for backing up your recovery phrase</li>
@@ -124,7 +124,7 @@ export function TermsPage() {
             <h2 className="text-xl font-semibold text-foreground mb-4">
               7. Intellectual Property
             </h2>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
               The Onera platform, including its software, design, and branding, is owned by us and protected by intellectual property laws. You retain ownership of any content you create using our services.
             </p>
           </section>
@@ -133,10 +133,10 @@ export function TermsPage() {
             <h2 className="text-xl font-semibold text-foreground mb-4">
               8. Disclaimer of Warranties
             </h2>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
               Onera is provided "as is" without warranties of any kind. We do not guarantee that:
             </p>
-            <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
+            <ul className="list-disc list-inside text-gray-500 dark:text-gray-400 space-y-2 mb-4">
               <li>The service will be uninterrupted or error-free</li>
               <li>AI-generated content will be accurate or suitable for your purposes</li>
               <li>The service will meet all your requirements</li>
@@ -147,7 +147,7 @@ export function TermsPage() {
             <h2 className="text-xl font-semibold text-foreground mb-4">
               9. Limitation of Liability
             </h2>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
               To the maximum extent permitted by law, we shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of Onera, including but not limited to loss of data, loss of profits, or business interruption.
             </p>
           </section>
@@ -156,7 +156,7 @@ export function TermsPage() {
             <h2 className="text-xl font-semibold text-foreground mb-4">
               10. Termination
             </h2>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
               We reserve the right to suspend or terminate your account if you violate these terms. You may also delete your account at any time. Upon termination, your encrypted data will be permanently deleted from our servers.
             </p>
           </section>
@@ -165,7 +165,7 @@ export function TermsPage() {
             <h2 className="text-xl font-semibold text-foreground mb-4">
               11. Changes to Terms
             </h2>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
               We may update these Terms of Service from time to time. We will notify you of any material changes by posting the updated terms on this page. Your continued use of Onera after changes constitutes acceptance of the new terms.
             </p>
           </section>
@@ -174,7 +174,7 @@ export function TermsPage() {
             <h2 className="text-xl font-semibold text-foreground mb-4">
               12. Contact
             </h2>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
               If you have any questions about these Terms of Service, please contact us through our GitHub repository.
             </p>
           </section>

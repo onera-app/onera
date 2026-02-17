@@ -103,7 +103,7 @@ export const ChatItem = memo(function ChatItem({
 
     const dragImage = document.createElement("div");
     dragImage.className =
-      "px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm text-gray-800 dark:text-gray-200 shadow-lg max-w-[220px] truncate";
+      "bg-black/80 backdrop-blur-2xl px-2 py-1 rounded-lg w-fit max-w-40 text-xs text-white";
     dragImage.textContent =
       title.length > 30 ? title.slice(0, 30) + "..." : title;
     dragImage.style.position = "absolute";
@@ -155,10 +155,10 @@ export const ChatItem = memo(function ChatItem({
           params={{ chatId: id }}
           search={{ pending: false }}
           className={cn(
-            "relative flex items-center w-full px-2.5 py-2 rounded-2xl text-sm transition-colors overflow-hidden",
+            "relative flex items-center w-full px-[11px] py-[6px] rounded-xl text-sm transition-colors overflow-hidden",
             isActive
-              ? "bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-200"
-              : "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900",
+              ? "bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-200"
+              : "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-200 group-hover:bg-gray-100 dark:group-hover:bg-gray-950",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           )}
         >
@@ -170,7 +170,7 @@ export const ChatItem = memo(function ChatItem({
           {/* Title container */}
           <div className="flex-1 min-w-0 overflow-hidden pr-6">
             <span
-              className="block whitespace-nowrap text-left font-normal truncate"
+              className="block whitespace-nowrap text-left font-normal overflow-hidden h-[20px] truncate"
               dir="auto"
             >
               {title}
@@ -253,7 +253,7 @@ export const ChatItem = memo(function ChatItem({
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDelete}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                className="bg-destructive text-white hover:bg-destructive/90"
               >
                 Delete
               </AlertDialogAction>

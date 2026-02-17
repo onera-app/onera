@@ -1287,7 +1287,7 @@ export function ChatPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full bg-white dark:bg-gray-900">
-        <Spinner size="lg" className="text-muted-foreground" />
+        <Spinner size="lg" className="text-gray-500 dark:text-gray-400" />
       </div>
     );
   }
@@ -1299,7 +1299,7 @@ export function ChatPage() {
           <Alert variant="destructive" className="bg-gray-50 dark:bg-gray-850 border-gray-100 dark:border-gray-850">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle className="text-foreground">Chat not found</AlertTitle>
-            <AlertDescription className="text-muted-foreground">
+            <AlertDescription className="text-gray-500 dark:text-gray-400">
               This conversation may have been deleted or doesn't exist.
             </AlertDescription>
           </Alert>
@@ -1320,7 +1320,7 @@ export function ChatPage() {
             <AlertTitle className="text-foreground">
               Couldn&apos;t decrypt conversation
             </AlertTitle>
-            <AlertDescription className="text-muted-foreground flex items-center justify-between gap-3">
+            <AlertDescription className="text-gray-500 dark:text-gray-400 flex items-center justify-between gap-3">
               <span>{chat.decryptionError}</span>
               <Button
                 size="sm"

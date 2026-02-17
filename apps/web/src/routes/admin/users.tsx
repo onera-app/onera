@@ -41,7 +41,7 @@ export function AdminUsersPage() {
         <Label htmlFor="admin-user-search" className="sr-only">
           Search users
         </Label>
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
         <input
           id="admin-user-search"
           type="text"
@@ -102,7 +102,7 @@ export function AdminUsersPage() {
                         )}
                         <div>
                           <div className="font-medium">{user.name}</div>
-                          <div className="text-xs text-muted-foreground">
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
                             {user.email}
                           </div>
                         </div>
@@ -120,7 +120,7 @@ export function AdminUsersPage() {
                                 ? "bg-status-success/10 text-status-success-text"
                                 : user.subscription?.planId === "team"
                                   ? "bg-status-warning/10 text-status-warning-text"
-                                  : "bg-gray-100 dark:bg-gray-800 text-muted-foreground"
+                                  : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
                         )}
                       >
                         {user.subscription?.planId || "free"}
@@ -134,20 +134,20 @@ export function AdminUsersPage() {
                             ? "bg-status-success/10 text-status-success-text"
                             : user.subscription?.status === "on_hold"
                               ? "bg-status-warning/10 text-status-warning-text"
-                              : "bg-gray-100 dark:bg-gray-800 text-muted-foreground"
+                              : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
                         )}
                       >
                         {user.subscription?.status || "none"}
                       </span>
                     </td>
-                    <td className="p-3 text-muted-foreground">
+                    <td className="p-3 text-gray-500 dark:text-gray-400">
                       {new Date(user.createdAt).toLocaleDateString()}
                     </td>
                   </tr>
                 ))}
             {!isLoading && !error && data?.users.length === 0 && (
               <tr>
-                <td colSpan={4} className="p-4 text-center text-muted-foreground">
+                <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
                   No users found for the current filter.
                 </td>
               </tr>
@@ -159,7 +159,7 @@ export function AdminUsersPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-gray-500 dark:text-gray-400">
             Page {page + 1} of {totalPages}
           </span>
           <div className="flex gap-2">

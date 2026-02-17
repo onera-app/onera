@@ -258,7 +258,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
   // Not unlocked
   if (!isUnlocked) {
     return (
-      <div className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm text-muted-foreground">
+      <div className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm text-gray-500 dark:text-gray-400">
         <Lock className="h-3 w-3" />
         <span>Unlock to select</span>
       </div>
@@ -288,11 +288,11 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
         >
           {isLoading ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-              <span className="text-muted-foreground">Loading...</span>
+              <Loader2 className="h-4 w-4 animate-spin text-gray-500 dark:text-gray-400" />
+              <span className="text-gray-500 dark:text-gray-400">Loading...</span>
             </>
           ) : models.length === 0 ? (
-            <span className="text-muted-foreground">No models</span>
+            <span className="text-gray-500 dark:text-gray-400">No models</span>
           ) : (
             <>
               <span className="truncate text-foreground max-w-[164px] sm:max-w-[214px]">
@@ -300,7 +300,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
               </span>
               <ChevronDown
                 className={cn(
-                  "h-3.5 w-3.5 text-muted-foreground transition-transform duration-150",
+                  "h-3.5 w-3.5 text-gray-500 dark:text-gray-400 transition-transform duration-150",
                   isOpen && "rotate-180",
                 )}
               />
@@ -314,7 +314,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
             {/* Search input - cleaner, more subtle */}
             <div className="p-2 pb-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -322,7 +322,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  className="w-full h-9 pl-9 pr-3 rounded-lg bg-foreground/[0.06] border-0 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-colors"
+                  className="w-full h-9 pl-9 pr-3 rounded-lg bg-foreground/[0.06] border-0 text-sm text-foreground placeholder:text-gray-300 dark:placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-ring transition-colors"
                 />
               </div>
             </div>
@@ -331,7 +331,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
             <div className="max-h-64 overflow-y-auto overscroll-contain">
               <div ref={listRef} className="py-1">
                 {filteredModels.length === 0 ? (
-                  <div className="px-3 py-8 text-center text-sm text-muted-foreground">
+                  <div className="px-3 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
                     No models found
                   </div>
                 ) : (
@@ -339,7 +339,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
                     {/* Pinned models section */}
                     {pinnedModels.length > 0 && (
                       <>
-                        <div className="px-3 pt-1 pb-1.5 text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                        <div className="px-3 pt-1 pb-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
                           <Pin className="h-2.5 w-2.5" />
                           Pinned
                         </div>
@@ -369,7 +369,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
                     {groupModelsByProvider(unpinnedModels).map(
                       ([provider, providerModels]) => (
                         <div key={provider}>
-                          <div className="px-3 pt-1 pb-1.5 text-xs font-medium text-muted-foreground">
+                          <div className="px-3 pt-1 pb-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
                             {formatProviderName(provider)}
                           </div>
                           {providerModels.map((model) => {

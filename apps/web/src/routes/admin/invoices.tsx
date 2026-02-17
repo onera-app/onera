@@ -51,7 +51,7 @@ export function AdminInvoicesPage() {
       </div>
 
       {!isLoading && !error && (data?.invoices.length ?? 0) === 0 && (
-        <p className="text-sm text-muted-foreground" role="status">
+        <p className="text-sm text-gray-500 dark:text-gray-400" role="status">
           No invoices found for the selected filter.
         </p>
       )}
@@ -64,7 +64,7 @@ export function AdminInvoicesPage() {
 
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-gray-500 dark:text-gray-400">
             Page {page + 1} of {totalPages}
           </span>
           <div className="flex gap-2">

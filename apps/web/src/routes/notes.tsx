@@ -56,7 +56,7 @@ export function NotesPage() {
                 variant="ghost"
                 size="sm"
                 onClick={handleBackToList}
-                className="text-muted-foreground"
+                className="text-gray-500 dark:text-gray-400"
                 aria-label="Back to notes list"
               >
                 <ChevronLeft className="h-4 w-4 mr-1" />
@@ -69,7 +69,7 @@ export function NotesPage() {
           </div>
         ) : (
           <div className="flex items-center justify-center h-full px-4">
-            <div className="text-center text-muted-foreground" role="status" aria-live="polite">
+            <div className="text-center text-gray-500 dark:text-gray-400" role="status" aria-live="polite">
               <FileText className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 opacity-50" />
               <p className="text-base sm:text-lg font-medium">Select or create a note</p>
               <p className="text-sm mt-1">Choose a note from the sidebar to start editing</p>

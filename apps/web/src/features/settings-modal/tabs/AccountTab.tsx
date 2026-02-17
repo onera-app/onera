@@ -71,7 +71,7 @@ export function AccountTab() {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium">Account Settings</h3>
-        <p className="mt-1 text-sm text-muted-foreground">Manage your profile and security</p>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage your profile and security</p>
       </div>
 
       {/* Profile Section */}
@@ -86,7 +86,7 @@ export function AccountTab() {
           </Avatar>
           <div>
             <p className="text-sm font-medium">{user?.name || 'User'}</p>
-            <p className="text-xs text-muted-foreground">{user?.email || ''}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email || ''}</p>
           </div>
         </div>
 
@@ -117,7 +117,7 @@ export function AccountTab() {
             disabled
             placeholder="your@email.com"
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             Email changes are managed through your account settings.
           </p>
         </div>
@@ -133,7 +133,7 @@ export function AccountTab() {
               <Lock className="h-4 w-4 inline mr-2" />
               Password
             </Label>
-            <p className="text-xs text-muted-foreground">Change your account password</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Change your account password</p>
           </div>
           <Button variant="outline" size="sm" onClick={() => setShowPasswordDialog(true)}>
             Change Password

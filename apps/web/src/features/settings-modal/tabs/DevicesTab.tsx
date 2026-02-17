@@ -94,7 +94,7 @@ export function DevicesTab() {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium">Devices</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Manage devices that have access to your encrypted data
         </p>
       </div>
@@ -109,7 +109,7 @@ export function DevicesTab() {
 
         {isLoading && (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <Loader2 className="h-6 w-6 animate-spin text-gray-500 dark:text-gray-400" />
           </div>
         )}
 
@@ -120,7 +120,7 @@ export function DevicesTab() {
         )}
 
         {devices && devices.length === 0 && (
-          <div className="text-sm text-muted-foreground py-4">
+          <div className="text-sm text-gray-500 dark:text-gray-400 py-4">
             No devices registered.
           </div>
         )}
@@ -138,7 +138,7 @@ export function DevicesTab() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-850">
-                      <DeviceIcon className="h-5 w-5 text-muted-foreground" />
+                      <DeviceIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -156,7 +156,7 @@ export function DevicesTab() {
                           <ShieldOff className="h-4 w-4 text-amber-500" />
                         )}
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
                         Last seen: {formatLastSeen(device.lastSeenAt)}
                       </div>
                     </div>
@@ -191,7 +191,7 @@ export function DevicesTab() {
           </div>
         )}
 
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-gray-500 dark:text-gray-400">
           Revoking a device will require re-authentication with your recovery phrase to access your data from that device.
         </p>
       </div>
@@ -227,7 +227,7 @@ export function DevicesTab() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white hover:bg-destructive/90">
               Remove Device
             </AlertDialogAction>
           </AlertDialogFooter>

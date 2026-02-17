@@ -41,7 +41,7 @@ export function EncryptionTab() {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium">End-to-End Encryption</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Manage your encryption keys and security settings
         </p>
       </div>
@@ -73,7 +73,7 @@ export function EncryptionTab() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             End-to-end encryption ensures that only you can access your API keys and sensitive data.
             Your encryption password never leaves your device.
           </p>
@@ -116,7 +116,7 @@ export function EncryptionTab() {
           </CardHeader>
           <CardContent>
             {!passkeySupported && !isCheckingPasskeySupport ? (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Passkeys are not supported on this device or browser. Use your recovery phrase to unlock.
               </p>
             ) : (
@@ -134,7 +134,7 @@ export function EncryptionTab() {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="font-normal">Lock Encryption</Label>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   Lock to prevent access until password is entered again
                 </p>
               </div>
@@ -148,7 +148,7 @@ export function EncryptionTab() {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="font-normal">Recovery Phrase</Label>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   View your 24-word recovery phrase
                 </p>
               </div>
@@ -161,7 +161,7 @@ export function EncryptionTab() {
         )}
 
         {!isUnlocked && (
-          <p className="text-sm text-muted-foreground text-center py-4">
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
             Unlock E2EE to access these settings
           </p>
         )}

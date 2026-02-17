@@ -91,10 +91,10 @@ export function ConnectionsTab() {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
         <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-gray-850 flex items-center justify-center mb-4">
-          <Lock className="w-8 h-8 text-muted-foreground" />
+          <Lock className="w-8 h-8 text-gray-500 dark:text-gray-400" />
         </div>
-        <p className="text-muted-foreground font-medium">Encryption locked</p>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-gray-500 dark:text-gray-400 font-medium">Encryption locked</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
           Unlock E2EE to manage your connections
         </p>
       </div>
@@ -119,7 +119,7 @@ export function ConnectionsTab() {
       {/* Header */}
       <div>
         <h3 className="text-lg font-semibold">Connections</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Connect your AI provider accounts. API keys are encrypted end-to-end.
         </p>
       </div>
@@ -149,7 +149,7 @@ export function ConnectionsTab() {
                           Connected
                         </Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         {provider?.name || credential.provider} &middot; Added{' '}
                         {dayjs(credential.createdAt).format('MMM D')}
                       </p>
@@ -161,7 +161,7 @@ export function ConnectionsTab() {
                         e.stopPropagation();
                         setDeleteCredentialId(credential.id);
                       }}
-                      className="opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
+                      className="opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 text-gray-500 dark:text-gray-400 hover:text-destructive transition-opacity"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -187,7 +187,7 @@ export function ConnectionsTab() {
                 'flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all',
                 activeCategory === category.id
                   ? 'bg-white dark:bg-gray-900 text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-foreground'
               )}
             >
               {category.name}
@@ -221,7 +221,7 @@ export function ConnectionsTab() {
                             <CheckCircle2 className="w-3.5 h-3.5 text-status-success-text flex-shrink-0" />
                           )}
                         </div>
-                        <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-0.5">
                           {provider.description}
                         </p>
                         {provider.website && (
@@ -230,7 +230,7 @@ export function ConnectionsTab() {
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-0.5 text-xs text-muted-foreground hover:text-primary hover:underline mt-1"
+                            className="inline-flex items-center gap-0.5 text-xs text-gray-500 dark:text-gray-400 hover:text-primary hover:underline mt-1"
                           >
                             Get API Key <ExternalLink className="w-2 h-2" />
                           </a>
@@ -249,10 +249,10 @@ export function ConnectionsTab() {
       {credentials.length === 0 && (
         <div className="flex flex-col items-center justify-center py-6 text-center border-2 border-dashed rounded-xl bg-gray-50 dark:bg-gray-900">
           <div className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-gray-850 flex items-center justify-center mb-3">
-            <Plus className="w-6 h-6 text-muted-foreground" />
+            <Plus className="w-6 h-6 text-gray-500 dark:text-gray-400" />
           </div>
-          <p className="text-sm font-medium text-muted-foreground">No connections yet</p>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">No connections yet</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             Select a provider above to get started
           </p>
         </div>
@@ -272,7 +272,7 @@ export function ConnectionsTab() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-white hover:bg-destructive/90"
             >
               Delete
             </AlertDialogAction>
@@ -419,7 +419,7 @@ function ProviderIcon({ provider, className }: { provider: string; className?: s
     default:
       return (
         <div className={cn(iconClass, 'bg-gray-100 dark:bg-gray-850')}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5 text-muted-foreground">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5 text-gray-500 dark:text-gray-400">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>

@@ -88,7 +88,7 @@ export const ModelItem = memo(function ModelItem({
                 "h-7 w-7 flex items-center justify-center rounded transition-all duration-100",
                 isPinned
                   ? "opacity-100 text-amber-500 hover:text-amber-600 hover:bg-foreground/10"
-                  : "opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground hover:bg-foreground/10",
+                  : "opacity-0 group-hover:opacity-100 text-gray-500 dark:text-gray-400 hover:text-foreground hover:bg-foreground/10",
               )}
             >
               {isPinned ? (

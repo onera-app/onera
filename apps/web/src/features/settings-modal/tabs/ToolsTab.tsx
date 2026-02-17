@@ -94,10 +94,10 @@ export function ToolsTab() {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
         <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-gray-850 flex items-center justify-center mb-4">
-          <Lock className="w-8 h-8 text-muted-foreground" />
+          <Lock className="w-8 h-8 text-gray-500 dark:text-gray-400" />
         </div>
-        <p className="text-muted-foreground font-medium">Encryption locked</p>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-gray-500 dark:text-gray-400 font-medium">Encryption locked</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
           Unlock E2EE to configure tool integrations
         </p>
       </div>
@@ -109,7 +109,7 @@ export function ToolsTab() {
       {/* Header */}
       <div>
         <h3 className="text-lg font-semibold">Tools</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Configure search providers and other tool integrations. API keys are
           encrypted end-to-end.
         </p>
@@ -118,7 +118,7 @@ export function ToolsTab() {
       {/* Web Search Settings */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <Globe className="h-4 w-4 text-muted-foreground" />
+          <Globe className="h-4 w-4 text-gray-500 dark:text-gray-400" />
           <h4 className="text-sm font-medium">Web Search</h4>
         </div>
 
@@ -129,7 +129,7 @@ export function ToolsTab() {
                 <Label htmlFor="search-default" className="text-sm font-medium">
                   Enable by default
                 </Label>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                   Automatically enable web search for new messages
                 </p>
               </div>
@@ -175,10 +175,10 @@ export function ToolsTab() {
       {/* Native AI Search */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <Wand2 className="h-4 w-4 text-muted-foreground" />
+          <Wand2 className="h-4 w-4 text-gray-500 dark:text-gray-400" />
           <h4 className="text-sm font-medium">Native AI Search</h4>
         </div>
-        <p className="text-xs text-muted-foreground -mt-2">
+        <p className="text-xs text-gray-500 dark:text-gray-400 -mt-2">
           Built-in search tools for supported AI providers. No additional API
           keys required.
         </p>
@@ -202,14 +202,14 @@ export function ToolsTab() {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       {provider.description}
                     </p>
                     <div className="flex flex-wrap gap-1 mt-2">
                       {provider.features.map((feature) => (
                         <span
                           key={feature}
-                          className="text-micro px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-850 text-muted-foreground"
+                          className="text-micro px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-850 text-gray-500 dark:text-gray-400"
                         >
                           {feature}
                         </span>
@@ -234,7 +234,7 @@ export function ToolsTab() {
                         <Label className="text-xs font-medium">
                           Image understanding
                         </Label>
-                        <p className="text-xs text-muted-foreground mt-0.5">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                           Allow Grok to analyze images from search results
                         </p>
                       </div>
@@ -262,7 +262,7 @@ export function ToolsTab() {
       <div className="space-y-3">
         <div>
           <h4 className="text-sm font-medium">External Search Providers</h4>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
             Add API keys for third-party search providers
           </p>
         </div>
@@ -344,7 +344,7 @@ function ProviderCard({
                 </Badge>
               )}
             </div>
-            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
               {provider.description}
             </p>
             <a
@@ -365,7 +365,7 @@ function ProviderCard({
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    className="text-muted-foreground hover:text-destructive"
+                    className="text-gray-500 dark:text-gray-400 hover:text-destructive"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -383,7 +383,7 @@ function ProviderCard({
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={onRemoveKey}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      className="bg-destructive text-white hover:bg-destructive/90"
                     >
                       Remove
                     </AlertDialogAction>

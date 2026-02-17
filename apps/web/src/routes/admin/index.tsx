@@ -22,7 +22,7 @@ export function AdminDashboard() {
     return (
       <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6" role="alert" aria-live="assertive">
         <h2 className="font-semibold text-destructive">Unable to load dashboard stats</h2>
-        <p className="text-sm text-muted-foreground mt-1">{error.message}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{error.message}</p>
       </div>
     );
   }
@@ -31,7 +31,7 @@ export function AdminDashboard() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">
+        <p className="text-gray-500 dark:text-gray-400 mt-1">
           Overview of billing and subscriptions
         </p>
       </div>

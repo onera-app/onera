@@ -119,7 +119,7 @@ export function BillingPage() {
           <h1 className="text-2xl sm:text-3xl font-semibold tracking-[-0.02em] text-foreground">
             Billing
           </h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1">
+          <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">
             Manage your subscription and usage
           </p>
         </header>
@@ -177,7 +177,7 @@ export function BillingPage() {
                               ? "text-status-warning-text"
                               : currentPlan?.id === "enterprise"
                                 ? "text-primary"
-                                : "text-muted-foreground",
+                                : "text-gray-500 dark:text-gray-400",
                     )}
                   />
                 </div>
@@ -185,12 +185,12 @@ export function BillingPage() {
                   <h2 className="text-lg font-semibold text-foreground">
                     {resolvedCurrentPlan?.name || "Free"}
                   </h2>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     {resolvedCurrentPlan?.description ||
                       "Encrypted AI chat to get started"}
                   </p>
                   {currentPeriodEndDate && (
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       Current period ends {formatDate(currentPeriodEndDate)}
                     </p>
                   )}
@@ -229,7 +229,7 @@ export function BillingPage() {
 
         {/* What's Included */}
         <section>
-          <h3 className="text-sm font-medium text-muted-foreground mb-4 px-1">
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4 px-1">
             What's included
           </h3>
           <div className="rounded-2xl bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850 p-5 sm:p-6">
@@ -252,7 +252,7 @@ export function BillingPage() {
         {/* Plan Selection */}
         <section className="mt-10">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-            <h3 className="text-sm font-medium text-muted-foreground px-1">
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 px-1">
               Change plan
             </h3>
             <div className="inline-flex rounded-xl border border-gray-100 dark:border-gray-850 p-1 bg-gray-50 dark:bg-gray-850/50">
@@ -263,7 +263,7 @@ export function BillingPage() {
                   "px-3 py-1.5 rounded-lg text-sm transition-colors",
                   billingInterval === "monthly"
                     ? "bg-foreground text-background"
-                    : "text-muted-foreground hover:text-foreground",
+                    : "text-gray-500 dark:text-gray-400 hover:text-foreground",
                 )}
               >
                 Monthly
@@ -275,7 +275,7 @@ export function BillingPage() {
                   "px-3 py-1.5 rounded-lg text-sm transition-colors",
                   billingInterval === "yearly"
                     ? "bg-foreground text-background"
-                    : "text-muted-foreground hover:text-foreground",
+                    : "text-gray-500 dark:text-gray-400 hover:text-foreground",
                 )}
               >
                 Yearly
@@ -349,16 +349,16 @@ export function BillingPage() {
                   >
                     <div>
                       <h4 className="text-lg font-semibold text-foreground">{plan.name}</h4>
-                      <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{plan.description}</p>
                     </div>
 
                     <div>
                       <span className="text-3xl font-semibold text-foreground">
                         ${Math.round(monthlyEquivalent / 100)}
                       </span>
-                      <span className="text-sm text-muted-foreground ml-1">/mo</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">/mo</span>
                       {billingInterval === "yearly" && plan.yearlyPrice > 0 && (
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                           ${Math.round(plan.yearlyPrice / 100)} billed yearly
                         </p>
                       )}
@@ -385,7 +385,7 @@ export function BillingPage() {
                       {actionLabel}
                     </Button>
                     {!isCurrent && plan.id !== "team" && (
-                      <p className="text-xs text-muted-foreground text-center">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
                         {isDowngrade
                           ? currentPeriodEndDate
                             ? `Takes effect on ${formatDate(currentPeriodEndDate)}`

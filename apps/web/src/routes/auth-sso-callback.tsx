@@ -202,8 +202,8 @@ export function SSOCallbackPage() {
         <Card className="w-full max-w-md bg-white dark:bg-gray-850 border-gray-100 dark:border-gray-850">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
-            <p className="text-muted-foreground">Completing sign in...</p>
-            <p className="mt-2 text-xs text-muted-foreground/80" aria-live="polite">
+            <p className="text-gray-500 dark:text-gray-400">Completing sign in...</p>
+            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400" aria-live="polite">
               {stageLabel}
             </p>
           </CardContent>
@@ -257,7 +257,7 @@ export function SSOCallbackPage() {
               <Lock className="h-8 w-8 text-amber-600 dark:text-amber-400" />
             </div>
             <h1 className="text-2xl font-semibold tracking-tight">Backup Recovery Phrase</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               Save this phrase securely in case you lose your passkey or password.
             </p>
           </div>
@@ -313,7 +313,7 @@ export function SSOCallbackPage() {
                     <button
                       type="button"
                       onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-foreground"
                       aria-label={showPassword ? "Hide password" : "Show password"}
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -334,7 +334,7 @@ export function SSOCallbackPage() {
                   />
                 </div>
 
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   Use at least 8 characters. This is separate from your account password.
                 </p>
 
@@ -370,7 +370,7 @@ export function SSOCallbackPage() {
           <Card className="w-full max-w-md bg-white dark:bg-gray-850 border-gray-100 dark:border-gray-850">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
-              <p className="text-muted-foreground">Checking device capabilities...</p>
+              <p className="text-gray-500 dark:text-gray-400">Checking device capabilities...</p>
             </CardContent>
           </Card>
         </div>
@@ -401,7 +401,7 @@ export function SSOCallbackPage() {
                   <Fingerprint className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium">Instant unlock</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Use one biometric gesture to unlock encrypted data.
                     </p>
                   </div>
@@ -411,7 +411,7 @@ export function SSOCallbackPage() {
                   <ShieldCheck className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium">Phishing resistant</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Passkeys stay bound to your device identity.
                     </p>
                   </div>
@@ -443,7 +443,7 @@ export function SSOCallbackPage() {
                 type="button"
                 onClick={() => setView("password")}
                 disabled={isRegisteringPasskey}
-                className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="w-full text-sm text-gray-500 dark:text-gray-400 hover:text-foreground transition-colors"
               >
                 Use password instead
               </button>

@@ -41,7 +41,7 @@ export function MandatoryLogoutConfirm({
                     <AlertDialogCancel>Go Back</AlertDialogCancel>
                     <AlertDialogAction
                         onClick={handleSignOut}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        className="bg-destructive text-white hover:bg-destructive/90"
                     >
                         Sign Out
                     </AlertDialogAction>

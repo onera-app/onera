@@ -536,7 +536,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
                       "h-10 w-10 lg:h-11 lg:w-11 rounded-2xl transition-all duration-200 shadow-md",
                       canSend && !disabled
                         ? "bg-foreground text-background hover:bg-foreground/90 hover:scale-105"
-                        : "bg-gray-100 dark:bg-gray-850 text-muted-foreground cursor-not-allowed",
+                        : "bg-gray-100 dark:bg-gray-850 text-gray-500 dark:text-gray-400 cursor-not-allowed",
                     )}
                   >
                     <ArrowUp className="h-4 w-4" strokeWidth={2.5} />

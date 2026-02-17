@@ -67,7 +67,7 @@ export const MentionList = forwardRef<MentionListRef, MentionListProps>(
 
     if (items.length === 0) {
       return (
-        <div className="p-3 text-sm text-muted-foreground">No models found</div>
+        <div className="p-3 text-sm text-gray-500 dark:text-gray-400">No models found</div>
       );
     }
 
@@ -87,7 +87,7 @@ export const MentionList = forwardRef<MentionListRef, MentionListProps>(
               )}
             >
               <span className="font-medium">{item.name}</span>
-              <span className="text-xs text-muted-foreground">{item.provider}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">{item.provider}</span>
             </button>
           ))}
         </div>

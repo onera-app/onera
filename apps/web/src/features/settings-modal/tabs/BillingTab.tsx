@@ -11,7 +11,7 @@ export function BillingTab() {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold">Billing</h3>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           Your plan and usage
         </p>
       </div>
@@ -20,7 +20,7 @@ export function BillingTab() {
       <div className="rounded-lg border border-gray-100 dark:border-gray-850 p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">Current plan</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Current plan</p>
             <p className="text-lg font-semibold">{currentPlan?.name || 'Free'}</p>
           </div>
           <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium bg-primary/10 text-primary">
@@ -52,7 +52,7 @@ export function BillingTab() {
           </div>
         )}
 
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-gray-500 dark:text-gray-400">
           Manage your subscription details in the Billing page.
         </p>
       </div>

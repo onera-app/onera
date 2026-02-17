@@ -32,7 +32,7 @@ export function AdminUserDetailPage() {
     return (
       <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6" role="alert" aria-live="assertive">
         <h2 className="font-semibold text-destructive">Unable to load user details</h2>
-        <p className="text-sm text-muted-foreground mt-1">{error.message}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{error.message}</p>
       </div>
     );
   }
@@ -62,7 +62,7 @@ export function AdminUserDetailPage() {
           )}
           <div>
             <h1 className="text-xl font-bold">{data.user.name}</h1>
-            <p className="text-sm text-muted-foreground">{data.user.email}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{data.user.email}</p>
           </div>
         </div>
       </div>
@@ -76,7 +76,7 @@ export function AdminUserDetailPage() {
             <strong>{data.plan?.name || "Free"}</strong>
           </span>
           {data.subscription && (
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-gray-500 dark:text-gray-400">
               Status: {data.subscription.status}
             </span>
           )}
