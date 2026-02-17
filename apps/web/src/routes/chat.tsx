@@ -711,19 +711,15 @@ export function ChatPage() {
     // Include ALL messages - streaming message stays in array (like Vercel's approach)
     if (aiMessages.length > storedMessages.length) {
       // Use pendingUserMessageRef for user message to preserve multimodal content (images/docs)
-      // The AI SDK may not preserve file parts in the same format we need
       const pendingUser = pendingUserMessageRef.current;
 
-      result = aiMessages.map((m, index) => {
-        // If this is the user message we just sent and we have a pending ref, use it
-        // This preserves images/documents that the AI SDK might not keep in parts
-        if (
-          pendingUser &&
-          m.role === "user" &&
-          index === aiMessages.length - 2
-        ) {
+      result = aiMessages.map((m) => {
+        // If this message ID matches our pending message ID, use the pending ref
+        // This ensures the message doesn't flicker/downgrade to text-only during the start of streaming
+        if (pendingUser && m.id === pendingUser.id) {
           return pendingUser;
         }
+
         return toChatMessage(
           m,
           m.role === "assistant" ? selectedModelId || undefined : undefined,
@@ -1010,9 +1006,9 @@ export function ChatPage() {
               sendParts.unshift({ type: "text", text: searchContext });
             }
           }
-          await sendMessage({ parts: sendParts });
+          await sendMessage({ parts: sendParts }, { id: userMessage.id });
         } else {
-          await sendMessage(finalContent);
+          await sendMessage(finalContent, { id: userMessage.id });
         }
       } catch (err) {
         pendingUserMessageRef.current = null; // Clear on error
@@ -1078,7 +1074,9 @@ export function ChatPage() {
 
         // Trigger a new AI response by sending the edited message
         if (selectedModelId && isReady) {
-          await sendMessage(newContent);
+          // Find the user message we just created and get its ID
+          const editedUserMessage = newMessages[newMessages.length - 1]; // This is usually the last message in an edit-branch re-run
+          await sendMessage(newContent, { id: editedUserMessage?.id });
         }
       } catch (error) {
         console.error("Failed to edit message:", error);
@@ -1207,7 +1205,7 @@ export function ChatPage() {
         };
 
         // Send the message again to regenerate
-        await sendMessage(userContent);
+        await sendMessage(userContent, { id: userMessage.id });
       } catch (error) {
         console.error("Failed to regenerate message:", error);
         toast.error("Failed to regenerate message");

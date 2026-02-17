@@ -85,13 +85,13 @@ interface UseDirectChatReturn extends Omit<UseChatHelpers<UIMessage>, 'sendMessa
   /**
    * Send a message to the AI (text or multimodal with parts)
    */
-  sendMessage: (content: SendMessageInput) => Promise<void>;
+  sendMessage: (content: SendMessageInput, options?: { id?: string }) => Promise<void>;
 
   /**
    * Regenerate the last assistant message
    * Optionally with a modifier prompt (e.g., "be more concise")
    */
-  regenerate: (options?: { modifier?: string }) => Promise<void>;
+  regenerate: (options?: { modifier?: string; id?: string }) => Promise<void>;
 
   /**
    * Whether the transport is ready (E2EE unlocked and credentials available)
@@ -430,7 +430,7 @@ export function useDirectChat({
 
   // Custom sendMessage that validates state and supports multimodal content
   const sendMessage = useCallback(
-    async (content: SendMessageInput) => {
+    async (content: SendMessageInput, options?: { id?: string }) => {
       if (!isReady) {
         let errorMessage = 'Unable to send message';
         if (!isUnlocked) {
@@ -451,12 +451,13 @@ export function useDirectChat({
 
       // Handle string input (text only)
       if (typeof content === 'string') {
-        await chat.sendMessage({ text: content });
+        await chat.sendMessage({ text: content, ...(options?.id && { id: options.id }) });
         return;
       }
 
       // Handle multimodal input with parts
       await chat.sendMessage({
+        id: options?.id,
         role: 'user',
         parts: content.parts.map(part => {
           if (part.type === 'text') {
@@ -476,7 +477,7 @@ export function useDirectChat({
 
   // Regenerate the last assistant message
   const regenerate = useCallback(
-    async (options?: { modifier?: string }) => {
+    async (options?: { modifier?: string; id?: string }) => {
       if (!isReady) {
         let errorMessage = 'Unable to regenerate';
         if (!isUnlocked) {
@@ -534,7 +535,7 @@ export function useDirectChat({
       chat.setMessages(messagesToKeep);
 
       // Re-send the user message to get a new response
-      await chat.sendMessage({ text: userContent });
+      await chat.sendMessage({ text: userContent, ...(options?.id && { id: options.id }) });
     },
     [chat, enclaveConfig, enforceAllowance, isReady, isUnlocked, selectedModelId]
   );
