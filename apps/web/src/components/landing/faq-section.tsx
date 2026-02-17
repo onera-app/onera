@@ -7,59 +7,56 @@ import {
 
 const faqs = [
   {
-    question: "What makes Onera private?",
+    question: "Can Onera read my conversations?",
     answer:
-      "Onera uses end-to-end encryption and passkey authentication to protect your account and conversations.",
+      "No. Your messages are encrypted on your device before they're sent anywhere. Onera never has access to your decryption keys, so we couldn't read your data even if compelled to.",
   },
   {
-    question: "Who can access my chats?",
+    question: "How is this different from ChatGPT or Claude?",
     answer:
-      "Your chats are private to you and people you explicitly choose to collaborate with.",
+      "Standard AI tools process your prompts in plaintext on their servers. Onera encrypts your input before it reaches any provider, so the content of your conversations stays invisible to third parties.",
   },
   {
-    question: "Can I use different AI models?",
+    question: "What AI models can I use?",
     answer:
-      "Yes. Onera supports multiple providers so you can choose the model that fits each task.",
+      "Onera supports models from OpenAI, Anthropic, Google, and other providers. You choose the model — Onera handles the encryption layer on top.",
   },
   {
-    question: "Is setup complicated?",
-    answer: "No. Create an account, add a passkey, and start chatting.",
-  },
-  {
-    question: "Is Onera free to try?",
-    answer: "Yes. Onera includes a free plan, with paid tiers for higher limits.",
-  },
-  {
-    question: "Can I use Onera on multiple devices?",
+    question: "Are my prompts used to train AI models?",
     answer:
-      "Yes. Onera supports protected sync so your chats are available wherever you sign in.",
+      "No. Your prompts are encrypted and never stored in plaintext. There is nothing for any provider to train on.",
+  },
+  {
+    question: "What happens if Onera gets breached?",
+    answer:
+      "An attacker would only find encrypted blobs. Without your passkey and device-held keys, the data is unreadable.",
+  },
+  {
+    question: "Do I need to install anything?",
+    answer:
+      "No. Onera runs in your browser. There's also an iOS app if you want native access on your phone.",
   },
 ];
 
 export function FAQSection() {
   return (
-    <section id="faq" className="px-4 py-16 sm:px-5 sm:py-24 md:px-8 md:py-28">
-      <div className="mx-auto max-w-[980px]">
-        <div className="text-center">
-          <p className="mx-auto inline-flex rounded-full border border-landing-pill-border bg-landing-pill px-4 py-1.5 font-landing text-sm text-landing-muted-foreground sm:px-5 sm:py-2 sm:text-lg">
-            FAQ
-          </p>
-          <h2 className="mt-6 font-landing text-3xl font-semibold leading-[1.08] tracking-tight text-landing-foreground sm:mt-7 sm:text-4xl md:text-6xl">
-            Frequently asked questions
-          </h2>
-        </div>
+    <section id="faq" className="px-4 py-20 sm:px-6 sm:py-28">
+      <div className="mx-auto max-w-[680px]">
+        <h2 className="text-center font-landing text-3xl font-semibold leading-tight tracking-tight text-landing-foreground sm:text-4xl md:text-5xl">
+          Frequently asked questions
+        </h2>
 
-        <Accordion type="single" collapsible className="mt-8 space-y-3 sm:mt-12 sm:space-y-4">
+        <Accordion type="single" collapsible className="mt-12 sm:mt-16">
           {faqs.map((faq, index) => (
             <AccordionItem
               key={faq.question}
               value={`faq-${index}`}
-              className="rounded-2xl border border-landing-border bg-landing-card px-4 sm:rounded-3xl sm:px-6"
+              className="border-b border-landing-border/60 px-0"
             >
-              <AccordionTrigger className="font-landing text-left text-lg font-semibold text-landing-foreground hover:no-underline sm:text-xl md:text-2xl [&>svg]:h-5 [&>svg]:w-5 sm:[&>svg]:h-6 sm:[&>svg]:w-6 [&>svg]:text-landing-muted-foreground">
+              <AccordionTrigger className="py-5 font-landing text-base font-semibold text-landing-foreground hover:no-underline sm:text-lg [&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-landing-muted-foreground">
                 {faq.question}
               </AccordionTrigger>
-              <AccordionContent className="pb-5 font-landing text-base leading-relaxed text-landing-muted-foreground sm:pb-7 sm:text-lg">
+              <AccordionContent className="pb-5 font-landing text-base leading-relaxed text-landing-muted-foreground">
                 {faq.answer}
               </AccordionContent>
             </AccordionItem>

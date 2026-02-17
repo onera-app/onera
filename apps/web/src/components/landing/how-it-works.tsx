@@ -1,50 +1,47 @@
 const steps = [
   {
-    step: "01",
-    title: "Create your account",
-    detail: "Sign up and secure your account with a passkey.",
+    number: "1",
+    title: "Set up your passkey",
+    detail: "No passwords to leak. Your passkey lives on your device and never touches a server.",
   },
   {
-    step: "02",
-    title: "Start chatting",
-    detail: "Use AI in a private workspace built for real tasks.",
+    number: "2",
+    title: "Chat privately",
+    detail: "Ask anything. Your messages are encrypted before they leave your browser.",
   },
   {
-    step: "03",
-    title: "Stay synced",
-    detail: "Access conversations across devices with protected sync.",
+    number: "3",
+    title: "Sync with zero exposure",
+    detail: "Your encrypted conversations follow you across devices. Only you hold the key.",
   },
 ];
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="px-4 py-12 sm:px-5 sm:py-16 md:px-8 md:py-24">
-      <div className="mx-auto max-w-[1180px] rounded-[28px] bg-landing-muted px-5 py-10 sm:rounded-[42px] sm:px-7 sm:py-12 md:px-10 md:py-16">
-        <div className="mx-auto max-w-[760px] text-center">
-          <p className="mx-auto inline-flex rounded-full border border-landing-pill-border bg-landing-pill px-4 py-1.5 font-landing text-sm text-landing-muted-foreground sm:px-5 sm:py-2 sm:text-lg">
-            How it works
-          </p>
-          <h2 className="mt-5 font-landing text-3xl font-semibold leading-[1.08] tracking-tight text-landing-foreground sm:mt-6 sm:text-4xl md:text-6xl">
-            Start securely in three steps
+    <section id="how-it-works" className="px-4 py-20 sm:px-6 sm:py-28">
+      <div className="mx-auto max-w-[980px]">
+        <div className="text-center">
+          <h2 className="font-landing text-3xl font-semibold leading-tight tracking-tight text-landing-foreground sm:text-4xl md:text-5xl">
+            Private in three steps
           </h2>
+          <p className="mx-auto mt-4 max-w-[480px] font-landing text-base leading-relaxed text-landing-muted-foreground sm:text-lg">
+            No IT team needed. No servers to configure. Just open and go.
+          </p>
         </div>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
+        <div className="mx-auto mt-14 grid max-w-[820px] gap-8 sm:mt-20 md:grid-cols-3 md:gap-12">
           {steps.map((item) => (
-            <article
-              key={item.step}
-              className="rounded-[24px] border border-landing-border bg-landing-card p-6"
-            >
-              <p className="font-landing text-sm font-semibold tracking-[0.08em] text-landing-muted-foreground">
-                STEP {item.step}
-              </p>
-              <h3 className="mt-4 font-landing text-2xl font-semibold leading-tight text-landing-foreground sm:mt-5 sm:text-3xl">
+            <div key={item.number} className="text-center md:text-left">
+              <span className="font-landing text-4xl font-semibold text-landing-muted-foreground/40">
+                {item.number}
+              </span>
+              <h3 className="mt-2 font-landing text-lg font-semibold text-landing-foreground">
                 {item.title}
               </h3>
-              <p className="mt-3 font-landing text-base leading-relaxed text-landing-muted-foreground sm:mt-4 sm:text-lg">
+              <p className="mt-1.5 font-landing text-base leading-relaxed text-landing-muted-foreground">
                 {item.detail}
               </p>
-            </article>
+            </div>
           ))}
         </div>
       </div>

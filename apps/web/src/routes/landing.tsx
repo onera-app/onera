@@ -10,7 +10,7 @@ import {
 
 export function LandingPage() {
   return (
-    <main className="min-h-screen bg-landing text-landing-foreground selection:bg-landing-foreground selection:text-landing">
+    <main className="min-h-screen bg-landing text-landing-foreground antialiased selection:bg-landing-foreground/10">
       <Header />
       <Hero />
       <FeaturesSection />
