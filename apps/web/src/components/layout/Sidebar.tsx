@@ -1,5 +1,5 @@
 import { Link, useLocation, useParams, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState, useCallback, useRef } from "react";
+import { useMemo, useState, useCallback, useRef, type UIEvent } from "react";
 import { toast } from "sonner";
 import { useUIStore } from "@/stores/uiStore";
 import { useE2EE } from "@/providers/E2EEProvider";
@@ -122,6 +122,12 @@ export function Sidebar() {
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [foldersExpanded, setFoldersExpanded] = useState(true);
   const [chatsExpanded, setChatsExpanded] = useState(true);
+  const [scrollTop, setScrollTop] = useState(0);
+
+  const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLDivElement;
+    setScrollTop(target.scrollTop);
+  }, []);
 
   // Decrypt chat titles when unlocked
   const chats = useMemo((): ChatWithTitle[] => {
@@ -328,13 +334,13 @@ export function Sidebar() {
 
   return (
     <TooltipProvider delayDuration={300}>
-      {/* Open sidebar button - visible when sidebar is closed */}
+      {/* Mobile: floating open button when sidebar is closed */}
       {!sidebarOpen && !hasInlineMenuTrigger && (
         <Tooltip>
           <TooltipTrigger asChild>
             <button
               onClick={toggleSidebar}
-              className="fixed top-3.5 left-3.5 z-50 p-2 rounded-xl text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="fixed top-3.5 left-3.5 z-50 p-2 rounded-xl text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden"
               aria-label="Open sidebar"
             >
               <PanelLeftOpen className="h-[18px] w-[18px]" />
@@ -346,6 +352,175 @@ export function Sidebar() {
         </Tooltip>
       )}
 
+      {/* Desktop: collapsed icon rail — Open WebUI style */}
+      {!sidebarOpen && (
+        <div
+          className="hidden md:flex flex-col justify-between h-full pt-[7px] pb-2 px-2 text-gray-900 dark:text-gray-200 border-e-[0.5px] border-gray-100 dark:border-gray-850/30 z-10 flex-shrink-0 bg-gray-50 dark:bg-gray-950"
+          id="sidebar-rail"
+        >
+          <button
+            className="flex flex-col flex-1 cursor-[e-resize] items-center"
+            onClick={toggleSidebar}
+          >
+            {/* Logo / Sidebar toggle */}
+            <div className="pb-1.5">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850 transition group cursor-[e-resize]">
+                    <div className="flex items-center justify-center size-9">
+                      <div className="group-hover:hidden">
+                        <OneraLogo size={24} />
+                      </div>
+                      <PanelLeftOpen className="size-5 hidden group-hover:flex text-gray-600 dark:text-gray-400" />
+                    </div>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="text-xs">
+                  Open sidebar
+                </TooltipContent>
+              </Tooltip>
+            </div>
+
+            {/* Action icons */}
+            <div className="-mt-[0.5px] flex flex-col items-center">
+              {/* New Chat */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    to="/app"
+                    className="flex rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850 transition"
+                    onClick={(e) => e.stopPropagation()}
+                    draggable={false}
+                  >
+                    <div className="flex items-center justify-center size-9">
+                      <Plus className="size-[18px] text-gray-800 dark:text-gray-200" />
+                    </div>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="text-xs">
+                  New Chat
+                </TooltipContent>
+              </Tooltip>
+
+              {/* Search */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    className="flex rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850 transition"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSearchModalOpen(true);
+                    }}
+                  >
+                    <div className="flex items-center justify-center size-9">
+                      <Search className="size-[18px] text-gray-800 dark:text-gray-200" />
+                    </div>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="text-xs">
+                  Search
+                </TooltipContent>
+              </Tooltip>
+
+              {/* Notes */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    to="/app/notes"
+                    className="flex rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850 transition"
+                    onClick={(e) => e.stopPropagation()}
+                    draggable={false}
+                  >
+                    <div className="flex items-center justify-center size-9">
+                      <FileText className="size-[18px] text-gray-800 dark:text-gray-200" />
+                    </div>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="text-xs">
+                  Notes
+                </TooltipContent>
+              </Tooltip>
+
+              {/* Admin */}
+              {isAdmin && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      to="/app/admin"
+                      className="flex rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850 transition"
+                      onClick={(e) => e.stopPropagation()}
+                      draggable={false}
+                    >
+                      <div className="flex items-center justify-center size-9">
+                        <Shield className="size-[18px] text-gray-800 dark:text-gray-200" />
+                      </div>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="text-xs">
+                    Admin
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+          </button>
+
+          {/* Bottom: User avatar */}
+          {user && (
+            <div className="flex justify-center py-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850 transition cursor-pointer focus-visible:outline-none">
+                    <div className="relative">
+                      {user.imageUrl ? (
+                        <img
+                          src={user.imageUrl}
+                          alt={user.name || "User"}
+                          className="size-7 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="size-7 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-white text-xs font-medium">
+                          {(user.name || user.email || "U")
+                            .charAt(0)
+                            .toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  side="right"
+                  sideOffset={8}
+                  className="w-52"
+                >
+                  <DropdownMenuItem asChild>
+                    <Link to="/app/billing" className="gap-2 cursor-pointer">
+                      <CreditCard className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                      Manage plan
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => openSettingsModal()}
+                    className="gap-2"
+                  >
+                    <Settings className="h-4 w-4" />
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => signOut()}
+                    className="gap-2 text-destructive focus:text-destructive focus:bg-destructive/10"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Mobile overlay backdrop — Open WebUI style */}
       {sidebarOpen && (
         <div
@@ -355,6 +530,7 @@ export function Sidebar() {
         />
       )}
 
+      {/* Expanded sidebar */}
       <nav
         id="sidebar"
         className={cn(
@@ -404,53 +580,57 @@ export function Sidebar() {
             </Tooltip>
           </header>
 
-          {/* Top gradient fade */}
-          <div className="sidebar-gradient-top absolute top-12 left-0 right-0 h-6 z-[5]" />
+          {/* Top gradient fade — only visible when scrolled (Open WebUI style) */}
+          <div className={cn(
+            "absolute top-12 left-0 right-0 h-6 z-[5] pointer-events-none bg-linear-to-b from-gray-50 dark:from-gray-950 from-50% to-transparent transition-opacity duration-150",
+            scrollTop > 0 ? "opacity-100" : "opacity-0",
+          )} />
 
-          {/* Navigation Menu — Open WebUI style */}
-          <div className="px-[0.4375rem] py-1.5">
-            {/* New Chat */}
-            <Link
-              to="/app"
-              className="group grow flex items-center space-x-3 rounded-2xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-200 outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <Plus className="size-[18px]" />
-              <span className="font-primary text-sm">New Chat</span>
-            </Link>
-
-            {/* Search */}
-            <button
-              onClick={() => setSearchModalOpen(true)}
-              className="w-full group grow flex items-center space-x-3 rounded-2xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-200 outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <Search className="size-[18px]" />
-              <span className="font-primary text-sm">Search</span>
-            </button>
-
-            {/* Notes */}
-            <Link
-              to="/app/notes"
-              className="group grow flex items-center space-x-3 rounded-2xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-200 outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <FileText className="size-[18px]" />
-              <span className="font-primary text-sm">Notes</span>
-            </Link>
-
-            {/* Admin */}
-            {isAdmin && (
+          {/* Main Content (scrollable) — includes nav menu + chat list */}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hidden" onScroll={handleScroll}>
+            {/* Navigation Menu — Open WebUI style */}
+            <div className="px-[0.4375rem] py-1.5">
+              {/* New Chat */}
               <Link
-                to="/app/admin"
+                to="/app"
                 className="group grow flex items-center space-x-3 rounded-2xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-200 outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <Shield className="size-[18px]" />
-                <span className="font-primary text-sm">Admin</span>
+                <Plus className="size-[18px]" />
+                <span className="font-primary text-sm">New Chat</span>
               </Link>
-            )}
-          </div>
 
-          {/* Main Content (scrollable) */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hidden px-[0.4375rem] mt-3">
-            <div className="pb-4">
+              {/* Search */}
+              <button
+                onClick={() => setSearchModalOpen(true)}
+                className="w-full group grow flex items-center space-x-3 rounded-2xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-200 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <Search className="size-[18px]" />
+                <span className="font-primary text-sm">Search</span>
+              </button>
+
+              {/* Notes */}
+              <Link
+                to="/app/notes"
+                className="group grow flex items-center space-x-3 rounded-2xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-200 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <FileText className="size-[18px]" />
+                <span className="font-primary text-sm">Notes</span>
+              </Link>
+
+              {/* Admin */}
+              {isAdmin && (
+                <Link
+                  to="/app/admin"
+                  className="group grow flex items-center space-x-3 rounded-2xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-200 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <Shield className="size-[18px]" />
+                  <span className="font-primary text-sm">Admin</span>
+                </Link>
+              )}
+            </div>
+
+            {/* Chat list */}
+            <div className="px-[0.4375rem] mt-3 pb-4">
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-16 gap-3">
                   <Spinner size="lg" className="text-gray-500 dark:text-gray-400" />
@@ -640,7 +820,7 @@ export function Sidebar() {
           </div>
 
           {/* Bottom gradient fade */}
-          <div className="sidebar-gradient-bottom absolute bottom-16 left-0 right-0 h-6 z-[5]" />
+          <div className="absolute bottom-16 left-0 right-0 h-6 z-[5] pointer-events-none bg-linear-to-t from-gray-50 dark:from-gray-950 from-50% to-transparent" />
 
           {/* User Profile Section — Open WebUI style */}
           {user && (

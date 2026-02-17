@@ -485,16 +485,7 @@
     color: #a1a3a7;
   }
 
-  /* Sidebar gradient fades — Open WebUI style */
-  .sidebar-gradient-top {
-    background: linear-gradient(to bottom, var(--color-sidebar-background), transparent);
-    pointer-events: none;
-  }
-
-  .sidebar-gradient-bottom {
-    background: linear-gradient(to top, var(--color-sidebar-background), transparent);
-    pointer-events: none;
-  }
+  /* Sidebar gradient fades are now inline Tailwind (from-gray-50/from-gray-950) */
 
   /* Reduce motion */
   @media (prefers-reduced-motion: reduce) {
