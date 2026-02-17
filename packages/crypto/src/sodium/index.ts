@@ -185,6 +185,7 @@ export {
 	decryptNoteContent,
 	encryptNote,
 	decryptNote,
+	removeNoteKeyFromCache,
 	clearNoteKeyCache,
 	type EncryptedNoteData,
 	type DecryptedNoteData

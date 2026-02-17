@@ -86,6 +86,14 @@ class SecureLRUCache<K, V> {
 		this.cache.set(key, { value, timestamp: Date.now() });
 	}
 
+	delete(key: K): void {
+		const entry = this.cache.get(key);
+		if (entry) {
+			this.dispose(entry.value);
+			this.cache.delete(key);
+		}
+	}
+
 	clear(): void {
 		for (const entry of this.cache.values()) {
 			this.dispose(entry.value);
@@ -285,6 +293,13 @@ export function createEncryptedNote(
 		encryptedContent: encryptedContent.ciphertext,
 		contentNonce: encryptedContent.nonce
 	};
+}
+
+/**
+ * Remove a specific note key from the cache
+ */
+export function removeNoteKeyFromCache(noteId: string): void {
+	noteKeyCache.delete(noteId);
 }
 
 /**

@@ -260,6 +260,60 @@ export interface CreateCredentialForm {
   iv: string;
 }
 
+// Note types
+export interface NoteListItem {
+  id: string;
+  user_id: string;
+  encrypted_note_key?: string;
+  note_key_nonce?: string;
+  encrypted_title: string;
+  title_nonce: string;
+  folder_id?: string;
+  pinned: boolean;
+  archived: boolean;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface EncryptedNote extends NoteListItem {
+  encrypted_content: string;
+  content_nonce: string;
+}
+
+export interface DecryptedNote {
+  id: string;
+  title: string;
+  content: string;
+  folder_id?: string;
+  pinned: boolean;
+  archived: boolean;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface CreateNoteForm {
+  id?: string;
+  encrypted_note_key?: string;
+  note_key_nonce?: string;
+  encrypted_title: string;
+  title_nonce: string;
+  encrypted_content: string;
+  content_nonce: string;
+  folder_id?: string;
+}
+
+export interface UpdateNoteForm {
+  encrypted_note_key?: string;
+  note_key_nonce?: string;
+  encrypted_title?: string;
+  title_nonce?: string;
+  encrypted_content?: string;
+  content_nonce?: string;
+  folder_id?: string | null;
+  pinned?: boolean;
+  archived?: boolean;
+}
+
 // Folder types
 export interface Folder {
   id: string;
