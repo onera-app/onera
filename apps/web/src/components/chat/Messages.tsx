@@ -206,19 +206,36 @@ export const Messages = memo(function Messages({
   followUps,
   isGeneratingFollowUps,
   onFollowUpSelect,
-}: MessagesProps) {
+  highlightMessageId,
+}: MessagesProps & { highlightMessageId?: string }) {
   // Use observer-based scroll handling instead of useEffect on messages
   const { containerRef, endRef, isAtBottom, scrollToBottom } =
     useScrollToBottom();
 
-  // Scroll to bottom on mount and when messages change (if at bottom or initial load)
+  // Scroll to highlighted message if present
   useEffect(() => {
-    // Small timeout to ensure DOM is rendered
-    const timeoutId = setTimeout(() => {
-      scrollToBottom();
-    }, 100);
-    return () => clearTimeout(timeoutId);
-  }, [messages.length, scrollToBottom]);
+    if (highlightMessageId && messages.length > 0) {
+      // Small timeout to ensure DOM is ready
+      setTimeout(() => {
+        const element = document.getElementById(highlightMessageId);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+          // Add highlight class temporarily
+          element.classList.add("bg-blue-50/50", "dark:bg-blue-900/20", "transition-colors", "duration-1000");
+          setTimeout(() => {
+            element.classList.remove("bg-blue-50/50", "dark:bg-blue-900/20");
+          }, 2000);
+        }
+      }, 500);
+    } else {
+      // Only scroll to bottom if we're NOT trying to highlight a specific message
+      // Small timeout to ensure DOM is rendered
+      const timeoutId = setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [messages.length, scrollToBottom, highlightMessageId]);
 
   // Smooth scroll button visibility with animation
   const { shouldRender: showScrollButton, isVisible: scrollButtonVisible } =
@@ -343,6 +360,7 @@ export const Messages = memo(function Messages({
 
                 return (
                   <div
+                    id={message.id}
                     key={message.id}
                     ref={isLastUserMessage ? lastUserMessageRef : undefined}
                     className={isNewMessage ? "message-enter" : undefined}
@@ -368,6 +386,7 @@ export const Messages = memo(function Messages({
 
               return (
                 <div
+                  id={message.id}
                   key={message.id}
                   className={cn(
                     isNewMessage && "message-enter",

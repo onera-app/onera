@@ -75,7 +75,7 @@ interface DecryptedChat {
 
 export function ChatPage() {
   const { chatId } = useParams({ strict: false });
-  const { pending } = useSearch({ strict: false }) as { pending?: boolean };
+  const { pending, messageId: highlightMessageId } = useSearch({ strict: false }) as { pending?: boolean; messageId?: string };
   const navigate = useNavigate();
   const { isUnlocked } = useE2EE();
   const { selectedModelId, setSelectedModel } = useModelStore();
@@ -1350,6 +1350,7 @@ export function ChatPage() {
           followUps={followUps}
           isGeneratingFollowUps={isGeneratingFollowUps}
           onFollowUpSelect={handleSendMessage}
+          highlightMessageId={highlightMessageId}
         />
       </div>
 

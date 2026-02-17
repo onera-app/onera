@@ -29,6 +29,8 @@
     "@onera/crypto": "workspace:*",
     "@onera/server": "workspace:*",
     "@onera/types": "workspace:*",
+    "@orama/orama": "3.1.18",
+    "@orama/plugin-data-persistence": "3.1.18",
     "@radix-ui/react-accordion": "1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.4",
     "@radix-ui/react-avatar": "^1.1.2",

@@ -19,7 +19,7 @@ export default defineConfig({
   plugins: [
     react(),
     nodePolyfills({
-      include: ['buffer', 'process'],
+      include: ['buffer', 'process', 'stream', 'util'],
       globals: {
         Buffer: false,  // We handle Buffer in polyfills.ts
         process: true,

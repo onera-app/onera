@@ -17,6 +17,7 @@ import { SupabaseAuthProvider } from './providers/SupabaseAuthProvider';
 import { TRPCProvider } from './providers/TRPCProvider';
 import { E2EEProvider } from './providers/E2EEProvider';
 import { ThemeProvider } from './providers/ThemeProvider';
+import { SearchProvider } from './components/providers/SearchProvider';
 import { useRealtimeUpdates } from './hooks/useRealtimeUpdates';
 import { AppErrorBoundary } from './components/system/AppErrorBoundary';
 import './styles/globals.css';
@@ -47,10 +48,12 @@ createRoot(document.getElementById('root')!).render(
         <TRPCProvider>
           <ThemeProvider>
             <E2EEProvider>
-              <RealtimeUpdatesInitializer>
-                <RouterProvider router={router} />
-                <Toaster position="top-right" richColors />
-              </RealtimeUpdatesInitializer>
+              <SearchProvider>
+                <RealtimeUpdatesInitializer>
+                  <RouterProvider router={router} />
+                  <Toaster position="top-right" richColors />
+                </RealtimeUpdatesInitializer>
+              </SearchProvider>
             </E2EEProvider>
           </ThemeProvider>
         </TRPCProvider>

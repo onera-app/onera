@@ -93,6 +93,7 @@ const chatRoute = createRoute({
   component: ChatPage,
   validateSearch: (search: Record<string, unknown>) => ({
     pending: search.pending === 'true' || search.pending === true,
+    messageId: typeof search.messageId === 'string' ? search.messageId : undefined,
   }),
 });
 
