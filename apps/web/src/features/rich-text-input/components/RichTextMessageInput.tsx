@@ -487,7 +487,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
           <EditorContent
             editor={editor}
             className={cn(
-              "text-body leading-relaxed",
+              "text-gray-900 dark:text-gray-100 leading-relaxed",
               disabled && "cursor-not-allowed",
             )}
           />
@@ -515,10 +515,10 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
             {isStreaming ? (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
+                    <Button
                     onClick={onStop}
                     size="icon"
-                    className="h-10 w-10 lg:h-11 lg:w-11 rounded-2xl bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 shadow-md"
+                    className="h-10 w-10 lg:h-11 lg:w-11 rounded-2xl bg-black dark:bg-white text-white dark:text-black hover:bg-gray-900 dark:hover:bg-gray-100 transition-all duration-200 shadow-md"
                   >
                     <Square className="h-3.5 w-3.5 fill-current" />
                   </Button>
@@ -535,7 +535,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
                     className={cn(
                       "h-10 w-10 lg:h-11 lg:w-11 rounded-2xl transition-all duration-200 shadow-md",
                       canSend && !disabled
-                        ? "bg-foreground text-background hover:bg-foreground/90 hover:scale-105"
+                        ? "bg-black dark:bg-white text-white dark:text-black hover:bg-gray-900 dark:hover:bg-gray-100 hover:scale-105"
                         : "bg-gray-100 dark:bg-gray-850 text-gray-500 dark:text-gray-400 cursor-not-allowed",
                     )}
                   >

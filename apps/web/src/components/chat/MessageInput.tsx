@@ -306,7 +306,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
         ref={containerRef}
         className={cn(
           "relative flex-1 flex flex-col w-full shadow-lg rounded-3xl border transition px-1",
-          "bg-white dark:bg-gray-500/5 text-gray-700 dark:text-gray-100",
+          "bg-white dark:bg-gray-500/5 text-gray-900 dark:text-gray-100",
           isFocused
             ? "border-gray-100 dark:border-gray-800"
             : "border-gray-100/30 dark:border-gray-850/30 hover:border-gray-200 dark:hover:border-gray-800",

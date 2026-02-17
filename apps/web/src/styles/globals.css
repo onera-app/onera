@@ -737,13 +737,13 @@
 
 /* ── Prose / Markdown ──────────────────────────────────────────── */
 .prose {
-  @apply text-foreground/90 max-w-none;
+  @apply text-gray-900 dark:text-gray-100 max-w-none;
 }
 
 .prose h1,
 .prose h2,
 .prose h3 {
-  @apply text-foreground font-semibold tracking-tight;
+  @apply text-gray-900 dark:text-gray-100 font-semibold tracking-tight;
 }
 
 .prose p {
@@ -751,14 +751,12 @@
 }
 
 .prose code {
-  @apply px-1.5 py-0.5 rounded text-sm font-mono;
+  @apply px-1.5 py-0.5 rounded text-sm font-mono bg-gray-100 dark:bg-gray-850;
   color: #eb5757;
-  background: var(--color-muted);
 }
 
 .prose pre {
-  @apply border border-border rounded-lg p-4 overflow-x-auto;
-  background: var(--color-muted);
+  @apply border border-gray-200 dark:border-gray-800 rounded-lg p-4 overflow-x-auto bg-gray-100 dark:bg-gray-850;
 }
 
 .prose a {
@@ -766,8 +764,7 @@
 }
 
 .prose blockquote {
-  @apply border-l-2 pl-4 italic text-gray-500 dark:text-gray-400;
-  border-color: var(--color-gray-600);
+  @apply border-l-2 pl-4 italic text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-600;
 }
 
 /* ── TipTap / ProseMirror ──────────────────────────────────────── */
