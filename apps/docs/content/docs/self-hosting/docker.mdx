@@ -10,7 +10,7 @@ The recommended way to self-host Onera is with Docker Compose. The provided `doc
 ## Prerequisites
 
 - Docker Engine 20.10+ and Docker Compose v2+
-- A [Clerk](https://clerk.com) account (free tier works for small deployments)
+- A [Supabase](https://supabase.com) project (free tier works for small deployments)
 
 ## Step 1: Clone and Configure
 
@@ -26,9 +26,11 @@ Edit `.env` and set the required values:
 # Required — generate a strong password
 POSTGRES_PASSWORD=your-secure-password-here
 
-# Required — from https://dashboard.clerk.com
-CLERK_SECRET_KEY=sk_live_...
-VITE_CLERK_PUBLISHABLE_KEY=pk_live_...
+# Required — from Supabase Dashboard → Settings → API
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SECRET_KEY=sb_secret_...
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 
 # Set these to your domain in production
 FRONTEND_URL=https://chat.example.com
@@ -138,6 +140,6 @@ Logs are configured with a 10 MB max size and 3 rotated files per service.
 
 ## Next Steps
 
-- [Configuration](/docs/self-hosting/configuration) — All environment variables and Clerk setup
+- [Configuration](/docs/self-hosting/configuration) — All environment variables and Supabase setup
 - [Production Hardening](/docs/self-hosting/production) — TLS, reverse proxy, and domain configuration
 - [Backup & Restore](/docs/self-hosting/backup-restore) — Database backup strategies

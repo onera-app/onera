@@ -1,6 +1,6 @@
 ---
 title: Configuration
-description: Environment variables, Clerk setup, and WebAuthn configuration
+description: Environment variables, Supabase setup, and WebAuthn configuration
 ---
 
 # Configuration
@@ -21,8 +21,10 @@ These must be set for Onera to function:
 |----------|-------------|
 | `POSTGRES_PASSWORD` | Password for the PostgreSQL database (Docker Compose only) |
 | `DATABASE_URL` | PostgreSQL connection string. Set automatically in Docker Compose. For non-Docker setups: `postgresql://user:pass@host:5432/onera` |
-| `CLERK_SECRET_KEY` | Clerk secret key from [dashboard.clerk.com](https://dashboard.clerk.com) |
-| `VITE_CLERK_PUBLISHABLE_KEY` | Clerk publishable key from [dashboard.clerk.com](https://dashboard.clerk.com) |
+| `SUPABASE_URL` | Supabase project URL from [supabase.com/dashboard](https://supabase.com/dashboard) |
+| `SUPABASE_SECRET_KEY` | Supabase service_role key |
+| `VITE_SUPABASE_URL` | Supabase project URL (build-time, same as `SUPABASE_URL`) |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key |
 
 ## URL Variables
 
@@ -55,27 +57,25 @@ WebAuthn (passkeys) are domain-bound. If you deploy to a custom domain, you **mu
 | `DODO_PAYMENTS_API_KEY` | — | Dodo Payments API key (for billing) |
 | `DODO_PAYMENTS_WEBHOOK_SECRET` | — | Dodo Payments webhook secret |
 
-## Clerk Setup
+## Supabase Setup
 
-Onera uses [Clerk](https://clerk.com) for authentication. To set up Clerk:
+Onera uses [Supabase](https://supabase.com) for authentication and database. To set up:
 
-1. Create a Clerk application at [dashboard.clerk.com](https://dashboard.clerk.com)
-2. In the Clerk dashboard, go to **API Keys**
-3. Copy the **Publishable key** (`pk_live_...` or `pk_test_...`) → set as `VITE_CLERK_PUBLISHABLE_KEY`
-4. Copy the **Secret key** (`sk_live_...` or `sk_test_...`) → set as `CLERK_SECRET_KEY`
+1. Create a project at [supabase.com/dashboard](https://supabase.com/dashboard)
+2. Go to **Settings → API** to get your keys
+3. Copy:
+   - **Project URL** → `SUPABASE_URL` and `VITE_SUPABASE_URL`
+   - **service_role key** → `SUPABASE_SECRET_KEY`
+   - **publishable key** → `VITE_SUPABASE_PUBLISHABLE_KEY`
+4. Go to **Settings → Database** for the connection string → `DATABASE_URL`
 
-### Clerk Configuration
+### Auth Providers
 
-In your Clerk dashboard, configure:
+In your Supabase dashboard under **Authentication → Providers**, configure:
 
-- **Sign-in methods**: Enable Passkeys and any social providers you want
-- **Allowed origins**: Add your deployment URL (e.g. `https://chat.example.com`)
-- **Webhooks** (optional): Not required for basic functionality
-
-### Test vs Live Keys
-
-- Use `pk_test_` / `sk_test_` keys for development and testing
-- Use `pk_live_` / `sk_live_` keys for production deployments
+- **Email** — enabled by default
+- **Google OAuth** — add your Google Cloud credentials
+- **Apple OAuth** — add your Apple Developer credentials
 
 ## Build-Time vs Runtime Variables
 
@@ -85,7 +85,8 @@ Some variables are baked into the frontend at build time (during `docker compose
 |----------|-------------|
 | `VITE_API_URL` | Build time |
 | `VITE_WS_URL` | Build time |
-| `VITE_CLERK_PUBLISHABLE_KEY` | Build time |
+| `VITE_SUPABASE_URL` | Build time |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Build time |
 | All other variables | Runtime |
 
 If you change a `VITE_*` variable, you must rebuild the web container:
@@ -101,9 +102,11 @@ docker compose up -d web
 # Database
 POSTGRES_PASSWORD=a-very-strong-random-password
 
-# Clerk
-CLERK_SECRET_KEY=sk_live_abc123...
-VITE_CLERK_PUBLISHABLE_KEY=pk_live_xyz789...
+# Supabase
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SECRET_KEY=sb_secret_...
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 
 # URLs (all pointing to your public domain)
 FRONTEND_URL=https://chat.example.com

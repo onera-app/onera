@@ -28,7 +28,7 @@ Multiple independent security layers—3-share key sharding, memory-hard KDFs, n
 flowchart TB
     subgraph layers [Security Layers]
         L1["Network: TLS 1.3"]
-        L2["Auth: Clerk + Device Secrets"]
+        L2["Auth: Supabase + Device Secrets"]
         L3["Keys: 3-Share Sharding"]
         L4["Data: AEAD Encryption"]
     end

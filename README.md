@@ -1,7 +1,7 @@
 <div align="center">
   <img src="onera-logo.svg" alt="Onera" width="80" />
   <h1>Onera</h1>
-  <p>End-to-end encrypted AI chat. Your keys, your data.</p>
+  <p>End-to-end encrypted AI chat with private inference.</p>
 
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue.svg" alt="License" /></a>
 </div>
@@ -10,67 +10,63 @@
 
 ## What is Onera?
 
-Onera is a privacy-first AI chat application with true end-to-end encryption. Messages, prompts, and API keys are encrypted client-side before reaching the server -- the server never sees plaintext data. Unlike conventional AI chat apps that trust the backend with your conversations, Onera ensures that only you hold the keys to your data.
+Onera is an AI chat app where all messages, prompts, and API keys are encrypted client-side before reaching the server. The server never sees plaintext data.
 
-It supports multiple LLM providers (OpenAI, Anthropic, Google, Groq, Deepseek, Mistral, xAI, OpenRouter, Ollama) and features WebAuthn/passkey authentication, BIP39 recovery phrases, and a 3-share key management system inspired by [Privy](https://www.privy.io/).
+For private inference, Onera routes prompts directly from your browser to TEE (Trusted Execution Environment) enclaves over Noise-encrypted WebSockets. The server never touches inference traffic.
 
-Onera also supports private inference through Rust-based enclaves with Noise protocol encryption for running models in trusted execution environments.
+## Features
 
-## Key Features
-
-- **End-to-end encryption** -- all chat data encrypted client-side with libsodium
-- **Multi-provider LLM support** -- 8+ providers including OpenAI, Anthropic, Google, Groq, Deepseek, Mistral, xAI, OpenRouter, and Ollama
-- **Direct browser-to-LLM connections** -- API keys never touch the server
-- **WebAuthn/passkey authentication** -- passwordless login via Clerk and SimpleWebAuthn
-- **BIP39 mnemonic recovery phrases** -- human-readable backup for your encryption keys
-- **3-share key management** -- master key split across auth share, device share, and recovery share
-- **Private inference enclaves** -- Rust-based TEEs with Noise protocol encryption
-- **Reproducible enclave builds** -- Nix flake ensures bit-for-bit identical builds for trust verification
-- **Transparency log verification** -- client verifies enclave build measurements against Sigstore Rekor
-- **Real-time streaming** -- WebSocket-based message streaming via Socket.io
-- **Rich text editor** -- TipTap-powered message composition
-- **Internationalization** -- multi-language support via i18next
+- **End-to-end encryption** -- all data encrypted client-side with libsodium
+- **Private inference** -- browser-to-enclave communication via Noise protocol, verified by remote attestation
+- **Multi-provider LLM** -- OpenAI, Anthropic, Google, Groq, Deepseek, Mistral, xAI, OpenRouter, Ollama
+- **Direct browser-to-LLM** -- API keys never touch the server
+- **3-share key management** -- master key split across auth share (Supabase), device share (browser), recovery share (BIP39 mnemonic)
+- **WebAuthn/passkeys** -- biometric unlock for encrypted data
+- **Real-time sync** -- Socket.io for cross-device updates
 
 ## Architecture
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│                        Browser                                │
-│  ┌────────────┐  ┌──────────────┐  ┌───────────────────────┐ │
-│  │  React 19  │  │  TanStack    │  │  E2EE Crypto Layer    │ │
-│  │  + Vite    │──│  Router/Query│──│  (@onera/crypto)      │ │
-│  └────────────┘  └──────────────┘  └───────────────────────┘ │
-│         │                │                     │              │
-│         ▼                ▼                     ▼              │
-│  ┌────────────┐  ┌──────────────┐  ┌───────────────────────┐ │
-│  │ Zustand    │  │ tRPC Client  │  │  Direct LLM           │ │
-│  │ State      │  │ + Socket.io  │  │  Connections           │ │
-│  └────────────┘  └──────────────┘  └───────────────────────┘ │
-└──────────────────────────┼─────────────────────┼─────────────┘
-                           │                     │
-                           ▼                     ▼
-                   ┌───────────────┐     ┌──────────────┐
-                   │  Hono Server  │     │ LLM Provider │
-                   │  + tRPC       │     │ (OpenAI,     │
-                   │  + Drizzle    │     │  Anthropic,  │
-                   │  (encrypted   │     │  Google, ... │
-                   │   blob store) │     │  Ollama)     │
-                   └───────────────┘     └──────────────┘
-                          │
-                          ▼
-                   ┌───────────────┐
-                   │  PostgreSQL   │
-                   └───────────────┘
+Browser
+├── React 19 + Vite + TanStack Router
+├── E2EE crypto layer (@onera/crypto, libsodium)
+├── tRPC client → Hono server → Supabase Postgres
+├── Direct LLM connections (BYOK providers)
+└── Noise WebSocket → TEE Enclave (private inference)
+
+Server (Hono + tRPC + Drizzle)
+├── Auth: Supabase Auth (JWT verification)
+├── Data: Supabase Postgres (encrypted blobs only)
+├── Realtime: Socket.io (sync notifications)
+└── Enclave orchestration (assignment, heartbeat, cleanup)
+
+TEE Enclaves
+├── AMD SEV-SNP trusted execution
+├── Noise NK protocol (encrypted inference)
+├── Remote attestation (launch digest verification)
+├── vLLM or router mode (gateway to model servers)
+└── Stale assignment cleanup (15min timeout)
 ```
+
+### Private Inference Flow
+
+```
+User sends message
+  → Browser encrypts with Noise protocol
+    → WebSocket to TEE enclave (direct, bypasses server)
+      → Enclave decrypts, runs inference (vLLM)
+        → Encrypted response streamed back
+          → Browser decrypts and displays
+```
+
+The server only handles enclave assignment (which enclave, capacity tracking) -- it never sees prompts or responses.
 
 ## Quick Start
 
 ### Prerequisites
 
 - [Bun](https://bun.sh) v1.2+
-- [Node.js](https://nodejs.org) v20+ (for production server)
-- PostgreSQL 16+ (or use Docker)
-- A [Clerk](https://clerk.com) account (for authentication)
+- [Supabase](https://supabase.com) project (or local via `supabase start`)
 
 ### Setup
 
@@ -79,100 +75,82 @@ git clone https://github.com/onera-app/onera.git
 cd onera
 bun install
 
-# Configure environment
 cp .env.example .env
 cp apps/web/.env.example apps/web/.env
 cp apps/server/.env.example apps/server/.env
-# Edit the .env files with your values (see Environment Variables below)
+# Fill in Supabase credentials (see .env.example for guidance)
 
-# Set up database
-bun run db:generate
 bun run db:migrate
-
-# Start development
 bun run dev
 ```
 
 ### Docker
 
 ```bash
-# Copy and configure .env files first (see above)
 docker compose up -d
 ```
 
-The web client runs at `http://localhost:5173` and the API at `http://localhost:3000`.
-
-For production deployments with TLS, custom domains, and WebAuthn configuration, see the [Self-Hosting Guide](https://docs.onera.chat/docs/self-hosting).
+Web client: `http://localhost:5173` | API: `http://localhost:3000`
 
 ## Environment Variables
 
-> See [`.env.example`](.env.example), [`apps/web/.env.example`](apps/web/.env.example), and [`apps/server/.env.example`](apps/server/.env.example) for all configuration options.
+See `.env.example` for all options. Key variables:
 
-| Variable | Location | Description |
-|----------|----------|-------------|
-| `DATABASE_URL` | Root / Server | PostgreSQL connection string |
-| `CLERK_SECRET_KEY` | Server | Clerk secret key ([dashboard.clerk.com](https://dashboard.clerk.com)) |
-| `VITE_CLERK_PUBLISHABLE_KEY` | Root / Web | Clerk publishable key |
-| `FRONTEND_URL` | Root / Server | Frontend URL for CORS |
-| `VITE_API_URL` | Root / Web | Backend API URL |
-| `VITE_WS_URL` | Root / Web | WebSocket URL |
-| `POSTGRES_PASSWORD` | Root (Docker) | PostgreSQL password for Docker Compose |
-| `WEBAUTHN_RP_ID` | Root / Server | Your domain for passkeys (e.g. `example.com`) |
-| `WEBAUTHN_ORIGIN` | Root / Server | Your full origin URL (e.g. `https://example.com`) |
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | Supabase Postgres pooler connection string |
+| `SUPABASE_URL` | Supabase project URL |
+| `SUPABASE_SECRET_KEY` | Supabase service_role key (server only) |
+| `VITE_SUPABASE_URL` | Supabase project URL (frontend) |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key (frontend) |
+| `WEBAUTHN_RP_ID` | Your domain for passkeys |
+| `WEBAUTHN_ORIGIN` | Your full origin URL |
 
 ## Project Structure
 
 ```
 onera/
 ├── apps/
-│   ├── web/              # React 19 web client
+│   ├── web/              # React 19 client
 │   ├── server/           # Hono + tRPC backend
-│   └── docs/             # Documentation site (Fumadocs + Next.js)
+│   └── docs/             # Documentation (Fumadocs + Next.js)
 ├── packages/
-│   ├── crypto/           # E2EE implementation (libsodium)
-│   │   └── src/attestation/  # Transparency log (Rekor) verification
+│   ├── crypto/           # E2EE + Noise protocol + attestation
 │   └── types/            # Shared TypeScript types
-└── infra/
-    └── enclave/          # Rust private inference enclave
-        └── flake.nix     # Nix flake for reproducible builds
+└── supabase/
+    └── config.toml       # Supabase local dev config
 ```
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React 19, TypeScript, Vite, TanStack Router, Zustand, Tailwind CSS 4, Radix UI |
-| Backend | Hono, tRPC, Drizzle ORM, PostgreSQL, Socket.io, Bun |
-| Auth | Clerk, WebAuthn (SimpleWebAuthn) |
-| Encryption | libsodium (E2EE), BIP39, Noise Protocol |
-| AI | Vercel AI SDK, multi-provider (OpenAI, Anthropic, Google, Groq, etc.) |
-| Infra | Docker, Nginx, Nix (reproducible builds), Rust (Tokio + Axum) for enclaves |
-| Trust | Sigstore Rekor (transparency log), Nix (reproducible builds) |
+| Frontend | React 19, Vite, TanStack Router, Zustand, Tailwind CSS 4, Radix UI |
+| Backend | Hono, tRPC, Drizzle ORM, Supabase Postgres, Socket.io |
+| Auth | Supabase Auth, WebAuthn (SimpleWebAuthn) |
+| Encryption | libsodium (E2EE), BIP39, Noise Protocol (enclaves) |
+| AI | Vercel AI SDK, 8+ providers, private inference via TEE |
+| Enclaves | AMD SEV-SNP, Noise NK, remote attestation, vLLM |
 
 ## Security Model
 
-- **All chat data is E2EE** -- encrypted client-side with libsodium before reaching the server.
-- **3-share key management** -- master key split across auth share (Clerk), device share (browser), and recovery share (BIP39 mnemonic).
-- **Zero-knowledge server** -- the server stores only encrypted blobs and never sees plaintext.
-- **LLM API keys** -- encrypted and stored in the browser, sent directly to providers.
-- **Reproducible enclave builds** -- the enclave binary is built with Nix (`nix build`) for bit-for-bit reproducibility. Anyone can rebuild and verify the binary matches what's running in the TEE.
-- **Transparency log** -- clients can verify enclave launch digests against [Sigstore Rekor](https://rekor.sigstore.dev), a tamper-evident public log. Publishing build measurements to Rekor during CI is planned but not yet wired up.
+- **E2EE everywhere** -- all user data encrypted client-side with libsodium before storage.
+- **3-share key management** -- master key split: auth share (Supabase-protected), device share (localStorage), recovery share (BIP39 mnemonic).
+- **Zero-knowledge server** -- stores only encrypted blobs. Cannot decrypt anything.
+- **Private inference** -- prompts go directly from browser to TEE enclave over Noise-encrypted WebSocket. Server only assigns enclaves.
+- **Remote attestation** -- clients verify enclave launch digest before sending data.
+- **RLS defense-in-depth** -- Row Level Security enabled on all tables; server uses service_role.
 
-For the full cryptographic specification, see the [whitepaper](apps/docs/content/docs/whitepaper/).
+For the full cryptographic specification, see the [whitepaper](https://docs.onera.chat/docs/whitepaper).
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, code style, and PR guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Security
 
-To report security vulnerabilities, see [SECURITY.md](SECURITY.md).
+To report vulnerabilities, see [SECURITY.md](SECURITY.md).
 
 ## License
 
-This project is licensed under the [GNU Affero General Public License v3.0](LICENSE).
-
-## Acknowledgments
-
-- E2EE architecture inspired by [Ente](https://ente.io) and [Privy](https://www.privy.io/)
-- Key sharding patterns from the original [Open WebUI](https://github.com/open-webui/open-webui) E2EE implementation
+[GNU Affero General Public License v3.0](LICENSE)
