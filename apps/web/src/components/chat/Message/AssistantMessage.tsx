@@ -12,6 +12,7 @@ import {
   hasThinkingContent,
   type ThinkingBlock,
 } from "@/lib/parseThinkingBlocks";
+import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
 import type { BranchInfo } from "./BranchNavigation";
 import type {
   MessagePart,
@@ -250,6 +251,16 @@ export const AssistantMessage = memo(function AssistantMessage({
     onCopy?.();
   }, [displayContent, onCopy]);
 
+  const { speak, speaking, cancel } = useSpeechSynthesis();
+
+  const handleSpeak = useCallback(() => {
+    if (speaking) {
+      cancel();
+    } else {
+      speak(displayContent);
+    }
+  }, [speaking, cancel, speak, displayContent]);
+
   const name = formatModelName(model);
 
   // Combine thinking blocks into a single reasoning string for the new component
@@ -324,6 +335,7 @@ export const AssistantMessage = memo(function AssistantMessage({
                   onCopy={handleCopy}
                   onRegenerate={hasRegenerate ? onRegenerate : undefined}
                   onDelete={hasDelete ? onDelete : undefined}
+                  onSpeak={handleSpeak}
                   isUser={false}
                   branchInfo={branchInfo}
                   onPreviousBranch={

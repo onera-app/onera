@@ -16,7 +16,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ArrowUp, Square } from "lucide-react";
+import { ArrowUp, Square, Mic } from "lucide-react";
 import { toast } from "sonner";
 import { AttachmentButton } from "./AttachmentButton";
 import { AttachmentPreview, type PendingAttachment } from "./AttachmentPreview";
@@ -24,6 +24,7 @@ import { SearchToggle } from "./SearchToggle";
 import { processFile } from "@/lib/fileProcessing";
 import { useToolsStore } from "@/stores/toolsStore";
 import { useUIStore } from "@/stores/uiStore";
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { RichTextMessageInput } from "@/features/rich-text-input";
 import type { ProcessedFile } from "@/lib/fileProcessing";
 import type { SearchProvider } from "@onera/types";
@@ -108,6 +109,53 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
   // Initialize search state from store
   const searchEnabledByDefault = useToolsStore((s) => s.searchEnabledByDefault);
   const defaultSearchProvider = useToolsStore((s) => s.defaultSearchProvider);
+
+  // Voice Input
+  const {
+    isListening,
+    transcript,
+    start: startListening,
+    stop: stopListening,
+    reset: resetTranscript,
+    supported: isSpeechSupported,
+  } = useSpeechRecognition();
+
+  // Store the text that was already there when listing started
+  const [initialTextBeforeListening, setInitialTextBeforeListening] = useState("");
+
+  // Update input value when transcript changes
+  useEffect(() => {
+    if (isListening && transcript) {
+      const separator = initialTextBeforeListening && !initialTextBeforeListening.endsWith(" ") ? " " : "";
+      setValue(initialTextBeforeListening + separator + transcript);
+
+      // Auto-resize textarea
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+      }
+    }
+  }, [transcript, isListening, initialTextBeforeListening]);
+
+  // Handle voice button click
+  const handleVoiceClick = useCallback(() => {
+    if (!isSpeechSupported) {
+      toast.error("Voice input is not supported in this browser");
+      return;
+    }
+
+    if (isListening) {
+      stopListening();
+    } else {
+      // Capture current text before starting
+      setInitialTextBeforeListening(value);
+      resetTranscript();
+      startListening();
+      toast.info("Listening...", { duration: 2000 });
+      // Focus textarea
+      textareaRef.current?.focus();
+    }
+  }, [isSpeechSupported, isListening, startListening, stopListening, resetTranscript, value]);
 
   useEffect(() => {
     setSearchEnabled(searchEnabledByDefault);
@@ -397,23 +445,52 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
                 <TooltipContent>Stop generating</TooltipContent>
               </Tooltip>
             ) : (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={handleSubmit}
-                    disabled={!canSend}
-                    className={cn(
-                      "transition rounded-full p-1.5 self-center",
-                      canSend
-                        ? "bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-100"
-                        : "text-gray-400 bg-gray-200 dark:text-gray-600 dark:bg-gray-700 cursor-not-allowed",
-                    )}
-                  >
-                    <ArrowUp className="h-4 w-4" strokeWidth={2.5} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>Send message</TooltipContent>
-              </Tooltip>
+              <div className="flex items-center gap-[0.5px]">
+                {/* Voice Input Button */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={handleVoiceClick}
+                      className={cn(
+                        "transition rounded-full p-1.5 self-center relative",
+                        isListening
+                          ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                          : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400"
+                      )}
+                    >
+                      {isListening ? (
+                        <>
+                          <span className="absolute inset-0 rounded-full animate-ping bg-red-400/20" />
+                          <Mic className="h-4 w-4 relative z-10" />
+                        </>
+                      ) : (
+                        <Mic className="h-4 w-4" />
+                      )}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {isListening ? "Stop listening" : "Voice input"}
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={handleSubmit}
+                      disabled={!canSend}
+                      className={cn(
+                        "transition rounded-full p-1.5 self-center",
+                        canSend
+                          ? "bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-100"
+                          : "text-gray-400 bg-gray-200 dark:text-gray-600 dark:bg-gray-700 cursor-not-allowed",
+                      )}
+                    >
+                      <ArrowUp className="h-4 w-4" strokeWidth={2.5} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Send message</TooltipContent>
+                </Tooltip>
+              </div>
             )}
           </div>
         </div>

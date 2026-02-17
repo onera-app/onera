@@ -1,84 +1,121 @@
-import { memo } from 'react';
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Copy, Pencil, Trash2 } from 'lucide-react';
-import { BranchNavigation, type BranchInfo } from './BranchNavigation';
+import {
+  Copy,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  Volume2,
+  Pencil,
+} from "lucide-react";
 import { RegenerateMenu } from './RegenerateMenu';
-import type { RegenerateOptions } from './AssistantMessage';
 
 interface MessageActionsProps {
-  onCopy?: () => void;
-  onEdit?: () => void;
-  onRegenerate?: (options?: RegenerateOptions) => void;
+  onCopy: () => void;
+  onRegenerate?: (options?: { modifier?: string }) => void;
   onDelete?: () => void;
-  isUser?: boolean;
-  className?: string;
-  branchInfo?: BranchInfo | null;
+  onEdit?: () => void;
+  onSpeak?: () => void;
+  isUser: boolean;
+  branchInfo?: { current: number; total: number } | null;
   onPreviousBranch?: () => void;
   onNextBranch?: () => void;
 }
 
-export const MessageActions = memo(function MessageActions({
+export function MessageActions({
   onCopy,
-  onEdit,
   onRegenerate,
   onDelete,
-  isUser = false,
-  className,
+  onEdit,
+  onSpeak,
+  isUser,
   branchInfo,
   onPreviousBranch,
   onNextBranch,
 }: MessageActionsProps) {
   return (
-    <div
-      className={cn(
-        'flex items-center gap-1',
-        className
+    <div className="flex items-center gap-0.5 text-gray-400 dark:text-gray-500">
+      {/* Branch Navigation */}
+      {branchInfo && (branchInfo.total > 1) && (
+        <div className="flex items-center gap-0.5 mr-1 bg-gray-100 dark:bg-gray-800/50 rounded-lg p-0.5">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 rounded-md hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-30"
+            onClick={onPreviousBranch}
+            disabled={!onPreviousBranch || branchInfo.current === 1}
+            title="Previous version"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+          </Button>
+          <span className="text-[10px] font-medium min-w-[20px] text-center select-none">
+            {branchInfo.current}/{branchInfo.total}
+          </span>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 rounded-md hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-30"
+            onClick={onNextBranch}
+            disabled={!onNextBranch || branchInfo.current === branchInfo.total}
+            title="Next version"
+          >
+            <ChevronRight className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       )}
-    >
-      {/* Branch navigation */}
-      <BranchNavigation
-        branchInfo={branchInfo ?? null}
-        onPrevious={onPreviousBranch}
-        onNext={onNextBranch}
-      />
+
+      {/* Speak Button */}
+      {onSpeak && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+          onClick={onSpeak}
+          title="Read aloud"
+        >
+          <Volume2 className="h-3.5 w-3.5" />
+        </Button>
+      )}
+
+      {/* Copy Button */}
       {onCopy && (
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="icon"
               onClick={onCopy}
-              className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850"
+              className="h-6 w-6 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
             >
-              <Copy className="h-4 w-4" />
+              <Copy className="h-3.5 w-3.5" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Copy</TooltipContent>
         </Tooltip>
       )}
 
+      {/* Edit Button */}
       {onEdit && isUser && (
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="icon"
               onClick={onEdit}
-              className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850"
+              className="h-6 w-6 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
             >
-              <Pencil className="h-4 w-4" />
+              <Pencil className="h-3.5 w-3.5" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Edit</TooltipContent>
         </Tooltip>
       )}
 
+      {/* Regenerate Button */}
       {onRegenerate && !isUser && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <span>
+            <span className="flex items-center">
               <RegenerateMenu onRegenerate={onRegenerate} />
             </span>
           </TooltipTrigger>
@@ -86,16 +123,17 @@ export const MessageActions = memo(function MessageActions({
         </Tooltip>
       )}
 
+      {/* Delete Button */}
       {onDelete && (
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="icon"
               onClick={onDelete}
-              className="text-gray-500 dark:text-gray-400 hover:text-destructive rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850"
+              className="h-6 w-6 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-destructive transition-colors"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3.5 w-3.5" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Delete</TooltipContent>
@@ -103,4 +141,4 @@ export const MessageActions = memo(function MessageActions({
       )}
     </div>
   );
-});
+}

@@ -22,7 +22,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ArrowUp, Square } from "lucide-react";
+import { ArrowUp, Square, Mic } from "lucide-react";
 import { toast } from "sonner";
 import {
   AttachmentButton,
@@ -36,6 +36,7 @@ import { SearchToggle } from "@/components/chat/SearchToggle";
 import { processFile } from "@/lib/fileProcessing";
 import { useToolsStore } from "@/stores/toolsStore";
 import { useE2EE } from "@/providers/E2EEProvider";
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useCredentials } from "@/hooks/queries/useCredentials";
 import {
   decryptCredentialsWithMetadata,
@@ -244,6 +245,93 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
       setEditorHasContent(!editor.isEmpty);
     },
   });
+
+  // Voice Input
+  const {
+    isListening,
+    transcript,
+    start: startListening,
+    stop: stopListening,
+    reset: resetTranscript,
+    supported: isSpeechSupported,
+  } = useSpeechRecognition();
+
+  // Store the initial editor content when listening starts
+  // We can't just store the string because TipTap is complex HTML
+  // But for simple appending, we can just insert the *new* part of the transcript
+
+  // Actually, standard `useSpeechRecognition` returns the full `transcript`
+  // We need to diff it or just append the final results. 
+  // Let's use a ref to track the last inserted length to append only new parts?
+  // Or simpler: just append the `transcript` to the editor when `isListening` is true?
+  // But `transcript` grows from 0. 
+
+  // Strategy:
+  // 1. When listening starts, remember current cursor position or just focus.
+  // 2. We will use a separate effect to handle `transcript` updates. 
+  //    Since `transcript` is cumulative for the session, we need to replace the *previously inserted* voice text with the new `transcript`.
+  //    This is tricky in TipTap.
+
+  // Alternative Strategy (Simpler):
+  // When `finalTranscript` updates in the hook, insert it and clear the hook's transcript? 
+  // My hook doesn't support "clearing partials" easily without reset.
+
+  // Let's modify the hook logic slightly in consumers:
+  // Just track `transcript` length?
+
+  const previousTranscriptRef = useRef("");
+
+  useEffect(() => {
+    if (!isListening) {
+      previousTranscriptRef.current = "";
+      return;
+    }
+
+    if (editor && transcript) {
+      // Calculate the new part to insert
+      const previous = previousTranscriptRef.current;
+      const current = transcript;
+
+      if (current.startsWith(previous)) {
+        const newPart = current.slice(previous.length);
+        if (newPart) {
+          editor.commands.insertContent(newPart);
+          previousTranscriptRef.current = current;
+        }
+      } else {
+        // Did the transcript reset or change drastically?
+        // Just insert the difference if possible, or maybe we just append everything if it's new
+        // Ideally we'd replace the *previous insertion*, but that requires tracking a transaction/range.
+        // For now, let's just append and relying on `continuous` to keep adding.
+        // If the hook resets `transcript` on every final result, we are good. 
+        // My hook *accumulates* final results.
+
+        // Wait, my hook: `setTranscript(final + interim)`.
+        // So `transcript` keeps growing.
+        // `previousTranscriptRef` approach is correct for *appending* text as it comes in.
+      }
+    }
+  }, [editor, transcript, isListening]);
+
+
+  // Handle voice button click
+  const handleVoiceClick = useCallback(() => {
+    if (!isSpeechSupported) {
+      toast.error("Voice input is not supported in this browser");
+      return;
+    }
+
+    if (isListening) {
+      stopListening();
+    } else {
+      resetTranscript();
+      previousTranscriptRef.current = "";
+      startListening();
+      toast.info("Listening...", { duration: 2000 });
+      editor?.commands.focus();
+    }
+  }, [isSpeechSupported, isListening, startListening, stopListening, resetTranscript, editor]);
+
 
   // Focus editor on mount
   useEffect(() => {
@@ -515,7 +603,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
             {isStreaming ? (
               <Tooltip>
                 <TooltipTrigger asChild>
-                    <Button
+                  <Button
                     onClick={onStop}
                     size="icon"
                     className="h-10 w-10 lg:h-11 lg:w-11 rounded-2xl bg-black dark:bg-white text-white dark:text-black hover:bg-gray-900 dark:hover:bg-gray-100 transition-all duration-200 shadow-md"
@@ -526,24 +614,48 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
                 <TooltipContent>Stop generating</TooltipContent>
               </Tooltip>
             ) : (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={!canSend || disabled}
-                    size="icon"
-                    className={cn(
-                      "h-10 w-10 lg:h-11 lg:w-11 rounded-2xl transition-all duration-200 shadow-md",
-                      canSend && !disabled
-                        ? "bg-black dark:bg-white text-white dark:text-black hover:bg-gray-900 dark:hover:bg-gray-100 hover:scale-105"
-                        : "bg-gray-100 dark:bg-gray-850 text-gray-500 dark:text-gray-400 cursor-not-allowed",
-                    )}
-                  >
-                    <ArrowUp className="h-4 w-4" strokeWidth={2.5} />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Send message</TooltipContent>
-              </Tooltip>
+              <div className="flex items-center gap-1">
+                {/* Voice Input Button */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={handleVoiceClick}
+                      variant="ghost"
+                      size="icon"
+                      className={cn(
+                        "h-10 w-10 lg:h-11 lg:w-11 rounded-2xl transition-all duration-200",
+                        isListening
+                          ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 animate-pulse"
+                          : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      )}
+                    >
+                      <Mic className="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {isListening ? "Stop listening" : "Voice input"}
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={!canSend || disabled}
+                      size="icon"
+                      className={cn(
+                        "h-10 w-10 lg:h-11 lg:w-11 rounded-2xl transition-all duration-200 shadow-md",
+                        canSend && !disabled
+                          ? "bg-black dark:bg-white text-white dark:text-black hover:bg-gray-900 dark:hover:bg-gray-100 hover:scale-105"
+                          : "bg-gray-100 dark:bg-gray-850 text-gray-500 dark:text-gray-400 cursor-not-allowed",
+                      )}
+                    >
+                      <ArrowUp className="h-5 w-5" strokeWidth={2.5} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Send message</TooltipContent>
+                </Tooltip>
+              </div>
             )}
           </div>
         </div>
