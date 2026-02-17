@@ -352,48 +352,6 @@ export function useDirectChat({
     }
   }, []);
 
-  // Update transport when model, settings, or enclave config changes
-  useEffect(() => {
-    if (transportRef.current && selectedModelId) {
-      transportRef.current.setOptions({
-        modelId: selectedModelId,
-        maxTokens,
-        systemPrompt,
-        nativeSearch,
-        providerSettings,
-        enclaveConfig: enclaveConfig || undefined,
-      });
-    }
-  }, [selectedModelId, maxTokens, systemPrompt, nativeSearch, providerSettings, enclaveConfig]);
-
-  // Create chat options with our transport - ALWAYS provide transport
-  // Uses refs for callbacks to avoid recreating on every render
-  const chatOptions = useMemo((): ChatInit<UIMessage> => {
-    // Create a transport if we don't have one yet
-    if (!transportRef.current) {
-      transportRef.current = new DirectBrowserTransport({
-        modelId: selectedModelId || 'placeholder',
-        maxTokens,
-        systemPrompt,
-        nativeSearch,
-        providerSettings,
-        enclaveConfig: enclaveConfig || undefined,
-      });
-    }
-
-    return {
-      id: chatId,
-      messages: initialMessages,
-      transport: transportRef.current as unknown as ChatInit<UIMessage>['transport'],
-      onFinish: ({ message }) => onFinishRef.current?.(message),
-      onError: (error) => onErrorRef.current?.(error),
-    };
-  }, [chatId, initialMessages, selectedModelId, maxTokens, systemPrompt, nativeSearch, providerSettings, enclaveConfig]);
-  // REMOVED: onFinish, onError from dependencies - using refs instead
-
-  // Use AI SDK's useChat with our transport
-  const chat = useChat(chatOptions);
-
   // Pre-flight: check inference allowance before sending/regenerating
   const checkAllowanceRef = useRef(checkAllowance);
   useEffect(() => { checkAllowanceRef.current = checkAllowance; });
@@ -428,6 +386,50 @@ export function useDirectChat({
     }
   }, []);
 
+  // Update transport when model, settings, or enclave config changes
+  useEffect(() => {
+    if (transportRef.current && selectedModelId) {
+      transportRef.current.setOptions({
+        modelId: selectedModelId,
+        maxTokens,
+        systemPrompt,
+        nativeSearch,
+        providerSettings,
+        enclaveConfig: enclaveConfig || undefined,
+        preflight: enforceAllowance,
+      });
+    }
+  }, [selectedModelId, maxTokens, systemPrompt, nativeSearch, providerSettings, enclaveConfig, enforceAllowance]);
+
+  // Create chat options with our transport - ALWAYS provide transport
+  // Uses refs for callbacks to avoid recreating on every render
+  const chatOptions = useMemo((): ChatInit<UIMessage> => {
+    // Create a transport if we don't have one yet
+    if (!transportRef.current) {
+      transportRef.current = new DirectBrowserTransport({
+        modelId: selectedModelId || 'placeholder',
+        maxTokens,
+        systemPrompt,
+        nativeSearch,
+        providerSettings,
+        enclaveConfig: enclaveConfig || undefined,
+        preflight: enforceAllowance,
+      });
+    }
+
+    return {
+      id: chatId,
+      messages: initialMessages,
+      transport: transportRef.current as unknown as ChatInit<UIMessage>['transport'],
+      onFinish: ({ message }) => onFinishRef.current?.(message),
+      onError: (error) => onErrorRef.current?.(error),
+    };
+  }, [chatId, initialMessages, selectedModelId, maxTokens, systemPrompt, nativeSearch, providerSettings, enclaveConfig, enforceAllowance]);
+  // REMOVED: onFinish, onError from dependencies - using refs instead
+
+  // Use AI SDK's useChat with our transport
+  const chat = useChat(chatOptions);
+
   // Custom sendMessage that validates state and supports multimodal content
   const sendMessage = useCallback(
     async (content: SendMessageInput, options?: { id?: string }) => {
@@ -446,8 +448,6 @@ export function useDirectChat({
         onErrorRef.current?.(error);
         throw error;
       }
-
-      await enforceAllowance();
 
       // Handle string input (text only)
       if (typeof content === 'string') {
@@ -493,8 +493,6 @@ export function useDirectChat({
         onErrorRef.current?.(error);
         throw error;
       }
-
-      await enforceAllowance();
 
       const messages = chat.messages;
       if (messages.length === 0) {

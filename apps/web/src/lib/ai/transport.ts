@@ -71,6 +71,11 @@ export interface DirectBrowserTransportOptions {
    * Enclave configuration for private inference (set when using private models)
    */
   enclaveConfig?: EnclaveConfig;
+
+  /**
+   * Pre-flight hook to run before sending messages (e.g., allowance check)
+   */
+  preflight?: () => Promise<void>;
 }
 
 /**
@@ -109,7 +114,12 @@ export class DirectBrowserTransport {
     abortSignal: AbortSignal | undefined;
   }): Promise<ReadableStream<UIMessageChunk>> {
     const { messages, abortSignal } = options;
-    const { modelId, maxTokens, systemPrompt, nativeSearch, providerSettings, enclaveConfig } = this.options;
+    const { modelId, maxTokens, systemPrompt, nativeSearch, providerSettings, enclaveConfig, preflight } = this.options;
+
+    // Run pre-flight hook if provided
+    if (preflight) {
+      await preflight();
+    }
 
     // Parse the model ID to get credential and model name
     const { credentialId, modelName, isPrivate } = parseModelId(modelId);
@@ -168,9 +178,9 @@ export class DirectBrowserTransport {
 
     const model = usesThinkTags
       ? wrapLanguageModel({
-          model: baseModel as unknown as Parameters<typeof wrapLanguageModel>[0]['model'],
-          middleware: extractReasoningMiddleware({ tagName: 'think' }),
-        })
+        model: baseModel as unknown as Parameters<typeof wrapLanguageModel>[0]['model'],
+        middleware: extractReasoningMiddleware({ tagName: 'think' }),
+      })
       : baseModel;
 
     // Convert UIMessages to ModelMessages using AI SDK utility
