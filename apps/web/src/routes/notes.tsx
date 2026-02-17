@@ -26,12 +26,11 @@ export function NotesPage() {
 
   return (
     <div
-      className="flex h-full overflow-hidden"
-      style={{ background: "var(--chat-shell-bg)" }}
+      className="flex h-full overflow-hidden bg-white dark:bg-gray-900"
     >
       {/* Notes List Sidebar */}
       <div className={cn(
-        'border-r border-[var(--chat-divider)] bg-[var(--chat-surface)] flex-shrink-0 transition-all duration-200',
+        'border-r border-gray-100 dark:border-gray-850 bg-gray-50 dark:bg-gray-900 flex-shrink-0 transition-all duration-200',
         // Mobile: full width or hidden
         'w-full md:w-88',
         // Hide on mobile when note is selected
@@ -52,7 +51,7 @@ export function NotesPage() {
         {selectedNoteId ? (
           <div className="h-full flex flex-col">
             {/* Mobile back button */}
-            <div className="md:hidden sticky top-0 z-10 flex items-center gap-2 px-3 py-2 border-b border-[var(--chat-divider)] bg-[var(--chat-surface)]/95 backdrop-blur">
+            <div className="md:hidden sticky top-0 z-10 flex items-center gap-2 px-3 py-2 border-b border-gray-100 dark:border-gray-850 bg-white dark:bg-gray-900">
               <Button
                 variant="ghost"
                 size="sm"

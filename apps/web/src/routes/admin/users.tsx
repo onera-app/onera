@@ -48,7 +48,7 @@ export function AdminUsersPage() {
           placeholder="Search by name or email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-lg border border-border bg-background pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          className="w-full rounded-lg border border-gray-100 dark:border-gray-850 bg-white dark:bg-gray-900 pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
 
@@ -59,29 +59,29 @@ export function AdminUsersPage() {
       )}
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-border">
+      <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-850">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border bg-secondary/50">
+            <tr className="border-b border-gray-100 dark:border-gray-850 bg-gray-50 dark:bg-gray-800/50">
               <th scope="col" className="p-3 text-left font-medium">User</th>
               <th scope="col" className="p-3 text-left font-medium">Plan</th>
               <th scope="col" className="p-3 text-left font-medium">Status</th>
               <th scope="col" className="p-3 text-left font-medium">Joined</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          <tbody className="divide-y divide-gray-100 dark:divide-gray-850">
             {isLoading
               ? [...Array(5)].map((_, i) => (
                   <tr key={i}>
                     <td colSpan={4} className="p-3">
-                      <div className="h-8 animate-pulse rounded bg-secondary" />
+                      <div className="h-8 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
                     </td>
                   </tr>
                 ))
               : data?.users.map((user) => (
                   <tr
                     key={user.id}
-                    className="hover:bg-accent/50 transition-colors"
+                    className="hover:bg-gray-50 dark:hover:bg-gray-850 transition-colors"
                   >
                     <td className="p-3">
                       <Link
@@ -96,7 +96,7 @@ export function AdminUsersPage() {
                             className="h-8 w-8 rounded-full"
                           />
                         ) : (
-                          <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center text-xs font-medium">
+                          <div className="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xs font-medium">
                             {user.name?.[0] || "?"}
                           </div>
                         )}
@@ -120,7 +120,7 @@ export function AdminUsersPage() {
                                 ? "bg-status-success/10 text-status-success-text"
                                 : user.subscription?.planId === "team"
                                   ? "bg-status-warning/10 text-status-warning-text"
-                                  : "bg-secondary text-muted-foreground"
+                                  : "bg-gray-100 dark:bg-gray-800 text-muted-foreground"
                         )}
                       >
                         {user.subscription?.planId || "free"}
@@ -134,7 +134,7 @@ export function AdminUsersPage() {
                             ? "bg-status-success/10 text-status-success-text"
                             : user.subscription?.status === "on_hold"
                               ? "bg-status-warning/10 text-status-warning-text"
-                              : "bg-secondary text-muted-foreground"
+                              : "bg-gray-100 dark:bg-gray-800 text-muted-foreground"
                         )}
                       >
                         {user.subscription?.status || "none"}

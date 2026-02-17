@@ -32,9 +32,9 @@ export function RichTextEditor({
           'focus:outline-none min-h-[200px] px-4 py-3',
           '[&_p]:my-2 [&_h1]:text-2xl [&_h2]:text-xl [&_h3]:text-lg',
           '[&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4',
-          '[&_code]:bg-muted [&_code]:px-1 [&_code]:rounded',
-          '[&_pre]:bg-muted [&_pre]:p-3 [&_pre]:rounded-lg',
-          '[&_blockquote]:border-l-4 [&_blockquote]:border-border [&_blockquote]:pl-4 [&_blockquote]:italic'
+          '[&_code]:bg-gray-100 dark:[&_code]:bg-gray-850 [&_code]:px-1 [&_code]:rounded',
+          '[&_pre]:bg-gray-100 dark:[&_pre]:bg-gray-850 [&_pre]:p-3 [&_pre]:rounded-lg',
+          '[&_blockquote]:border-l-4 [&_blockquote]:border-gray-100 dark:[&_blockquote]:border-gray-850 [&_blockquote]:pl-4 [&_blockquote]:italic'
         ),
       },
     },
@@ -48,11 +48,11 @@ export function RichTextEditor({
   }
 
   return (
-    <div className={cn('relative border border-[var(--chat-divider)] rounded-xl chat-surface overflow-hidden', className)}>
+    <div className={cn('relative border border-gray-100 dark:border-gray-850 rounded-xl bg-gray-50 dark:bg-gray-850/50 overflow-hidden', className)}>
       {/* Toolbar */}
       {editable && (
         <TooltipProvider>
-          <div className="flex flex-wrap gap-1 p-2 border-b border-[var(--chat-divider)] bg-[var(--chat-muted)]">
+          <div className="flex flex-wrap gap-1 p-2 border-b border-gray-100 dark:border-gray-850 bg-gray-100 dark:bg-gray-850">
             <ToolbarButton
               onClick={() => editor.chain().focus().toggleBold().run()}
               active={editor.isActive('bold')}

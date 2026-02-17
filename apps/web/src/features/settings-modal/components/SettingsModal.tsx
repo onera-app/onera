@@ -23,6 +23,8 @@ import {
   Smartphone,
   ChevronLeft,
   ChevronRight,
+  Search,
+  X,
 } from 'lucide-react';
 
 // Tab components
@@ -191,14 +193,23 @@ export function SettingsModal({ open, onOpenChange, initialTab = 'general' }: Se
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[85vh] max-h-[85vh] sm:h-[85vh] p-0 gap-0 flex flex-col border-0 w-[calc(100vw-2rem)] sm:w-full">
-        {/* Desktop Header - always visible on desktop */}
-        <DialogHeader className="hidden sm:block px-6 py-4 shrink-0">
-          <DialogTitle className="text-xl">Settings</DialogTitle>
+      <DialogContent
+        hideCloseButton
+        className="max-w-4xl h-[85vh] max-h-[85vh] sm:h-[85vh] p-0 gap-0 flex flex-col w-[calc(100vw-2rem)] sm:w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border border-white dark:border-gray-850 rounded-[2rem] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]"
+      >
+        {/* Desktop Header — Open WebUI style */}
+        <DialogHeader className="hidden sm:flex flex-row items-center justify-between dark:text-gray-300 px-4 md:px-[1.125rem] pt-[1.125rem] pb-0.5 md:pb-2.5 shrink-0">
+          <DialogTitle className="text-lg font-medium">Settings</DialogTitle>
+          <button
+            onClick={() => onOpenChange(false)}
+            className="p-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors focus:outline-none"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </DialogHeader>
 
-        {/* Mobile Header - changes based on state */}
-        <DialogHeader className="sm:hidden px-3 py-3 shrink-0 border-b border-border">
+        {/* Mobile Header */}
+        <DialogHeader className="sm:hidden px-3 py-3 shrink-0 border-b border-gray-100 dark:border-gray-850">
           {mobileShowContent ? (
             <div className="flex items-center gap-2">
               <Button
@@ -209,21 +220,40 @@ export function SettingsModal({ open, onOpenChange, initialTab = 'general' }: Se
               >
                 <ChevronLeft className="h-5 w-5" />
               </Button>
-              <DialogTitle className="text-lg">{activeTabLabel}</DialogTitle>
+              <DialogTitle className="text-lg font-medium">{activeTabLabel}</DialogTitle>
             </div>
           ) : (
-            <DialogTitle className="text-lg">Settings</DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-lg font-medium">Settings</DialogTitle>
+              <button
+                onClick={() => onOpenChange(false)}
+                className="p-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           )}
         </DialogHeader>
 
-        <div className="flex flex-1 min-h-0">
-          {/* Sidebar navigation - hidden on mobile when viewing content */}
+        <div className="flex flex-col md:flex-row flex-1 min-h-0 w-full pt-1 pb-4">
+          {/* Sidebar navigation — Open WebUI tab style */}
           <div className={cn(
-            "w-full sm:w-56 flex flex-col shrink-0",
-            mobileShowContent && "hidden sm:flex"
+            "tabs flex flex-row overflow-x-auto gap-2.5 mx-3 md:pr-4 md:gap-1 md:flex-col flex-1 md:flex-none md:w-[200px] md:min-h-[42rem] md:max-h-[42rem] dark:text-gray-200 text-sm text-left mb-1 md:mb-0",
+            mobileShowContent && "hidden md:flex"
           )}>
-            {/* Search */}
-            <div className="p-3">
+            {/* Search — desktop only */}
+            <div className="hidden md:flex w-full rounded-full px-2.5 gap-2 bg-gray-100/80 dark:bg-gray-850/80 my-1 mb-1.5 items-center">
+              <Search className="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0" />
+              <input
+                placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full py-1.5 text-sm bg-transparent dark:text-gray-300 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600"
+              />
+            </div>
+
+            {/* Mobile search */}
+            <div className="md:hidden w-full px-0 py-1">
               <Input
                 placeholder="Search settings..."
                 value={searchQuery}
@@ -233,37 +263,35 @@ export function SettingsModal({ open, onOpenChange, initialTab = 'general' }: Se
             </div>
 
             {/* Tab list */}
-            <ScrollArea className="flex-1">
-              <nav className="p-2 space-y-1">
-                {filteredTabs.map((tab) => {
-                  const Icon = tab.icon;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => handleTabChange(tab.id)}
-                      className={cn(
-                        'w-full flex items-center gap-3 px-3 py-2.5 sm:py-2 rounded-md text-sm font-medium transition-colors',
-                        activeTab === tab.id
-                          ? 'bg-accent text-accent-foreground'
-                          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                      <span className="flex-1 text-left">{tab.label}</span>
-                      <ChevronRight className="h-4 w-4 sm:hidden text-muted-foreground" />
-                    </button>
-                  );
-                })}
-              </nav>
-            </ScrollArea>
+            <nav className="flex flex-row md:flex-col gap-0.5 overflow-x-auto md:overflow-x-visible scrollbar-hide">
+              {filteredTabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => handleTabChange(tab.id)}
+                    className={cn(
+                      'px-0.5 md:px-2.5 py-1 min-w-fit rounded-xl flex-1 md:flex-none flex text-left transition items-center gap-2',
+                      activeTab === tab.id
+                        ? 'text-gray-900 dark:text-white'
+                        : 'text-gray-300 dark:text-gray-600 hover:text-gray-700 dark:hover:text-white'
+                    )}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left whitespace-nowrap">{tab.label}</span>
+                    <ChevronRight className="h-4 w-4 md:hidden text-gray-300 dark:text-gray-600 shrink-0" />
+                  </button>
+                );
+              })}
+            </nav>
           </div>
 
-          {/* Tab content - hidden on mobile when viewing tab list */}
+          {/* Tab content */}
           <ScrollArea className={cn(
-            "flex-1",
+            "flex-1 px-3.5 md:pl-0 md:pr-[1.125rem] md:min-h-[42rem] md:max-h-[42rem]",
             !mobileShowContent && "hidden sm:block"
           )}>
-            <div className="p-4 sm:p-6">
+            <div className="py-1">
               <ActiveTabComponent />
             </div>
           </ScrollArea>

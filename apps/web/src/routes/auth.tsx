@@ -75,22 +75,19 @@ export function AuthPage() {
   const isButtonLoading = isLoading || loadingProvider !== null;
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center p-4"
-      style={{ background: "var(--chat-shell-bg)" }}
-    >
-      <div className="w-full max-w-[380px] relative z-10 flex flex-col items-center text-center rounded-3xl chat-surface-elevated p-7 sm:p-8 shadow-[0_24px_72px_rgba(20,20,22,0.16)]">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-900">
+      <div className="w-full max-w-[380px] flex flex-col items-center text-center">
         {/* Logo */}
         <div className="mb-10">
-          <OneraLogo size={64} className="text-foreground" />
+          <OneraLogo size={64} className="text-gray-900 dark:text-gray-100" />
         </div>
 
         {/* Heading */}
         <div className="mb-10 space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+          <h1 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
             Sign in to Onera
           </h1>
-          <p className="text-muted-foreground text-base">
+          <p className="text-gray-500 dark:text-gray-400 text-base">
             Private, encrypted AI chat.
           </p>
         </div>
@@ -99,50 +96,46 @@ export function AuthPage() {
         <div className="w-full space-y-3">
           <Button
             variant="outline"
-            className="w-full h-12 rounded-2xl chat-surface text-foreground hover:bg-foreground/[0.05] transition-all active:scale-[0.98] shadow-sm"
+            className="w-full h-12 rounded-full bg-gray-700/5 hover:bg-gray-700/10 dark:bg-gray-100/5 dark:hover:bg-gray-100/10 dark:text-gray-300 dark:hover:text-white text-sm font-medium transition-all active:scale-[0.98] border-0 gap-3"
             onClick={handleGoogleSignIn}
             disabled={!isLoaded || isButtonLoading}
           >
             {loadingProvider === "google" ? (
               <Spinner size="sm" />
             ) : (
-              <div className="absolute left-4">
-                <GoogleIcon className="w-5 h-5" />
-              </div>
+              <GoogleIcon className="w-5 h-5" />
             )}
-            <span className="font-medium text-base">Continue with Google</span>
+            Continue with Google
           </Button>
 
           <Button
             variant="outline"
-            className="w-full h-12 rounded-2xl chat-surface text-foreground hover:bg-foreground/[0.05] transition-all active:scale-[0.98] shadow-sm"
+            className="w-full h-12 rounded-full bg-gray-700/5 hover:bg-gray-700/10 dark:bg-gray-100/5 dark:hover:bg-gray-100/10 dark:text-gray-300 dark:hover:text-white text-sm font-medium transition-all active:scale-[0.98] border-0 gap-3"
             onClick={handleAppleSignIn}
             disabled={!isLoaded || isButtonLoading}
           >
             {loadingProvider === "apple" ? (
               <Spinner size="sm" />
             ) : (
-              <div className="absolute left-4">
-                <AppleIcon className="w-5 h-5 text-foreground" />
-              </div>
+              <AppleIcon className="w-5 h-5 text-gray-900 dark:text-gray-100" />
             )}
-            <span className="font-medium text-base">Continue with Apple</span>
+            Continue with Apple
           </Button>
         </div>
 
         {/* Footer */}
-        <p className="mt-12 text-xs text-muted-foreground max-w-xs mx-auto leading-relaxed">
+        <p className="mt-12 text-xs text-gray-500 dark:text-gray-400 max-w-xs mx-auto leading-relaxed">
           By continuing, you agree to our{" "}
           <Link
             to="/terms"
-            className="underline hover:text-foreground transition-colors"
+            className="underline hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
           >
             Terms
           </Link>{" "}
           and{" "}
           <Link
             to="/privacy"
-            className="underline hover:text-foreground transition-colors"
+            className="underline hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
           >
             Privacy Policy
           </Link>

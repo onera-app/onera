@@ -456,7 +456,7 @@ export const Messages = memo(function Messages({
           <Button
             variant="outline"
             size="icon"
-            className="h-9 w-9 rounded-full shadow-lg chat-surface backdrop-blur-xl border-[var(--chat-divider)] hover:bg-[var(--chat-surface-elevated)] hover:shadow-xl transition-all duration-200 hover:scale-105"
+            className="h-9 w-9 rounded-full shadow-lg bg-white dark:bg-gray-850 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 hover:shadow-xl transition-all duration-200 hover:scale-105"
             onClick={() => scrollToBottom("smooth")}
           >
             <ArrowDown className="h-4 w-4 text-muted-foreground" />

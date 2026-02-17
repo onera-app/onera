@@ -50,10 +50,10 @@ export function AdminSubscriptionsPage() {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-border">
+      <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-850">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border bg-secondary/50">
+            <tr className="border-b border-gray-100 dark:border-gray-850 bg-gray-50 dark:bg-gray-800/50">
               <th scope="col" className="p-3 text-left font-medium">User ID</th>
               <th scope="col" className="p-3 text-left font-medium">Plan</th>
               <th scope="col" className="p-3 text-left font-medium">Status</th>
@@ -61,17 +61,17 @@ export function AdminSubscriptionsPage() {
               <th scope="col" className="p-3 text-left font-medium">Period End</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          <tbody className="divide-y divide-gray-100 dark:divide-gray-850">
             {isLoading
               ? [...Array(5)].map((_, i) => (
                   <tr key={i}>
                     <td colSpan={5} className="p-3">
-                      <div className="h-8 animate-pulse rounded bg-secondary" />
+                      <div className="h-8 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
                     </td>
                   </tr>
                 ))
               : data?.subscriptions.map((sub) => (
-                  <tr key={sub.id} className="hover:bg-accent/50">
+                  <tr key={sub.id} className="hover:bg-gray-50 dark:hover:bg-gray-850">
                     <td className="p-3 font-mono text-xs">{sub.userId}</td>
                     <td className="p-3">{sub.planId}</td>
                     <td className="p-3">
@@ -82,7 +82,7 @@ export function AdminSubscriptionsPage() {
                             ? "bg-status-success/10 text-status-success-text"
                             : sub.status === "on_hold"
                               ? "bg-status-warning/10 text-status-warning-text"
-                              : "bg-secondary text-muted-foreground"
+                              : "bg-gray-100 dark:bg-gray-800 text-muted-foreground"
                         )}
                       >
                         {sub.status}

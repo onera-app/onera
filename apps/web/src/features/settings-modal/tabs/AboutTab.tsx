@@ -120,19 +120,19 @@ export function AboutTab() {
         <div className="grid gap-2 text-sm">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">New Chat</span>
-            <kbd className="px-2 py-1 text-xs bg-muted rounded">⌘ N</kbd>
+            <kbd className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-850 rounded">⌘ N</kbd>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Toggle Sidebar</span>
-            <kbd className="px-2 py-1 text-xs bg-muted rounded">⌘ B</kbd>
+            <kbd className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-850 rounded">⌘ B</kbd>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Settings</span>
-            <kbd className="px-2 py-1 text-xs bg-muted rounded">⌘ ,</kbd>
+            <kbd className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-850 rounded">⌘ ,</kbd>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Search Chats</span>
-            <kbd className="px-2 py-1 text-xs bg-muted rounded">⌘ K</kbd>
+            <kbd className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-850 rounded">⌘ K</kbd>
           </div>
         </div>
       </div>

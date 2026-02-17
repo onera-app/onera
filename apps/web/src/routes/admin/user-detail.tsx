@@ -22,8 +22,8 @@ export function AdminUserDetailPage() {
   if (isLoading) {
     return (
       <div className="animate-pulse space-y-6">
-        <div className="h-20 rounded-xl bg-secondary" />
-        <div className="h-40 rounded-xl bg-secondary" />
+        <div className="h-20 rounded-xl bg-gray-100 dark:bg-gray-800" />
+        <div className="h-40 rounded-xl bg-gray-100 dark:bg-gray-800" />
       </div>
     );
   }
@@ -56,7 +56,7 @@ export function AdminUserDetailPage() {
               className="h-10 w-10 rounded-full"
             />
           ) : (
-            <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center font-medium">
+            <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center font-medium">
               {data.user.name[0]}
             </div>
           )}
@@ -68,7 +68,7 @@ export function AdminUserDetailPage() {
       </div>
 
       {/* Subscription Management */}
-      <section className="rounded-xl border border-border p-6 space-y-4">
+      <section className="rounded-xl border border-gray-100 dark:border-gray-850 p-6 space-y-4">
         <h2 className="font-semibold">Subscription</h2>
         <div className="flex items-center gap-4">
           <span className="text-sm">
@@ -101,7 +101,7 @@ export function AdminUserDetailPage() {
 
       {/* Usage */}
       {data.plan && (
-        <section className="rounded-xl border border-border p-6 space-y-4">
+        <section className="rounded-xl border border-gray-100 dark:border-gray-850 p-6 space-y-4">
           <h2 className="font-semibold">Usage</h2>
           <UsageMeter
             label="Inference Requests"
@@ -119,7 +119,7 @@ export function AdminUserDetailPage() {
       )}
 
       {/* Invoices */}
-      <section className="rounded-xl border border-border p-6 space-y-4">
+      <section className="rounded-xl border border-gray-100 dark:border-gray-850 p-6 space-y-4">
         <h2 className="font-semibold">Invoice History</h2>
         <InvoiceTable invoices={data.invoices || []} />
       </section>

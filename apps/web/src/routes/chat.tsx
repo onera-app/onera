@@ -1286,7 +1286,7 @@ export function ChatPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full bg-background">
+      <div className="flex items-center justify-center h-full bg-white dark:bg-gray-900">
         <Spinner size="lg" className="text-muted-foreground" />
       </div>
     );
@@ -1294,9 +1294,9 @@ export function ChatPage() {
 
   if (!chat) {
     return (
-      <div className="flex items-center justify-center h-full bg-background">
+      <div className="flex items-center justify-center h-full bg-white dark:bg-gray-900">
         <div className="text-center max-w-md px-4">
-          <Alert variant="destructive" className="bg-card border-border">
+          <Alert variant="destructive" className="bg-gray-50 dark:bg-gray-850 border-gray-100 dark:border-gray-850">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle className="text-foreground">Chat not found</AlertTitle>
             <AlertDescription className="text-muted-foreground">
@@ -1356,7 +1356,7 @@ export function ChatPage() {
       </div>
 
       {/* Input area - Floating at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 px-4 sm:px-6 bg-[color:var(--chat-shell-bg)]/92 backdrop-blur-md pb-5 sm:pb-6 pt-4 sm:pt-5 w-full">
+      <div className="absolute bottom-0 left-0 right-0 z-20 px-4 sm:px-6 bg-white dark:bg-gray-900 pb-5 sm:pb-6 pt-4 sm:pt-5 w-full">
         <div className="max-w-6xl mx-auto w-full">
           <MessageInput
             onSend={handleSendMessage}

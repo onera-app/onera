@@ -93,7 +93,7 @@ export function ToolsTab() {
   if (!isUnlocked) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
+        <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-gray-850 flex items-center justify-center mb-4">
           <Lock className="w-8 h-8 text-muted-foreground" />
         </div>
         <p className="text-muted-foreground font-medium">Encryption locked</p>
@@ -209,7 +209,7 @@ export function ToolsTab() {
                       {provider.features.map((feature) => (
                         <span
                           key={feature}
-                          className="text-micro px-1.5 py-0.5 rounded bg-muted text-muted-foreground"
+                          className="text-micro px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-850 text-muted-foreground"
                         >
                           {feature}
                         </span>

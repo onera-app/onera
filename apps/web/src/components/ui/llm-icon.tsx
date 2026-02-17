@@ -182,7 +182,7 @@ export const LLMIcon = memo(function LLMIcon({ model, size = 'md', className, is
     default:
       // Fallback sparkles icon for unknown providers
       return (
-        <div className={cn(baseClass, 'bg-muted')}>
+        <div className={cn(baseClass, 'bg-gray-100 dark:bg-gray-850')}>
           <svg
             viewBox="0 0 16 16"
             fill="currentColor"

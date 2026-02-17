@@ -96,7 +96,7 @@ Delete this file after storing the phrase safely.
         {/* Blur overlay when hidden */}
         {!isRevealed && (
           <div
-            className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center rounded-xl bg-background/80 backdrop-blur-md transition-all"
+            className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center rounded-xl bg-white dark:bg-gray-900 transition-all"
             onClick={() => setIsRevealed(true)}
           >
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
@@ -106,15 +106,15 @@ Delete this file after storing the phrase safely.
           </div>
         )}
 
-        <div className="rounded-xl border bg-gradient-to-b from-muted/30 to-muted/60 p-1">
-          <div className="rounded-lg bg-background/80 p-4 backdrop-blur-sm">
+        <div className="rounded-xl border bg-gradient-to-b from-gray-50 dark:from-gray-900 to-gray-100 dark:to-gray-850 p-1">
+          <div className="rounded-lg bg-white dark:bg-gray-900 p-4">
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {words.map((word, index) => (
                 <div
                   key={index}
                   className={cn(
-                    "group relative flex items-center gap-2 rounded-lg border border-border/50 bg-muted/30 px-2.5 py-2 transition-all duration-200 overflow-hidden",
-                    "hover:border-primary/30 hover:bg-muted/50",
+                    "group relative flex items-center gap-2 rounded-lg border border-gray-100 dark:border-gray-850 bg-gray-50 dark:bg-gray-900 px-2.5 py-2 transition-all duration-200 overflow-hidden",
+                    "hover:border-primary/30 hover:bg-gray-50 dark:hover:bg-gray-850",
                     "animate-in fade-in-up"
                   )}
                   style={{ animationDelay: `${index * 30}ms` }}
@@ -185,7 +185,7 @@ Delete this file after storing the phrase safely.
       </div>
 
       {/* Tips */}
-      <div className="space-y-2 rounded-lg border border-dashed border-border/60 bg-muted/20 p-3">
+      <div className="space-y-2 rounded-lg border border-dashed border-gray-100 dark:border-gray-850 bg-gray-50 dark:bg-gray-900 p-3">
         <p className="text-xs font-medium text-muted-foreground">Quick save options:</p>
         <ul className="space-y-1 text-xs text-muted-foreground/80">
           <li className="flex gap-2">

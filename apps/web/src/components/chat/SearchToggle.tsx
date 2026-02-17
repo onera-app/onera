@@ -1,11 +1,10 @@
 /**
  * Search Toggle Component
- * Per-message toggle for web search functionality
+ * Per-message toggle for web search functionality — Open WebUI style
  */
 
 import { memo } from "react";
 import { Globe, Loader2, Check, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -50,18 +49,15 @@ export const SearchToggle = memo(function SearchToggle({
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
+          <button
             disabled
-            className="h-8 w-8 text-muted-foreground rounded-lg"
+            className="p-[7px] rounded-full bg-transparent text-gray-400 dark:text-gray-600 transition-colors"
           >
             <Sparkles className="h-4 w-4" />
-          </Button>
+          </button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Configure a search provider in Settings → Tools</p>
+          <p>Configure a search provider in Settings &rarr; Tools</p>
         </TooltipContent>
       </Tooltip>
     );
@@ -78,16 +74,13 @@ export const SearchToggle = memo(function SearchToggle({
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
+          <button
             disabled={disabled || isSearching}
             className={cn(
-              "h-8 w-8 rounded-lg",
+              "p-[7px] rounded-full transition-colors duration-300 focus:outline-none",
               enabled
-                ? "text-foreground bg-accent hover:bg-accent/80"
-                : "text-muted-foreground hover:text-foreground hover:bg-accent/60",
+                ? "text-sky-500 dark:text-sky-300 bg-sky-50 hover:bg-sky-100 dark:bg-sky-400/10 dark:hover:bg-sky-600/10 border border-sky-200/40 dark:border-sky-500/20"
+                : "bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800",
             )}
             onClick={() => onToggle(!enabled)}
           >
@@ -96,7 +89,7 @@ export const SearchToggle = memo(function SearchToggle({
             ) : (
               <Sparkles className="h-4 w-4" />
             )}
-          </Button>
+          </button>
         </TooltipTrigger>
         <TooltipContent>
           {enabled
@@ -113,16 +106,13 @@ export const SearchToggle = memo(function SearchToggle({
       <Tooltip>
         <TooltipTrigger asChild>
           <DropdownMenuTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
+            <button
               disabled={disabled || isSearching}
               className={cn(
-                "h-8 w-8 rounded-lg",
+                "p-[7px] rounded-full transition-colors duration-300 focus:outline-none",
                 enabled
-                  ? "text-foreground bg-accent hover:bg-accent/80"
-                  : "text-muted-foreground hover:text-foreground hover:bg-accent/60",
+                  ? "text-sky-500 dark:text-sky-300 bg-sky-50 hover:bg-sky-100 dark:bg-sky-400/10 dark:hover:bg-sky-600/10 border border-sky-200/40 dark:border-sky-500/20"
+                  : "bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800",
               )}
             >
               {isSearching ? (
@@ -130,7 +120,7 @@ export const SearchToggle = memo(function SearchToggle({
               ) : (
                 <Sparkles className="h-4 w-4" />
               )}
-            </Button>
+            </button>
           </DropdownMenuTrigger>
         </TooltipTrigger>
         <TooltipContent>
@@ -193,7 +183,7 @@ export function SearchBadge({
     <div
       className={cn(
         "inline-flex items-center gap-1.5 px-2 py-1 rounded-full",
-        "bg-primary/10 text-primary text-xs",
+        "bg-sky-50 dark:bg-sky-400/10 text-sky-600 dark:text-sky-300 text-xs border border-sky-200/40 dark:border-sky-500/20",
         className,
       )}
     >

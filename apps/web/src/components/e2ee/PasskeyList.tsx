@@ -122,7 +122,7 @@ export function PasskeyList({ onDelete }: PasskeyListProps) {
         {passkeys.map((passkey) => (
           <div
             key={passkey.id}
-            className="flex items-center justify-between p-3 rounded-lg border bg-card"
+            className="flex items-center justify-between p-3 rounded-lg border bg-white dark:bg-gray-850"
           >
             <div className="flex items-center gap-3 flex-1 min-w-0">
               {passkey.credentialDeviceType === "multiDevice" ? (

@@ -59,7 +59,7 @@ function AttachmentItem({ attachment, onRemove }: AttachmentItemProps) {
   return (
     <div
       className={cn(
-        "relative group rounded-lg border bg-muted/50 overflow-hidden",
+        "relative group rounded-lg border bg-gray-50 dark:bg-gray-850 overflow-hidden",
         status === "error" && "border-destructive",
         isImage ? "w-20 h-20" : "flex items-center gap-2 px-3 py-2 pr-8",
       )}
@@ -70,7 +70,7 @@ function AttachmentItem({ attachment, onRemove }: AttachmentItemProps) {
         variant="ghost"
         size="icon"
         className={cn(
-          "absolute z-10 h-5 w-5 rounded-full bg-background/80 hover:bg-background",
+          "absolute z-10 h-5 w-5 rounded-full bg-white dark:bg-gray-900 hover:bg-white dark:hover:bg-gray-900",
           "opacity-0 group-hover:opacity-100 transition-opacity",
           isImage ? "top-1 right-1" : "top-1/2 right-1.5 -translate-y-1/2",
         )}
@@ -179,7 +179,7 @@ export function MessageAttachment({
   }
 
   return (
-    <div className="mt-2 inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 border">
+    <div className="mt-2 inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-850 border">
       <FileIcon type={type} />
       <div className="flex flex-col">
         <span className="text-sm font-medium">{fileName}</span>

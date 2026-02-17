@@ -32,7 +32,7 @@ export function MandatoryLogoutConfirm({
 
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
-            <AlertDialogContent className="max-w-sm chat-surface-elevated border-[var(--chat-divider)]">
+            <AlertDialogContent className="max-w-sm bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850">
                 <AlertDialogHeader>
                     <AlertDialogTitle>{title}</AlertDialogTitle>
                     <AlertDialogDescription>{description}</AlertDialogDescription>

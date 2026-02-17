@@ -40,11 +40,9 @@ export function HomePage() {
   } = trpc.enclaves.listModels.useQuery(undefined, { enabled: isUnlocked });
   const hasPrivateModels = privateModels && privateModels.length > 0;
 
-  // Query is pending if not yet enabled (waiting for unlock) OR actively loading
   const privateModelsQueryPending =
     !isUnlocked || loadingPrivateModels || fetchingPrivateModels;
 
-  // User can chat if they have connections OR private models
   const canChat = useMemo(() => {
     return hasAnyConnections || hasPrivateModels;
   }, [hasAnyConnections, hasPrivateModels]);
@@ -76,7 +74,6 @@ export function HomePage() {
       setIsCreating(true);
 
       try {
-        // Create user message
         const userMessageId = uuidv4();
         const userMessage: ChatMessage = {
           id: userMessageId,
@@ -87,7 +84,6 @@ export function HomePage() {
           childrenIds: [],
         };
 
-        // Build ChatHistory with just the user message
         const history: ChatHistory = {
           currentId: userMessageId,
           messages: {
@@ -95,11 +91,9 @@ export function HomePage() {
           },
         };
 
-        // Generate initial title from user message
         const initialTitle =
           content.slice(0, 50) + (content.length > 50 ? "..." : "");
 
-        // Encrypt and create chat
         const { data: encryptedData } = await createEncryptedChat(
           initialTitle,
           history as unknown as Record<string, unknown>,
@@ -114,10 +108,8 @@ export function HomePage() {
           chatNonce: encryptedData.chatNonce,
         });
 
-        // Pre-populate the cache to avoid loading state on chat page
         utils.chats.get.setData({ chatId: createdChat.id }, createdChat);
 
-        // Navigate to chat page with pending flag to trigger AI response
         navigate({
           to: "/app/c/$chatId",
           params: { chatId: createdChat.id },
@@ -141,12 +133,8 @@ export function HomePage() {
     ],
   );
 
-  // Show welcome screen
   return (
-    <div
-      className="relative flex flex-col h-full w-full min-w-0 overflow-x-hidden"
-      style={{ background: "var(--chat-shell-bg)" }}
-    >
+    <div className="relative flex flex-col h-full w-full min-w-0 overflow-x-hidden bg-white dark:bg-gray-900">
       {/* Minimal header with model selector */}
       <header className="absolute top-1 z-10 left-1/2 -translate-x-1/2 sm:left-4 sm:right-4 sm:translate-x-0 flex items-center gap-2 sm:gap-3 px-2 sm:px-4 h-12 w-fit max-w-[calc(100vw-1.5rem)] sm:w-auto">
         {/* Menu button - visible when sidebar is closed */}
@@ -155,7 +143,7 @@ export function HomePage() {
             variant="ghost"
             size="icon"
             onClick={toggleSidebar}
-            className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-foreground/[0.06] rounded-xl transition-all duration-200 flex-shrink-0"
+            className="h-9 w-9 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-850 rounded-xl transition-colors flex-shrink-0"
           >
             <Menu className="h-[18px] w-[18px]" />
           </Button>
@@ -172,26 +160,26 @@ export function HomePage() {
         <div className="w-full max-w-3xl min-w-0">
           {/* Brand mark */}
           <div className="text-center mb-8 sm:mb-10">
-            <h1 className="text-3xl sm:text-3xl font-semibold tracking-[-0.02em] mb-2 sm:mb-3 text-foreground/90">
+            <h1 className="text-3xl sm:text-3xl font-primary font-semibold tracking-[-0.02em] mb-2 sm:mb-3 text-gray-900 dark:text-gray-100">
               What can I help with?
             </h1>
-            <p className="text-muted-foreground/70 text-sm sm:text-base leading-relaxed">
+            <p className="text-gray-500 dark:text-gray-500 text-sm sm:text-base leading-relaxed">
               Your conversations are end-to-end encrypted
             </p>
           </div>
 
-          {/* No connections warning - only show if no private models either */}
+          {/* No connections warning */}
           {!canChat && !isLoading && isUnlocked && (
-            <Alert className="mb-6 sm:mb-8 chat-surface border-[var(--chat-divider)] rounded-2xl">
+            <Alert className="mb-6 sm:mb-8 border-gray-100 dark:border-gray-850 rounded-2xl bg-gray-50 dark:bg-gray-850">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
-              <AlertTitle className="text-foreground text-sm sm:text-base">
+              <AlertTitle className="text-gray-900 dark:text-gray-100 text-sm sm:text-base">
                 No Models Available
               </AlertTitle>
-              <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-muted-foreground text-sm sm:text-sm">
+              <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-gray-600 dark:text-gray-400 text-sm sm:text-sm">
                 <span>Add an API key to start chatting with AI models.</span>
                 <Button
                   variant="link"
-                  className="p-0 h-auto flex items-center gap-1 text-foreground/80 hover:text-foreground self-start sm:self-auto transition-colors"
+                  className="p-0 h-auto flex items-center gap-1 text-gray-900 dark:text-gray-200 hover:text-gray-700 dark:hover:text-white self-start sm:self-auto transition-colors"
                   onClick={() => openSettingsModal("connections")}
                 >
                   Add API Key <ArrowRight className="h-3.5 w-3.5" />
@@ -200,7 +188,7 @@ export function HomePage() {
             </Alert>
           )}
 
-          {/* Message input - prominent */}
+          {/* Message input */}
           <div>
             <MessageInput
               onSend={handleSendMessage}
@@ -221,9 +209,9 @@ export function HomePage() {
         </div>
       </div>
 
-      {/* Footer - minimal */}
+      {/* Footer */}
       <footer className="px-4 py-4 sm:py-5 text-center w-full">
-        <p className="text-xs text-muted-foreground/50 flex items-center justify-center gap-1.5">
+        <p className="text-xs text-gray-500 text-center line-clamp-1 flex items-center justify-center gap-1.5">
           <Lock className="h-3 w-3" />
           End-to-end encrypted
         </p>

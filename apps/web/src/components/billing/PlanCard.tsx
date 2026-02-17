@@ -71,7 +71,7 @@ export function PlanCard({
         "relative flex flex-col rounded-2xl border p-6 sm:p-8",
         isPopular
           ? "border-primary bg-primary/5 shadow-lg"
-          : "border-border bg-card",
+          : "border-gray-100 dark:border-gray-850 bg-white dark:bg-gray-850",
         isCurrentPlan && "ring-2 ring-primary"
       )}
     >

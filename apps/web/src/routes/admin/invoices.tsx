@@ -46,7 +46,7 @@ export function AdminInvoicesPage() {
         ))}
       </div>
 
-      <div className="rounded-xl border border-border p-6">
+      <div className="rounded-xl border border-gray-100 dark:border-gray-850 p-6">
         <InvoiceTable invoices={data?.invoices || []} isLoading={isLoading} />
       </div>
 

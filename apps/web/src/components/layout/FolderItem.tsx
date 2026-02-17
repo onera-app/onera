@@ -123,8 +123,8 @@ export function FolderItem({
       <Collapsible open={isExpanded} onOpenChange={onToggle}>
         <div
           className={cn(
-            'relative group rounded-xl transition-all duration-200',
-            isDragOver && 'bg-sidebar-accent ring-1 ring-ring ring-inset'
+            'relative group rounded-2xl transition-all duration-200',
+            isDragOver && 'bg-gray-100 dark:bg-gray-900 ring-1 ring-ring ring-inset'
           )}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -143,24 +143,24 @@ export function FolderItem({
                 }}
                 onBlur={handleSaveEdit}
                 placeholder="Folder name"
-                className="w-full h-10 lg:h-11 px-3.5 rounded-lg bg-sidebar-accent text-base lg:text-base text-sidebar-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring transition-all"
+                className="w-full h-8 px-3 rounded-xl bg-gray-100 dark:bg-gray-850 text-sm text-gray-900 dark:text-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-all"
               />
             </div>
           ) : (
             <CollapsibleTrigger asChild>
               <button
                 className={cn(
-                'flex items-center gap-2.5 w-full py-2.5 lg:py-3 px-3 rounded-xl text-left',
-                  'text-sidebar-foreground/75 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring'
+                  'flex items-center gap-2.5 w-full py-2 px-2.5 rounded-2xl text-left',
+                  'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900 transition-all duration-150 focus-visible:outline-none'
                 )}
               >
                 <ChevronRight
                   className={cn(
-                    'h-4 w-4 text-sidebar-foreground/65 transition-transform duration-200 flex-shrink-0',
+                    'h-3.5 w-3.5 transition-transform duration-200 flex-shrink-0',
                     isExpanded && 'rotate-90'
                   )}
                 />
-                <span className="flex-1 text-base lg:text-base truncate">{name}</span>
+                <span className="flex-1 text-sm font-primary truncate">{name}</span>
               </button>
             </CollapsibleTrigger>
           )}
@@ -171,18 +171,18 @@ export function FolderItem({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="p-1.5 rounded-xl text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+                    className="p-1 rounded-lg text-gray-400 dark:text-gray-600 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors focus-visible:outline-none"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <MoreHorizontal className="h-4 w-4" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-36 bg-popover border-border">
-                  <DropdownMenuItem onClick={handleStartEdit} className="gap-2 text-muted-foreground focus:text-foreground focus:bg-accent">
+                <DropdownMenuContent align="end" className="w-36">
+                  <DropdownMenuItem onClick={handleStartEdit} className="gap-2">
                     <Pencil className="h-3.5 w-3.5" />
                     Rename
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-border" />
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => setShowDeleteDialog(true)}
                     className="gap-2 text-destructive focus:text-destructive focus:bg-destructive/10"
@@ -202,17 +202,15 @@ export function FolderItem({
       </Collapsible>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="max-w-sm bg-card border-border">
+        <AlertDialogContent className="max-w-sm">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-foreground">Delete folder?</AlertDialogTitle>
-            <AlertDialogDescription className="text-muted-foreground">
+            <AlertDialogTitle>Delete folder?</AlertDialogTitle>
+            <AlertDialogDescription>
               This will delete "{name}". Conversations inside will be moved to your main list.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-transparent border-border text-muted-foreground hover:bg-accent hover:text-foreground">
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"

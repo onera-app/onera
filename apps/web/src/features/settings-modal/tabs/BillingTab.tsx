@@ -17,7 +17,7 @@ export function BillingTab() {
       </div>
 
       {/* Current Plan */}
-      <div className="rounded-lg border border-border p-4 space-y-4">
+      <div className="rounded-lg border border-gray-100 dark:border-gray-850 p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-muted-foreground">Current plan</p>
@@ -30,7 +30,7 @@ export function BillingTab() {
 
         {/* Usage */}
         {usage && currentPlan && (
-          <div className="space-y-3 pt-2 border-t border-border">
+          <div className="space-y-3 pt-2 border-t border-gray-100 dark:border-gray-850">
             <UsageMeter
               label="Private Inference"
               used={usage.inferenceRequests}

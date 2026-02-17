@@ -47,9 +47,9 @@ export function PromptsList({ selectedPromptId, onSelectPrompt, onCreatePrompt }
 
   return (
     <>
-      <div className="flex flex-col h-full bg-[var(--chat-surface)]">
+      <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3.5 border-b border-[var(--chat-divider)]">
+        <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-100 dark:border-gray-850">
           <h2 className="text-lg font-semibold">Prompts</h2>
           <Button size="sm" onClick={onCreatePrompt}>
             <Plus className="h-4 w-4 mr-1" />
@@ -58,7 +58,7 @@ export function PromptsList({ selectedPromptId, onSelectPrompt, onCreatePrompt }
         </div>
 
         {/* Search */}
-        <div className="px-3 py-2.5 border-b border-[var(--chat-divider)]">
+        <div className="px-3 py-2.5 border-b border-gray-100 dark:border-gray-850">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -66,7 +66,7 @@ export function PromptsList({ selectedPromptId, onSelectPrompt, onCreatePrompt }
               placeholder="Search prompts..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 chat-surface border-[var(--chat-divider)] rounded-xl"
+              className="pl-9 bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850 rounded-xl"
             />
           </div>
         </div>
@@ -91,7 +91,7 @@ export function PromptsList({ selectedPromptId, onSelectPrompt, onCreatePrompt }
               description={searchQuery ? undefined : 'Create one to get started'}
             />
           ) : (
-            <div className="divide-y divide-[var(--chat-divider)]">
+            <div className="divide-y divide-gray-100 dark:divide-gray-850">
               {filteredPrompts.map((prompt) => (
                 <div
                   key={prompt.id}
@@ -100,7 +100,7 @@ export function PromptsList({ selectedPromptId, onSelectPrompt, onCreatePrompt }
                     'p-4 cursor-pointer transition-colors group',
                     selectedPromptId === prompt.id
                       ? 'chat-pill border-l-2 border-l-[var(--chat-focus)]'
-                      : 'hover:bg-[var(--chat-muted)]'
+                      : 'hover:bg-gray-100 dark:hover:bg-gray-850'
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">

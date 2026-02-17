@@ -188,7 +188,7 @@ export function EncryptionTab() {
 
             <div className="relative">
               <div
-                className={`font-mono text-sm p-4 bg-muted rounded-lg break-words ${
+                className={`font-mono text-sm p-4 bg-gray-100 dark:bg-gray-850 rounded-lg break-words ${
                   !showPhrase ? 'blur-sm select-none' : ''
                 }`}
               >

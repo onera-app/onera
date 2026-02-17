@@ -126,9 +126,9 @@ export const CodeArtifact = memo(function CodeArtifact({
     : content;
 
   return (
-    <div className={cn('rounded-lg border border-border overflow-hidden', className)}>
+    <div className={cn('rounded-lg border border-gray-100 dark:border-gray-850 overflow-hidden', className)}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 bg-muted/50 border-b border-border">
+      <div className="flex items-center justify-between px-4 py-2 bg-gray-50 dark:bg-gray-850 border-b border-gray-100 dark:border-gray-850">
         <div className="flex items-center gap-2">
           {title && (
             <span className="text-sm font-medium text-foreground">{title}</span>
@@ -225,7 +225,7 @@ export const CodeArtifact = memo(function CodeArtifact({
             />
           </Suspense>
         ) : (
-          <pre className="p-4 overflow-x-auto text-sm bg-muted/30 max-h-[400px] overflow-y-auto">
+          <pre className="p-4 overflow-x-auto text-sm bg-gray-50 dark:bg-gray-900 max-h-[400px] overflow-y-auto">
             <code className={`language-${detectedLanguage}`}>{displayContent}</code>
           </pre>
         )}

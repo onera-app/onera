@@ -42,9 +42,9 @@ export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorB
     }
 
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 p-4">
         <div
-          className="w-full max-w-md rounded-xl border border-border bg-card p-6 space-y-4"
+          className="w-full max-w-md rounded-xl border border-gray-100 dark:border-gray-850 bg-white dark:bg-gray-850 p-6 space-y-4"
           role="alert"
           aria-live="assertive"
         >

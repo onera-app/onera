@@ -11,7 +11,7 @@ export function AdminDashboard() {
       <div className="animate-pulse space-y-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-28 rounded-xl bg-secondary" />
+            <div key={i} className="h-28 rounded-xl bg-gray-100 dark:bg-gray-800" />
           ))}
         </div>
       </div>
@@ -61,7 +61,7 @@ export function AdminDashboard() {
 
       <div>
         <h2 className="text-lg font-semibold mb-4">Recent Invoices</h2>
-        <div className="rounded-xl border border-border p-6">
+        <div className="rounded-xl border border-gray-100 dark:border-gray-850 p-6">
           <InvoiceTable invoices={stats?.recentInvoices || []} />
         </div>
       </div>

@@ -93,7 +93,7 @@ export function AttachmentButton({
                 variant="ghost"
                 size="icon"
                 disabled={disabled}
-                className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-[var(--chat-muted)] rounded-lg"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-850 rounded-lg"
               >
                 <Plus className="h-5 w-5" />
               </Button>
@@ -128,7 +128,7 @@ export function DragDropOverlay({ isVisible }: DragDropOverlayProps) {
   if (!isVisible) return null;
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm border-2 border-dashed border-primary rounded-xl">
+    <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/95 dark:bg-gray-900/95 border-2 border-dashed border-primary rounded-xl">
       <div className="flex flex-col items-center gap-2 text-primary">
         <Paperclip className="h-8 w-8" />
         <span className="text-sm font-medium">Drop files here</span>

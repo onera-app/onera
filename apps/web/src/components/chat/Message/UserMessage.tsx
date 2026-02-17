@@ -198,7 +198,7 @@ export const UserMessage = memo(function UserMessage({
               }}
               className={cn(
                 "w-full px-4 py-3.5 rounded-xl resize-none",
-                "border-2 border-[var(--chat-focus)] bg-[var(--chat-surface-elevated)]",
+                "border-2 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-850",
                 "text-base leading-relaxed",
               )}
               rows={1}
@@ -275,7 +275,7 @@ export const UserMessage = memo(function UserMessage({
                   download={doc.fileName}
                   className={cn(
                     "flex items-center gap-2 px-3 py-2 rounded-lg",
-                    "bg-muted/50 hover:bg-muted transition-colors",
+                    "bg-gray-50 dark:bg-gray-850 hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors",
                     "text-sm text-foreground",
                   )}
                 >

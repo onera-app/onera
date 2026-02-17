@@ -153,7 +153,7 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
     if (step === 'select') {
       return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-          <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
+          <DialogContent className="sm:max-w-md bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850" onInteractOutside={(e) => e.preventDefault()}>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <ShieldCheck className="h-5 w-5 text-primary" />
@@ -174,7 +174,7 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
                 {passkeySupported && !isCheckingPasskeySupport && (
                   <button
                     onClick={() => setStep('passkey')}
-                    className="w-full flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent transition-colors text-left"
+                    className="w-full flex items-start gap-3 p-3 rounded-lg border bg-white dark:bg-gray-850 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left"
                   >
                     <Fingerprint className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
                     <div className="flex-1 min-w-0">
@@ -189,7 +189,7 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
                 {/* Password option */}
                 <button
                   onClick={() => setStep('password')}
-                  className="w-full flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent transition-colors text-left"
+                  className="w-full flex items-start gap-3 p-3 rounded-lg border bg-white dark:bg-gray-850 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left"
                 >
                   <KeyRound className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
                   <div className="flex-1 min-w-0">
@@ -213,7 +213,7 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
     if (step === 'passkey') {
       return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-          <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
+          <DialogContent className="sm:max-w-md bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850" onInteractOutside={(e) => e.preventDefault()}>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Fingerprint className="h-5 w-5 text-primary" />
@@ -225,7 +225,7 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
             </DialogHeader>
 
             <div className="py-4 space-y-4">
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-850">
                 <Smartphone className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Device Passkey</p>
@@ -235,7 +235,7 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-850">
                 <Cloud className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Synced Passkey</p>
@@ -287,7 +287,7 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
     // Password step
     return (
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="sm:max-w-md bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <KeyRound className="h-5 w-5 text-primary" />

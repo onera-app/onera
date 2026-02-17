@@ -334,7 +334,7 @@ export function Sidebar() {
           <TooltipTrigger asChild>
             <button
               onClick={toggleSidebar}
-              className="fixed top-3.5 left-3.5 z-50 p-2 rounded-xl chat-surface text-muted-foreground hover:text-foreground hover:bg-foreground/[0.06] active:scale-[0.97] transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="fixed top-3.5 left-3.5 z-50 p-2 rounded-xl text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="Open sidebar"
             >
               <PanelLeftOpen className="h-[18px] w-[18px]" />
@@ -346,10 +346,10 @@ export function Sidebar() {
         </Tooltip>
       )}
 
-      {/* Mobile overlay backdrop */}
+      {/* Mobile overlay backdrop — Open WebUI style */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-background/60 backdrop-blur-sm z-30 md:hidden animate-in fade-in duration-300"
+          className="fixed inset-0 bg-black/60 z-30 md:hidden animate-in fade-in duration-300"
           onClick={toggleSidebar}
           aria-hidden="true"
         />
@@ -358,9 +358,14 @@ export function Sidebar() {
       <nav
         id="sidebar"
         className={cn(
-          "flex flex-col h-full transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] flex-shrink-0 bg-sidebar-background/95 backdrop-blur-xl",
-          // Mobile: fixed overlay that slides in from left
+          "flex flex-col h-full transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] flex-shrink-0",
+          "text-gray-900 dark:text-gray-200 text-sm select-none",
+          // Mobile: fixed overlay; Desktop: relative
           "fixed md:relative z-40 md:z-20",
+          // Background — Open WebUI: opaque on mobile, semi-transparent on desktop
+          sidebarOpen
+            ? "bg-gray-50 dark:bg-gray-950 md:bg-gray-50/70 md:dark:bg-gray-950/70"
+            : "",
           // Width handling
           sidebarOpen
             ? "w-[280px] min-w-[280px] translate-x-0"
@@ -372,14 +377,14 @@ export function Sidebar() {
         }}
       >
         {/* Content */}
-        <div className="flex flex-col h-full overflow-hidden">
-          {/* Header - OpenWebUI style */}
-          <header className="flex items-center justify-between px-4 h-14">
+        <div className="flex flex-col h-full overflow-hidden relative">
+          {/* Header — Open WebUI style */}
+          <header className="flex items-center justify-between px-[0.5625rem] pt-2 pb-1.5 sticky top-0 z-10">
             <Link to="/app" className="flex items-center gap-2 group">
               <div className="w-7 h-7 rounded-full overflow-hidden">
                 <OneraLogo size={30} />
               </div>
-              <span className="font-semibold text-base text-sidebar-foreground tracking-tight">
+              <span className="font-primary font-medium text-sm text-gray-850 dark:text-white tracking-tight">
                 Onera
               </span>
             </Link>
@@ -388,7 +393,7 @@ export function Sidebar() {
               <TooltipTrigger asChild>
                 <button
                   onClick={toggleSidebar}
-                  className="p-2 rounded-lg text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background"
+                  className="flex rounded-xl size-[34px] justify-center items-center text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors focus-visible:outline-none"
                 >
                   <PanelLeftClose className="h-4 w-4" />
                 </button>
@@ -399,74 +404,77 @@ export function Sidebar() {
             </Tooltip>
           </header>
 
-          {/* Navigation Menu - OpenWebUI style, tighter spacing */}
-          <div className="px-3 py-1.5">
+          {/* Top gradient fade */}
+          <div className="sidebar-gradient-top absolute top-12 left-0 right-0 h-6 z-[5]" />
+
+          {/* Navigation Menu — Open WebUI style */}
+          <div className="px-[0.4375rem] py-1.5">
             {/* New Chat */}
             <Link
               to="/app"
-              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground hover:text-sidebar-foreground group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background"
+              className="group grow flex items-center space-x-3 rounded-2xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-200 outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <Plus className="h-[17px] w-[17px]" />
-              <span className="text-sm">New Chat</span>
+              <Plus className="size-[18px]" />
+              <span className="font-primary text-sm">New Chat</span>
             </Link>
 
             {/* Search */}
             <button
               onClick={() => setSearchModalOpen(true)}
-              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground hover:text-sidebar-foreground group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background"
+              className="w-full group grow flex items-center space-x-3 rounded-2xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-200 outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <Search className="h-[17px] w-[17px]" />
-              <span className="text-sm">Search</span>
+              <Search className="size-[18px]" />
+              <span className="font-primary text-sm">Search</span>
             </button>
 
             {/* Notes */}
             <Link
               to="/app/notes"
-              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground hover:text-sidebar-foreground group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background"
+              className="group grow flex items-center space-x-3 rounded-2xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-200 outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <FileText className="h-[17px] w-[17px]" />
-              <span className="text-sm">Notes</span>
+              <FileText className="size-[18px]" />
+              <span className="font-primary text-sm">Notes</span>
             </Link>
 
             {/* Admin */}
             {isAdmin && (
               <Link
                 to="/app/admin"
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground hover:text-sidebar-foreground group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background"
+                className="group grow flex items-center space-x-3 rounded-2xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-200 outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <Shield className="h-[17px] w-[17px]" />
-                <span className="text-sm">Admin</span>
+                <Shield className="size-[18px]" />
+                <span className="font-primary text-sm">Admin</span>
               </Link>
             )}
           </div>
 
           {/* Main Content (scrollable) */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 mt-3">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hidden px-[0.4375rem] mt-3">
             <div className="pb-4">
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-16 gap-3">
-                  <Spinner size="lg" className="text-sidebar-foreground/50" />
-                  <span className="text-xs text-sidebar-foreground/70">Loading...</span>
+                  <Spinner size="lg" className="text-gray-500" />
+                  <span className="text-xs text-gray-500">Loading...</span>
                 </div>
               ) : chats.length === 0 && foldersWithState.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-                  <MessageSquare className="w-8 h-8 text-sidebar-foreground/40 mb-3" />
-                  <p className="text-base text-sidebar-foreground/80 mb-1">
+                  <MessageSquare className="w-8 h-8 text-gray-400 dark:text-gray-600 mb-3" />
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
                     No conversations yet
                   </p>
-                  <p className="text-sm text-sidebar-foreground/65">
+                  <p className="text-xs text-gray-500 dark:text-gray-500">
                     Start a new chat to begin
                   </p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {/* Folders Section - OpenWebUI style */}
+                  {/* Folders Section */}
                   <Collapsible
                     open={foldersExpanded}
                     onOpenChange={setFoldersExpanded}
                   >
                     <div className="flex items-center justify-between">
-                      <CollapsibleTrigger className="flex items-center gap-1.5 px-2 py-1 text-sm font-medium text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background rounded-md">
+                      <CollapsibleTrigger className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors focus-visible:outline-none rounded-md">
                         <ChevronRight
                           className={cn(
                             "h-3 w-3 transition-transform duration-200",
@@ -479,7 +487,7 @@ export function Sidebar() {
                         <TooltipTrigger asChild>
                           <button
                             onClick={handleNewFolder}
-                            className="p-1.5 rounded-lg text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background"
+                            className="p-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors focus-visible:outline-none"
                           >
                             <Plus className="h-3.5 w-3.5" />
                           </button>
@@ -493,7 +501,7 @@ export function Sidebar() {
                     <CollapsibleContent className="space-y-0.5 mt-1">
                       {foldersWithState.length === 0 ? (
                         <div className="py-2 px-3 ml-5">
-                          <p className="text-sm text-sidebar-foreground/65 italic">
+                          <p className="text-xs text-gray-400 dark:text-gray-600 italic">
                             No folders yet
                           </p>
                         </div>
@@ -518,7 +526,7 @@ export function Sidebar() {
                             >
                               {folderChats.length === 0 ? (
                                 <div className="py-1.5 px-3 ml-5">
-                                  <p className="text-sm text-sidebar-foreground/65 italic">
+                                  <p className="text-xs text-gray-400 dark:text-gray-600 italic">
                                     Empty
                                   </p>
                                 </div>
@@ -549,12 +557,12 @@ export function Sidebar() {
                     </CollapsibleContent>
                   </Collapsible>
 
-                  {/* Chats Section - OpenWebUI style */}
+                  {/* Chats Section */}
                   <Collapsible
                     open={chatsExpanded}
                     onOpenChange={setChatsExpanded}
                   >
-                    <CollapsibleTrigger className="flex items-center gap-1.5 px-2 py-1 text-sm font-medium text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background rounded-md">
+                    <CollapsibleTrigger className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors w-full focus-visible:outline-none rounded-md">
                       <ChevronRight
                         className={cn(
                           "h-3 w-3 transition-transform duration-200",
@@ -568,11 +576,11 @@ export function Sidebar() {
                       {/* Pinned Section */}
                       {pinnedChats.length > 0 && (
                         <div className="mb-2">
-                          <div className="flex items-center gap-1.5 px-2 py-1 text-sm text-sidebar-foreground/65">
+                          <div className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-gray-500 dark:text-gray-500 font-medium">
                             <Pin className="h-3 w-3" />
                             <span>Pinned</span>
                           </div>
-                          <div className="space-y-0.5 mt-1">
+                          <div className="ml-3 pl-1 space-y-0.5 mt-1 border-s border-gray-100 dark:border-gray-900">
                             {pinnedChats.map((chat) => (
                               <ChatItem
                                 key={chat.id}
@@ -590,14 +598,14 @@ export function Sidebar() {
                         </div>
                       )}
 
-                      {/* Date Groups - OpenWebUI style */}
+                      {/* Date Groups — Open WebUI style time labels */}
                       {Array.from(groupedChats.entries()).map(
                         ([group, groupChats]) => (
                           <div key={group} className="mt-3">
-                            <div className="px-2 py-1 text-sm text-sidebar-foreground/65">
+                            <div className="w-full pl-2.5 text-xs text-gray-500 dark:text-gray-500 font-medium pb-1.5">
                               {DATE_GROUP_LABELS[group as DateGroup]}
                             </div>
-                            <div className="space-y-0.5 mt-1">
+                            <div className="space-y-0.5 mt-0.5">
                               {groupChats.map((chat) => (
                                 <ChatItem
                                   key={chat.id}
@@ -619,7 +627,7 @@ export function Sidebar() {
                       {/* Empty state */}
                       {pinnedChats.length === 0 && groupedChats.size === 0 && (
                         <div className="py-2 px-3 ml-5">
-                          <p className="text-sm text-sidebar-foreground/65 italic">
+                          <p className="text-xs text-gray-400 dark:text-gray-600 italic">
                             No chats yet
                           </p>
                         </div>
@@ -631,21 +639,24 @@ export function Sidebar() {
             </div>
           </div>
 
-          {/* User Profile Section - Apple style: clean, no dividers */}
+          {/* Bottom gradient fade */}
+          <div className="sidebar-gradient-bottom absolute bottom-16 left-0 right-0 h-6 z-[5]" />
+
+          {/* User Profile Section — Open WebUI style */}
           {user && (
-            <div className="px-2.5 pb-2.5 pt-2 border-t border-[var(--chat-divider)]">
+            <div className="px-1.5 pt-1.5 pb-2 sticky bottom-0 z-10 border-t border-gray-50 dark:border-gray-850">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-3 w-full px-2 py-2 rounded-xl hover:bg-foreground/[0.06] active:scale-[0.98] transition-all duration-150 ease-out text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background">
+                  <button className="flex items-center rounded-2xl py-2 px-1.5 w-full hover:bg-gray-100/50 dark:hover:bg-gray-900/50 transition text-left group focus-visible:outline-none">
                     {/* Avatar */}
                     {user.imageUrl ? (
                       <img
                         src={user.imageUrl}
                         alt={user.name || "User"}
-                        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                        className="size-7 rounded-full object-cover flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-[var(--chat-pill)] flex items-center justify-center text-foreground text-base font-semibold flex-shrink-0">
+                      <div className="size-7 rounded-full bg-gray-800 dark:bg-gray-700 flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
                         {(user.name || user.email || "U")
                           .charAt(0)
                           .toUpperCase()}
@@ -653,8 +664,8 @@ export function Sidebar() {
                     )}
 
                     {/* Name and Plan */}
-                    <div className="flex-1 min-w-0">
-                      <span className="block text-sm font-medium text-sidebar-foreground truncate">
+                    <div className="flex-1 min-w-0 ml-3">
+                      <span className="block text-sm font-primary font-medium text-gray-850 dark:text-white truncate">
                         {user.name || "User"}
                       </span>
                       <span
@@ -668,7 +679,7 @@ export function Sidebar() {
                                 ? "text-status-success-text"
                                 : subData?.plan?.id === "enterprise"
                                   ? "text-primary"
-                                  : "text-sidebar-foreground/70",
+                                  : "text-gray-500",
                         )}
                       >
                         {subData?.plan?.name || "Free"} plan
@@ -676,7 +687,7 @@ export function Sidebar() {
                     </div>
 
                     {/* Chevron */}
-                    <ChevronRight className="h-4 w-4 text-sidebar-foreground/60 group-hover:text-sidebar-foreground transition-colors flex-shrink-0" />
+                    <ChevronRight className="h-4 w-4 text-gray-400 dark:text-gray-600 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors flex-shrink-0" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -698,7 +709,7 @@ export function Sidebar() {
                                 ? "text-status-success"
                                 : subData?.plan?.id === "enterprise"
                                   ? "text-primary"
-                                  : "text-sidebar-foreground/50",
+                                  : "text-gray-500",
                         )}
                       />
                       Manage plan

@@ -62,8 +62,8 @@ export function ResizeHandle() {
         // Hidden on mobile - resize only works on desktop
         'hidden md:block',
         'w-1 flex-shrink-0 cursor-col-resize relative group',
-        'hover:bg-accent/20 transition-colors duration-150',
-        isDragging && 'bg-accent/30'
+        'hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors duration-150',
+        isDragging && 'bg-gray-300 dark:bg-gray-700'
       )}
       onMouseDown={handleMouseDown}
     >
@@ -71,7 +71,7 @@ export function ResizeHandle() {
       <div
         className={cn(
           'absolute inset-y-0 -left-0.5 w-1 rounded-full transition-opacity duration-150',
-          'bg-accent opacity-0 group-hover:opacity-100',
+          'bg-gray-400 dark:bg-gray-600 opacity-0 group-hover:opacity-100',
           isDragging && 'opacity-100'
         )}
       />

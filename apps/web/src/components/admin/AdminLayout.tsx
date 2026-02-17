@@ -38,8 +38,7 @@ export function AdminLayout() {
   if (isLoading || adminCheck.isLoading) {
     return (
       <div
-        className="flex items-center justify-center h-full"
-        style={{ background: "var(--chat-shell-bg)" }}
+        className="flex items-center justify-center h-full bg-white dark:bg-gray-900"
       >
         <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
       </div>
@@ -47,9 +46,9 @@ export function AdminLayout() {
   }
 
   return (
-    <div className="flex h-full" style={{ background: "var(--chat-shell-bg)" }}>
+    <div className="flex h-full bg-white dark:bg-gray-900">
       {/* Admin Sidebar */}
-      <aside className="w-60 flex-shrink-0 border-r border-[var(--chat-divider)] bg-[var(--chat-surface)] p-4 space-y-1">
+      <aside className="w-60 flex-shrink-0 border-r border-gray-100 dark:border-gray-850 bg-gray-50 dark:bg-gray-900 p-4 space-y-1">
         <div className="flex items-center gap-2 mb-6">
           <Button variant="ghost" size="icon-sm" asChild>
             <Link to="/app">
@@ -72,7 +71,7 @@ export function AdminLayout() {
                 "flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors",
                 isActive
                   ? "chat-pill text-foreground font-medium"
-                  : "text-muted-foreground hover:text-foreground hover:bg-[var(--chat-muted)]"
+                  : "text-muted-foreground hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-850"
               )}
             >
               <item.icon className="h-4 w-4" />

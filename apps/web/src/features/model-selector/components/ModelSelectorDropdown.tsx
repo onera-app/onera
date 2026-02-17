@@ -308,9 +308,9 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
           )}
         </button>
 
-        {/* Dropdown panel - Apple style: subtle glass, soft shadow */}
+        {/* Dropdown panel */}
         {isOpen && models.length > 0 && (
-          <div className="absolute left-0 mt-1 w-64 sm:w-80 max-w-[calc(100vw-2rem)] z-50 bg-popover backdrop-blur-2xl rounded-xl shadow-lg border border-border overflow-hidden">
+          <div className="absolute left-0 mt-1 w-64 sm:w-80 max-w-[calc(100vw-2rem)] z-50 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-100 dark:border-gray-850 overflow-hidden">
             {/* Search input - cleaner, more subtle */}
             <div className="p-2 pb-1">
               <div className="relative">

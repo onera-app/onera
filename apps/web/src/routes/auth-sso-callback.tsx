@@ -198,11 +198,8 @@ export function SSOCallbackPage() {
 
   if (view === "processing") {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center p-4"
-        style={{ background: "var(--chat-shell-bg)" }}
-      >
-        <Card className="w-full max-w-md chat-surface-elevated border-[var(--chat-divider)]">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-white dark:bg-gray-900">
+        <Card className="w-full max-w-md bg-white dark:bg-gray-850 border-gray-100 dark:border-gray-850">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
             <p className="text-muted-foreground">Completing sign in...</p>
@@ -217,11 +214,8 @@ export function SSOCallbackPage() {
 
   if (view === "error") {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center p-4"
-        style={{ background: "var(--chat-shell-bg)" }}
-      >
-        <Card className="w-full max-w-md chat-surface-elevated border-[var(--chat-divider)]">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-white dark:bg-gray-900">
+        <Card className="w-full max-w-md bg-white dark:bg-gray-850 border-gray-100 dark:border-gray-850">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Sign In Failed</CardTitle>
             <CardDescription aria-live="assertive">{stageLabel}</CardDescription>
@@ -256,16 +250,8 @@ export function SSOCallbackPage() {
 
   if (view === "recovery" && recoveryInfo) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center p-4"
-        style={{ background: "var(--chat-shell-bg)" }}
-      >
-        <div className="pointer-events-none fixed inset-0 overflow-hidden">
-          <div className="absolute -left-1/4 -top-1/4 h-1/2 w-1/2 rounded-full bg-gradient-to-br from-amber-500/5 to-transparent blur-3xl" />
-          <div className="absolute -bottom-1/4 -right-1/4 h-1/2 w-1/2 rounded-full bg-gradient-to-tl from-orange-500/5 to-transparent blur-3xl" />
-        </div>
-
-        <div className="relative w-full max-w-lg rounded-3xl chat-surface-elevated p-6 sm:p-8 border border-[var(--chat-divider)]">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-white dark:bg-gray-900">
+        <div className="relative w-full max-w-lg rounded-3xl bg-white dark:bg-gray-850 p-6 sm:p-8 border border-gray-100 dark:border-gray-850">
           <div className="mb-6 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/20 via-orange-500/20 to-red-500/10 ring-1 ring-amber-500/20">
               <Lock className="h-8 w-8 text-amber-600 dark:text-amber-400" />
@@ -276,7 +262,7 @@ export function SSOCallbackPage() {
             </p>
           </div>
 
-          <Card className="border-[var(--chat-divider)] chat-surface shadow-xl shadow-black/5">
+          <Card className="border-gray-100 dark:border-gray-850 bg-gray-50 dark:bg-gray-850/50 shadow-md">
             <CardContent className="p-4 sm:p-6">
               <RecoveryPhraseDisplay
                 recoveryInfo={recoveryInfo}
@@ -296,12 +282,9 @@ export function SSOCallbackPage() {
 
   if (view === "password") {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center p-4"
-        style={{ background: "var(--chat-shell-bg)" }}
-      >
+      <div className="min-h-screen flex items-center justify-center p-4 bg-white dark:bg-gray-900">
         <div className="w-full max-w-md">
-          <Card className="chat-surface-elevated border-[var(--chat-divider)]">
+          <Card className="bg-white dark:bg-gray-850 border-gray-100 dark:border-gray-850">
             <CardHeader className="text-center space-y-4">
               <div className="mx-auto w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
                 <KeyRound className="w-6 h-6 text-primary" />
@@ -383,11 +366,8 @@ export function SSOCallbackPage() {
   if (view === "passkey") {
     if (isCheckingPasskeySupport) {
       return (
-        <div
-          className="min-h-screen flex items-center justify-center p-4"
-          style={{ background: "var(--chat-shell-bg)" }}
-        >
-          <Card className="w-full max-w-md chat-surface-elevated border-[var(--chat-divider)]">
+        <div className="min-h-screen flex items-center justify-center p-4 bg-white dark:bg-gray-900">
+          <Card className="w-full max-w-md bg-white dark:bg-gray-850 border-gray-100 dark:border-gray-850">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
               <p className="text-muted-foreground">Checking device capabilities...</p>
@@ -402,12 +382,9 @@ export function SSOCallbackPage() {
     }
 
     return (
-      <div
-        className="min-h-screen flex items-center justify-center p-4"
-        style={{ background: "var(--chat-shell-bg)" }}
-      >
+      <div className="min-h-screen flex items-center justify-center p-4 bg-white dark:bg-gray-900">
         <div className="w-full max-w-md">
-          <Card className="chat-surface-elevated border-[var(--chat-divider)]">
+          <Card className="bg-white dark:bg-gray-850 border-gray-100 dark:border-gray-850">
             <CardHeader className="text-center space-y-4">
               <div className="mx-auto w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
                 <Fingerprint className="w-6 h-6 text-primary" />
@@ -420,7 +397,7 @@ export function SSOCallbackPage() {
 
             <CardContent className="space-y-4">
               <div className="space-y-3">
-                <div className="flex items-start gap-3 p-3 rounded-xl chat-surface border border-[var(--chat-divider)]">
+                <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850">
                   <Fingerprint className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium">Instant unlock</p>
@@ -430,7 +407,7 @@ export function SSOCallbackPage() {
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 p-3 rounded-xl chat-surface border border-[var(--chat-divider)]">
+                <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850">
                   <ShieldCheck className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium">Phishing resistant</p>

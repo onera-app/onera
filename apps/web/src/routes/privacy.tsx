@@ -5,9 +5,9 @@ import { Footer } from "@/components/landing";
 
 export function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-white dark:bg-gray-900">
       {/* Simple Header */}
-      <header className="border-b border-[var(--chat-divider)]">
+      <header className="border-b border-gray-100 dark:border-gray-850">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
             <div className="size-8 rounded-xl overflow-hidden transition-transform duration-200 group-hover:scale-105">

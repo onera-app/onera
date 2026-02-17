@@ -118,7 +118,7 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-full bg-[var(--chat-shell-bg)] p-6">
+      <div className="flex flex-col h-full bg-white dark:bg-gray-900 p-6">
         <div className="space-y-4">
           <Skeleton className="h-8 w-1/3" />
           <Skeleton className="h-4 w-1/4" />
@@ -140,17 +140,17 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-[var(--chat-shell-bg)] p-3 sm:p-4">
-      <div className="flex flex-col h-full chat-surface-elevated border border-[var(--chat-divider)] rounded-2xl overflow-hidden">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900 p-3 sm:p-4">
+      <div className="flex flex-col h-full bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850 rounded-2xl overflow-hidden">
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[var(--chat-divider)]">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-gray-100 dark:border-gray-850">
         <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
           {/* Folder selector */}
           <Select
             value={folderId || 'none'}
             onValueChange={handleFolderChange}
           >
-            <SelectTrigger className="w-40 chat-surface border-[var(--chat-divider)] rounded-xl">
+            <SelectTrigger className="w-40 bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850 rounded-xl">
               <SelectValue placeholder="No folder" />
             </SelectTrigger>
             <SelectContent>
@@ -204,7 +204,7 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
       </div>
 
       {/* Title */}
-      <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[var(--chat-divider)]">
+      <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-gray-100 dark:border-gray-850">
         <Input
           type="text"
           value={title}

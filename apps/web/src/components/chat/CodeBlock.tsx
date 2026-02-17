@@ -48,9 +48,9 @@ export function CodeBlock({
   const languageLabel = getLanguageLabel(displayLanguage);
 
   return (
-    <div className="group relative rounded-lg overflow-hidden bg-muted/60 dark:bg-muted/40 my-3 border border-border">
+    <div className="group relative rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-850 my-3 border border-gray-100 dark:border-gray-850">
       {/* Header bar */}
-      <div className="flex items-center justify-between px-4 py-2 bg-muted/80 dark:bg-muted/60 border-b border-border">
+      <div className="flex items-center justify-between px-4 py-2 bg-gray-100 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-850">
         <div className="flex items-center gap-2">
           {filename && (
             <>
@@ -91,7 +91,7 @@ export function CodeBlock({
       <div className="overflow-x-auto">
         <pre className={cn('p-4 text-sm', showLineNumbers && 'pl-12 relative')}>
           {showLineNumbers && (
-            <div className="absolute left-0 top-0 pt-4 pb-4 px-3 text-right text-muted-foreground/60 select-none border-r border-border bg-muted/30">
+            <div className="absolute left-0 top-0 pt-4 pb-4 px-3 text-right text-muted-foreground/60 select-none border-r border-gray-100 dark:border-gray-850 bg-gray-50 dark:bg-gray-900">
               {code.split('\n').map((_, i) => (
                 <div key={i} className="leading-6">
                   {i + 1}

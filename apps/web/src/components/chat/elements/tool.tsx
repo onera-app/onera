@@ -120,7 +120,7 @@ export type ToolContentProps = ComponentProps<typeof CollapsibleContent>;
 export const ToolContent = ({ className, ...props }: ToolContentProps) => (
   <CollapsibleContent
     className={cn(
-      'data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 text-popover-foreground outline-hidden data-[state=closed]:animate-out data-[state=open]:animate-in',
+      'data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 text-gray-700 dark:text-gray-200 outline-hidden data-[state=closed]:animate-out data-[state=open]:animate-in',
       className
     )}
     {...props}
@@ -136,7 +136,7 @@ export const ToolInput = ({ className, input, ...props }: ToolInputProps) => (
     <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
       Parameters
     </h4>
-    <pre className="overflow-x-auto rounded-md bg-muted/50 p-3 font-mono text-xs">
+    <pre className="overflow-x-auto rounded-md bg-gray-50 dark:bg-gray-850 p-3 font-mono text-xs">
       {JSON.stringify(input, null, 2)}
     </pre>
   </div>
@@ -167,7 +167,7 @@ export const ToolOutput = ({
           'overflow-x-auto rounded-md text-xs [&_table]:w-full',
           errorText
             ? 'bg-destructive/10 text-destructive p-3'
-            : 'bg-muted/50 text-foreground'
+            : 'bg-gray-50 dark:bg-gray-850 text-foreground'
         )}
       >
         {errorText && <div>{errorText}</div>}

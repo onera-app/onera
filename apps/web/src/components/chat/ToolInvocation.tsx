@@ -91,9 +91,9 @@ export const ToolInvocation = memo(function ToolInvocation({
         hasError ? 'border-destructive/50 bg-destructive/5' :
           wasDenied ? 'border-status-warning/40 bg-status-warning/10' :
             needsApproval ? 'border-status-warning/40 bg-status-warning/10 ring-1 ring-status-warning/30' :
-              'border-border/50 bg-muted/30'
+              'border-gray-100 dark:border-gray-850 bg-gray-50 dark:bg-gray-900'
       )}>
-        <CollapsibleTrigger className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-muted/50 transition-colors">
+        <CollapsibleTrigger className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors">
           <ChevronRight
             className={cn(
               'h-4 w-4 shrink-0 transition-transform duration-200',
@@ -116,12 +116,12 @@ export const ToolInvocation = memo(function ToolInvocation({
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <div className="border-t border-border/50 px-4 py-3 space-y-3">
+          <div className="border-t border-gray-100 dark:border-gray-850 px-4 py-3 space-y-3">
             {/* Input/Arguments */}
             {tool.args !== undefined && (
               <div>
                 <div className="text-xs font-medium text-muted-foreground mb-1">Input</div>
-                <pre className="text-xs bg-background/50 rounded p-2 overflow-x-auto">
+                <pre className="text-xs bg-gray-50 dark:bg-gray-900 rounded p-2 overflow-x-auto">
                   {typeof tool.args === 'string' ? tool.args : JSON.stringify(tool.args, null, 2)}
                 </pre>
               </div>
@@ -131,7 +131,7 @@ export const ToolInvocation = memo(function ToolInvocation({
             {tool.state === 'output-available' && tool.result !== undefined && (
               <div>
                 <div className="text-xs font-medium text-muted-foreground mb-1">Output</div>
-                <pre className="text-xs bg-background/50 rounded p-2 overflow-x-auto max-h-48 overflow-y-auto">
+                <pre className="text-xs bg-gray-50 dark:bg-gray-900 rounded p-2 overflow-x-auto max-h-48 overflow-y-auto">
                   {typeof tool.result === 'string'
                     ? tool.result
                     : JSON.stringify(tool.result, null, 2)}
@@ -166,7 +166,7 @@ export const ToolInvocation = memo(function ToolInvocation({
 
             {/* Approval buttons */}
             {needsApproval && onApprove && onDeny && (
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/50 mt-3">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-850 mt-3">
                 <Button
                   variant="ghost"
                   size="sm"

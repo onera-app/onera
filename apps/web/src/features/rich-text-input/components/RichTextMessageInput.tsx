@@ -219,8 +219,8 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
         class: cn(
           "prose prose-base dark:prose-invert max-w-none",
           "focus:outline-none min-h-[24px] max-h-[120px]",
-          "[&_p]:my-0 [&_code]:bg-muted [&_code]:px-1 [&_code]:rounded",
-          "[&_pre]:bg-muted [&_pre]:p-2 [&_pre]:rounded-lg [&_pre]:text-base",
+          "[&_p]:my-0 [&_code]:bg-gray-100 dark:[&_code]:bg-gray-850 [&_code]:px-1 [&_code]:rounded",
+          "[&_pre]:bg-gray-100 dark:[&_pre]:bg-gray-850 [&_pre]:p-2 [&_pre]:rounded-lg [&_pre]:text-base",
           "overflow-y-auto",
         ),
       },
@@ -457,7 +457,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
       <div
         ref={containerRef}
         className={cn(
-          "relative rounded-3xl overflow-hidden chat-surface-elevated",
+          "relative rounded-3xl overflow-hidden bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850",
           "shadow-[0_10px_36px_rgba(28,28,30,0.14)]",
           "transition-all duration-200",
           "focus-within:ring-2 focus-within:ring-[var(--chat-focus)]",
@@ -500,7 +500,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
               onFilesSelected={handleFilesSelected}
               disabled={disabled || isStreaming}
             />
-            <div className="w-px h-5 bg-[var(--chat-divider)] mx-1" />
+            <div className="w-px h-5 bg-gray-200 dark:bg-gray-800 mx-1" />
             <SearchToggle
               enabled={searchEnabled}
               onToggle={setSearchEnabled}
@@ -536,7 +536,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
                       "h-10 w-10 lg:h-11 lg:w-11 rounded-2xl transition-all duration-200 shadow-md",
                       canSend && !disabled
                         ? "bg-foreground text-background hover:bg-foreground/90 hover:scale-105"
-                        : "bg-[var(--chat-muted)] text-muted-foreground cursor-not-allowed",
+                        : "bg-gray-100 dark:bg-gray-850 text-muted-foreground cursor-not-allowed",
                     )}
                   >
                     <ArrowUp className="h-4 w-4" strokeWidth={2.5} />

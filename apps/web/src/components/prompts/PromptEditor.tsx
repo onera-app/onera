@@ -96,7 +96,7 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
 
   if (isLoading && !isNew) {
     return (
-      <div className="flex flex-col h-full bg-[var(--chat-shell-bg)] p-6">
+      <div className="flex flex-col h-full bg-white dark:bg-gray-900 p-6">
         <div className="space-y-4">
           <Skeleton className="h-8 w-1/3" />
           <Skeleton className="h-4 w-1/4" />
@@ -120,10 +120,10 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
   }
 
   return (
-    <div className="flex flex-col h-full bg-[var(--chat-shell-bg)] p-3 sm:p-4">
-      <div className="flex flex-col h-full chat-surface-elevated border border-[var(--chat-divider)] rounded-2xl overflow-hidden">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900 p-3 sm:p-4">
+      <div className="flex flex-col h-full bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850 rounded-2xl overflow-hidden">
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[var(--chat-divider)]">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-gray-100 dark:border-gray-850">
         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
           <h2 className="text-base sm:text-lg font-semibold">
             {isNew ? 'New Prompt' : 'Edit Prompt'}
@@ -172,7 +172,7 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
             value={name}
             onChange={(e) => handleChange(setName)(e.target.value)}
             placeholder="e.g., Code Review Helper"
-            className="chat-surface border-[var(--chat-divider)] rounded-xl"
+            className="bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850 rounded-xl"
           />
         </div>
 
@@ -185,7 +185,7 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
             value={description}
             onChange={(e) => handleChange(setDescription)(e.target.value)}
             placeholder="Brief description of what this prompt does"
-            className="chat-surface border-[var(--chat-divider)] rounded-xl"
+            className="bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850 rounded-xl"
           />
         </div>
 
@@ -203,7 +203,7 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
             onChange={(e) => handleChange(setContent)(e.target.value)}
             placeholder="Enter your prompt template here..."
             rows={12}
-            className="font-mono text-sm resize-none chat-surface border-[var(--chat-divider)] rounded-xl"
+            className="font-mono text-sm resize-none bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850 rounded-xl"
           />
         </div>
       </div>

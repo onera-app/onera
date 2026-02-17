@@ -55,7 +55,7 @@ export function UsageMeter({
 
       {/* Progress Bar - only for limited plans */}
       {!isUnlimited && (
-        <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+        <div className="h-1.5 rounded-full bg-gray-100 dark:bg-gray-850 overflow-hidden">
           <div className="flex h-full">
             <div
               className={cn(

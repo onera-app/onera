@@ -64,11 +64,11 @@ export function AppLayout() {
     shouldShowUnlock,
   ]);
 
-  // Show loading state - minimal Apple-style spinner
+  // Show loading state
   if (state.kind === "loading") {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="w-8 h-8 rounded-full border-2 border-[var(--chat-divider)] border-t-foreground/50 animate-spin" />
+      <div className="flex items-center justify-center min-h-screen bg-white dark:bg-gray-900">
+        <div className="w-5 h-5 rounded-full border-2 border-gray-200 dark:border-gray-800 border-t-gray-600 dark:border-t-gray-400 animate-spin" />
       </div>
     );
   }
@@ -82,10 +82,9 @@ export function AppLayout() {
     <TooltipProvider>
       <div
         className={cn(
-          "flex h-dvh w-full relative overflow-x-hidden overflow-y-hidden",
+          "text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-900 h-screen max-h-[100dvh] overflow-hidden flex flex-row",
           `chat-density-${chatDensity}`,
         )}
-        style={{ background: "var(--chat-shell-bg)" }}
       >
         {/* Sidebar */}
         <Sidebar />
@@ -101,10 +100,10 @@ export function AppLayout() {
         {/* E2EE Setup Modal */}
         {shouldShowSetup && <E2EESetupModal />}
 
-        {/* E2EE Unlock Modal - show when locked or unlocking */}
+        {/* E2EE Unlock Modal */}
         {shouldShowUnlock && <E2EEUnlockModal />}
 
-        {/* Onboarding Completion Modal - show when unlocked but no unlock method set up */}
+        {/* Onboarding Completion Modal */}
         {shouldShowOnboardingCompletion && !onboardingCompletedThisSession && (
           <OnboardingCompletionModal
             open={true}

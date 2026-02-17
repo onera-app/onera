@@ -48,7 +48,7 @@ export function EmptyState({
     <div className={cn('text-center', styles.container, className)}>
       <div
         className={cn(
-          'mx-auto mb-3 flex items-center justify-center bg-muted/50',
+          'mx-auto mb-3 flex items-center justify-center bg-gray-100 dark:bg-gray-850',
           styles.iconWrapper
         )}
       >

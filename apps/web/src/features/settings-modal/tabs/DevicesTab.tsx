@@ -134,10 +134,10 @@ export function DevicesTab() {
               return (
                 <div
                   key={device.id}
-                  className="flex items-center justify-between p-3 rounded-lg border bg-card"
+                  className="flex items-center justify-between p-3 rounded-lg border bg-white dark:bg-gray-850"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-muted">
+                    <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-850">
                       <DeviceIcon className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>

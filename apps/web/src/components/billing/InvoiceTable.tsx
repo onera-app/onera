@@ -26,7 +26,7 @@ export function InvoiceTable({ invoices, isLoading }: InvoiceTableProps) {
     return (
       <div className="animate-pulse space-y-3">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="h-12 rounded-lg bg-secondary" />
+          <div key={i} className="h-12 rounded-lg bg-gray-100 dark:bg-gray-800" />
         ))}
       </div>
     );
@@ -44,7 +44,7 @@ export function InvoiceTable({ invoices, isLoading }: InvoiceTableProps) {
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-border">
+          <tr className="border-b border-gray-100 dark:border-gray-850">
             <th className="pb-2 text-left font-medium text-muted-foreground">
               Date
             </th>
@@ -59,7 +59,7 @@ export function InvoiceTable({ invoices, isLoading }: InvoiceTableProps) {
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-border">
+        <tbody className="divide-y divide-gray-100 dark:divide-gray-850">
           {invoices.map((invoice) => (
             <tr key={invoice.id}>
               <td className="py-3">
@@ -76,7 +76,7 @@ export function InvoiceTable({ invoices, isLoading }: InvoiceTableProps) {
                 <span
                   className={cn(
                     "inline-flex rounded-full px-2 py-0.5 text-xs font-medium",
-                    statusColors[invoice.status] || "bg-secondary text-foreground"
+                    statusColors[invoice.status] || "bg-gray-100 dark:bg-gray-800 text-foreground"
                   )}
                 >
                   {invoice.status}

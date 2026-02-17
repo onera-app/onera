@@ -70,13 +70,13 @@ export function ArtifactsPanel({
   return (
     <div
       className={cn(
-        'w-full md:w-[500px] border-l border-border bg-background flex flex-col',
+        'w-full md:w-[500px] border-l border-gray-100 dark:border-gray-850 bg-white dark:bg-gray-900 flex flex-col',
         'animate-in slide-in-from-right duration-200',
         className
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-850">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose}>
             <X className="h-4 w-4" />
@@ -120,7 +120,7 @@ export function ArtifactsPanel({
 
       {/* Tabs - show when more than 3 artifacts */}
       {artifacts.length > 3 && (
-        <div className="flex gap-1 px-4 py-2 border-b border-border overflow-x-auto">
+        <div className="flex gap-1 px-4 py-2 border-b border-gray-100 dark:border-gray-850 overflow-x-auto">
           {artifacts.map((artifact) => (
             <Button
               key={artifact.id}
@@ -185,10 +185,10 @@ function ArtifactContent({ artifact, isEditable, onSave }: ArtifactContentProps)
 
     case 'html':
       return (
-        <div className="rounded-lg border border-border overflow-hidden">
+        <div className="rounded-lg border border-gray-100 dark:border-gray-850 overflow-hidden">
           <iframe
             srcDoc={artifact.content}
-            className="w-full min-h-[400px] bg-background"
+            className="w-full min-h-[400px] bg-white dark:bg-gray-900"
             sandbox="allow-scripts"
             title={artifact.title}
           />
@@ -197,7 +197,7 @@ function ArtifactContent({ artifact, isEditable, onSave }: ArtifactContentProps)
 
     case 'image':
       return (
-        <div className="rounded-lg border border-border overflow-hidden">
+        <div className="rounded-lg border border-gray-100 dark:border-gray-850 overflow-hidden">
           <img
             src={artifact.content}
             alt={artifact.title}
@@ -208,7 +208,7 @@ function ArtifactContent({ artifact, isEditable, onSave }: ArtifactContentProps)
 
     default:
       return (
-        <pre className="p-4 bg-muted rounded-lg overflow-x-auto text-sm whitespace-pre-wrap">
+        <pre className="p-4 bg-gray-100 dark:bg-gray-850 rounded-lg overflow-x-auto text-sm whitespace-pre-wrap">
           {artifact.content}
         </pre>
       );

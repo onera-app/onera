@@ -82,8 +82,8 @@ export const MentionList = forwardRef<MentionListRef, MentionListProps>(
                 'w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm text-left',
                 'transition-colors',
                 index === selectedIndex
-                  ? 'bg-accent text-accent-foreground'
-                  : 'hover:bg-muted'
+                  ? 'bg-gray-100 dark:bg-gray-850 text-gray-900 dark:text-gray-100'
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-850'
               )}
             >
               <span className="font-medium">{item.name}</span>

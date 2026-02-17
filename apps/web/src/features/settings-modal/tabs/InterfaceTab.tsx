@@ -121,7 +121,7 @@ export function InterfaceTab() {
                 'px-4 py-2 rounded-md text-sm font-medium transition-colors',
                 chatDensity === d.value
                   ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  : 'bg-gray-100 dark:bg-gray-850 text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800'
               )}
             >
               {d.label}

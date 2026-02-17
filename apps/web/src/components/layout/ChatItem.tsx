@@ -103,7 +103,7 @@ export const ChatItem = memo(function ChatItem({
 
     const dragImage = document.createElement("div");
     dragImage.className =
-      "px-3 py-2 bg-card rounded-lg text-base text-foreground shadow-lg max-w-[220px] truncate";
+      "px-3 py-2 bg-gray-850 dark:bg-gray-800 rounded-xl text-sm text-gray-200 shadow-lg max-w-[220px] truncate";
     dragImage.textContent =
       title.length > 30 ? title.slice(0, 30) + "..." : title;
     dragImage.style.position = "absolute";
@@ -133,7 +133,7 @@ export const ChatItem = memo(function ChatItem({
             if (e.key === "Escape") handleCancelEdit();
           }}
           onBlur={handleCancelEdit}
-          className="w-full h-10 lg:h-11 px-3.5 rounded-lg bg-sidebar-accent text-base lg:text-base text-sidebar-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring transition-colors"
+          className="w-full h-8 px-3 rounded-xl bg-gray-100 dark:bg-gray-850 text-sm text-gray-900 dark:text-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
         />
       </div>
     );
@@ -155,16 +155,16 @@ export const ChatItem = memo(function ChatItem({
           params={{ chatId: id }}
           search={{ pending: false }}
           className={cn(
-            "relative flex items-center w-full h-10 lg:h-11 px-3 rounded-xl text-base lg:text-base transition-colors overflow-hidden",
+            "relative flex items-center w-full px-2.5 py-2 rounded-2xl text-sm transition-colors overflow-hidden",
             isActive
-              ? "bg-sidebar-accent/85 text-sidebar-foreground shadow-sm"
-              : "text-sidebar-foreground/90 hover:text-sidebar-foreground hover:bg-sidebar-accent",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background",
+              ? "bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-200"
+              : "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           )}
         >
           {/* Lock indicator */}
           {isLocked && (
-            <Lock className="w-4 h-4 mr-2 flex-shrink-0 text-sidebar-foreground/60" />
+            <Lock className="w-3.5 h-3.5 mr-2 flex-shrink-0 text-gray-400 dark:text-gray-600" />
           )}
 
           {/* Title container */}
@@ -178,7 +178,7 @@ export const ChatItem = memo(function ChatItem({
           </div>
         </Link>
 
-        {/* Menu trigger - OpenWebUI style */}
+        {/* Menu trigger — Open WebUI style */}
         <div
           className={cn(
             "absolute right-2 top-1/2 -translate-y-1/2 flex items-center",
@@ -191,7 +191,7 @@ export const ChatItem = memo(function ChatItem({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className="p-1.5 rounded-xl text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+                className="p-1 rounded-lg text-gray-400 dark:text-gray-600 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors focus-visible:outline-none"
                 onClick={(e) => e.preventDefault()}
               >
                 <MoreHorizontal className="h-4 w-4" />
@@ -239,8 +239,6 @@ export const ChatItem = memo(function ChatItem({
         </div>
       </div>
 
-      {/* Only render AlertDialog when needed to avoid Radix UI overhead */}
-      {/* Only render AlertDialog when needed to avoid Radix UI overhead */}
       {showDeleteDialog && (
         <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
           <AlertDialogContent className="max-w-sm">

@@ -72,7 +72,7 @@ export const MessageMetadata = memo(function MessageMetadata({
               {completionTokens !== undefined && (
                 <div>Completion: {formatTokenCount(completionTokens)}</div>
               )}
-              <div className="border-t border-border pt-1 mt-1">
+              <div className="border-t border-gray-100 dark:border-gray-850 pt-1 mt-1">
                 Total: {formatTokenCount(totalTokens)}
               </div>
             </div>

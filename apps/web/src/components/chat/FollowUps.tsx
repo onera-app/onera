@@ -22,9 +22,9 @@ export const FollowUps = memo(function FollowUps({ followUps, onSelect, classNam
           className={cn(
             'group h-auto justify-start whitespace-normal text-left',
             'px-3 sm:px-4 py-2.5 sm:py-2.5 rounded-xl',
-            'bg-muted/50 hover:bg-muted',
-            'border-border hover:border-border/80',
-            'text-muted-foreground hover:text-foreground',
+            'bg-gray-50 dark:bg-gray-850 hover:bg-gray-100 dark:hover:bg-gray-850',
+            'border-gray-100 dark:border-gray-850 hover:border-gray-200 dark:hover:border-gray-800',
+            'text-gray-500 dark:text-gray-400 hover:text-foreground',
             'transition-all duration-150',
             'max-w-full'
           )}

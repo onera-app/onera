@@ -111,8 +111,7 @@ export function BillingPage() {
 
   return (
     <div
-      className="h-full overflow-y-auto"
-      style={{ background: "var(--chat-shell-bg)" }}
+      className="h-full overflow-y-auto bg-white dark:bg-gray-900"
     >
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Header */}
@@ -136,16 +135,16 @@ export function BillingPage() {
         )}
 
         {isLoading && !hasError && (
-          <div className="mb-8 rounded-2xl bg-muted/50 p-6 animate-pulse">
-            <div className="h-6 w-1/3 rounded bg-muted mb-4" />
-            <div className="h-4 w-1/2 rounded bg-muted mb-2" />
-            <div className="h-4 w-2/3 rounded bg-muted" />
+          <div className="mb-8 rounded-2xl bg-gray-50 dark:bg-gray-850 p-6 animate-pulse">
+            <div className="h-6 w-1/3 rounded bg-gray-100 dark:bg-gray-850 mb-4" />
+            <div className="h-4 w-1/2 rounded bg-gray-100 dark:bg-gray-850 mb-2" />
+            <div className="h-4 w-2/3 rounded bg-gray-100 dark:bg-gray-850" />
           </div>
         )}
 
         {/* Current Plan Card */}
         <section className="mb-8">
-          <div className="rounded-2xl chat-surface-elevated p-5 sm:p-6 border border-[var(--chat-divider)]">
+          <div className="rounded-2xl bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850 p-5 sm:p-6">
             {/* Plan Header */}
             <div className="flex items-start justify-between gap-4 mb-6">
               <div className="flex items-center gap-3">
@@ -162,7 +161,7 @@ export function BillingPage() {
                             ? "bg-status-warning/15"
                             : currentPlan?.id === "enterprise"
                               ? "bg-primary/15"
-                              : "bg-muted",
+                              : "bg-gray-100 dark:bg-gray-850",
                   )}
                 >
                   <CreditCard
@@ -233,7 +232,7 @@ export function BillingPage() {
           <h3 className="text-sm font-medium text-muted-foreground mb-4 px-1">
             What's included
           </h3>
-          <div className="rounded-2xl chat-surface p-5 sm:p-6 border border-[var(--chat-divider)]">
+          <div className="rounded-2xl bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850 p-5 sm:p-6">
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6">
               {includedFeatures.map((feature) => (
                 <li
@@ -256,7 +255,7 @@ export function BillingPage() {
             <h3 className="text-sm font-medium text-muted-foreground px-1">
               Change plan
             </h3>
-            <div className="inline-flex rounded-xl border border-[var(--chat-divider)] p-1 chat-surface">
+            <div className="inline-flex rounded-xl border border-gray-100 dark:border-gray-850 p-1 bg-gray-50 dark:bg-gray-850/50">
               <button
                 type="button"
                 onClick={() => setBillingInterval("monthly")}
@@ -297,10 +296,10 @@ export function BillingPage() {
           )}
 
           {loadingPlans ? (
-            <div className="rounded-2xl bg-muted/50 p-6 animate-pulse">
-              <div className="h-5 w-32 rounded bg-muted mb-4" />
-              <div className="h-4 w-full rounded bg-muted mb-2" />
-              <div className="h-4 w-4/5 rounded bg-muted" />
+            <div className="rounded-2xl bg-gray-50 dark:bg-gray-850 p-6 animate-pulse">
+              <div className="h-5 w-32 rounded bg-gray-100 dark:bg-gray-850 mb-4" />
+              <div className="h-4 w-full rounded bg-gray-100 dark:bg-gray-850 mb-2" />
+              <div className="h-4 w-4/5 rounded bg-gray-100 dark:bg-gray-850" />
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -344,8 +343,8 @@ export function BillingPage() {
                     className={cn(
                       "rounded-2xl border p-5 sm:p-6 flex flex-col gap-4",
                       isCurrent
-                        ? "chat-surface-elevated border-primary/40"
-                        : "chat-surface border-[var(--chat-divider)]",
+                        ? "bg-white dark:bg-gray-850 border-primary/40"
+                        : "bg-gray-50 dark:bg-gray-850/50 border-gray-100 dark:border-gray-850",
                     )}
                   >
                     <div>

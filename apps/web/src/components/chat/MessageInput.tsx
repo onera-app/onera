@@ -10,7 +10,6 @@ import {
 } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Tooltip,
@@ -56,7 +55,7 @@ export const MessageInput = memo(function MessageInput({
   // Use rich text input if enabled
   if (useRichTextInput) {
     return (
-      <div className="w-full max-w-6xl mx-auto">
+      <div className="w-full max-w-6xl mx-auto font-primary">
         <RichTextMessageInput
           onSend={onSend}
           disabled={disabled}
@@ -70,7 +69,7 @@ export const MessageInput = memo(function MessageInput({
 
   // Fallback to simple textarea input
   return (
-    <div className="w-full max-w-6xl mx-auto">
+    <div className="w-full max-w-6xl mx-auto font-primary">
       <SimpleMessageInput
         onSend={onSend}
         disabled={disabled}
@@ -83,7 +82,7 @@ export const MessageInput = memo(function MessageInput({
 });
 
 /**
- * Simple textarea-based message input (legacy)
+ * Simple textarea-based message input — Open WebUI style
  */
 const SimpleMessageInput = memo(function SimpleMessageInput({
   onSend,
@@ -92,8 +91,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
   onStop,
   isStreaming = false,
 }: MessageInputProps) {
-  // Note: We use a fixed placeholder "Send a Message" to match OpenWebUI style
-  void _placeholder; // Suppress unused variable warning
+  void _placeholder;
   const [value, setValue] = useState("");
   const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -125,7 +123,6 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
 
   // Process files and add to attachments
   const handleFilesSelected = useCallback(async (files: File[]) => {
-    // Create pending entries
     const pending: PendingAttachment[] = files.map((file) => ({
       id: uuidv4(),
       file,
@@ -134,13 +131,11 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
 
     setAttachments((prev) => [...prev, ...pending]);
 
-    // Process all files in parallel and collect results
     const results = await Promise.all(
       pending.map(async (entry) => {
         try {
           const processed = await processFile(entry.file!);
 
-          // Generate preview for images
           let preview: string | undefined;
           if (processed.type === "image") {
             preview = `data:${processed.mimeType};base64,${processed.data}`;
@@ -168,7 +163,6 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
       }),
     );
 
-    // Batch update all results at once to avoid race conditions
     setAttachments((prev) =>
       prev.map((a) => {
         const result = results.find((r) => r.id === a.id);
@@ -186,12 +180,10 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
     );
   }, []);
 
-  // Remove an attachment
   const handleRemoveAttachment = useCallback((id: string) => {
     setAttachments((prev) => prev.filter((a) => a.id !== id));
   }, []);
 
-  // Handle paste for images
   const handlePaste = useCallback(
     async (e: ClipboardEvent<HTMLTextAreaElement>) => {
       const items = e.clipboardData?.items;
@@ -215,7 +207,6 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
     [handleFilesSelected],
   );
 
-  // Drag and drop handlers
   const handleDragEnter = useCallback((e: DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -225,7 +216,6 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
   const handleDragLeave = useCallback((e: DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // Only set to false if we're leaving the container
     const rect = containerRef.current?.getBoundingClientRect();
     if (rect) {
       const { clientX, clientY } = e;
@@ -268,7 +258,6 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
     if (!trimmed && readyAttachments.length === 0) return;
     if (disabled) return;
 
-    // Build options
     const options: MessageInputOptions = {};
 
     if (readyAttachments.length > 0) {
@@ -284,11 +273,9 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
 
     onSend(trimmed, Object.keys(options).length > 0 ? options : undefined);
 
-    // Reset state
     setValue("");
     setAttachments([]);
 
-    // Reset textarea height
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
@@ -314,12 +301,15 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
 
   return (
     <div className="relative w-full">
-      {/* Main input container - OpenWebUI style */}
+      {/* Main input container — Open WebUI style */}
       <div
         ref={containerRef}
         className={cn(
-          "relative rounded-3xl overflow-hidden transition-all duration-200 chat-surface-elevated shadow-[0_10px_36px_rgba(28,28,30,0.14)]",
-          isFocused && "ring-2 ring-[var(--chat-focus)]",
+          "relative flex-1 flex flex-col w-full shadow-lg rounded-3xl border transition px-1",
+          "bg-white/5 dark:bg-gray-500/5 dark:text-gray-100",
+          isFocused
+            ? "border-gray-100 dark:border-gray-800"
+            : "border-gray-100/30 dark:border-gray-850/30 hover:border-gray-200 dark:hover:border-gray-800",
           disabled && "opacity-50",
         )}
         onDragEnter={handleDragEnter}
@@ -340,8 +330,8 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
           </div>
         )}
 
-        {/* Textarea at top - OpenWebUI style */}
-        <div className="px-4 pt-2.5 pb-1">
+        {/* Textarea — Open WebUI style */}
+        <div className="px-2.5 pt-2.5 pb-1">
           <Textarea
             ref={textareaRef}
             value={value}
@@ -364,15 +354,15 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
           />
         </div>
 
-        {/* Bottom toolbar - OpenWebUI style */}
-        <div className="flex items-center justify-between px-3 pb-2 pt-1">
-          {/* Left side: attach + separator + tools */}
-          <div className="flex items-center gap-1">
+        {/* Bottom toolbar — Open WebUI style */}
+        <div className="flex justify-between mt-0.5 mb-2.5 mx-0.5 max-w-full">
+          {/* Left side: attach + divider + tools */}
+          <div className="ml-1 self-end flex items-center flex-1 max-w-[80%] gap-[0.5px]">
             <AttachmentButton
               onFilesSelected={handleFilesSelected}
               disabled={disabled || isStreaming}
             />
-            <div className="w-px h-5 bg-[var(--chat-divider)] mx-1" />
+            <div className="flex self-center w-[1px] h-4 mx-1 bg-gray-200/50 dark:bg-gray-800/50" />
             <SearchToggle
               enabled={searchEnabled}
               onToggle={setSearchEnabled}
@@ -383,37 +373,35 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
             />
           </div>
 
-          {/* Right side: send button */}
-          <div className="flex items-center gap-2">
+          {/* Right side: send button — Open WebUI primary action style */}
+          <div className="self-end flex space-x-1 mr-1 shrink-0 gap-[0.5px]">
             {isStreaming ? (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
+                  <button
                     onClick={onStop}
-                    size="icon"
-                    className="h-10 w-10 lg:h-11 lg:w-11 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                    className="bg-white hover:bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-800 transition rounded-full p-1.5 self-center"
                   >
-                    <Square className="h-3.5 w-3.5 fill-current" />
-                  </Button>
+                    <Square className="h-4 w-4 fill-current" />
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent>Stop generating</TooltipContent>
               </Tooltip>
             ) : (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
+                  <button
                     onClick={handleSubmit}
                     disabled={!canSend}
-                    size="icon"
                     className={cn(
-                      "h-10 w-10 lg:h-11 lg:w-11 rounded-full transition-colors",
+                      "transition rounded-full p-1.5 self-center",
                       canSend
-                        ? "bg-foreground text-background hover:bg-foreground/90"
-                        : "bg-[var(--chat-muted)] text-muted-foreground cursor-not-allowed",
+                        ? "bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-100"
+                        : "text-white bg-gray-200 dark:text-gray-900 dark:bg-gray-700 cursor-not-allowed",
                     )}
                   >
                     <ArrowUp className="h-4 w-4" strokeWidth={2.5} />
-                  </Button>
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent>Send message</TooltipContent>
               </Tooltip>

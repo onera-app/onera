@@ -51,17 +51,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const step = steps[currentStep];
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: "var(--chat-shell-bg)" }}
-    >
-      {/* Background decoration */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -left-1/4 -top-1/4 h-1/2 w-1/2 rounded-full bg-[var(--chat-muted)]/25 blur-3xl" />
-        <div className="absolute -bottom-1/4 -right-1/4 h-1/2 w-1/2 rounded-full bg-[var(--chat-muted)]/20 blur-3xl" />
-      </div>
-
-      <div className="relative w-full max-w-lg rounded-3xl chat-surface-elevated p-6 sm:p-8">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-white dark:bg-gray-900">
+      <div className="relative w-full max-w-lg rounded-3xl bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850 p-6 sm:p-8">
         {/* Progress indicator */}
         <div className="mb-8 flex justify-center gap-2">
           {steps.map((_, index) => (
@@ -73,7 +64,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   ? "w-8 bg-primary"
                   : index < currentStep
                     ? "w-4 bg-primary/50"
-                    : "w-4 bg-muted",
+                    : "w-4 bg-gray-200 dark:bg-gray-800",
               )}
             />
           ))}
@@ -133,7 +124,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 function WelcomeStep() {
   return (
     <div className="text-center">
-      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl chat-surface">
+      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850">
         <MessageSquare className="h-9 w-9 text-foreground/80" />
       </div>
       <h1 className="text-3xl font-bold tracking-tight mb-3">
@@ -212,7 +203,7 @@ function Feature({
   text: string;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl chat-surface p-3">
+    <div className="flex items-center gap-3 rounded-xl bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850 p-3">
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/12">
         <Icon className="h-4 w-4 text-primary" />
       </div>

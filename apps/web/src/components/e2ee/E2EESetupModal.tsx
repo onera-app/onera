@@ -29,7 +29,7 @@ export function E2EESetupModal() {
   return (
     <>
       <Dialog open onOpenChange={(open) => !open && setShowSignOutConfirm(true)}>
-        <DialogContent className="sm:max-w-md chat-surface-elevated border-[var(--chat-divider)]" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="sm:max-w-md bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />

@@ -160,12 +160,12 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-4xl h-[600px] p-0 overflow-hidden"
+        className="max-w-4xl h-[600px] p-0 overflow-hidden rounded-[2rem]"
         hideCloseButton
       >
         <div className="flex h-full">
           {/* Left Panel - Search & Results */}
-          <div className="flex-1 flex flex-col border-r border-border">
+          <div className="flex-1 flex flex-col border-r border-gray-100 dark:border-gray-850">
             {/* Search Input */}
             <div className="p-4">
               <div className="relative">
@@ -176,12 +176,12 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                   placeholder="Search conversations..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-12 pl-12 pr-12 rounded-xl bg-muted border border-border text-foreground text-base placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-all"
+                    className="w-full h-12 pl-12 pr-12 rounded-xl bg-gray-100 dark:bg-gray-850 border border-gray-100 dark:border-gray-850 text-foreground text-base placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-all"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -192,26 +192,26 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             {/* Search Hints */}
             {!searchQuery && (
               <div className="px-4 pb-4">
-                <div className="p-3 rounded-xl bg-muted/50 border border-border">
+                <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-850 border border-gray-100 dark:border-gray-850">
                   <div className="text-xs font-medium text-muted-foreground mb-2">
                     Quick filters
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => setSearchQuery("pinned:")}
-                      className="px-3 py-1.5 rounded-lg bg-muted text-xs text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                      className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-850 text-xs text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-850 hover:text-foreground transition-colors"
                     >
                       pinned:
                     </button>
                     <button
                       onClick={() => setSearchQuery("folder:")}
-                      className="px-3 py-1.5 rounded-lg bg-muted text-xs text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                      className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-850 text-xs text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-850 hover:text-foreground transition-colors"
                     >
                       folder:
                     </button>
                     <button
                       onClick={() => setSearchQuery("tag:")}
-                      className="px-3 py-1.5 rounded-lg bg-muted text-xs text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                      className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-850 text-xs text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-850 hover:text-foreground transition-colors"
                     >
                       tag:
                     </button>
@@ -224,7 +224,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             <div className="flex-1 overflow-y-auto px-3">
               {filteredChats.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground pb-20">
-                  <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
+                    <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-850 flex items-center justify-center mb-4">
                     <MessageSquare className="h-8 w-8 text-muted-foreground/60" />
                   </div>
                   <p className="text-sm font-medium text-foreground mb-1">
@@ -253,8 +253,8 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                               className={cn(
                                 "w-full flex items-center gap-3 px-3 h-10 rounded-xl text-left transition-all duration-150",
                                 selectedChatId === chat.id
-                                  ? "bg-accent text-foreground"
-                                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+                                  ? "bg-gray-100 dark:bg-gray-850 text-foreground"
+                                  : "text-muted-foreground hover:bg-gray-100/50 dark:hover:bg-gray-850/50 hover:text-foreground",
                               )}
                             >
                               <span className="flex-1 truncate text-sm">
@@ -271,16 +271,16 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             </div>
 
             {/* Footer hint */}
-            <div className="px-4 py-3 border-t border-border">
+            <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-850">
               <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1.5">
-                  <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-xs">
+                    <kbd className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-850 text-muted-foreground font-mono text-xs">
                     ↵
                   </kbd>
                   <span>open</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono text-xs">
+                    <kbd className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-850 text-muted-foreground font-mono text-xs">
                     esc
                   </kbd>
                   <span>close</span>
@@ -290,11 +290,11 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
           </div>
 
           {/* Right Panel - Preview */}
-          <div className="w-80 flex flex-col bg-muted/30">
+          <div className="w-80 flex flex-col bg-gray-50 dark:bg-gray-900">
             {selectedChat ? (
               <div className="flex-1 flex flex-col p-5">
                 {/* Chat icon */}
-                <div className="w-12 h-12 rounded-xl chat-surface flex items-center justify-center mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850 flex items-center justify-center mb-4">
                   <MessageSquare className="h-5 w-5 text-muted-foreground" />
                 </div>
 
@@ -322,7 +322,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
               </div>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
-                <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
+                <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-gray-850 flex items-center justify-center mb-4">
                   <Search className="h-7 w-7 text-muted-foreground" />
                 </div>
                 <p className="text-sm text-muted-foreground">

@@ -25,7 +25,7 @@ export const ChatNavbar = memo(function ChatNavbar({
             size="icon"
             onClick={toggleSidebar}
             title="Open sidebar"
-            className="text-muted-foreground hover:text-foreground hover:bg-foreground/[0.06] h-9 w-9 flex-shrink-0 rounded-xl transition-all duration-200"
+            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-850 h-9 w-9 flex-shrink-0 rounded-xl transition-colors"
           >
             <Menu className="h-[18px] w-[18px]" />
           </Button>
@@ -42,7 +42,7 @@ export const ChatNavbar = memo(function ChatNavbar({
           size="sm"
           onClick={() => navigate({ to: "/app" })}
           title="New chat"
-          className="text-muted-foreground hover:text-foreground hover:bg-foreground/[0.06] hidden sm:flex h-8 px-3 rounded-xl transition-all duration-200 gap-1.5"
+          className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-850 hidden sm:flex h-8 px-3 rounded-xl transition-colors gap-1.5"
         >
           <Plus className="h-4 w-4" />
           <span className="text-sm">New</span>
@@ -53,7 +53,7 @@ export const ChatNavbar = memo(function ChatNavbar({
           size="icon"
           onClick={() => navigate({ to: "/app" })}
           title="New chat"
-          className="text-muted-foreground hover:text-foreground hover:bg-foreground/[0.06] sm:hidden h-8 w-8 rounded-xl transition-all duration-200"
+          className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-850 sm:hidden h-8 w-8 rounded-xl transition-colors"
         >
           <Plus className="h-[18px] w-[18px]" />
         </Button>

@@ -80,9 +80,9 @@ export const TextArtifact = memo(function TextArtifact({
     : content;
 
   return (
-    <div className={cn('rounded-lg border border-border overflow-hidden', className)}>
+    <div className={cn('rounded-lg border border-gray-100 dark:border-gray-850 overflow-hidden', className)}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 bg-muted/50 border-b border-border">
+      <div className="flex items-center justify-between px-4 py-2 bg-gray-50 dark:bg-gray-850 border-b border-gray-100 dark:border-gray-850">
         <div className="flex items-center gap-2">
           {title && (
             <span className="text-sm font-medium text-foreground">{title}</span>

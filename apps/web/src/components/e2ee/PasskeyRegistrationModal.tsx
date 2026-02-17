@@ -152,7 +152,7 @@ export function PasskeyRegistrationModal({
             </DialogHeader>
 
             <div className="space-y-4 py-4">
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-850">
                 <Smartphone className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Device Passkey</p>
@@ -162,7 +162,7 @@ export function PasskeyRegistrationModal({
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-850">
                 <Cloud className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Synced Passkey</p>
