@@ -276,10 +276,10 @@ export const UserMessage = memo(function UserMessage({
                   className={cn(
                     "flex items-center gap-2 px-3 py-2 rounded-lg",
                     "bg-gray-50 dark:bg-gray-850 hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors",
-                    "text-sm text-foreground",
+                    "text-sm text-gray-900 dark:text-gray-100",
                   )}
                 >
-                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <FileText className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                   <span className="truncate max-w-[200px]">{doc.fileName}</span>
                 </a>
               ))}
@@ -288,14 +288,14 @@ export const UserMessage = memo(function UserMessage({
 
           {/* Text bubble - refined with subtle background, fully rounded */}
           {textContent && (
-            <div className="inline-block w-fit rounded-[22px] px-4 py-2.5 text-left bg-[var(--chat-pill)] text-foreground select-text chat-soft-border">
+            <div className="inline-block w-fit rounded-[22px] px-4 py-2.5 text-left bg-[var(--chat-pill)] text-gray-900 dark:text-gray-100 select-text chat-soft-border">
               <span className="whitespace-pre-wrap break-words text-base lg:text-lg leading-[1.55] tracking-[-0.01em]">
                 {textContent}
               </span>
             </div>
           )}
           {edited && (
-            <span className="text-xs text-muted-foreground mt-1 text-right">
+            <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-right">
               edited
             </span>
           )}

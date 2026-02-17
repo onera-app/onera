@@ -110,8 +110,8 @@ export function getProviderStyle(modelOrProvider?: string): ProviderStyle {
       id: 'unknown',
       letter: 'AI',
       name: 'Assistant',
-      bgClass: 'bg-muted',
-      textClass: 'text-muted-foreground',
+      bgClass: 'bg-gray-100 dark:bg-gray-850',
+      textClass: 'text-gray-500 dark:text-gray-400',
     };
   }
 
@@ -143,8 +143,8 @@ export function getProviderStyle(modelOrProvider?: string): ProviderStyle {
     id: 'unknown',
     letter: 'AI',
     name: formatModelName(modelOrProvider),
-    bgClass: 'bg-muted',
-    textClass: 'text-muted-foreground',
+    bgClass: 'bg-gray-100 dark:bg-gray-850',
+    textClass: 'text-gray-500 dark:text-gray-400',
   };
 }
 

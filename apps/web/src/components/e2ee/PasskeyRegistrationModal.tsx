@@ -123,7 +123,7 @@ export function PasskeyRegistrationModal({
           </DialogHeader>
 
           <div className="py-4">
-            <p className="text-sm text-muted-foreground">{reason}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{reason}</p>
           </div>
 
           <DialogFooter>
@@ -156,7 +156,7 @@ export function PasskeyRegistrationModal({
                 <Smartphone className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Device Passkey</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     Works only on this device. Fastest and most secure.
                   </p>
                 </div>
@@ -166,13 +166,13 @@ export function PasskeyRegistrationModal({
                 <Cloud className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Synced Passkey</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     Synced via iCloud or Google. Works across your devices.
                   </p>
                 </div>
               </div>
 
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Your device will automatically choose the best option.
               </p>
             </div>
@@ -206,7 +206,7 @@ export function PasskeyRegistrationModal({
                   onChange={(e) => setPasskeyName(e.target.value)}
                   autoFocus
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   Leave empty to use the default name.
                 </p>
               </div>
@@ -236,7 +236,7 @@ export function PasskeyRegistrationModal({
 
             <div className="flex flex-col items-center justify-center py-8">
               <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-              <p className="text-sm text-muted-foreground text-center">
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
                 Use Face ID, Touch ID, or your device PIN when prompted...
               </p>
             </div>
@@ -257,7 +257,7 @@ export function PasskeyRegistrationModal({
             </DialogHeader>
 
             <div className="py-4">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 You can now use this passkey to unlock your encryption on this
                 device. It's faster and more convenient than entering your
                 recovery phrase.
@@ -284,7 +284,7 @@ export function PasskeyRegistrationModal({
             </DialogHeader>
 
             <div className="py-4">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {errorMessage || "An unknown error occurred."}
               </p>
             </div>

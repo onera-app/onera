@@ -111,7 +111,7 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
   if (!prompt && !isNew) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-center text-muted-foreground">
+        <div className="text-center text-gray-500 dark:text-gray-400">
           <MessageSquareText className="w-16 h-16 mx-auto mb-4 opacity-50" />
           <p>Select a prompt to edit</p>
         </div>
@@ -129,7 +129,7 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
             {isNew ? 'New Prompt' : 'Edit Prompt'}
           </h2>
           {!isNew && prompt && (
-            <span className="text-xs text-muted-foreground truncate">
+            <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
               Updated {dayjs(prompt.updatedAt).format('MMM D, YYYY h:mm A')}
             </span>
           )}
@@ -194,7 +194,7 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
           <Label htmlFor="content">
             Content <span className="text-destructive">*</span>
           </Label>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             Use {'{{variable}}'} syntax for placeholders that will be filled in when using the prompt.
           </p>
           <Textarea

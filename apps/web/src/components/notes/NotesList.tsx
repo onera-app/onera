@@ -112,7 +112,7 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
               checked={showArchived}
               onCheckedChange={(checked) => setShowArchived(checked === true)}
             />
-            <Label htmlFor="show-archived" className="text-sm text-muted-foreground cursor-pointer">
+            <Label htmlFor="show-archived" className="text-sm text-gray-500 dark:text-gray-400 cursor-pointer">
               Show archived
             </Label>
           </div>
@@ -154,7 +154,7 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
                       <h3 className="font-medium truncate">
                         {getTitle(note)}
                       </h3>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {dayjs(note.updatedAt).format('MMM D, YYYY h:mm A')}
                       </p>
                     </div>
@@ -165,7 +165,7 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
                         e.stopPropagation();
                         setDeleteNoteId(note.id);
                       }}
-                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
+                      className="opacity-0 group-hover:opacity-100 text-gray-500 dark:text-gray-400 hover:text-destructive"
                     >
                       <Trash2 />
                     </Button>

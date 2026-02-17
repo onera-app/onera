@@ -87,9 +87,9 @@ function AttachmentItem({ attachment, onRemove }: AttachmentItemProps) {
             isImage ? "w-full h-full" : "",
           )}
         >
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          <Loader2 className="h-5 w-5 animate-spin text-gray-500 dark:text-gray-400" />
           {!isImage && (
-            <span className="text-xs text-muted-foreground ml-2 truncate max-w-[120px]">
+            <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 truncate max-w-[120px]">
               Processing...
             </span>
           )}
@@ -122,7 +122,7 @@ function AttachmentItem({ attachment, onRemove }: AttachmentItemProps) {
               {fileName}
             </span>
             {processed?.metadata?.pageCount && (
-              <span className="text-micro text-muted-foreground">
+              <span className="text-micro text-gray-500 dark:text-gray-400">
                 {processed.metadata.pageCount} pages
               </span>
             )}
@@ -140,9 +140,9 @@ function FileIcon({ type }: { type: string }) {
     case "document":
       return <FileText className="h-4 w-4 text-primary flex-shrink-0" />;
     case "text":
-      return <File className="h-4 w-4 text-muted-foreground flex-shrink-0" />;
+      return <File className="h-4 w-4 text-gray-500 dark:text-gray-400 flex-shrink-0" />;
     default:
-      return <File className="h-4 w-4 text-muted-foreground flex-shrink-0" />;
+      return <File className="h-4 w-4 text-gray-500 dark:text-gray-400 flex-shrink-0" />;
   }
 }
 
@@ -184,7 +184,7 @@ export function MessageAttachment({
       <div className="flex flex-col">
         <span className="text-sm font-medium">{fileName}</span>
         {metadata?.pageCount && (
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs text-gray-500 dark:text-gray-400">
             {metadata.pageCount} pages
           </span>
         )}

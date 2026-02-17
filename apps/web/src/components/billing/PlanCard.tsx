@@ -83,16 +83,16 @@ export function PlanCard({
 
       <div className="mb-6">
         <h3 className="text-xl font-semibold">{name}</h3>
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{description}</p>
       </div>
 
       <div className="mb-6">
         <span className="text-4xl font-bold">
           {formatPrice(monthlyEquivalent)}
         </span>
-        <span className="text-muted-foreground">/mo</span>
+        <span className="text-gray-500 dark:text-gray-400">/mo</span>
         {billingInterval === "yearly" && monthlyPrice > 0 && (
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {formatPrice(yearlyPrice)} billed yearly
           </p>
         )}

@@ -16,7 +16,7 @@ export function RouteErrorFallback({ error, reset }: RouteErrorFallbackProps) {
           <AlertTriangle className="h-5 w-5" />
           <h1 className="font-semibold">Page failed to load</h1>
         </div>
-        <p className="text-sm text-muted-foreground">{message}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{message}</p>
         <div className="flex gap-2">
           <Button onClick={() => (reset ? reset() : window.location.reload())} className="flex-1">
             Reload

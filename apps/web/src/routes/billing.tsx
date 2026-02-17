@@ -116,7 +116,7 @@ export function BillingPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Header */}
         <header className="mb-8 sm:mb-10">
-          <h1 className="text-2xl sm:text-3xl font-semibold tracking-[-0.02em] text-foreground">
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-[-0.02em] text-gray-900 dark:text-gray-100">
             Billing
           </h1>
           <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">
@@ -182,7 +182,7 @@ export function BillingPage() {
                   />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                     {resolvedCurrentPlan?.name || "Free"}
                   </h2>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -237,7 +237,7 @@ export function BillingPage() {
               {includedFeatures.map((feature) => (
                 <li
                   key={feature}
-                  className="flex items-center gap-2.5 text-sm text-foreground/80"
+                  className="flex items-center gap-2.5 text-sm text-gray-900/80 dark:text-gray-100/80"
                 >
                   <div className="w-4 h-4 rounded-full bg-status-success/15 flex items-center justify-center flex-shrink-0">
                     <Check className="w-2.5 h-2.5 text-status-success-text" />
@@ -262,8 +262,8 @@ export function BillingPage() {
                 className={cn(
                   "px-3 py-1.5 rounded-lg text-sm transition-colors",
                   billingInterval === "monthly"
-                    ? "bg-foreground text-background"
-                    : "text-gray-500 dark:text-gray-400 hover:text-foreground",
+                    ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100",
                 )}
               >
                 Monthly
@@ -274,8 +274,8 @@ export function BillingPage() {
                 className={cn(
                   "px-3 py-1.5 rounded-lg text-sm transition-colors",
                   billingInterval === "yearly"
-                    ? "bg-foreground text-background"
-                    : "text-gray-500 dark:text-gray-400 hover:text-foreground",
+                    ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100",
                 )}
               >
                 Yearly
@@ -348,12 +348,12 @@ export function BillingPage() {
                     )}
                   >
                     <div>
-                      <h4 className="text-lg font-semibold text-foreground">{plan.name}</h4>
+                      <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{plan.name}</h4>
                       <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{plan.description}</p>
                     </div>
 
                     <div>
-                      <span className="text-3xl font-semibold text-foreground">
+                      <span className="text-3xl font-semibold text-gray-900 dark:text-gray-100">
                         ${Math.round(monthlyEquivalent / 100)}
                       </span>
                       <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">/mo</span>
@@ -368,7 +368,7 @@ export function BillingPage() {
                       {planBenefits.map((benefit) => (
                         <li
                           key={`${plan.id}-${benefit}`}
-                          className="flex items-center gap-2 text-sm text-foreground/85"
+                          className="flex items-center gap-2 text-sm text-gray-900/85 dark:text-gray-100/85"
                         >
                           <Check className="w-3.5 h-3.5 text-status-success-text flex-shrink-0" />
                           {benefit}

@@ -169,19 +169,19 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             {/* Search Input */}
             <div className="p-4">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-gray-400" />
                 <input
                   ref={inputRef}
                   type="text"
                   placeholder="Search conversations..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full h-12 pl-12 pr-12 rounded-xl bg-gray-100 dark:bg-gray-850 border border-gray-100 dark:border-gray-850 text-foreground text-base placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-all"
+                    className="w-full h-12 pl-12 pr-12 rounded-xl bg-gray-100 dark:bg-gray-850 border border-gray-100 dark:border-gray-850 text-gray-900 dark:text-gray-100 text-base placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-all"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -193,25 +193,25 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             {!searchQuery && (
               <div className="px-4 pb-4">
                 <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-850 border border-gray-100 dark:border-gray-850">
-                  <div className="text-xs font-medium text-muted-foreground mb-2">
+                  <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
                     Quick filters
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => setSearchQuery("pinned:")}
-                      className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-850 text-xs text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-850 hover:text-foreground transition-colors"
+                      className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-850 text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-850 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
                     >
                       pinned:
                     </button>
                     <button
                       onClick={() => setSearchQuery("folder:")}
-                      className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-850 text-xs text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-850 hover:text-foreground transition-colors"
+                      className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-850 text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-850 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
                     >
                       folder:
                     </button>
                     <button
                       onClick={() => setSearchQuery("tag:")}
-                      className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-850 text-xs text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-850 hover:text-foreground transition-colors"
+                      className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-850 text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-850 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
                     >
                       tag:
                     </button>
@@ -223,14 +223,14 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             {/* Results List */}
             <div className="flex-1 overflow-y-auto px-3">
               {filteredChats.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-muted-foreground pb-20">
+                <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400 pb-20">
                     <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-850 flex items-center justify-center mb-4">
-                    <MessageSquare className="h-8 w-8 text-muted-foreground/60" />
+                    <MessageSquare className="h-8 w-8 text-gray-500/60 dark:text-gray-400/60" />
                   </div>
-                  <p className="text-sm font-medium text-foreground mb-1">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
                     {searchQuery ? "No results found" : "No conversations yet"}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     {searchQuery
                       ? `Try a different search term`
                       : "Start a new chat to begin"}
@@ -241,7 +241,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                   {Array.from(groupedChats.entries()).map(
                     ([group, groupChats]) => (
                       <div key={group}>
-                        <div className="px-3 py-2 text-xs font-medium text-muted-foreground">
+                        <div className="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400">
                           {DATE_GROUP_LABELS[group as DateGroup]}
                         </div>
                         <div className="space-y-0.5">
@@ -253,8 +253,8 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                               className={cn(
                                 "w-full flex items-center gap-3 px-3 h-10 rounded-xl text-left transition-all duration-150",
                                 selectedChatId === chat.id
-                                  ? "bg-gray-100 dark:bg-gray-850 text-foreground"
-                                  : "text-muted-foreground hover:bg-gray-100/50 dark:hover:bg-gray-850/50 hover:text-foreground",
+                                ? "bg-gray-100 dark:bg-gray-850 text-gray-900 dark:text-gray-100"
+                                : "text-gray-500 dark:text-gray-400 hover:bg-gray-100/50 dark:hover:bg-gray-850/50 hover:text-gray-900 dark:hover:text-gray-100",
                               )}
                             >
                               <span className="flex-1 truncate text-sm">
@@ -272,17 +272,17 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
 
             {/* Footer hint */}
             <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-850">
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                 <div className="flex items-center gap-1.5">
-                    <kbd className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-850 text-muted-foreground font-mono text-xs">
+                    <kbd className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-850 text-gray-500 dark:text-gray-400 font-mono text-xs">
                     ↵
-                  </kbd>
+                   </kbd>
                   <span>open</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                    <kbd className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-850 text-muted-foreground font-mono text-xs">
+                    <kbd className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-850 text-gray-500 dark:text-gray-400 font-mono text-xs">
                     esc
-                  </kbd>
+                   </kbd>
                   <span>close</span>
                 </div>
               </div>
@@ -295,16 +295,16 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
               <div className="flex-1 flex flex-col p-5">
                 {/* Chat icon */}
                 <div className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850 flex items-center justify-center mb-4">
-                  <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                  <MessageSquare className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                 </div>
 
                 {/* Title */}
-                <h3 className="text-lg font-medium text-foreground mb-2 line-clamp-2">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2 line-clamp-2">
                   {selectedChat.decryptedTitle}
                 </h3>
 
                 {/* Date */}
-                <p className="text-sm text-muted-foreground mb-6">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
                   {formatDate(selectedChat.updatedAt)}
                 </p>
 
@@ -323,9 +323,9 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
                 <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-gray-850 flex items-center justify-center mb-4">
-                  <Search className="h-7 w-7 text-muted-foreground" />
+                  <Search className="h-7 w-7 text-gray-500 dark:text-gray-400" />
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   Select a conversation to preview
                 </p>
               </div>

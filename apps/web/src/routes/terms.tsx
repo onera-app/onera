@@ -13,11 +13,11 @@ export function TermsPage() {
             <div className="size-8 rounded-xl overflow-hidden transition-transform duration-200 group-hover:scale-105">
               <OneraLogo size={32} />
             </div>
-            <span className="font-bold text-xl text-foreground">Onera</span>
+            <span className="font-bold text-xl text-gray-900 dark:text-gray-100">Onera</span>
           </Link>
           <Link 
             to="/" 
-            className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-foreground transition-colors"
+            className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
           >
             <ArrowLeft className="size-4" />
             Back to Home
@@ -27,7 +27,7 @@ export function TermsPage() {
 
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 py-12 sm:py-16">
-        <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
           Terms of Service
         </h1>
         <p className="text-gray-500 dark:text-gray-400 mb-8">
@@ -36,7 +36,7 @@ export function TermsPage() {
 
         <div className="prose prose-neutral dark:prose-invert max-w-none">
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
               1. Acceptance of Terms
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
@@ -45,7 +45,7 @@ export function TermsPage() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
               2. Description of Service
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
@@ -60,7 +60,7 @@ export function TermsPage() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
               3. User Accounts
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
@@ -75,7 +75,7 @@ export function TermsPage() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
               4. Your API Keys
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
@@ -90,7 +90,7 @@ export function TermsPage() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
               5. Acceptable Use
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
@@ -106,7 +106,7 @@ export function TermsPage() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
               6. Encryption and Data Access
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
@@ -121,7 +121,7 @@ export function TermsPage() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
               7. Intellectual Property
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
@@ -130,7 +130,7 @@ export function TermsPage() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
               8. Disclaimer of Warranties
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
@@ -144,7 +144,7 @@ export function TermsPage() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
               9. Limitation of Liability
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
@@ -153,7 +153,7 @@ export function TermsPage() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
               10. Termination
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
@@ -162,7 +162,7 @@ export function TermsPage() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
               11. Changes to Terms
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
@@ -171,7 +171,7 @@ export function TermsPage() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
               12. Contact
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mb-4">

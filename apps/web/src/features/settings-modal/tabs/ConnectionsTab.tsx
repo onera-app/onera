@@ -186,8 +186,8 @@ export function ConnectionsTab() {
               className={cn(
                 'flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all',
                 activeCategory === category.id
-                  ? 'bg-white dark:bg-gray-900 text-foreground shadow-sm'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-foreground'
+                  ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
               )}
             >
               {category.name}

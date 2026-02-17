@@ -34,7 +34,7 @@ export function InvoiceTable({ invoices, isLoading }: InvoiceTableProps) {
 
   if (invoices.length === 0) {
     return (
-      <p className="text-center text-sm text-muted-foreground py-8">
+      <p className="text-center text-sm text-gray-500 dark:text-gray-400 py-8">
         No invoices yet
       </p>
     );
@@ -45,16 +45,16 @@ export function InvoiceTable({ invoices, isLoading }: InvoiceTableProps) {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-100 dark:border-gray-850">
-            <th className="pb-2 text-left font-medium text-muted-foreground">
+            <th className="pb-2 text-left font-medium text-gray-500 dark:text-gray-400">
               Date
             </th>
-            <th className="pb-2 text-left font-medium text-muted-foreground">
+            <th className="pb-2 text-left font-medium text-gray-500 dark:text-gray-400">
               Description
             </th>
-            <th className="pb-2 text-right font-medium text-muted-foreground">
+            <th className="pb-2 text-right font-medium text-gray-500 dark:text-gray-400">
               Amount
             </th>
-            <th className="pb-2 text-right font-medium text-muted-foreground">
+            <th className="pb-2 text-right font-medium text-gray-500 dark:text-gray-400">
               Status
             </th>
           </tr>
@@ -65,7 +65,7 @@ export function InvoiceTable({ invoices, isLoading }: InvoiceTableProps) {
               <td className="py-3">
                 {new Date(invoice.createdAt).toLocaleDateString()}
               </td>
-              <td className="py-3 text-muted-foreground">
+              <td className="py-3 text-gray-500 dark:text-gray-400">
                 {invoice.description || "Payment"}
               </td>
               <td className="py-3 text-right font-medium">
@@ -76,7 +76,7 @@ export function InvoiceTable({ invoices, isLoading }: InvoiceTableProps) {
                 <span
                   className={cn(
                     "inline-flex rounded-full px-2 py-0.5 text-xs font-medium",
-                    statusColors[invoice.status] || "bg-gray-100 dark:bg-gray-800 text-foreground"
+                    statusColors[invoice.status] || "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                   )}
                 >
                   {invoice.status}

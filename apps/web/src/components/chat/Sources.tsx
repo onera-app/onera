@@ -55,8 +55,8 @@ export const Sources = memo(function Sources({ sources, className }: SourcesProp
   return (
     <div className={cn('mt-4 pt-3 border-t border-gray-100 dark:border-gray-850', className)}>
       <div className="flex items-center gap-2 mb-2">
-        <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+        <ExternalLink className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
+        <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
           Sources
         </span>
       </div>
@@ -73,7 +73,7 @@ export const Sources = memo(function Sources({ sources, className }: SourcesProp
               rel="noopener noreferrer"
               className={cn(
                 'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md',
-                'text-xs text-muted-foreground hover:text-foreground',
+                'text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100',
                 'bg-gray-50 dark:bg-gray-850 hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors',
                 'border border-gray-100 dark:border-gray-850 hover:border-gray-200 dark:hover:border-gray-800',
                 'max-w-[200px] truncate'

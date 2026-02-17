@@ -70,8 +70,8 @@ export function AdminLayout() {
               className={cn(
                 "flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors",
                 isActive
-                  ? "chat-pill text-foreground font-medium"
-                  : "text-muted-foreground hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-850"
+                  ? "chat-pill text-gray-900 dark:text-gray-100 font-medium"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-850"
               )}
             >
               <item.icon className="h-4 w-4" />

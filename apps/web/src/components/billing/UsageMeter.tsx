@@ -29,17 +29,17 @@ export function UsageMeter({
     <div className="space-y-2">
       {/* Label and Value */}
       <div className="flex items-center justify-between">
-        <span className="text-sm text-foreground">{label}</span>
-        <span className="text-sm text-muted-foreground">
+        <span className="text-sm text-gray-900 dark:text-gray-100">{label}</span>
+        <span className="text-sm text-gray-500 dark:text-gray-400">
           {isUnlimited ? (
             <>
               {used.toLocaleString()} {unit}
-              <span className="text-muted-foreground ml-1">(Unlimited)</span>
+              <span className="text-gray-500 dark:text-gray-400 ml-1">(Unlimited)</span>
             </>
           ) : (
             <>
               {used.toLocaleString()}
-              <span className="text-muted-foreground">
+              <span className="text-gray-500 dark:text-gray-400">
                 {" "}
                 / {limit.toLocaleString()} {unit}
               </span>

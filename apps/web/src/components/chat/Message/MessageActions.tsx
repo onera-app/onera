@@ -50,7 +50,7 @@ export const MessageActions = memo(function MessageActions({
               variant="ghost"
               size="icon-sm"
               onClick={onCopy}
-              className="text-muted-foreground hover:text-foreground rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850"
+              className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850"
             >
               <Copy className="h-4 w-4" />
             </Button>
@@ -66,7 +66,7 @@ export const MessageActions = memo(function MessageActions({
               variant="ghost"
               size="icon-sm"
               onClick={onEdit}
-              className="text-muted-foreground hover:text-foreground rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850"
+              className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850"
             >
               <Pencil className="h-4 w-4" />
             </Button>
@@ -93,7 +93,7 @@ export const MessageActions = memo(function MessageActions({
               variant="ghost"
               size="icon-sm"
               onClick={onDelete}
-              className="text-muted-foreground hover:text-destructive rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850"
+              className="text-gray-500 dark:text-gray-400 hover:text-destructive rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850"
             >
               <Trash2 className="h-4 w-4" />
             </Button>

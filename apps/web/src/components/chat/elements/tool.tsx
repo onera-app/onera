@@ -105,12 +105,12 @@ export const ToolHeader = ({
     {...props}
   >
     <div className="flex min-w-0 flex-1 items-center gap-2">
-      <WrenchIcon className="size-4 shrink-0 text-muted-foreground" />
+      <WrenchIcon className="size-4 shrink-0 text-gray-500 dark:text-gray-400" />
       <span className="truncate font-medium text-sm">{getToolDisplayName(toolName)}</span>
     </div>
     <div className="flex shrink-0 items-center gap-2">
       {getStatusBadge(state)}
-      <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+      <ChevronDownIcon className="size-4 text-gray-500 dark:text-gray-400 transition-transform group-data-[state=open]:rotate-180" />
     </div>
   </CollapsibleTrigger>
 );
@@ -133,7 +133,7 @@ export type ToolInputProps = ComponentProps<'div'> & {
 
 export const ToolInput = ({ className, input, ...props }: ToolInputProps) => (
   <div className={cn('space-y-2 overflow-hidden p-4', className)} {...props}>
-    <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+    <h4 className="font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">
       Parameters
     </h4>
     <pre className="overflow-x-auto rounded-md bg-gray-50 dark:bg-gray-850 p-3 font-mono text-xs">
@@ -159,7 +159,7 @@ export const ToolOutput = ({
 
   return (
     <div className={cn('space-y-2 p-4', className)} {...props}>
-      <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+      <h4 className="font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">
         {errorText ? 'Error' : 'Result'}
       </h4>
       <div
@@ -167,7 +167,7 @@ export const ToolOutput = ({
           'overflow-x-auto rounded-md text-xs [&_table]:w-full',
           errorText
             ? 'bg-destructive/10 text-destructive p-3'
-            : 'bg-gray-50 dark:bg-gray-850 text-foreground'
+            : 'bg-gray-50 dark:bg-gray-850 text-gray-900 dark:text-gray-100'
         )}
       >
         {errorText && <div>{errorText}</div>}

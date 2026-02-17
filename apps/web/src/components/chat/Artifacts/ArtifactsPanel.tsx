@@ -86,7 +86,7 @@ export function ArtifactsPanel({
               {activeArtifact?.title || 'Artifact'}
             </span>
             {artifacts.length > 1 && (
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
                 {activeIndex + 1} of {artifacts.length}
               </span>
             )}

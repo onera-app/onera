@@ -131,7 +131,7 @@ export const CodeArtifact = memo(function CodeArtifact({
       <div className="flex items-center justify-between px-4 py-2 bg-gray-50 dark:bg-gray-850 border-b border-gray-100 dark:border-gray-850">
         <div className="flex items-center gap-2">
           {title && (
-            <span className="text-sm font-medium text-foreground">{title}</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{title}</span>
           )}
           <Badge variant="secondary" className="text-xs">
             {detectedLanguage}
@@ -150,7 +150,7 @@ export const CodeArtifact = memo(function CodeArtifact({
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
                 {currentVersionIndex + 1} / {versions.length}
               </span>
               <Button
@@ -204,7 +204,7 @@ export const CodeArtifact = memo(function CodeArtifact({
           <Suspense
             fallback={
               <div className="h-[300px] flex items-center justify-center">
-                <span className="text-muted-foreground">Loading editor...</span>
+                <span className="text-gray-500 dark:text-gray-400">Loading editor...</span>
               </div>
             }
           >

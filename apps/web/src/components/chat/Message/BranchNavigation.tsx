@@ -38,7 +38,7 @@ export function BranchNavigation({
             size="icon"
             onClick={onPrevious}
             disabled={!canGoPrevious}
-            className="h-6 w-6 text-muted-foreground hover:text-foreground disabled:opacity-30"
+            className="h-6 w-6 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-30"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
           </Button>
@@ -46,7 +46,7 @@ export function BranchNavigation({
         <TooltipContent>Previous version</TooltipContent>
       </Tooltip>
 
-      <span className="text-xs font-medium text-muted-foreground tabular-nums min-w-[2.5rem] text-center">
+      <span className="text-xs font-medium text-gray-500 dark:text-gray-400 tabular-nums min-w-[2.5rem] text-center">
         {current} / {total}
       </span>
 
@@ -57,7 +57,7 @@ export function BranchNavigation({
             size="icon"
             onClick={onNext}
             disabled={!canGoNext}
-            className="h-6 w-6 text-muted-foreground hover:text-foreground disabled:opacity-30"
+            className="h-6 w-6 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-30"
           >
             <ChevronRight className="h-3.5 w-3.5" />
           </Button>

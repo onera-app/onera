@@ -281,7 +281,7 @@ export const AssistantMessage = memo(function AssistantMessage({
         >
           {/* Model name indicator */}
           {name && (
-            <span className="text-xs font-medium text-muted-foreground/70 tracking-[-0.01em]">
+            <span className="text-xs font-medium text-gray-400 dark:text-gray-500 tracking-[-0.01em]">
               {name}
             </span>
           )}
@@ -301,7 +301,7 @@ export const AssistantMessage = memo(function AssistantMessage({
           {displayContent ? (
             <div
               className={cn(
-                "text-left transition-opacity duration-200 text-base lg:text-lg leading-[1.65] tracking-[-0.01em] text-foreground/95",
+                "text-left transition-opacity duration-200 text-base lg:text-lg leading-[1.65] tracking-[-0.01em] text-gray-800 dark:text-gray-100",
                 isLoading && "streaming-cursor",
               )}
             >

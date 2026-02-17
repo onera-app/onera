@@ -87,7 +87,7 @@ export const RegenerateMenu = memo(function RegenerateMenu({
           variant="ghost"
           size="sm"
           disabled={disabled}
-          className="h-7 gap-1 px-2 text-muted-foreground hover:text-foreground"
+          className="h-7 gap-1 px-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
         >
           <RefreshCw className="h-4 w-4" />
           <ChevronDown className="h-3 w-3" />
@@ -101,10 +101,10 @@ export const RegenerateMenu = memo(function RegenerateMenu({
             onClick={() => handleRegenerate(option.modifier)}
             className="flex items-start gap-3 px-3 py-2.5 cursor-pointer"
           >
-            <option.icon className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
+            <option.icon className="h-4 w-4 mt-0.5 shrink-0 text-gray-500 dark:text-gray-400" />
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-medium">{option.label}</span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
                 {option.description}
               </span>
             </div>
@@ -116,7 +116,7 @@ export const RegenerateMenu = memo(function RegenerateMenu({
         {/* Custom prompt input */}
         <form onSubmit={handleCustomSubmit} className="p-2">
           <div className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <MessageSquare className="h-4 w-4 shrink-0 text-gray-500 dark:text-gray-400" />
             <Input
               value={customPrompt}
               onChange={(e) => setCustomPrompt(e.target.value)}

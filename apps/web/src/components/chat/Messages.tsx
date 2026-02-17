@@ -300,10 +300,10 @@ export const Messages = memo(function Messages({
       <div className="flex flex-col items-center justify-center h-full px-4">
         {/* Empty state - clean and minimal */}
         <div className="text-center max-w-lg mx-auto px-2">
-          <h1 className="text-3xl sm:text-3xl font-semibold tracking-[-0.02em] mb-2 sm:mb-3 text-foreground/90">
+          <h1 className="text-3xl sm:text-3xl font-semibold tracking-[-0.02em] mb-2 sm:mb-3 text-gray-800 dark:text-gray-100">
             How can I help you today?
           </h1>
-          <p className="text-sm sm:text-base text-muted-foreground/60 leading-relaxed">
+          <p className="text-sm sm:text-base text-gray-400 dark:text-gray-500 leading-relaxed">
             Start a conversation below.
           </p>
         </div>
@@ -405,7 +405,7 @@ export const Messages = memo(function Messages({
                     onFollowUpSelect && (
                       <div className="mt-3 sm:mt-4 pl-8 sm:pl-10 md:pl-11">
                         {isGeneratingFollowUps ? (
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                             <Spinner size="sm" />
                             <span>Generating suggestions...</span>
                           </div>
@@ -459,7 +459,7 @@ export const Messages = memo(function Messages({
             className="h-9 w-9 rounded-full shadow-lg bg-white dark:bg-gray-850 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 hover:shadow-xl transition-all duration-200 hover:scale-105"
             onClick={() => scrollToBottom("smooth")}
           >
-            <ArrowDown className="h-4 w-4 text-muted-foreground" />
+            <ArrowDown className="h-4 w-4 text-gray-500 dark:text-gray-400" />
             <span className="sr-only">Scroll to bottom</span>
           </Button>
         </div>

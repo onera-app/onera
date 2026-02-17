@@ -131,7 +131,7 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
   if (!note) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-center text-muted-foreground">
+        <div className="text-center text-gray-500 dark:text-gray-400">
           <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
           <p>Select a note to edit</p>
         </div>
@@ -164,7 +164,7 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
           </Select>
 
           {/* Last updated */}
-          <span className="text-xs text-muted-foreground truncate">
+          <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
             Updated {dayjs(note.updatedAt).format('MMM D, YYYY h:mm A')}
           </span>
 

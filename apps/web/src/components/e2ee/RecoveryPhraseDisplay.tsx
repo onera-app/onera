@@ -99,7 +99,7 @@ Delete this file after storing the phrase safely.
             className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center rounded-xl bg-white dark:bg-gray-900 transition-all"
             onClick={() => setIsRevealed(true)}
           >
-            <div className="flex flex-col items-center gap-2 text-muted-foreground">
+            <div className="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
               <Eye className="h-6 w-6" />
               <span className="text-sm font-medium">Click to reveal</span>
             </div>
@@ -186,8 +186,8 @@ Delete this file after storing the phrase safely.
 
       {/* Tips */}
       <div className="space-y-2 rounded-lg border border-dashed border-gray-100 dark:border-gray-850 bg-gray-50 dark:bg-gray-900 p-3">
-        <p className="text-xs font-medium text-muted-foreground">Quick save options:</p>
-        <ul className="space-y-1 text-xs text-muted-foreground/80">
+        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Quick save options:</p>
+        <ul className="space-y-1 text-xs text-gray-500/80 dark:text-gray-400/80">
           <li className="flex gap-2">
             <span className="text-primary">•</span>
             Copy to your password manager

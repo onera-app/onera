@@ -51,7 +51,7 @@ export const MessageMetadata = memo(function MessageMetadata({
 
   return (
     <div className={cn(
-      'flex items-center gap-3 text-xs text-muted-foreground/70 rounded-full px-2.5 py-1 chat-pill',
+      'flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500 rounded-full px-2.5 py-1 chat-pill',
       className
     )}>
       {/* Token usage */}

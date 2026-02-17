@@ -60,7 +60,7 @@ export function PromptsList({ selectedPromptId, onSelectPrompt, onCreatePrompt }
         {/* Search */}
         <div className="px-3 py-2.5 border-b border-gray-100 dark:border-gray-850">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
             <Input
               type="text"
               placeholder="Search prompts..."
@@ -109,11 +109,11 @@ export function PromptsList({ selectedPromptId, onSelectPrompt, onCreatePrompt }
                         {prompt.name}
                       </h3>
                       {prompt.description && (
-                        <p className="text-sm text-muted-foreground truncate mt-0.5">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5">
                           {prompt.description}
                         </p>
                       )}
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {dayjs(prompt.updatedAt).format('MMM D, YYYY')}
                       </p>
                     </div>
@@ -124,7 +124,7 @@ export function PromptsList({ selectedPromptId, onSelectPrompt, onCreatePrompt }
                         e.stopPropagation();
                         setDeletePromptId(prompt.id);
                       }}
-                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
+                      className="opacity-0 group-hover:opacity-100 text-gray-500 dark:text-gray-400 hover:text-destructive"
                     >
                       <Trash2 />
                     </Button>

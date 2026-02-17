@@ -1298,7 +1298,7 @@ export function ChatPage() {
         <div className="text-center max-w-md px-4">
           <Alert variant="destructive" className="bg-gray-50 dark:bg-gray-850 border-gray-100 dark:border-gray-850">
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle className="text-foreground">Chat not found</AlertTitle>
+            <AlertTitle className="text-gray-900 dark:text-gray-100">Chat not found</AlertTitle>
             <AlertDescription className="text-gray-500 dark:text-gray-400">
               This conversation may have been deleted or doesn't exist.
             </AlertDescription>
@@ -1317,7 +1317,7 @@ export function ChatPage() {
         <div className="px-4 pt-16 sm:px-6">
           <Alert className="bg-amber-500/10 border-amber-500/30">
             <AlertTriangle className="h-4 w-4 text-amber-500" />
-            <AlertTitle className="text-foreground">
+            <AlertTitle className="text-gray-900 dark:text-gray-100">
               Couldn&apos;t decrypt conversation
             </AlertTitle>
             <AlertDescription className="text-gray-500 dark:text-gray-400 flex items-center justify-between gap-3">

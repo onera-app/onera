@@ -143,7 +143,7 @@ export const SearchToggle = memo(function SearchToggle({
         {enabled && availableProviders.length > 1 && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel className="text-xs text-muted-foreground">
+            <DropdownMenuLabel className="text-xs text-gray-500 dark:text-gray-400">
               Provider
             </DropdownMenuLabel>
             {availableProviders.map((provider) => (

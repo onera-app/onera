@@ -47,7 +47,7 @@ function getStateIcon(state: ToolState) {
     case 'output-denied':
       return <XCircle className="h-4 w-4 text-status-warning-text" />;
     default:
-      return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
+      return <AlertCircle className="h-4 w-4 text-gray-500 dark:text-gray-400" />;
   }
 }
 
@@ -100,15 +100,15 @@ export const ToolInvocation = memo(function ToolInvocation({
               isOpen && 'rotate-90'
             )}
           />
-          <Wrench className="h-4 w-4 shrink-0 text-muted-foreground" />
-          <span className="font-medium text-foreground">
+          <Wrench className="h-4 w-4 shrink-0 text-gray-500 dark:text-gray-400" />
+          <span className="font-medium text-gray-900 dark:text-gray-100">
             {getToolDisplayName(tool.toolName)}
           </span>
           <div className="ml-auto flex items-center gap-2">
             {getStateIcon(tool.state)}
             <span className={cn(
               'text-xs',
-              hasError ? 'text-destructive' : 'text-muted-foreground'
+              hasError ? 'text-destructive' : 'text-gray-500 dark:text-gray-400'
             )}>
               {getStateLabel(tool.state)}
             </span>
@@ -120,7 +120,7 @@ export const ToolInvocation = memo(function ToolInvocation({
             {/* Input/Arguments */}
             {tool.args !== undefined && (
               <div>
-                <div className="text-xs font-medium text-muted-foreground mb-1">Input</div>
+                <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Input</div>
                 <pre className="text-xs bg-gray-50 dark:bg-gray-900 rounded p-2 overflow-x-auto">
                   {typeof tool.args === 'string' ? tool.args : JSON.stringify(tool.args, null, 2)}
                 </pre>
@@ -130,7 +130,7 @@ export const ToolInvocation = memo(function ToolInvocation({
             {/* Output/Result */}
             {tool.state === 'output-available' && tool.result !== undefined && (
               <div>
-                <div className="text-xs font-medium text-muted-foreground mb-1">Output</div>
+                <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Output</div>
                 <pre className="text-xs bg-gray-50 dark:bg-gray-900 rounded p-2 overflow-x-auto max-h-48 overflow-y-auto">
                   {typeof tool.result === 'string'
                     ? tool.result
@@ -151,7 +151,7 @@ export const ToolInvocation = memo(function ToolInvocation({
 
             {/* Loading state */}
             {isLoading && (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 <span>Executing tool...</span>
               </div>

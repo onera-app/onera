@@ -165,7 +165,7 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
             </DialogHeader>
 
             <div className="py-4 space-y-4">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 You'll use this to unlock your encryption without entering your recovery phrase every time.
               </p>
 
@@ -179,7 +179,7 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
                     <Fingerprint className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium">Passkey</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         Use Face ID, Touch ID, or Windows Hello
                       </p>
                     </div>
@@ -194,14 +194,14 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
                   <KeyRound className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">Encryption Password</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Set a password to unlock your data
                     </p>
                   </div>
                 </button>
               </div>
 
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Your recovery phrase always works as a backup.
               </p>
             </div>
@@ -229,7 +229,7 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
                 <Smartphone className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Device Passkey</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     Works only on this device. Fastest and most secure.
                   </p>
                 </div>
@@ -239,13 +239,13 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
                 <Cloud className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Synced Passkey</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     Synced via iCloud or Google. Works across your devices.
                   </p>
                 </div>
               </div>
 
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Your device will automatically choose the best option.
               </p>
 
@@ -316,7 +316,7 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -336,7 +336,7 @@ export function OnboardingCompletionModal({ open, onComplete }: OnboardingComple
                 />
               </div>
 
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Use at least 8 characters. This is separate from your account password.
               </p>
 

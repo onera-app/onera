@@ -70,12 +70,12 @@ function CitationCard({ citation, index }: { citation: Citation; index: number }
           </div>
         )}
         {citation.snippet && (
-          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
             {citation.snippet}
           </p>
         )}
         {citation.source && (
-          <div className="text-xs text-muted-foreground/70 mt-1">
+          <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
             {citation.source}
           </div>
         )}

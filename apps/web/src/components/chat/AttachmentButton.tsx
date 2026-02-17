@@ -93,7 +93,7 @@ export function AttachmentButton({
                 variant="ghost"
                 size="icon"
                 disabled={disabled}
-                className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-850 rounded-lg"
+                className="h-8 w-8 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-850 rounded-lg"
               >
                 <Plus className="h-5 w-5" />
               </Button>

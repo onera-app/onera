@@ -111,7 +111,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         {currentStep === 0 && (
           <button
             onClick={onComplete}
-            className="mt-4 w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="mt-4 w-full text-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
           >
             Skip introduction
           </button>
@@ -125,12 +125,12 @@ function WelcomeStep() {
   return (
     <div className="text-center">
       <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850">
-        <MessageSquare className="h-9 w-9 text-foreground/80" />
+        <MessageSquare className="h-9 w-9 text-gray-900/80 dark:text-gray-100/80" />
       </div>
       <h1 className="text-3xl font-bold tracking-tight mb-3">
         Welcome to Onera
       </h1>
-      <p className="text-lg text-muted-foreground mb-8">
+      <p className="text-lg text-gray-500 dark:text-gray-400 mb-8">
         Private AI chat that actually keeps your conversations private.
       </p>
       <div className="space-y-3 text-left">
@@ -157,7 +157,7 @@ function RecoveryStep() {
       <h1 className="text-3xl font-bold tracking-tight mb-3">
         Your Recovery Phrase
       </h1>
-      <p className="text-muted-foreground mb-6">
+      <p className="text-gray-500 dark:text-gray-400 mb-6">
         In the next step, you'll receive a recovery phrase. This is important.
       </p>
 
@@ -187,7 +187,7 @@ function RecoveryStep() {
         </div>
       </div>
 
-      <p className="mt-4 text-sm text-muted-foreground">
+      <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
         Save it somewhere safe. You'll see it after setting up your unlock
         method.
       </p>

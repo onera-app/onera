@@ -93,14 +93,14 @@ export function PasskeyList({ onDelete }: PasskeyListProps) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        <Loader2 className="h-5 w-5 animate-spin text-gray-500 dark:text-gray-400" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-sm text-muted-foreground py-4 text-center">
+      <div className="text-sm text-gray-500 dark:text-gray-400 py-4 text-center">
         Failed to load passkeys
       </div>
     );
@@ -108,7 +108,7 @@ export function PasskeyList({ onDelete }: PasskeyListProps) {
 
   if (!passkeys || passkeys.length === 0) {
     return (
-      <div className="text-sm text-muted-foreground py-4 text-center">
+      <div className="text-sm text-gray-500 dark:text-gray-400 py-4 text-center">
         No passkeys registered yet
       </div>
     );
@@ -174,7 +174,7 @@ export function PasskeyList({ onDelete }: PasskeyListProps) {
                     <p className="text-sm font-medium truncate">
                       {decryptPasskeyName(passkey)}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       {passkey.deviceType}
                       {passkey.lastUsedAt && (
                         <>

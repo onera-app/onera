@@ -58,9 +58,9 @@ export const ModelItem = memo(function ModelItem({
         "w-full flex items-center gap-2 mx-1.5 px-2.5 py-2 rounded-md text-left text-sm group cursor-pointer",
         "transition-colors duration-100",
         // Use foreground opacity for theme-aware colors
-        isHighlighted && "bg-foreground/10",
-        isSelected && !isHighlighted && "bg-foreground/[0.06]",
-        !isHighlighted && !isSelected && "hover:bg-foreground/[0.06]",
+        isHighlighted && "bg-gray-900/10 dark:bg-gray-100/10",
+        isSelected && !isHighlighted && "bg-gray-900/[0.06] dark:bg-gray-100/[0.06]",
+        !isHighlighted && !isSelected && "hover:bg-gray-900/[0.06] dark:hover:bg-gray-100/[0.06]",
       )}
       style={{ width: "calc(100% - 12px)" }}
     >
@@ -69,7 +69,7 @@ export const ModelItem = memo(function ModelItem({
         <span
           className={cn(
             "truncate block",
-            isSelected ? "text-foreground font-medium" : "text-foreground/80",
+            isSelected ? "text-gray-900 dark:text-gray-100 font-medium" : "text-gray-900/80 dark:text-gray-100/80",
           )}
         >
           {model.name}
@@ -87,8 +87,8 @@ export const ModelItem = memo(function ModelItem({
               className={cn(
                 "h-7 w-7 flex items-center justify-center rounded transition-all duration-100",
                 isPinned
-                  ? "opacity-100 text-amber-500 hover:text-amber-600 hover:bg-foreground/10"
-                  : "opacity-0 group-hover:opacity-100 text-gray-500 dark:text-gray-400 hover:text-foreground hover:bg-foreground/10",
+                  ? "opacity-100 text-amber-500 hover:text-amber-600 hover:bg-gray-900/10 dark:hover:bg-gray-100/10"
+                  : "opacity-0 group-hover:opacity-100 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-900/10 dark:hover:bg-gray-100/10",
               )}
             >
               {isPinned ? (

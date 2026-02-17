@@ -247,7 +247,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
     return (
       <button
         onClick={() => openSettingsModal("connections")}
-        className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm text-amber-500 hover:text-amber-600 hover:bg-foreground/[0.06] transition-colors duration-150"
+        className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm text-amber-500 hover:text-amber-600 hover:bg-gray-900/[0.06] dark:hover:bg-gray-100/[0.06] transition-colors duration-150"
       >
         <AlertTriangle className="h-3.5 w-3.5" />
         <span>Add Connection</span>
@@ -281,9 +281,9 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
           disabled={isLoading || models.length === 0}
           className={cn(
             "flex max-w-[220px] sm:max-w-[280px] items-center gap-2 h-9 px-3 rounded-lg text-sm transition-all duration-150",
-            "hover:bg-foreground/[0.06] active:bg-foreground/10",
+            "hover:bg-gray-900/[0.06] dark:hover:bg-gray-100/[0.06] active:bg-gray-900/10 dark:active:bg-gray-100/10",
             "disabled:opacity-40 disabled:cursor-not-allowed",
-            isOpen && "bg-foreground/[0.06]",
+            isOpen && "bg-gray-900/[0.06] dark:bg-gray-100/[0.06]",
           )}
         >
           {isLoading ? (
@@ -295,7 +295,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
             <span className="text-gray-500 dark:text-gray-400">No models</span>
           ) : (
             <>
-              <span className="truncate text-foreground max-w-[164px] sm:max-w-[214px]">
+              <span className="truncate text-gray-900 dark:text-gray-100 max-w-[164px] sm:max-w-[214px]">
                 {selectedModel?.name || "Select model"}
               </span>
               <ChevronDown
@@ -322,7 +322,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  className="w-full h-9 pl-9 pr-3 rounded-lg bg-foreground/[0.06] border-0 text-sm text-foreground placeholder:text-gray-300 dark:placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-ring transition-colors"
+                  className="w-full h-9 pl-9 pr-3 rounded-lg bg-gray-900/[0.06] dark:bg-gray-100/[0.06] border-0 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-300 dark:placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-ring transition-colors"
                 />
               </div>
             </div>

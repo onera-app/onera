@@ -41,7 +41,7 @@ export function E2EESetupModal() {
           </DialogHeader>
 
           <div className="py-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               This can happen if your initial sign-in was interrupted. Please sign out
               and sign in again to complete the encryption setup.
             </p>

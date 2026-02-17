@@ -129,7 +129,7 @@ export function FolderTree({ selectedFolderId, onSelectFolder, showAllOption = t
             'flex items-center gap-1 py-1.5 px-2 rounded-md cursor-pointer group',
             isSelected
               ? 'bg-primary/10 text-primary'
-              : 'hover:bg-accent'
+              : 'hover:bg-gray-100 dark:hover:bg-gray-850'
           )}
           style={{ paddingLeft: `${depth * 16 + 8}px` }}
           onClick={() => onSelectFolder(node.id)}
@@ -152,9 +152,9 @@ export function FolderTree({ selectedFolderId, onSelectFolder, showAllOption = t
 
           {/* Folder icon */}
           {isExpanded ? (
-            <FolderOpen className={cn('h-4 w-4 flex-shrink-0', isSelected ? 'text-primary' : 'text-muted-foreground')} />
+            <FolderOpen className={cn('h-4 w-4 flex-shrink-0', isSelected ? 'text-primary' : 'text-gray-500 dark:text-gray-400')} />
           ) : (
-            <FolderIcon className={cn('h-4 w-4 flex-shrink-0', isSelected ? 'text-primary' : 'text-muted-foreground')} />
+            <FolderIcon className={cn('h-4 w-4 flex-shrink-0', isSelected ? 'text-primary' : 'text-gray-500 dark:text-gray-400')} />
           )}
 
           {/* Name */}
@@ -227,7 +227,7 @@ export function FolderTree({ selectedFolderId, onSelectFolder, showAllOption = t
   };
 
   if (isLoading) {
-    return <div className="p-4 text-muted-foreground text-sm">Loading folders...</div>;
+    return <div className="p-4 text-gray-500 dark:text-gray-400 text-sm">Loading folders...</div>;
   }
 
   return (
@@ -239,11 +239,11 @@ export function FolderTree({ selectedFolderId, onSelectFolder, showAllOption = t
             'flex items-center gap-2 py-1.5 px-2 mx-2 rounded-md cursor-pointer',
             !selectedFolderId
               ? 'bg-primary/10 text-primary'
-              : 'hover:bg-accent'
+              : 'hover:bg-gray-100 dark:hover:bg-gray-850'
           )}
           onClick={() => onSelectFolder(undefined)}
         >
-          <Archive className="h-4 w-4 text-muted-foreground" />
+          <Archive className="h-4 w-4 text-gray-500 dark:text-gray-400" />
           <span className="text-sm">All items</span>
         </div>
       )}

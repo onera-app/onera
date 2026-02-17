@@ -52,7 +52,7 @@ export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorB
             <AlertTriangle className="h-5 w-5" />
             <h1 className="font-semibold">Something went wrong</h1>
           </div>
-          <p className="text-sm text-muted-foreground">{this.state.message}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{this.state.message}</p>
           <div className="flex gap-2">
             <Button onClick={this.handleReload} className="flex-1">
               Reload

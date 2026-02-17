@@ -54,11 +54,11 @@ export function CodeBlock({
         <div className="flex items-center gap-2">
           {filename && (
             <>
-              <span className="text-xs text-muted-foreground">{filename}</span>
-              <span className="text-muted-foreground/50">|</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">{filename}</span>
+              <span className="text-gray-400 dark:text-gray-500">|</span>
             </>
           )}
-          <span className="text-xs text-muted-foreground font-mono">{languageLabel}</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">{languageLabel}</span>
         </div>
 
         {/* Copy button */}
@@ -70,7 +70,7 @@ export function CodeBlock({
             'h-7 px-2 text-xs',
             copied
               ? 'text-status-success hover:text-status-success'
-              : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-850'
           )}
         >
           {copied ? (
@@ -91,7 +91,7 @@ export function CodeBlock({
       <div className="overflow-x-auto">
         <pre className={cn('p-4 text-sm', showLineNumbers && 'pl-12 relative')}>
           {showLineNumbers && (
-            <div className="absolute left-0 top-0 pt-4 pb-4 px-3 text-right text-muted-foreground/60 select-none border-r border-gray-100 dark:border-gray-850 bg-gray-50 dark:bg-gray-900">
+            <div className="absolute left-0 top-0 pt-4 pb-4 px-3 text-right text-gray-400 dark:text-gray-500 select-none border-r border-gray-100 dark:border-gray-850 bg-gray-50 dark:bg-gray-900">
               {code.split('\n').map((_, i) => (
                 <div key={i} className="leading-6">
                   {i + 1}
@@ -102,7 +102,7 @@ export function CodeBlock({
           <code
             ref={codeRef}
             className={cn(
-              'text-foreground font-mono leading-6',
+              'text-gray-900 dark:text-gray-100 font-mono leading-6',
               language && `language-${displayLanguage}`
             )}
           >

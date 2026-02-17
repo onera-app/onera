@@ -52,11 +52,11 @@ export function EmptyState({
           styles.iconWrapper
         )}
       >
-        <Icon className={cn('text-muted-foreground', styles.icon)} />
+        <Icon className={cn('text-gray-500 dark:text-gray-400', styles.icon)} />
       </div>
-      <p className={cn('text-foreground', styles.title)}>{title}</p>
+      <p className={cn('text-gray-900 dark:text-gray-100', styles.title)}>{title}</p>
       {description && (
-        <p className={cn('text-muted-foreground mt-1', styles.description)}>
+        <p className={cn('text-gray-500 dark:text-gray-400 mt-1', styles.description)}>
           {description}
         </p>
       )}

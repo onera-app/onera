@@ -263,7 +263,7 @@ export function E2EEUnlockModal() {
             </DialogHeader>
 
             <div className="py-4">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Please sign out and sign in again to set up encryption.
               </p>
             </div>
@@ -294,7 +294,7 @@ export function E2EEUnlockModal() {
             </DialogHeader>
 
             <div className="py-4">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Make sure you entered your 12 or 24 word recovery phrase correctly.
               </p>
             </div>
@@ -329,7 +329,7 @@ export function E2EEUnlockModal() {
 
             <div className="flex flex-col items-center justify-center py-8">
               <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Please wait while we unlock your encrypted data.
               </p>
             </div>
@@ -372,7 +372,7 @@ export function E2EEUnlockModal() {
             <div className="py-4">
               {isLoadingUnlockInfo ? (
                 <div className="flex items-center justify-center py-4">
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  <Loader2 className="h-5 w-5 animate-spin text-gray-500 dark:text-gray-400" />
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -444,7 +444,7 @@ export function E2EEUnlockModal() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -503,7 +503,7 @@ export function E2EEUnlockModal() {
                   className="font-mono text-sm"
                   autoFocus
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   This is the phrase you saved when you first created your account.
                 </p>
               </div>
@@ -511,7 +511,7 @@ export function E2EEUnlockModal() {
               <div className="pt-2 border-t">
                 <button
                   onClick={() => setCurrentView('reset')}
-                  className="text-xs text-muted-foreground hover:text-destructive hover:underline"
+                  className="text-xs text-gray-500 dark:text-gray-400 hover:text-destructive hover:underline"
                 >
                   Lost your recovery phrase? Reset encryption
                 </button>
