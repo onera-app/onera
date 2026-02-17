@@ -8,10 +8,7 @@ import {
     type SearchParams,
     type TypedDocument
 } from "@orama/orama";
-import {
-    persist,
-    restore,
-} from "@orama/plugin-data-persistence";
+
 import { type ChatMessage } from "@onera/types";
 import { encryptJSON, decryptJSON } from "@onera/crypto";
 
