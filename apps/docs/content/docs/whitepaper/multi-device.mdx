@@ -14,7 +14,7 @@ sequenceDiagram
     participant Device as New Device
     participant Server as Server
     
-    Device->>Server: 1. Authenticate with Clerk
+    Device->>Server: 1. Authenticate with Supabase
     Device->>Server: 2. Register device<br/>{ deviceId, fingerprint }
     Note over Server: 3. Server generates and stores<br/>device secret (32 bytes)
     Server->>Device: 4. Return device secret
@@ -55,7 +55,7 @@ function reshardForNewDevice(
 ```mermaid
 flowchart TB
     Start["New Device Setup"]
-    Auth["User authenticates with Clerk"]
+    Auth["User authenticates with Supabase"]
     Check{"Device recognized?"}
     
     Recovery["Enter recovery phrase"]

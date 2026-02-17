@@ -1,135 +1,78 @@
-# Onera - Web & Backend
+# Onera
 
-End-to-end encrypted AI chat application with multi-provider LLM support.
-
-## Project Overview
-
-Onera is a privacy-focused AI chat application featuring:
-- End-to-end encryption for all chat data
-- Multiple LLM provider support (OpenAI, Anthropic, Google, etc.)
-- Real-time streaming responses
-- WebAuthn/Passkey authentication
-- Cross-platform sync
+End-to-end encrypted AI chat with private inference via TEE enclaves.
 
 ## Repository Structure
 
 ```
 apps/
-├── web/          # React 19 web client
-├── server/       # Hono/tRPC backend
-└── docs/         # Documentation site (Fumadocs)
+├── web/          # React 19 client (Vite, TanStack Router, Zustand)
+├── server/       # Hono + tRPC backend (Drizzle ORM, Supabase Postgres)
+└── docs/         # Documentation site (Fumadocs + Next.js)
 
 packages/
-├── crypto/       # E2EE implementation (libsodium)
+├── crypto/       # E2EE (libsodium), Noise protocol, attestation verification
 └── types/        # Shared TypeScript types
+
+supabase/
+└── config.toml   # Supabase local dev config
 ```
 
-## Technology Stack
+## Tech Stack
 
-### Web Client (`apps/web`)
-- **Framework**: React 19 with TypeScript
-- **Routing**: Tanstack Router
-- **State**: Zustand (client) + Tanstack Query (server)
-- **Styling**: Tailwind CSS 4 + Radix UI
-- **API**: tRPC client
-- **AI**: Vercel AI SDK with streaming
-- **Auth**: Clerk + WebAuthn
+### Web (`apps/web`)
+- React 19, TypeScript, Vite, TanStack Router/Query
+- Zustand (state), Tailwind CSS 4 + Radix UI (styling)
+- Supabase Auth, WebAuthn/passkeys
+- Vercel AI SDK (streaming), direct browser-to-LLM connections
+- Noise protocol WebSocket for private inference
 
-### Backend (`apps/server`)
-- **Framework**: Hono
-- **API**: tRPC
-- **Database**: PostgreSQL + Drizzle ORM
-- **Auth**: Clerk
-- **Realtime**: Socket.io
-- **Validation**: Zod
+### Server (`apps/server`)
+- Hono, tRPC, Drizzle ORM, Supabase Postgres
+- Supabase Auth (JWT verification via service_role)
+- Socket.io (real-time sync)
+- Enclave orchestration (assignment, heartbeat, cleanup)
 
-### Shared Packages
-- **@onera/crypto**: libsodium-based E2EE
-- **@onera/types**: Shared TypeScript types
+### Crypto (`packages/crypto`)
+- libsodium: E2EE encryption/decryption
+- BIP39: recovery phrase generation
+- Noise NK: browser-to-enclave encryption
+- Attestation: TEE launch digest verification
 
-## Architecture Patterns
+## Architecture
 
-### Web
-- Feature-based folder structure
-- Zustand stores for global state
-- Custom hooks for reusable logic
-- Radix primitives for accessibility
+### Auth Flow
+Supabase Auth (email/password + Google/Apple OAuth) → JWT → tRPC middleware verifies via `supabase.auth.getUser(token)` → user ID in context.
 
-### Backend
-- tRPC routers organized by domain
-- Middleware for auth and validation
-- Repository pattern for data access
-- Type-safe end-to-end with tRPC
+### E2EE
+3-share key system: auth share (server, Supabase-protected), device share (localStorage), recovery share (BIP39 mnemonic). Master key reconstructed client-side only.
 
-## Development Guidelines
+### Private Inference
+Browser → Noise WebSocket → TEE enclave (AMD SEV-SNP) → vLLM. Server only assigns enclaves and tracks capacity. Prompts/responses never touch the server.
 
-### Code Style
-- TypeScript strict mode required
-- Explicit return types on exported functions
-- Zod schemas for all runtime validation
-- Prefer `const` over `let`
+### Data
+All user content (chats, notes, credentials, prompts) stored as encrypted blobs. RLS enabled on all tables. Server uses service_role key (bypasses RLS).
 
-### API Development
-- All endpoints must be authenticated (unless public)
-- Input validation with Zod at router level
-- Consistent error handling with TRPCError
-- Rate limiting on sensitive endpoints
+## Key Patterns
 
-### Security Requirements
-- All chat content MUST be E2EE
-- Never log decrypted content
-- Validate all user inputs
-- Use parameterized queries (Drizzle handles this)
-
-### Testing
-- Unit tests for business logic
-- Integration tests for tRPC routers
-- E2E tests with Playwright
-
-## File Patterns
-
-When creating new features:
-
-### Web Component
-```
-src/features/{feature}/
-├── components/
-├── hooks/
-├── stores/
-└── index.ts
-```
-
-### tRPC Router
-```
-src/trpc/routers/{domain}.ts
-```
-
-### Database Schema
-```
-src/db/schema/{entity}.ts
-```
+- Feature-based folder structure in web app
+- tRPC routers organized by domain (`keyShares`, `devices`, `enclaves`, `chats`, etc.)
+- Drizzle schema split by domain (`schema/enclaves.ts`, `schema/billing.ts`)
+- Supabase migrations tracked in both Supabase and Drizzle journal
 
 ## Environment Variables
 
-Required in `.env`:
-- `DATABASE_URL` - PostgreSQL connection
-- `CLERK_*` - Clerk authentication
-- `VITE_CLERK_*` - Clerk frontend keys
+Required:
+- `DATABASE_URL` -- Supabase Postgres pooler
+- `SUPABASE_URL` + `SUPABASE_SECRET_KEY` -- server auth
+- `VITE_SUPABASE_URL` + `VITE_SUPABASE_PUBLISHABLE_KEY` -- frontend auth
 
 ## Commands
 
 ```bash
-# Development
 bun run dev           # Start all apps
-bun run dev --filter web    # Start web only
-bun run dev --filter server # Start server only
-
-# Database
-bun run db:generate   # Generate migrations
 bun run db:migrate    # Run migrations
 bun run db:studio     # Open Drizzle Studio
-
-# Build
 bun run build         # Build all
 bun run type-check    # TypeScript check
 ```

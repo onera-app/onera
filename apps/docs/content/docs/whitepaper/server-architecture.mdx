@@ -15,7 +15,7 @@ flowchart TB
         S1["✓ Encrypted chat content (XSalsa20-Poly1305)"]
         S2["✓ Encrypted chat keys (wrapped with master key)"]
         S3["✓ Encrypted credentials (API keys wrapped with master key)"]
-        S4["✓ Auth share (plaintext, Clerk-protected)"]
+        S4["✓ Auth share (plaintext, Supabase-protected)"]
         S5["✓ Encrypted recovery share (wrapped with recovery key)"]
         S6["✓ Device secrets (entropy for device key derivation)"]
         S7["✓ Public keys (for sharing)"]
@@ -38,7 +38,7 @@ flowchart TB
 ```sql
 CREATE TABLE key_shares (
   id UUID PRIMARY KEY,
-  user_id TEXT NOT NULL,           -- Clerk user ID
+  user_id TEXT NOT NULL,           -- Supabase Auth user ID
   auth_share TEXT,                  -- Plaintext auth share
   encrypted_recovery_share TEXT,    -- Recovery-key encrypted
   public_key TEXT,                  -- Plaintext for sharing
@@ -85,7 +85,7 @@ CREATE TABLE devices (
 
 ## API Design
 
-All tRPC endpoints require Clerk authentication:
+All tRPC endpoints require Supabase authentication:
 
 ```typescript
 // Key shares

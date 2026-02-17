@@ -14,7 +14,7 @@ flowchart TB
     MK["Master Key (M)<br/>256-bit"]
     
     MK -->|XOR Split| DS["Device Share (D)<br/>Encrypted in localStorage<br/>w/ device key"]
-    MK -->|XOR Split| AS["Auth Share (A)<br/>Plaintext on server<br/>(Clerk protected)"]
+    MK -->|XOR Split| AS["Auth Share (A)<br/>Plaintext on server<br/>(Supabase protected)"]
     MK -->|XOR Split| RS["Recovery Share (R)<br/>Encrypted w/ recovery key<br/>on server"]
     
     Note["Reconstruction: M = D XOR A XOR R"]
@@ -43,7 +43,7 @@ function splitMasterKey(masterKey: Uint8Array): Shares {
 | Share | Storage Location | Protection |
 |-------|------------------|------------|
 | **Device Share** | Browser localStorage | Encrypted with device-specific key derived from: `BLAKE2b(deviceId + fingerprint + serverDeviceSecret)` |
-| **Auth Share** | Server database | Plaintext, protected by Clerk authentication |
+| **Auth Share** | Server database | Plaintext, protected by Supabase authentication |
 | **Recovery Share** | Server database | Encrypted with user's recovery key |
 
 ## Device Share Protection
