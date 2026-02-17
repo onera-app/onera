@@ -16,7 +16,7 @@ export const ChatNavbar = memo(function ChatNavbar({
   const { sidebarOpen, toggleSidebar } = useUIStore();
 
   return (
-    <header className="absolute top-2 z-10 flex items-center justify-between px-3 sm:px-4 h-12 left-0 right-0 w-full max-w-5xl mx-auto pointer-events-none">
+    <header className="absolute top-2 z-10 flex items-center justify-between px-3 sm:px-4 md:px-6 h-12 left-0 right-0 w-full max-w-5xl md:max-w-none mx-auto md:mx-0 pointer-events-none">
       <div className="flex items-center gap-2 pointer-events-auto">
         {/* Menu button (shown when sidebar is closed) */}
         {!sidebarOpen && (
@@ -25,7 +25,7 @@ export const ChatNavbar = memo(function ChatNavbar({
             size="icon"
             onClick={toggleSidebar}
             title="Open sidebar"
-            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-850 h-9 w-9 flex-shrink-0 rounded-xl transition-colors"
+            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-850 h-9 w-9 flex-shrink-0 rounded-xl transition-colors md:hidden"
           >
             <Menu className="h-[18px] w-[18px]" />
           </Button>
