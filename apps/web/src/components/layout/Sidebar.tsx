@@ -364,7 +364,7 @@ export function Sidebar() {
           "fixed md:relative z-40 md:z-20",
           // Background — Open WebUI: opaque on mobile, semi-transparent on desktop
           sidebarOpen
-            ? "bg-gray-50 dark:bg-gray-950 md:bg-gray-50/70 md:dark:bg-gray-950/70"
+            ? "bg-gray-50 dark:bg-gray-950 md:bg-gray-50 md:dark:bg-gray-950/70"
             : "",
           // Width handling
           sidebarOpen
