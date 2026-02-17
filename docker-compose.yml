@@ -1,18 +1,103 @@
+# Onera — Self-hosted with Supabase (auth + database)
+#
+# Prerequisites:
+#   1. Copy .env.example → .env and fill in values
+#   2. Generate JWT keys: see comments in .env.example
+#
+# Start:  docker compose up -d
+# Stop:   docker compose down
+# Logs:   docker compose logs -f
+# Reset:  docker compose down -v  (deletes all data)
+
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: onera-postgres
+  # ─── Supabase Database ─────────────────────────────────────
+  supabase-db:
+    image: supabase/postgres:17.4.1.019
+    container_name: onera-supabase-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: onera
-      POSTGRES_USER: onera
+      POSTGRES_HOST: /var/run/postgresql
+      PGPORT: "5432"
+      POSTGRES_PORT: "5432"
+      PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      PGDATABASE: postgres
+      POSTGRES_DB: postgres
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_EXP: 3600
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - supabase_db_data:/var/lib/postgresql/data
+      - ./supabase/docker/volumes/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
+      - ./supabase/docker/volumes/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z
+      - ./supabase/docker/volumes/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z
+      - ./supabase/docker/volumes/db/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:Z
     networks:
       - onera-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U onera -d onera"]
+      test: ["CMD-SHELL", "pg_isready -U supabase_admin -h localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ─── Supabase Auth (GoTrue) ────────────────────────────────
+  supabase-auth:
+    image: supabase/gotrue:v2.172.1
+    container_name: onera-supabase-auth
+    restart: unless-stopped
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: "9999"
+      API_EXTERNAL_URL: ${API_EXTERNAL_URL:-http://localhost:8000}
+
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD}@supabase-db:5432/postgres
+
+      GOTRUE_SITE_URL: ${SITE_URL:-http://localhost:5173}
+      GOTRUE_URI_ALLOW_LIST: ${ADDITIONAL_REDIRECT_URLS:-}
+      GOTRUE_DISABLE_SIGNUP: "false"
+
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_JWT_SECRET: ${JWT_SECRET}
+
+      # Email auth
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+
+      # Google OAuth (optional)
+      GOTRUE_EXTERNAL_GOOGLE_ENABLED: ${GOOGLE_AUTH_ENABLED:-false}
+      GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID: ${GOOGLE_AUTH_CLIENT_ID:-}
+      GOTRUE_EXTERNAL_GOOGLE_SECRET: ${GOOGLE_AUTH_CLIENT_SECRET:-}
+      GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI: ${API_EXTERNAL_URL:-http://localhost:8000}/auth/v1/callback
+
+      # Apple OAuth (optional)
+      GOTRUE_EXTERNAL_APPLE_ENABLED: ${APPLE_AUTH_ENABLED:-false}
+      GOTRUE_EXTERNAL_APPLE_CLIENT_ID: ${APPLE_AUTH_CLIENT_ID:-}
+      GOTRUE_EXTERNAL_APPLE_SECRET: ${APPLE_AUTH_SECRET:-}
+      GOTRUE_EXTERNAL_APPLE_REDIRECT_URI: ${API_EXTERNAL_URL:-http://localhost:8000}/auth/v1/callback
+
+      GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED: "false"
+      GOTRUE_RATE_LIMIT_EMAIL_SENT: "100"
+    networks:
+      - onera-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9999/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -28,6 +113,42 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # ─── Supabase API Gateway (Kong) ───────────────────────────
+  supabase-kong:
+    image: kong:2.8.1
+    container_name: onera-supabase-kong
+    restart: unless-stopped
+    depends_on:
+      supabase-auth:
+        condition: service_healthy
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /home/kong/kong.yml
+      KONG_DNS_ORDER: LAST,A,CNAME
+      KONG_PLUGINS: request-transformer,cors,key-auth,acl,basic-auth
+      KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
+      KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
+      SUPABASE_ANON_KEY: ${ANON_KEY:?ANON_KEY is required}
+      SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY:?SERVICE_ROLE_KEY is required}
+    volumes:
+      - ./supabase/docker/volumes/api/kong.yml:/home/kong/kong.yml:ro
+    ports:
+      - "8000:8000"
+    networks:
+      - onera-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 64M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ─── Onera Server ──────────────────────────────────────────
   server:
     build:
       context: .
@@ -35,16 +156,17 @@ services:
     container_name: onera-server
     restart: unless-stopped
     depends_on:
-      postgres:
+      supabase-db:
+        condition: service_healthy
+      supabase-auth:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://onera:${POSTGRES_PASSWORD}@postgres:5432/onera
-      SUPABASE_URL: ${SUPABASE_URL:?SUPABASE_URL is required}
-      SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY:?SUPABASE_SECRET_KEY is required}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@supabase-db:5432/postgres
+      SUPABASE_URL: ${API_EXTERNAL_URL:-http://supabase-kong:8000}
+      SUPABASE_SECRET_KEY: ${SERVICE_ROLE_KEY}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
       PORT: 3000
       NODE_ENV: production
-      # WebAuthn / Passkeys (required for non-localhost domains)
       WEBAUTHN_RP_ID: ${WEBAUTHN_RP_ID:-localhost}
       WEBAUTHN_RP_NAME: ${WEBAUTHN_RP_NAME:-Onera}
       WEBAUTHN_ORIGIN: ${WEBAUTHN_ORIGIN:-http://localhost:5173}
@@ -64,6 +186,7 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # ─── Onera Web Client ─────────────────────────────────────
   web:
     build:
       context: .
@@ -71,8 +194,8 @@ services:
       args:
         VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
         VITE_WS_URL: ${VITE_WS_URL:-http://localhost:3000}
-        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:?VITE_SUPABASE_URL is required}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:?VITE_SUPABASE_PUBLISHABLE_KEY is required}
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-http://localhost:8000}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${ANON_KEY}
     container_name: onera-web
     restart: unless-stopped
     depends_on:
@@ -94,7 +217,7 @@ services:
         max-file: "3"
 
 volumes:
-  postgres_data:
+  supabase_db_data:
 
 networks:
   onera-network:
