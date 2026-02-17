@@ -91,7 +91,7 @@ const chatRoute = createRoute({
   getParentRoute: () => appRoute,
   path: '/c/$chatId',
   component: ChatPage,
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: Record<string, unknown>): { pending: boolean; messageId?: string } => ({
     pending: search.pending === 'true' || search.pending === true,
     messageId: typeof search.messageId === 'string' ? search.messageId : undefined,
   }),
