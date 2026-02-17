@@ -148,6 +148,20 @@
       "when": 1739577600000,
       "tag": "0020_add_users_table",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1739750400000,
+      "tag": "0021_repair_schema_constraints_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1739750401000,
+      "tag": "0022_enable_rls_all_tables",
+      "breakpoints": true
     }
   ]
 }
