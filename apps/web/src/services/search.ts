@@ -9,11 +9,12 @@ import {
     type Orama,
     type Results,
     type SearchParams,
-    type TypedDocument
+    type TypedDocument,
+    type RawData
 } from "@orama/orama";
 
 import { type ChatMessage } from "@onera/types";
-import { encryptJSON, decryptJSON } from "@onera/crypto";
+import { encryptJSON, decryptJSON, type EncryptedData } from "@onera/crypto";
 
 // Define the schema for our search index
 // We index individual messages, not entire chats
@@ -68,7 +69,7 @@ export class SearchService {
                         const decrypted = await decryptJSON(encryptedData, key);
                         if (decrypted) {
                             this.db = await create({ schema: messageSchema });
-                            oramaLoad(this.db, decrypted);
+                            oramaLoad(this.db, decrypted as RawData);
                         }
                     } catch (e) {
                         console.warn("Failed to decrypt index, creating new:", e);
@@ -125,6 +126,7 @@ export class SearchService {
         if (docs.length === 0) return;
 
         // Remove existing messages for this chat before re-inserting
+        // Limit is well above any realistic single-chat message count
         const existing = await search(this.db, {
             term: "",
             where: { chatId },
@@ -147,7 +149,6 @@ export class SearchService {
 
     public async getIndexStats() {
         if (!this.db) return { count: 0 };
-        // @ts-ignore - count is available on the orama instance
         return { count: await count(this.db) };
     }
 
@@ -194,7 +195,10 @@ export class SearchService {
     }
 
     // Simple IDB helpers
-    private getIDB(): Promise<IDBDatabase> {
+    private idbInstance: IDBDatabase | null = null;
+
+    private async getIDB(): Promise<IDBDatabase> {
+        if (this.idbInstance) return this.idbInstance;
         return new Promise((resolve, reject) => {
             const request = indexedDB.open("onera-search-db", 1);
             request.onupgradeneeded = (event) => {
@@ -203,12 +207,15 @@ export class SearchService {
                     db.createObjectStore("index");
                 }
             };
-            request.onsuccess = () => resolve(request.result);
+            request.onsuccess = () => {
+                this.idbInstance = request.result;
+                resolve(request.result);
+            };
             request.onerror = () => reject(request.error);
         });
     }
 
-    private async saveToIDB(data: any): Promise<void> {
+    private async saveToIDB(data: EncryptedData): Promise<void> {
         const db = await this.getIDB();
         return new Promise((resolve, reject) => {
             const tx = db.transaction("index", "readwrite");
@@ -219,7 +226,7 @@ export class SearchService {
         });
     }
 
-    private async loadFromIDB(): Promise<any> {
+    private async loadFromIDB(): Promise<EncryptedData | undefined> {
         const db = await this.getIDB();
         return new Promise((resolve, reject) => {
             const tx = db.transaction("index", "readonly");
@@ -233,11 +240,23 @@ export class SearchService {
     /**
      * Clear the index (useful for logout)
      */
-    public async clear() {
+    public clear() {
         this.db = null;
         this.isInitialized = false;
         this.initPromise = null;
         this.encryptionKey = null;
+        if (this.idbInstance) {
+            this.idbInstance.close();
+            this.idbInstance = null;
+        }
+        // Delete encrypted index data from IDB
+        const request = indexedDB.open("onera-search-db", 1);
+        request.onsuccess = () => {
+            const db = request.result;
+            const tx = db.transaction("index", "readwrite");
+            tx.objectStore("index").delete("main-index");
+            tx.oncomplete = () => db.close();
+        };
     }
 }
 

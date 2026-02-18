@@ -20,6 +20,7 @@ import {
   encryptNoteTitle,
   encryptNoteContent,
   createEncryptedNote,
+  type EncryptedNoteData,
 } from '@onera/crypto';
 import { FileText, Archive, ArchiveRestore, Save } from 'lucide-react';
 
@@ -89,9 +90,9 @@ export function NoteEditor({ noteId }: NoteEditorProps) {
 
     setIsSaving(true);
     try {
-      let encryptedNoteKey = note.encryptedNoteKey ?? undefined;
-      let noteKeyNonce = note.noteKeyNonce ?? undefined;
-      let newIsolatedKeyData: any = null;
+      const encryptedNoteKey = note.encryptedNoteKey ?? undefined;
+      const noteKeyNonce = note.noteKeyNonce ?? undefined;
+      let newIsolatedKeyData: EncryptedNoteData | null = null;
 
       // Migration: If this is a legacy note (no isolated key), generate one now
       if (!encryptedNoteKey || !noteKeyNonce) {

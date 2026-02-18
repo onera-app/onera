@@ -156,7 +156,6 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
     navigate({
       to: "/app/c/$chatId",
       params: { chatId },
-      // @ts-ignore - dynamic param
       search: { pending: false, messageId },
     });
     onOpenChange(false);
