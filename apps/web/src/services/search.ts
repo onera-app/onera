@@ -1,8 +1,11 @@
 import {
     create,
     insertMultiple,
+    removeMultiple,
     search,
     count,
+    save as oramaSave,
+    load as oramaLoad,
     type Orama,
     type Results,
     type SearchParams,
@@ -65,8 +68,7 @@ export class SearchService {
                         const decrypted = await decryptJSON(encryptedData, key);
                         if (decrypted) {
                             this.db = await create({ schema: messageSchema });
-                            // @ts-ignore - load from snapshot
-                            await this.db.load(decrypted);
+                            oramaLoad(this.db, decrypted);
                         }
                     } catch (e) {
                         console.warn("Failed to decrypt index, creating new:", e);
@@ -122,6 +124,17 @@ export class SearchService {
 
         if (docs.length === 0) return;
 
+        // Remove existing messages for this chat before re-inserting
+        const existing = await search(this.db, {
+            term: "",
+            where: { chatId },
+            limit: 10000,
+        });
+        if (existing.hits.length > 0) {
+            const idsToRemove = existing.hits.map((h) => h.id);
+            await removeMultiple(this.db, idsToRemove);
+        }
+
         // Bulk insert
         await insertMultiple(this.db, docs);
         await this.save();
@@ -172,8 +185,7 @@ export class SearchService {
     private async save() {
         if (!this.db || !this.encryptionKey) return;
         try {
-            // @ts-ignore - export to snapshot
-            const snapshot = await this.db.export();
+            const snapshot = oramaSave(this.db);
             const encrypted = await encryptJSON(snapshot, this.encryptionKey);
             await this.saveToIDB(encrypted);
         } catch (e) {

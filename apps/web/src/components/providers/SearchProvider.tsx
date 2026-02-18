@@ -49,14 +49,16 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     // Initialize with key when unlocked
     useEffect(() => {
         if (isUnlocked) {
-            try {
-                const key = getMasterKey();
-                if (key) {
-                    searchService.init(key);
+            (async () => {
+                try {
+                    const key = getMasterKey();
+                    if (key) {
+                        await searchService.init(key);
+                    }
+                } catch (e) {
+                    console.error("Failed to get master key for search init", e);
                 }
-            } catch (e) {
-                console.error("Failed to get master key for search init", e);
-            }
+            })();
         } else {
             searchService.clear();
             setIndexingProgress(null);
