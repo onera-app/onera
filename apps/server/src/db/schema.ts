@@ -268,6 +268,9 @@ export const notes = pgTable(
   {
     id: uuidPrimaryKey("id"),
     userId: text("user_id").notNull(), // Supabase Auth user ID
+    // Encryption metadata
+    encryptedNoteKey: text("encrypted_note_key"),
+    noteKeyNonce: text("note_key_nonce"),
     // Encrypted content
     encryptedTitle: text("encrypted_title").notNull(),
     titleNonce: text("title_nonce").notNull(),

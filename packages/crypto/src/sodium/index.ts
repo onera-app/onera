@@ -145,7 +145,10 @@ export {
 // Sharing
 export {
 	encryptChatKeyForRecipient,
+	encryptNoteKeyForRecipient,
+	decryptReceivedKey,
 	decryptReceivedChatKey,
+	decryptReceivedNoteKey,
 	getVerificationIdForKey,
 	getOwnVerificationId,
 	getOwnVerificationId as getVerificationId
@@ -174,13 +177,18 @@ export {
 
 // Notes encryption
 export {
+	getNoteKey,
+	createEncryptedNote,
 	encryptNoteTitle,
 	decryptNoteTitle,
 	encryptNoteContent,
 	decryptNoteContent,
 	encryptNote,
 	decryptNote,
-	type EncryptedNoteData
+	removeNoteKeyFromCache,
+	clearNoteKeyCache,
+	type EncryptedNoteData,
+	type DecryptedNoteData
 } from './notesEncryption';
 
 // Folders encryption

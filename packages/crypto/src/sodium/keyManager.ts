@@ -24,6 +24,7 @@ import { deriveKEKWithParams } from './keyEncryption';
 import { decryptSecretBox } from './symmetric';
 import { clearChatKeyCache } from './chatEncryption';
 import { clearCredentialsKeyCache } from './credentialsEncryption';
+import { clearNoteKeyCache } from './notesEncryption';
 import {
 	createSecureSession,
 	restoreSecureSession,
@@ -210,7 +211,7 @@ export async function setupUserKeys(
 			storedKeys: storable
 		});
 		resetSessionTimeout();
-		persistSessionKeys().catch(() => {}); // Best effort persistence
+		persistSessionKeys().catch(() => { }); // Best effort persistence
 
 		const recoveryInfo = createRecoveryKeyInfo(keyBundle.recoveryKey);
 		secureZero(keyBundle.recoveryKey);
@@ -245,7 +246,7 @@ export async function unlockWithPasswordFlow(
 
 		updateState({ unlocked: true, status: 'unlocked' });
 		resetSessionTimeout();
-		persistSessionKeys().catch(() => {}); // Best effort persistence
+		persistSessionKeys().catch(() => { }); // Best effort persistence
 	} catch (error) {
 		updateState({
 			status: 'error',
@@ -272,7 +273,7 @@ export async function unlockWithRecoveryMnemonic(
 
 		updateState({ storedKeys: keys, unlocked: true, status: 'unlocked' });
 		resetSessionTimeout();
-		persistSessionKeys().catch(() => {}); // Best effort persistence
+		persistSessionKeys().catch(() => { }); // Best effort persistence
 	} catch (error) {
 		updateState({
 			status: 'error',
@@ -307,7 +308,7 @@ export function setDecryptedKeys(keys: {
 
 	updateState({ unlocked: true, status: 'unlocked' });
 	resetSessionTimeout();
-	persistSessionKeys().catch(() => {}); // Best effort persistence
+	persistSessionKeys().catch(() => { }); // Best effort persistence
 }
 
 /**
@@ -481,6 +482,7 @@ export async function lock(clearPersisted: boolean = true): Promise<void> {
 
 	clearChatKeyCache();
 	clearCredentialsKeyCache();
+	clearNoteKeyCache();
 
 	if (clearPersisted) {
 		await clearPersistedSession();
@@ -720,12 +722,13 @@ if (typeof window !== 'undefined') {
 		}
 		clearChatKeyCache();
 		clearCredentialsKeyCache();
+		clearNoteKeyCache();
 		updateState({ unlocked: false, status: 'locked' });
 		clearSessionTimeout();
 
 		// Clear persisted session async (best effort)
 		if (securitySettings.strictSessionLocking) {
-			clearPersistedSession().catch(() => {});
+			clearPersistedSession().catch(() => { });
 		}
 	});
 

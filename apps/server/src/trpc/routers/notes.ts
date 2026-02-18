@@ -33,6 +33,8 @@ export const notesRouter = router({
       return result.map((note) => ({
         id: note.id,
         userId: note.userId,
+        encryptedNoteKey: note.encryptedNoteKey,
+        noteKeyNonce: note.noteKeyNonce,
         encryptedTitle: note.encryptedTitle,
         titleNonce: note.titleNonce,
         encryptedContent: note.encryptedContent,
@@ -60,6 +62,8 @@ export const notesRouter = router({
       return {
         id: note.id,
         userId: note.userId,
+        encryptedNoteKey: note.encryptedNoteKey,
+        noteKeyNonce: note.noteKeyNonce,
         encryptedTitle: note.encryptedTitle,
         titleNonce: note.titleNonce,
         encryptedContent: note.encryptedContent,
@@ -75,6 +79,8 @@ export const notesRouter = router({
   create: protectedProcedure
     .input(
       z.object({
+        encryptedNoteKey: z.string().optional(),
+        noteKeyNonce: z.string().optional(),
         encryptedTitle: z.string(),
         titleNonce: z.string(),
         encryptedContent: z.string(),
@@ -87,6 +93,8 @@ export const notesRouter = router({
         .insert(notes)
         .values({
           userId: ctx.user.id,
+          encryptedNoteKey: input.encryptedNoteKey,
+          noteKeyNonce: input.noteKeyNonce,
           encryptedTitle: input.encryptedTitle,
           titleNonce: input.titleNonce,
           encryptedContent: input.encryptedContent,
@@ -100,6 +108,8 @@ export const notesRouter = router({
       const result = {
         id: note.id,
         userId: note.userId,
+        encryptedNoteKey: note.encryptedNoteKey,
+        noteKeyNonce: note.noteKeyNonce,
         encryptedTitle: note.encryptedTitle,
         titleNonce: note.titleNonce,
         encryptedContent: note.encryptedContent,
@@ -120,6 +130,8 @@ export const notesRouter = router({
     .input(
       z.object({
         noteId: z.string().uuid(),
+        encryptedNoteKey: z.string().optional(),
+        noteKeyNonce: z.string().optional(),
         encryptedTitle: z.string().optional(),
         titleNonce: z.string().optional(),
         encryptedContent: z.string().optional(),
@@ -148,6 +160,8 @@ export const notesRouter = router({
       const result = {
         id: note.id,
         userId: note.userId,
+        encryptedNoteKey: note.encryptedNoteKey,
+        noteKeyNonce: note.noteKeyNonce,
         encryptedTitle: note.encryptedTitle,
         titleNonce: note.titleNonce,
         encryptedContent: note.encryptedContent,

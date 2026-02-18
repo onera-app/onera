@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import dayjs from 'dayjs';
 import { v4 as uuid } from 'uuid';
-import { encryptNote, decryptNoteTitle } from '@onera/crypto';
+import { createEncryptedNote, decryptNoteTitle } from '@onera/crypto';
 import { Plus, FileText, Trash2 } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 
@@ -46,9 +46,11 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
 
   const handleCreateNote = async () => {
     const noteId = uuid();
-    const encryptedData = encryptNote('New Note', '<p></p>');
+    const encryptedData = createEncryptedNote(noteId, 'New Note', '<p></p>');
 
     await createNote.mutateAsync({
+      encryptedNoteKey: encryptedData.encryptedNoteKey,
+      noteKeyNonce: encryptedData.noteKeyNonce,
       encryptedTitle: encryptedData.encryptedTitle,
       titleNonce: encryptedData.titleNonce,
       encryptedContent: encryptedData.encryptedContent,
@@ -68,8 +70,20 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
   };
 
   // Decrypt note title
-  const getTitle = (note: { encryptedTitle: string; titleNonce: string }) => {
-    return decryptNoteTitle(note.encryptedTitle, note.titleNonce);
+  const getTitle = (note: {
+    id: string;
+    encryptedTitle: string;
+    titleNonce: string;
+    encryptedNoteKey: string | null;
+    noteKeyNonce: string | null;
+  }) => {
+    return decryptNoteTitle(
+      note.id,
+      note.encryptedTitle,
+      note.titleNonce,
+      note.encryptedNoteKey ?? undefined,
+      note.noteKeyNonce ?? undefined
+    );
   };
 
   return (
