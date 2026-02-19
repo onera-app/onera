@@ -79,6 +79,7 @@ export const notesRouter = router({
   create: protectedProcedure
     .input(
       z.object({
+        noteId: z.string().uuid().optional(),
         encryptedNoteKey: z.string().optional(),
         noteKeyNonce: z.string().optional(),
         encryptedTitle: z.string(),
@@ -92,6 +93,7 @@ export const notesRouter = router({
       const [note] = await db
         .insert(notes)
         .values({
+          id: input.noteId,
           userId: ctx.user.id,
           encryptedNoteKey: input.encryptedNoteKey,
           noteKeyNonce: input.noteKeyNonce,

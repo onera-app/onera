@@ -17,7 +17,7 @@ export const ChatNavbar = memo(function ChatNavbar({
 
   return (
     <>
-      <header className="absolute top-[1px] z-10 left-1/2 -translate-x-1/2 sm:left-4 sm:right-4 sm:translate-x-0 flex items-center gap-2 sm:gap-3 px-2 sm:px-3 h-12 w-fit max-w-[calc(100vw-1.5rem)] sm:w-auto pointer-events-none">
+      <header className="absolute top-[1px] z-10 left-1 sm:left-4 flex items-center gap-2 sm:gap-3 px-2 sm:px-3 h-12 w-fit max-w-[calc(100vw-1.5rem)] sm:w-auto pointer-events-none">
         <div className="flex items-center gap-2 pointer-events-auto">
           {/* Menu button (shown when sidebar is closed) */}
           {!sidebarOpen && (

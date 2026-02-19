@@ -110,6 +110,9 @@ const notesRoute = createRoute({
   getParentRoute: () => appRoute,
   path: '/notes',
   component: NotesPage,
+  validateSearch: (search: Record<string, unknown>): { noteId?: string } => ({
+    noteId: typeof search.noteId === 'string' ? search.noteId : undefined,
+  }),
 });
 
 // Prompts route - /app/prompts

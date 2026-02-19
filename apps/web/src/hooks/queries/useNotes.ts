@@ -29,6 +29,7 @@ export function useCreateNote() {
 
   return {
     mutateAsync: async (data: {
+      noteId?: string;
       encryptedNoteKey?: string;
       noteKeyNonce?: string;
       encryptedTitle: string;
@@ -40,6 +41,7 @@ export function useCreateNote() {
       return mutation.mutateAsync(data);
     },
     mutate: (data: {
+      noteId?: string;
       encryptedNoteKey?: string;
       noteKeyNonce?: string;
       encryptedTitle: string;
@@ -57,9 +59,11 @@ export function useCreateNote() {
 export function useUpdateNote() {
   const utils = trpc.useUtils();
   const mutation = trpc.notes.update.useMutation({
-    onSuccess: (data) => {
-      utils.notes.list.invalidate();
-      utils.notes.get.invalidate({ noteId: data.id });
+    onSuccess: async (data) => {
+      return Promise.all([
+        utils.notes.list.invalidate(),
+        utils.notes.get.invalidate({ noteId: data.id }),
+      ]);
     },
   });
 

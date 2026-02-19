@@ -26,11 +26,21 @@ export const messageSchema = {
     createdAt: "number",
 } as const;
 
+// Define schema for notes
+export const noteSchema = {
+    id: "string",
+    title: "string",
+    content: "string",
+    createdAt: "number",
+} as const;
+
 type MessageDocument = TypedDocument<Orama<typeof messageSchema>>;
+type NoteDocument = TypedDocument<Orama<typeof noteSchema>>;
 
 export class SearchService {
     private static instance: SearchService;
     private db: Orama<typeof messageSchema> | null = null;
+    private notesDb: Orama<typeof noteSchema> | null = null;
     private isInitialized = false;
     private initPromise: Promise<void> | null = null;
     private encryptionKey: Uint8Array | null = null;
@@ -62,7 +72,8 @@ export class SearchService {
         this.initPromise = (async () => {
             try {
                 // Try to load encrypted data from IDB
-                const encryptedData = await this.loadFromIDB();
+                const encryptedData = await this.loadFromIDB("main-index");
+                const encryptedNotesData = await this.loadFromIDB("notes-index");
 
                 if (encryptedData) {
                     try {
@@ -72,17 +83,31 @@ export class SearchService {
                             oramaLoad(this.db, decrypted as RawData);
                         }
                     } catch (e) {
-                        console.warn("Failed to decrypt index, creating new:", e);
+                        console.warn("Failed to decrypt message index, creating new:", e);
                         this.db = await create({ schema: messageSchema });
                     }
                 } else {
                     this.db = await create({ schema: messageSchema });
                 }
+
+                if (encryptedNotesData) {
+                    try {
+                        const decrypted = await decryptJSON(encryptedNotesData, key);
+                        if (decrypted) {
+                            this.notesDb = await create({ schema: noteSchema });
+                            oramaLoad(this.notesDb, decrypted as RawData);
+                        }
+                    } catch (e) {
+                        console.warn("Failed to decrypt notes index, creating new:", e);
+                        this.notesDb = await create({ schema: noteSchema });
+                    }
+                } else {
+                    this.notesDb = await create({ schema: noteSchema });
+                }
             } catch (e) {
-                console.warn("Failed to restore index, creating new:", e);
-                this.db = await create({
-                    schema: messageSchema,
-                });
+                console.warn("Failed to restore indices, creating new:", e);
+                this.db = await create({ schema: messageSchema });
+                this.notesDb = await create({ schema: noteSchema });
             }
             this.isInitialized = true;
         })();
@@ -147,9 +172,39 @@ export class SearchService {
         }
     }
 
+    /**
+     * Index a single note
+     */
+    public async indexNote(id: string, title: string, content: string, createdAt: number) {
+        if (!this.notesDb || !this.encryptionKey) return;
+
+        // Strip HTML if content is HTML
+        const doc: NoteDocument = {
+            id,
+            title,
+            content: content.replace(/<[^>]*>?/gm, ""),
+            createdAt,
+        } as NoteDocument;
+
+        // Remove existing note before re-inserting
+        await removeMultiple(this.notesDb, [id]);
+
+        // Insert
+        await insertMultiple(this.notesDb, [doc]);
+        await this.saveNotes();
+
+        if (this.indexingProgressCallback) {
+            const stats = await this.getIndexStats();
+            this.indexingProgressCallback(`Indexed ${stats.count} messages, ${stats.notesCount} notes`);
+        }
+    }
+
     public async getIndexStats() {
-        if (!this.db) return { count: 0 };
-        return { count: await count(this.db) };
+        if (!this.db || !this.notesDb) return { count: 0, notesCount: 0 };
+        return {
+            count: await count(this.db),
+            notesCount: await count(this.notesDb)
+        };
     }
 
     public async debugLogAll() {
@@ -181,6 +236,30 @@ export class SearchService {
     }
 
     /**
+     * Search for notes
+     */
+    public async searchNotes(
+        query: string,
+        params?: Partial<SearchParams<Orama<typeof noteSchema>>>
+    ): Promise<Results<NoteDocument>> {
+        if (!this.notesDb) {
+            return {
+                count: 0,
+                hits: [],
+                elapsed: { raw: 0, formatted: "0ms" },
+            };
+        }
+
+        return search(this.notesDb, {
+            term: query,
+            properties: ["title", "content"],
+            threshold: 0.2,
+            limit: 20,
+            ...params,
+        });
+    }
+
+    /**
      * Persist index to IndexedDB
      */
     private async save() {
@@ -188,9 +267,20 @@ export class SearchService {
         try {
             const snapshot = oramaSave(this.db);
             const encrypted = await encryptJSON(snapshot, this.encryptionKey);
-            await this.saveToIDB(encrypted);
+            await this.saveToIDB(encrypted, "main-index");
         } catch (e) {
             console.warn("Failed to persist search index", e);
+        }
+    }
+
+    private async saveNotes() {
+        if (!this.notesDb || !this.encryptionKey) return;
+        try {
+            const snapshot = oramaSave(this.notesDb);
+            const encrypted = await encryptJSON(snapshot, this.encryptionKey);
+            await this.saveToIDB(encrypted, "notes-index");
+        } catch (e) {
+            console.warn("Failed to persist notes search index", e);
         }
     }
 
@@ -215,23 +305,23 @@ export class SearchService {
         });
     }
 
-    private async saveToIDB(data: EncryptedData): Promise<void> {
+    private async saveToIDB(data: EncryptedData, key: string): Promise<void> {
         const db = await this.getIDB();
         return new Promise((resolve, reject) => {
             const tx = db.transaction("index", "readwrite");
             const store = tx.objectStore("index");
-            const request = store.put(data, "main-index");
+            const request = store.put(data, key);
             request.onsuccess = () => resolve();
             request.onerror = () => reject(request.error);
         });
     }
 
-    private async loadFromIDB(): Promise<EncryptedData | undefined> {
+    private async loadFromIDB(key: string): Promise<EncryptedData | undefined> {
         const db = await this.getIDB();
         return new Promise((resolve, reject) => {
             const tx = db.transaction("index", "readonly");
             const store = tx.objectStore("index");
-            const request = store.get("main-index");
+            const request = store.get(key);
             request.onsuccess = () => resolve(request.result);
             request.onerror = () => reject(request.error);
         });
@@ -242,6 +332,7 @@ export class SearchService {
      */
     public clear() {
         this.db = null;
+        this.notesDb = null;
         this.isInitialized = false;
         this.initPromise = null;
         this.encryptionKey = null;
@@ -255,6 +346,7 @@ export class SearchService {
             const db = request.result;
             const tx = db.transaction("index", "readwrite");
             tx.objectStore("index").delete("main-index");
+            tx.objectStore("index").delete("notes-index");
             tx.oncomplete = () => db.close();
         };
     }

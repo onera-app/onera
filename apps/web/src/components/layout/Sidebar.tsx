@@ -334,7 +334,9 @@ export function Sidebar() {
   );
 
   const hasInlineMenuTrigger =
-    location.pathname === "/app" || location.pathname.startsWith("/app/c/");
+    location.pathname === "/app" ||
+    location.pathname.startsWith("/app/c/") ||
+    location.pathname.startsWith("/app/notes");
 
   return (
     <TooltipProvider delayDuration={300}>

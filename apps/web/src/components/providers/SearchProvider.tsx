@@ -7,11 +7,14 @@ import {
     useState,
 } from "react";
 import { useChats } from "@/hooks/queries/useChats";
+import { useNotes } from "@/hooks/queries/useNotes";
 import { useE2EE } from "@/providers/E2EEProvider";
 import { searchService } from "@/services/search";
 import {
     decryptChatContent,
     getChatKey,
+    decryptNoteTitle,
+    decryptNoteContent,
 } from "@onera/crypto";
 import { createMessagesList } from "@/lib/messageTree";
 import type { ChatHistory } from "@onera/types";
@@ -34,9 +37,11 @@ export function useSearchContext() {
 export function SearchProvider({ children }: { children: ReactNode }) {
     const { isUnlocked, getMasterKey } = useE2EE();
     const chats = useChats();
+    const { data: notes } = useNotes();
     const utils = trpc.useUtils();
     const indexingQueue = useRef<Set<string>>(new Set());
     const indexedChats = useRef<Map<string, number>>(new Map()); // Map<chatId, updatedAt>
+    const indexedNotes = useRef<Map<string, number>>(new Map()); // Map<noteId, updatedAt>
     const [indexingProgress, setIndexingProgress] = useState<string | null>(null);
 
     // Initialize search service and progress callback
@@ -77,52 +82,82 @@ export function SearchProvider({ children }: { children: ReactNode }) {
             // Basic implementation to avoid loops
             if (indexingQueue.current.size > 0) return;
 
-            for (const chat of chats) {
-                if (!chat.encryptedChatKey || !chat.chatKeyNonce) continue;
+            // Index Chats
+            if (chats) {
+                for (const chat of chats) {
+                    if (!chat.encryptedChatKey || !chat.chatKeyNonce) continue;
 
-                const lastIndexed = indexedChats.current.get(chat.id);
+                    const lastIndexed = indexedChats.current.get(chat.id);
+                    if (lastIndexed && lastIndexed >= chat.updatedAt) continue;
+                    if (indexingQueue.current.has(chat.id)) continue;
 
-                if (lastIndexed && lastIndexed >= chat.updatedAt) continue;
+                    indexingQueue.current.add(chat.id);
+                    setIndexingProgress(`Indexing chat ${chat.id.slice(0, 8)}...`);
 
-                if (indexingQueue.current.has(chat.id)) continue;
+                    try {
+                        getChatKey(chat.id, chat.encryptedChatKey, chat.chatKeyNonce);
+                        const fullChat = await utils.chats.get.fetch({ chatId: chat.id });
 
-                indexingQueue.current.add(chat.id);
-                setIndexingProgress(`Indexing ${chat.id.slice(0, 8)}...`);
+                        if (fullChat && fullChat.encryptedChat && fullChat.chatNonce) {
+                            const history = decryptChatContent(
+                                chat.id,
+                                chat.encryptedChatKey,
+                                chat.chatKeyNonce,
+                                fullChat.encryptedChat,
+                                fullChat.chatNonce
+                            ) as unknown as ChatHistory;
 
-                try {
-                    // Get the key first
-                    getChatKey(chat.id, chat.encryptedChatKey, chat.chatKeyNonce);
-
-                    // Fetch full chat data to get the encrypted content
-                    const fullChat = await utils.chats.get.fetch({ chatId: chat.id });
-
-                    if (fullChat && fullChat.encryptedChat && fullChat.chatNonce) {
-                        const history = decryptChatContent(
-                            chat.id,
-                            chat.encryptedChatKey,
-                            chat.chatKeyNonce,
-                            fullChat.encryptedChat,
-                            fullChat.chatNonce
-                        ) as unknown as ChatHistory;
-
-                        const messages = createMessagesList(history);
-
-                        // Index messages
-                        await searchService.indexChatMessages(chat.id, messages);
-
-                        // Mark as indexed
-                        indexedChats.current.set(chat.id, chat.updatedAt);
+                            const messages = createMessagesList(history);
+                            await searchService.indexChatMessages(chat.id, messages);
+                            indexedChats.current.set(chat.id, chat.updatedAt);
+                        }
+                    } catch (e) {
+                        console.error(`[SearchProvider] Failed to index chat ${chat.id}`, e);
+                    } finally {
+                        indexingQueue.current.delete(chat.id);
                     }
-                } catch (e) {
-                    // Silent fail for indexing errors
-                    console.error(`[SearchProvider] Failed to index chat ${chat.id}`, e);
-                } finally {
-                    indexingQueue.current.delete(chat.id);
+                    await new Promise(resolve => setTimeout(resolve, 50));
                 }
-
-                // Yield to main thread
-                await new Promise(resolve => setTimeout(resolve, 50));
             }
+
+            // Index Notes
+            if (notes) {
+                for (const note of notes) {
+                    const lastIndexed = indexedNotes.current.get(note.id);
+                    if (lastIndexed && lastIndexed >= note.updatedAt) continue;
+                    if (indexingQueue.current.has(note.id)) continue;
+
+                    indexingQueue.current.add(note.id);
+                    setIndexingProgress(`Indexing note ${note.id.slice(0, 8)}...`);
+
+                    try {
+                        const title = decryptNoteTitle(
+                            note.id,
+                            note.encryptedTitle,
+                            note.titleNonce,
+                            note.encryptedNoteKey ?? undefined,
+                            note.noteKeyNonce ?? undefined
+                        );
+
+                        const content = decryptNoteContent(
+                            note.id,
+                            note.encryptedContent,
+                            note.contentNonce,
+                            note.encryptedNoteKey ?? undefined,
+                            note.noteKeyNonce ?? undefined
+                        );
+
+                        await searchService.indexNote(note.id, title, content, note.updatedAt);
+                        indexedNotes.current.set(note.id, note.updatedAt);
+                    } catch (e) {
+                        console.error(`[SearchProvider] Failed to index note ${note.id}`, e);
+                    } finally {
+                        indexingQueue.current.delete(note.id);
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                }
+            }
+
             setIndexingProgress(null);
         };
 
@@ -132,7 +167,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
 
         return () => clearTimeout(timeoutId);
 
-    }, [chats, isUnlocked, utils]);
+    }, [chats, notes, isUnlocked, utils]);
 
     return (
         <SearchContext.Provider value={{ isIndexing: indexingQueue.current.size > 0, indexingProgress }}>

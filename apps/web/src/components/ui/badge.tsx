@@ -17,7 +17,7 @@ const badgeVariants = cva(
         success:
           "border-transparent bg-status-success text-status-success-text",
         warning:
-          "border-transparent bg-status-warning text-status-warning-text",
+          "border-transparent bg-status-warning text-white",
       },
     },
     defaultVariants: {
@@ -28,7 +28,7 @@ const badgeVariants = cva(
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+  VariantProps<typeof badgeVariants> { }
 
 function Badge({ className, variant, ...props }: BadgeProps) {
   return (

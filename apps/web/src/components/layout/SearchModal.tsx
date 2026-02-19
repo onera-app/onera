@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useChats } from "@/hooks/queries/useChats";
 import { useE2EE } from "@/providers/E2EEProvider";
 import { useMessageSearch } from "@/hooks/useMessageSearch";
+import { useNoteSearch } from "@/hooks/useNoteSearch";
 import { useUIStore } from "@/stores/uiStore";
 import { useSearchContext } from "@/components/providers/SearchProvider";
 import { decryptChatTitle } from "@onera/crypto";
@@ -13,7 +14,7 @@ import {
   DATE_GROUP_LABELS,
 } from "@/lib/dateGrouping";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Search, X, MessageSquare, ArrowRight } from "lucide-react";
+import { Search, X, MessageSquare, ArrowRight, StickyNote } from "lucide-react";
 
 interface SearchModalProps {
   open: boolean;
@@ -64,8 +65,11 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   const { indexingProgress } = useSearchContext();
 
 
-  // Message Search
-  const { search: searchMessages, results: messageResults, isSearching } = useMessageSearch();
+  // Search Hooks
+  const { search: searchMessages, results: messageResults, isSearching: isSearchingMessages } = useMessageSearch();
+  const { search: searchNotes, results: noteResults, isSearching: isSearchingNotes } = useNoteSearch();
+
+  const isSearching = isSearchingMessages || isSearchingNotes;
 
   // Reset state when modal opens/closes
   useEffect(() => {
@@ -131,15 +135,16 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
     );
   }, [chats, searchQuery]);
 
-  // Trigger effect for message search
+  // Trigger effect for search
   useEffect(() => {
     const timer = setTimeout(() => {
       if (searchQuery.trim()) {
         searchMessages(searchQuery);
+        searchNotes(searchQuery);
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery, searchMessages]);
+  }, [searchQuery, searchMessages, searchNotes]);
 
   // Group filtered chats by date
   const groupedChats = useMemo(() => {
@@ -247,7 +252,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
 
             {/* Results List */}
             <div className="flex-1 overflow-y-auto px-3">
-              {filteredChats.length === 0 && messageResults.length === 0 && !isSearching ? (
+              {filteredChats.length === 0 && messageResults.length === 0 && noteResults.length === 0 && !isSearching ? (
                 <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400 pb-20">
                   <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-850 flex items-center justify-center mb-4">
                     <MessageSquare className="h-8 w-8 text-gray-500/60 dark:text-gray-400/60" />
@@ -263,6 +268,43 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                 </div>
               ) : (
                 <div className="py-1 space-y-4">
+                  {/* Note Results */}
+                  {noteResults.length > 0 && (
+                    <div>
+                      <div className="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+                        Notes
+                      </div>
+                      <div className="space-y-0.5">
+                        {noteResults.map((note) => (
+                          <button
+                            key={note.id}
+                            onClick={() => {
+                              navigate({
+                                to: "/app/notes",
+                                search: { noteId: note.id },
+                              });
+                              onOpenChange(false);
+                            }}
+                            className="w-full flex flex-col gap-1 px-3 py-2 rounded-xl text-left transition-all duration-150 hover:bg-gray-100 dark:hover:bg-gray-850"
+                          >
+                            <div className="flex items-center justify-between w-full">
+                              <span className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate flex items-center gap-2">
+                                <StickyNote className="h-3 w-3" />
+                                {note.title}
+                              </span>
+                              <span className="text-[10px] text-gray-500 dark:text-gray-400">
+                                {formatDate(note.createdAt)}
+                              </span>
+                            </div>
+                            <span className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 break-words">
+                              {note.content}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Message Results */}
                   {messageResults.length > 0 && (
                     <div>
