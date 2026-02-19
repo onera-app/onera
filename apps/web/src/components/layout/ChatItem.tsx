@@ -198,7 +198,7 @@ export const ChatItem = memo(function ChatItem({
           </div>
 
           {!isActive && (
-            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[0.75rem] text-gray-500 dark:text-gray-400 tabular-nums">
+            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[0.75rem] text-gray-500 dark:text-gray-400 tabular-nums transition-opacity duration-150 opacity-100 md:group-hover:opacity-0 md:group-focus-within:opacity-0">
               {getTimeLabel(updatedAt)}
             </span>
           )}
