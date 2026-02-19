@@ -47,7 +47,6 @@ import {
 import {
   Search,
   FileText,
-  Blocks,
   MessageSquare,
   ChevronRight,
   PanelLeftClose,
@@ -617,14 +616,6 @@ export function Sidebar() {
                 <FileText className="size-[18px]" />
                 <span className="font-primary text-[0.9rem] font-medium leading-none">Notes</span>
               </Link>
-
-              <button
-                onClick={() => openSettingsModal()}
-                className="w-full group grow flex items-center space-x-3 rounded-xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <Blocks className="size-[18px]" />
-                <span className="font-primary text-[0.9rem] font-medium leading-none">Workspace</span>
-              </button>
 
               {/* Admin */}
               {isAdmin && (
