@@ -14,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { User, Mail, Lock, Loader2 } from 'lucide-react';
+import { User, Mail, Lock, Loader2, Trash2 } from 'lucide-react';
 
 export function AccountTab() {
   const { user } = useAuth();
@@ -137,6 +137,30 @@ export function AccountTab() {
           </div>
           <Button variant="outline" size="sm" onClick={() => setShowPasswordDialog(true)}>
             Change Password
+          </Button>
+        </div>
+      </div>
+
+      {/* Danger Zone */}
+      <div className="space-y-4 pt-4 border-t">
+        <Label className="text-base text-destructive">Danger Zone</Label>
+
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <Label className="font-normal">
+              <Trash2 className="h-4 w-4 inline mr-2" />
+              Delete Account
+            </Label>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Permanently delete your account and all associated data
+            </p>
+          </div>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => window.open('/settings/account/delete', '_blank')}
+          >
+            Delete Account
           </Button>
         </div>
       </div>

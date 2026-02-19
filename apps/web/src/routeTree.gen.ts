@@ -13,6 +13,7 @@ import { PromptsPage } from './routes/prompts';
 import { LandingPage } from './routes/landing';
 import { PrivacyPage } from './routes/privacy';
 import { TermsPage } from './routes/terms';
+import { DeleteAccountPage } from './routes/delete-account';
 import { PricingPage } from './routes/pricing';
 import { BillingPage } from './routes/billing';
 import { AdminLayout } from './components/admin/AdminLayout';
@@ -55,6 +56,13 @@ const pricingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/pricing',
   component: PricingPage,
+});
+
+// Account deletion page (public, requires auth to act)
+const deleteAccountRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/settings/account/delete',
+  component: DeleteAccountPage,
 });
 
 // Auth route (login/signup)
@@ -166,6 +174,7 @@ export const routeTree = rootRoute.addChildren([
   privacyRoute,
   termsRoute,
   pricingRoute,
+  deleteAccountRoute,
   authRoute,
   ssoCallbackRoute,
   appRoute.addChildren([
