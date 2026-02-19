@@ -253,6 +253,12 @@ export function Sidebar() {
     }
   }, [currentChatId, navigate]);
 
+  const handleMobileNav = useCallback(() => {
+    if (window.innerWidth < 768) {
+      toggleSidebar();
+    }
+  }, [toggleSidebar]);
+
   // Folder actions
   const handleNewFolder = async () => {
     try {
@@ -599,6 +605,7 @@ export function Sidebar() {
               {/* New Chat */}
               <Link
                 to="/app"
+                onClick={handleMobileNav}
                 className="group grow flex items-center space-x-3 rounded-xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <Plus className="size-[18px]" />
@@ -607,7 +614,10 @@ export function Sidebar() {
 
               {/* Search */}
               <button
-                onClick={() => setSearchModalOpen(true)}
+                onClick={() => {
+                  setSearchModalOpen(true);
+                  handleMobileNav();
+                }}
                 className="w-full group grow flex items-center space-x-3 rounded-xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <Search className="size-[18px]" />
@@ -617,6 +627,7 @@ export function Sidebar() {
               {/* Notes */}
               <Link
                 to="/app/notes"
+                onClick={handleMobileNav}
                 className="group grow flex items-center space-x-3 rounded-xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <FileText className="size-[18px]" />
@@ -627,6 +638,7 @@ export function Sidebar() {
               {isAdmin && (
                 <Link
                   to="/app/admin"
+                  onClick={handleMobileNav}
                   className="group grow flex items-center space-x-3 rounded-xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <Shield className="size-[18px]" />
@@ -730,6 +742,7 @@ export function Sidebar() {
                                       onRemoveFromFolder={
                                         handleRemoveChatFromFolder
                                       }
+                                      onClick={handleMobileNav}
                                     />
                                   ))}
                                 </div>
@@ -771,6 +784,7 @@ export function Sidebar() {
                                 isActive={chat.id === currentChatId}
                                 onDelete={handleDeleteChat}
                                 onTogglePin={handleTogglePin}
+                                onClick={handleMobileNav}
                               />
                             ))}
                           </div>
@@ -797,6 +811,7 @@ export function Sidebar() {
                                   isActive={chat.id === currentChatId}
                                   onDelete={handleDeleteChat}
                                   onTogglePin={handleTogglePin}
+                                  onClick={handleMobileNav}
                                 />
                               ))}
                             </div>

@@ -135,14 +135,14 @@ export function HomePage() {
   return (
     <div className="relative flex flex-col h-full w-full min-w-0 overflow-x-hidden bg-white dark:bg-gray-900">
       {/* Minimal header with model selector */}
-      <header className="absolute top-[1px] z-10 left-1/2 -translate-x-1/2 sm:left-4 sm:right-4 sm:translate-x-0 flex items-center gap-2 sm:gap-3 px-2 sm:px-3 h-12 w-fit max-w-[calc(100vw-1.5rem)] sm:w-auto">
+      <header className="absolute top-[1px] z-10 left-1 sm:left-4 flex items-center gap-2 sm:gap-3 px-2 sm:px-3 h-12 w-fit max-w-[calc(100vw-1.5rem)] sm:w-auto">
         {/* Menu button - visible when sidebar is closed */}
         {!sidebarOpen && (
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleSidebar}
-            className="h-9 w-9 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-850 rounded-xl transition-colors flex-shrink-0"
+            className="h-9 w-9 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-850 rounded-xl transition-colors flex-shrink-0 md:hidden"
           >
             <Menu className="h-[18px] w-[18px]" />
           </Button>

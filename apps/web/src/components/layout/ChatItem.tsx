@@ -41,6 +41,7 @@ interface ChatItemProps {
   onRename?: (id: string, newTitle: string) => void;
   onRemoveFromFolder?: (id: string) => void;
   onTogglePin?: (id: string, pinned: boolean) => void;
+  onClick?: () => void;
 }
 
 export const ChatItem = memo(function ChatItem({
@@ -55,6 +56,7 @@ export const ChatItem = memo(function ChatItem({
   onRename,
   onRemoveFromFolder,
   onTogglePin,
+  onClick,
 }: ChatItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(title);
@@ -169,6 +171,7 @@ export const ChatItem = memo(function ChatItem({
           to="/app/c/$chatId"
           params={{ chatId: id }}
           search={{ pending: false }}
+          onClick={onClick}
           className={cn(
             "relative flex items-center w-full px-2.5 py-1.5 rounded-xl text-sm transition-colors overflow-hidden",
             isActive
