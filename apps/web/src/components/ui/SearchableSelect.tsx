@@ -17,11 +17,12 @@ interface SearchableSelectProps {
     searchPlaceholder?: string;
     className?: string;
     triggerClassName?: string;
+    disabled?: boolean;
 }
 
 /**
  * A performance-optimized searchable dropdown component.
- * Implements a partial rendering strategy to handle large lists efficiently.
+ * Implements a partial rendering strategy to handle large items efficiently.
  */
 export function SearchableSelect({
     options,
@@ -31,6 +32,7 @@ export function SearchableSelect({
     searchPlaceholder = "Search...",
     className,
     triggerClassName,
+    disabled = false,
 }: SearchableSelectProps) {
     const [open, setOpen] = React.useState(false);
     const [search, setSearch] = React.useState("");
@@ -75,10 +77,11 @@ export function SearchableSelect({
 
     return (
         <DropdownMenu open={open} onOpenChange={setOpen}>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger asChild disabled={disabled}>
                 <Button
                     variant="ghost"
                     size="sm"
+                    disabled={disabled}
                     className={cn(
                         "flex items-center justify-between gap-2 px-3 py-1.5 h-auto text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-850 border border-transparent hover:border-gray-200 dark:hover:border-gray-800 rounded-xl transition-all",
                         triggerClassName
