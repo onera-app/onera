@@ -31,7 +31,7 @@ export function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="text-gray-500 dark:text-gray-400 mb-8">
-          Last updated: January 21, 2026
+          Last updated: February 19, 2026
         </p>
 
         <div className="prose prose-neutral dark:prose-invert max-w-none">
@@ -93,27 +93,43 @@ export function PrivacyPage() {
               5. Data Sharing
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
-              We do not sell, trade, or rent your personal information. Your encrypted data is never shared with third parties. We may share minimal account data only when required by law.
+              We do not sell, trade, or rent your personal information. Your encrypted data stored on Onera's servers is never shared with third parties. We may share minimal account data only when required by law.
             </p>
           </section>
 
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
-              6. Your AI Provider Keys
+              6. Third-Party AI Services
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
-              When you use your own AI provider API keys with Onera:
+              Onera is a "Bring Your Own Key" (BYOK) AI client. When you connect a third-party AI provider (such as OpenAI, Anthropic, Google, xAI, Groq, Mistral, DeepSeek, or others), the following applies:
             </p>
             <ul className="list-disc list-inside text-gray-500 dark:text-gray-400 space-y-2 mb-4">
-              <li>Your keys are encrypted with your personal encryption key</li>
-              <li>We never store or access your API keys in plain text</li>
-              <li>Requests to AI providers are made directly from your session</li>
+              <li><strong>What data is sent:</strong> Your chat messages, prompts, and any attachments you include in a conversation are sent to the AI provider you select</li>
+              <li><strong>Who receives the data:</strong> Data is sent directly from your device to the third-party AI provider's servers using your own API key. Onera does not route, intercept, store, or process this data on our servers</li>
+              <li><strong>Your consent:</strong> Before connecting your first AI provider, the app asks for your explicit permission and explains the data sharing involved</li>
+              <li><strong>Provider policies:</strong> Your use of third-party AI services is governed by each provider's own privacy policy and terms of service. We encourage you to review these before connecting a provider</li>
+              <li><strong>Local providers:</strong> If you use a local AI provider (such as Ollama or LM Studio), your data stays entirely on your device and is not sent to any third party</li>
             </ul>
           </section>
 
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
-              7. Data Security
+              7. Your API Provider Keys
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 mb-4">
+              When you store your AI provider API keys with Onera:
+            </p>
+            <ul className="list-disc list-inside text-gray-500 dark:text-gray-400 space-y-2 mb-4">
+              <li>Your keys are encrypted with your personal encryption key before being stored</li>
+              <li>We never store or access your API keys in plain text</li>
+              <li>API keys are decrypted only on your device when making requests to AI providers</li>
+            </ul>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+              8. Data Security
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
               We implement industry-standard security measures including:
@@ -128,7 +144,7 @@ export function PrivacyPage() {
 
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
-              8. Your Rights
+              9. Your Rights
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
               You have the right to:
@@ -143,7 +159,7 @@ export function PrivacyPage() {
 
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
-              9. Changes to This Policy
+              10. Changes to This Policy
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
               We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the "Last updated" date.
@@ -152,7 +168,7 @@ export function PrivacyPage() {
 
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
-              10. Contact Us
+              11. Contact Us
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
               If you have any questions about this Privacy Policy, please contact us through our GitHub repository.
