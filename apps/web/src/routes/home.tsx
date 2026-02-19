@@ -136,7 +136,7 @@ export function HomePage() {
   return (
     <div className="relative flex flex-col h-full w-full min-w-0 overflow-x-hidden bg-white dark:bg-gray-900">
       {/* Minimal header with model selector */}
-      <header className="absolute top-1 z-10 left-1/2 -translate-x-1/2 sm:left-4 sm:right-4 sm:translate-x-0 flex items-center gap-2 sm:gap-3 px-2 sm:px-4 h-12 w-fit max-w-[calc(100vw-1.5rem)] sm:w-auto">
+      <header className="absolute top-[1px] z-10 left-1/2 -translate-x-1/2 sm:left-4 sm:right-4 sm:translate-x-0 flex items-center gap-2 sm:gap-3 px-2 sm:px-3 h-12 w-fit max-w-[calc(100vw-1.5rem)] sm:w-auto">
         {/* Menu button - visible when sidebar is closed */}
         {!sidebarOpen && (
           <Button

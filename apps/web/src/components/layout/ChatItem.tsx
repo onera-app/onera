@@ -44,6 +44,7 @@ interface ChatItemProps {
 export const ChatItem = memo(function ChatItem({
   id,
   title,
+  updatedAt,
   isLocked,
   isPinned,
   isActive = false,
@@ -120,6 +121,17 @@ export const ChatItem = memo(function ChatItem({
     setIsDragging(false);
   };
 
+  const getTimeLabel = (timestamp: number) => {
+    const now = Date.now();
+    const deltaMs = Math.max(0, now - timestamp);
+    const minutes = Math.floor(deltaMs / 60000);
+    if (minutes < 60) return `${Math.max(1, minutes)}m`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h`;
+    const days = Math.floor(hours / 24);
+    return `${days}d`;
+  };
+
   if (isEditing) {
     return (
       <div className="px-0">
@@ -155,10 +167,10 @@ export const ChatItem = memo(function ChatItem({
           params={{ chatId: id }}
           search={{ pending: false }}
           className={cn(
-            "relative flex items-center w-full px-[11px] py-[6px] rounded-xl text-sm transition-colors overflow-hidden",
+            "relative flex items-center w-full px-2.5 py-1.5 rounded-xl text-sm transition-colors overflow-hidden",
             isActive
-              ? "bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-200"
-              : "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-200 group-hover:bg-gray-100 dark:group-hover:bg-gray-950",
+              ? "bg-gray-100 dark:bg-gray-900/80 text-gray-900 dark:text-gray-100"
+              : "text-gray-700 dark:text-gray-100 hover:text-gray-900 dark:hover:text-gray-100 group-hover:bg-gray-100 dark:group-hover:bg-gray-950",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           )}
         >
@@ -168,14 +180,20 @@ export const ChatItem = memo(function ChatItem({
           )}
 
           {/* Title container */}
-          <div className="flex-1 min-w-0 overflow-hidden pr-6">
+          <div className="flex-1 min-w-0 overflow-hidden pr-9">
             <span
-              className="block whitespace-nowrap text-left font-normal overflow-hidden h-[20px] truncate"
+              className="block whitespace-nowrap text-left text-[0.9rem] font-normal overflow-hidden h-5 leading-5 truncate"
               dir="auto"
             >
               {title}
             </span>
           </div>
+
+          {!isActive && (
+            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[0.75rem] text-gray-500 dark:text-gray-400 tabular-nums">
+              {getTimeLabel(updatedAt)}
+            </span>
+          )}
         </Link>
 
         {/* Menu trigger — Open WebUI style */}
@@ -191,7 +209,7 @@ export const ChatItem = memo(function ChatItem({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className="p-1 rounded-lg text-gray-400 dark:text-gray-600 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors focus-visible:outline-none"
+                className="p-1 rounded-lg text-gray-400 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors focus-visible:outline-none"
                 onClick={(e) => e.preventDefault()}
               >
                 <MoreHorizontal className="h-4 w-4" />

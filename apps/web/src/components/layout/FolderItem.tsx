@@ -150,17 +150,17 @@ export function FolderItem({
             <CollapsibleTrigger asChild>
               <button
                 className={cn(
-                  'flex items-center gap-1.5 w-full py-1 px-1.5 rounded-xl text-left',
-                  'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900 transition-all duration-150 focus-visible:outline-none'
+                  'flex items-center gap-2 w-full py-1 px-2 rounded-xl text-left',
+                  'text-gray-600 dark:text-gray-100 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900 transition-all duration-150 focus-visible:outline-none'
                 )}
               >
                 <ChevronRight
                   className={cn(
-                    'h-3.5 w-3.5 transition-transform duration-200 flex-shrink-0',
+                    'h-3.5 w-3.5 transition-transform duration-200 flex-shrink-0 text-gray-500 dark:text-gray-400',
                     isExpanded && 'rotate-90'
                   )}
                 />
-                <span className="flex-1 text-sm font-primary truncate">{name}</span>
+                <span className="flex-1 text-[0.9rem] font-primary truncate">{name}</span>
               </button>
             </CollapsibleTrigger>
           )}

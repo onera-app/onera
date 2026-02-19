@@ -47,6 +47,7 @@ import {
 import {
   Search,
   FileText,
+  Blocks,
   MessageSquare,
   ChevronRight,
   PanelLeftClose,
@@ -540,7 +541,7 @@ export function Sidebar() {
           "fixed md:relative z-40 md:z-20",
           // Background — Open WebUI: opaque on mobile, semi-transparent on desktop
           sidebarOpen
-            ? "bg-gray-50 dark:bg-gray-950 md:bg-gray-50 md:dark:bg-gray-950/70"
+            ? "bg-gray-50 dark:bg-black md:bg-gray-50 md:dark:bg-black"
             : "",
           // Width handling
           sidebarOpen
@@ -555,12 +556,12 @@ export function Sidebar() {
         {/* Content */}
         <div className="flex flex-col h-full overflow-hidden relative">
           {/* Header — Open WebUI style */}
-          <header className="flex items-center justify-between px-[0.5625rem] pt-2 pb-1.5 sticky top-0 z-10">
+          <header className="flex items-center justify-between px-3 pt-2 pb-1 sticky top-0 z-10">
             <Link to="/app" className="flex items-center gap-2 group">
-              <div className="w-7 h-7 rounded-full overflow-hidden">
-                <OneraLogo size={30} />
+              <div className="w-8 h-8 rounded-full overflow-hidden">
+                <OneraLogo size={32} />
               </div>
-              <span className="font-primary font-medium text-sm text-gray-850 dark:text-white tracking-tight">
+              <span className="font-primary font-semibold text-[0.9rem] text-gray-850 dark:text-white tracking-tight">
                 Onera
               </span>
             </Link>
@@ -569,7 +570,7 @@ export function Sidebar() {
               <TooltipTrigger asChild>
                 <button
                   onClick={toggleSidebar}
-                  className="flex rounded-xl size-[34px] justify-center items-center text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors focus-visible:outline-none"
+                  className="flex rounded-xl size-[34px] justify-center items-center text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors focus-visible:outline-none"
                 >
                   <PanelLeftClose className="h-4 w-4" />
                 </button>
@@ -582,55 +583,63 @@ export function Sidebar() {
 
           {/* Top gradient fade — only visible when scrolled (Open WebUI style) */}
           <div className={cn(
-            "absolute top-12 left-0 right-0 h-6 z-[5] pointer-events-none bg-linear-to-b from-gray-50 dark:from-gray-950 from-50% to-transparent transition-opacity duration-150",
+            "absolute top-12 left-0 right-0 h-6 z-[5] pointer-events-none bg-linear-to-b from-gray-50 dark:from-black from-50% to-transparent transition-opacity duration-150",
             scrollTop > 0 ? "opacity-100" : "opacity-0",
           )} />
 
           {/* Main Content (scrollable) — includes nav menu + chat list */}
           <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hidden" onScroll={handleScroll}>
             {/* Navigation Menu — Open WebUI style */}
-            <div className="px-[0.4375rem] py-1.5">
+            <div className="px-1 py-2">
               {/* New Chat */}
               <Link
                 to="/app"
-                className="group grow flex items-center space-x-3 rounded-2xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-200 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="group grow flex items-center space-x-3 rounded-xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <Plus className="size-[18px]" />
-                <span className="font-primary text-sm">New Chat</span>
+                <span className="font-primary text-[0.9rem] font-medium leading-none">New Chat</span>
               </Link>
 
               {/* Search */}
               <button
                 onClick={() => setSearchModalOpen(true)}
-                className="w-full group grow flex items-center space-x-3 rounded-2xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-200 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="w-full group grow flex items-center space-x-3 rounded-xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <Search className="size-[18px]" />
-                <span className="font-primary text-sm">Search</span>
+                <span className="font-primary text-[0.9rem] font-medium leading-none">Search</span>
               </button>
 
               {/* Notes */}
               <Link
                 to="/app/notes"
-                className="group grow flex items-center space-x-3 rounded-2xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-200 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="group grow flex items-center space-x-3 rounded-xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <FileText className="size-[18px]" />
-                <span className="font-primary text-sm">Notes</span>
+                <span className="font-primary text-[0.9rem] font-medium leading-none">Notes</span>
               </Link>
+
+              <button
+                onClick={() => openSettingsModal()}
+                className="w-full group grow flex items-center space-x-3 rounded-xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <Blocks className="size-[18px]" />
+                <span className="font-primary text-[0.9rem] font-medium leading-none">Workspace</span>
+              </button>
 
               {/* Admin */}
               {isAdmin && (
                 <Link
                   to="/app/admin"
-                  className="group grow flex items-center space-x-3 rounded-2xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-200 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="group grow flex items-center space-x-3 rounded-xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <Shield className="size-[18px]" />
-                  <span className="font-primary text-sm">Admin</span>
+                  <span className="font-primary text-[0.9rem] font-medium leading-none">Admin</span>
                 </Link>
               )}
             </div>
 
             {/* Chat list */}
-            <div className="px-[0.4375rem] mt-3 pb-4">
+            <div className="px-1.5 mt-3 pb-4">
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-16 gap-3">
                   <Spinner size="lg" className="text-gray-500 dark:text-gray-400" />
@@ -647,27 +656,24 @@ export function Sidebar() {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {/* Folders Section */}
                   <Collapsible
                     open={foldersExpanded}
                     onOpenChange={setFoldersExpanded}
                   >
-                    <div className="flex items-center justify-between">
-                      <CollapsibleTrigger className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors focus-visible:outline-none rounded-md">
-                        <ChevronRight
-                          className={cn(
-                            "h-3 w-3 transition-transform duration-200",
-                            foldersExpanded && "rotate-90",
-                          )}
-                        />
+                    <div className="relative">
+                      <CollapsibleTrigger className="w-full flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors focus-visible:outline-none rounded-xl">
                         <span>Folders</span>
                       </CollapsibleTrigger>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <button
-                            onClick={handleNewFolder}
-                            className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors focus-visible:outline-none"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleNewFolder();
+                            }}
+                            className="absolute right-1 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors focus-visible:outline-none"
                           >
                             <Plus className="h-3.5 w-3.5" />
                           </button>
@@ -742,13 +748,7 @@ export function Sidebar() {
                     open={chatsExpanded}
                     onOpenChange={setChatsExpanded}
                   >
-                    <CollapsibleTrigger className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors w-full focus-visible:outline-none rounded-md">
-                      <ChevronRight
-                        className={cn(
-                          "h-3 w-3 transition-transform duration-200",
-                          chatsExpanded && "rotate-90",
-                        )}
-                      />
+                    <CollapsibleTrigger className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors w-full focus-visible:outline-none rounded-xl">
                       <span>Chats</span>
                     </CollapsibleTrigger>
 
@@ -760,7 +760,7 @@ export function Sidebar() {
                             <Pin className="h-3 w-3" />
                             <span>Pinned</span>
                           </div>
-                          <div className="ml-3 pl-1 space-y-0.5 mt-1 border-s border-gray-100 dark:border-gray-900">
+                          <div className="ml-3 pl-1 space-y-1 mt-1 border-s border-gray-100 dark:border-gray-900">
                             {pinnedChats.map((chat) => (
                               <ChatItem
                                 key={chat.id}
@@ -780,12 +780,12 @@ export function Sidebar() {
 
                       {/* Date Groups — Open WebUI style time labels */}
                       {Array.from(groupedChats.entries()).map(
-                        ([group, groupChats]) => (
-                          <div key={group} className="mt-3">
-                            <div className="w-full pl-2.5 text-xs text-gray-500 dark:text-gray-400 font-medium pb-1.5">
+                        ([group, groupChats], groupIndex) => (
+                          <div key={group} className={cn(groupIndex === 0 ? "mt-1.5" : "mt-4")}>
+                            <div className="w-full pl-2.5 text-[0.7rem] text-gray-500 dark:text-gray-500 font-medium pb-1.5">
                               {DATE_GROUP_LABELS[group as DateGroup]}
                             </div>
-                            <div className="space-y-0.5 mt-0.5">
+                            <div className="space-y-1 mt-0.5">
                               {groupChats.map((chat) => (
                                 <ChatItem
                                   key={chat.id}
@@ -820,14 +820,14 @@ export function Sidebar() {
           </div>
 
           {/* Bottom gradient fade */}
-          <div className="absolute bottom-16 left-0 right-0 h-6 z-[5] pointer-events-none bg-linear-to-t from-gray-50 dark:from-gray-950 from-50% to-transparent" />
+          <div className="absolute bottom-16 left-0 right-0 h-6 z-[5] pointer-events-none bg-linear-to-t from-gray-50 dark:from-black from-50% to-transparent" />
 
           {/* User Profile Section — Open WebUI style */}
           {user && (
             <div className="px-1.5 pt-1.5 pb-2 sticky bottom-0 z-10 -mt-3">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center rounded-2xl py-2 px-1.5 w-full hover:bg-gray-100/50 dark:hover:bg-gray-900/50 transition text-left group focus-visible:outline-none">
+                  <button className="flex items-center rounded-2xl py-2 px-1.5 w-full hover:bg-gray-100/50 dark:hover:bg-gray-900 transition text-left group focus-visible:outline-none">
                     {/* Avatar */}
                     {user.imageUrl ? (
                       <img

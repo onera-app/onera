@@ -280,7 +280,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
           onClick={() => setIsOpen(!isOpen)}
           disabled={isLoading || models.length === 0}
           className={cn(
-            "flex max-w-[220px] sm:max-w-[280px] items-center gap-2 h-9 px-3 rounded-lg text-sm transition-all duration-150",
+            "flex max-w-[220px] sm:max-w-[280px] items-center gap-2 h-9 px-3 rounded-lg text-[15px] transition-all duration-150",
             "hover:bg-gray-900/[0.06] dark:hover:bg-gray-100/[0.06] active:bg-gray-900/10 dark:active:bg-gray-100/10",
             "disabled:opacity-40 disabled:cursor-not-allowed",
             isOpen && "bg-gray-900/[0.06] dark:bg-gray-100/[0.06]",
@@ -289,13 +289,13 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin text-gray-500 dark:text-gray-400" />
-              <span className="text-gray-500 dark:text-gray-400">Loading...</span>
+              <span className="text-[15px] text-gray-500 dark:text-gray-400">Loading...</span>
             </>
           ) : models.length === 0 ? (
-            <span className="text-gray-500 dark:text-gray-400">No models</span>
+            <span className="text-[15px] text-gray-500 dark:text-gray-400">No models</span>
           ) : (
             <>
-              <span className="truncate text-gray-900 dark:text-gray-100 max-w-[164px] sm:max-w-[214px]">
+              <span className="truncate text-[15px] text-gray-900 dark:text-gray-100 max-w-[164px] sm:max-w-[214px]">
                 {selectedModel?.name || "Select model"}
               </span>
               <ChevronDown
