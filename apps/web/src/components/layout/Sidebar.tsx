@@ -72,6 +72,7 @@ interface ChatWithTitle {
   isLocked?: boolean;
   folderId?: string | null;
   isPinned?: boolean;
+  isTitleGenerating?: boolean;
 }
 
 interface FolderWithState {
@@ -160,6 +161,7 @@ export function Sidebar() {
             isLocked: false,
             folderId: chat.folderId,
             isPinned: chat.pinned,
+            isTitleGenerating: title === "New Chat" || title === "Untitled",
           };
         } catch {
           return {
@@ -169,6 +171,7 @@ export function Sidebar() {
             isLocked: true,
             folderId: chat.folderId,
             isPinned: chat.pinned,
+            isTitleGenerating: false,
           };
         }
       }
@@ -179,6 +182,7 @@ export function Sidebar() {
         isLocked: !isUnlocked,
         folderId: chat.folderId,
         isPinned: chat.pinned,
+        isTitleGenerating: false,
       };
     });
   }, [rawChats, isUnlocked]);
@@ -717,6 +721,7 @@ export function Sidebar() {
                                       updatedAt={chat.updatedAt}
                                       isLocked={chat.isLocked}
                                       isPinned={chat.isPinned}
+                                      isTitleGenerating={chat.isTitleGenerating}
                                       isActive={chat.id === currentChatId}
                                       onDelete={handleDeleteChat}
                                       onTogglePin={handleTogglePin}
@@ -760,6 +765,7 @@ export function Sidebar() {
                                 updatedAt={chat.updatedAt}
                                 isLocked={chat.isLocked}
                                 isPinned={chat.isPinned}
+                                isTitleGenerating={chat.isTitleGenerating}
                                 isActive={chat.id === currentChatId}
                                 onDelete={handleDeleteChat}
                                 onTogglePin={handleTogglePin}
@@ -785,6 +791,7 @@ export function Sidebar() {
                                   updatedAt={chat.updatedAt}
                                   isLocked={chat.isLocked}
                                   isPinned={chat.isPinned}
+                                  isTitleGenerating={chat.isTitleGenerating}
                                   isActive={chat.id === currentChatId}
                                   onDelete={handleDeleteChat}
                                   onTogglePin={handleTogglePin}

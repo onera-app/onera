@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Lock,
+  Loader2,
   MoreHorizontal,
   Pencil,
   Trash2,
@@ -34,6 +35,7 @@ interface ChatItemProps {
   updatedAt: number;
   isLocked?: boolean;
   isPinned?: boolean;
+  isTitleGenerating?: boolean;
   isActive?: boolean;
   onDelete: (id: string) => void;
   onRename?: (id: string, newTitle: string) => void;
@@ -47,6 +49,7 @@ export const ChatItem = memo(function ChatItem({
   updatedAt,
   isLocked,
   isPinned,
+  isTitleGenerating = false,
   isActive = false,
   onDelete,
   onRename,
@@ -181,12 +184,17 @@ export const ChatItem = memo(function ChatItem({
 
           {/* Title container */}
           <div className="flex-1 min-w-0 overflow-hidden pr-9">
-            <span
-              className="block whitespace-nowrap text-left text-[0.9rem] font-normal overflow-hidden h-5 leading-5 truncate"
-              dir="auto"
-            >
-              {title}
-            </span>
+            <div className="flex items-center gap-1.5 min-w-0 h-5">
+              {isTitleGenerating && (
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-gray-500 dark:text-gray-400 flex-shrink-0" />
+              )}
+              <span
+                className="block whitespace-nowrap text-left text-[0.9rem] font-normal overflow-hidden h-5 leading-5 truncate"
+                dir="auto"
+              >
+                {isTitleGenerating ? "New Chat" : title}
+              </span>
+            </div>
           </div>
 
           {!isActive && (

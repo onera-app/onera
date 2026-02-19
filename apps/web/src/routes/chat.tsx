@@ -779,9 +779,8 @@ export function ChatPage() {
         try {
           setIsGeneratingFollowUps(true); // Show loading state
 
-          // Generate initial title from user message
-          const initialTitle =
-            content.slice(0, 50) + (content.length > 50 ? "..." : "");
+          // Use placeholder until AI title generation completes after first exchange
+          const initialTitle = "New Chat";
 
           // We'll construct the real message content later, but for initial creation we need something
           // The empty history is fine because handleFinish will add the messages properly

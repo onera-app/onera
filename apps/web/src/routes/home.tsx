@@ -91,8 +91,7 @@ export function HomePage() {
           },
         };
 
-        const initialTitle =
-          content.slice(0, 50) + (content.length > 50 ? "..." : "");
+        const initialTitle = "New Chat";
 
         const { data: encryptedData } = await createEncryptedChat(
           initialTitle,
