@@ -30,7 +30,13 @@ export function NotesPage() {
   // On mobile, when a note is selected, hide the list
   const handleSelectNote = (noteId: string) => {
     navigate({
-      search: (prev) => ({ ...prev, noteId }),
+      search: (prev) => {
+        if (!noteId) {
+          const { noteId: _, ...rest } = prev;
+          return rest;
+        }
+        return { ...prev, noteId };
+      },
     });
   };
 
@@ -92,7 +98,7 @@ export function NotesPage() {
                   <NoteEditor
                     key={selectedNoteId}
                     noteId={selectedNoteId}
-                    onBack={isMobile ? handleBackToList : undefined}
+                    onBack={handleBackToList}
                   />
                 </div>
               </div>

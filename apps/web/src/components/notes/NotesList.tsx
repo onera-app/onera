@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useUIStore } from "@/stores/uiStore";
 import { useNotes, useCreateNote, useDeleteNote } from '@/hooks/queries/useNotes';
@@ -51,20 +52,25 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
   const { search: performSearch, results: searchResults, isSearching } = useNoteSearch();
 
   const handleCreateNote = async () => {
-    const noteId = uuid();
-    const encryptedData = createEncryptedNote(noteId, 'New Note', '<p></p>');
+    try {
+      const noteId = uuid();
+      const encryptedData = createEncryptedNote(noteId, 'New Note', '<p></p>');
 
-    await createNote.mutateAsync({
-      noteId,
-      encryptedNoteKey: encryptedData.encryptedNoteKey,
-      noteKeyNonce: encryptedData.noteKeyNonce,
-      encryptedTitle: encryptedData.encryptedTitle,
-      titleNonce: encryptedData.titleNonce,
-      encryptedContent: encryptedData.encryptedContent,
-      contentNonce: encryptedData.contentNonce,
-      folderId: selectedFolderId,
-    });
-    onSelectNote(noteId);
+      await createNote.mutateAsync({
+        noteId,
+        encryptedNoteKey: encryptedData.encryptedNoteKey,
+        noteKeyNonce: encryptedData.noteKeyNonce,
+        encryptedTitle: encryptedData.encryptedTitle,
+        titleNonce: encryptedData.titleNonce,
+        encryptedContent: encryptedData.encryptedContent,
+        contentNonce: encryptedData.contentNonce,
+        folderId: selectedFolderId,
+      });
+      onSelectNote(noteId);
+    } catch (error) {
+      console.error('[NotesList] Failed to create note:', error);
+      toast.error('Failed to create note');
+    }
   };
 
   const handleDeleteNote = async () => {
@@ -85,6 +91,16 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchQuery, performSearch]);
+
+  // Sync selectedFolderId with existing folders
+  useEffect(() => {
+    if (selectedFolderId && folders.length > 0) {
+      const folderExists = folders.some(f => f.id === selectedFolderId);
+      if (!folderExists) {
+        setSelectedFolderId(undefined);
+      }
+    }
+  }, [folders, selectedFolderId]);
 
   const displayNotes = searchQuery.trim() ? searchResults : notes;
 
@@ -111,9 +127,13 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
                     size="icon"
                     onClick={handleCreateNote}
                     disabled={createNote.isPending}
-                    className="h-9 w-9 bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm rounded-xl transition-all active:scale-95"
+                    className="h-9 w-9 bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm rounded-xl transition-all active:scale-95 disabled:opacity-70"
                   >
-                    <Plus className="h-5 w-5" />
+                    {createNote.isPending ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <Plus className="h-5 w-5" />
+                    )}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>New Note</TooltipContent>
@@ -186,8 +206,21 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
                 {searchQuery ? 'No notes match your search' : showArchived ? 'No archived notes' : 'No notes yet'}
               </p>
               {!searchQuery && !showArchived && (
-                <Button variant="link" size="sm" onClick={handleCreateNote} className="mt-2 text-primary">
-                  Create your first note
+                <Button
+                  variant="link"
+                  size="sm"
+                  onClick={handleCreateNote}
+                  className="mt-2 text-primary"
+                  disabled={createNote.isPending}
+                >
+                  {createNote.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    'Create your first note'
+                  )}
                 </Button>
               )}
             </div>

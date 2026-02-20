@@ -23,7 +23,7 @@ export function useCreateNote() {
   const utils = trpc.useUtils();
   const mutation = trpc.notes.create.useMutation({
     onSuccess: () => {
-      utils.notes.list.invalidate();
+      return utils.notes.list.invalidate();
     },
   });
 
@@ -59,7 +59,7 @@ export function useCreateNote() {
 export function useUpdateNote() {
   const utils = trpc.useUtils();
   const mutation = trpc.notes.update.useMutation({
-    onSuccess: async (data) => {
+    onSuccess: (data) => {
       return Promise.all([
         utils.notes.list.invalidate(),
         utils.notes.get.invalidate({ noteId: data.id }),
@@ -112,6 +112,9 @@ export function useUpdateNote() {
         ...data,
       });
     },
+    isPending: mutation.isPending,
+    isError: mutation.isError,
+    error: mutation.error,
   };
 }
 
@@ -119,7 +122,7 @@ export function useDeleteNote() {
   const utils = trpc.useUtils();
   const mutation = trpc.notes.remove.useMutation({
     onSuccess: () => {
-      utils.notes.list.invalidate();
+      return utils.notes.list.invalidate();
     },
   });
 
@@ -130,5 +133,8 @@ export function useDeleteNote() {
     mutate: (id: string) => {
       mutation.mutate({ noteId: id });
     },
+    isPending: mutation.isPending,
+    isError: mutation.isError,
+    error: mutation.error,
   };
 }

@@ -265,7 +265,8 @@ export function Sidebar() {
       const folder = await createFolder.mutateAsync({ name: "New Folder" });
       setNewFolderIds((prev) => new Set(prev).add(folder.id));
       setExpandedFolders((prev) => new Set(prev).add(folder.id));
-    } catch {
+    } catch (error) {
+      console.error("Failed to create folder:", error);
       toast.error("Failed to create folder");
     }
   };
@@ -278,7 +279,8 @@ export function Sidebar() {
         next.delete(folderId);
         return next;
       });
-    } catch {
+    } catch (error) {
+      console.error("Failed to rename folder:", error);
       toast.error("Failed to rename folder");
     }
   };
@@ -296,7 +298,8 @@ export function Sidebar() {
         next.delete(folderId);
         return next;
       });
-    } catch {
+    } catch (error) {
+      console.error("Failed to delete folder:", error);
       toast.error("Failed to delete folder");
     }
   };
@@ -308,7 +311,8 @@ export function Sidebar() {
         data: { folderId },
       });
       toast.success("Chat moved to folder");
-    } catch {
+    } catch (error) {
+      console.error("Failed to move chat:", error);
       toast.error("Failed to move chat");
     }
   };
@@ -319,7 +323,8 @@ export function Sidebar() {
         id: chatId,
         data: { folderId: null },
       });
-    } catch {
+    } catch (error) {
+      console.error("Failed to remove from folder:", error);
       toast.error("Failed to remove from folder");
     }
   }, []);
@@ -332,7 +337,8 @@ export function Sidebar() {
           data: { pinned },
         });
         toast.success(pinned ? "Chat pinned" : "Chat unpinned");
-      } catch {
+      } catch (error) {
+        console.error("Failed to update pin status:", error);
         toast.error("Failed to update pin status");
       }
     },
@@ -682,9 +688,14 @@ export function Sidebar() {
                               e.stopPropagation();
                               handleNewFolder();
                             }}
-                            className="absolute right-1 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors focus-visible:outline-none"
+                            disabled={createFolder.isPending}
+                            className="absolute right-1 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors focus-visible:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            <Plus className="h-3.5 w-3.5" />
+                            {createFolder.isPending ? (
+                              <Spinner className="h-3.5 w-3.5" />
+                            ) : (
+                              <Plus className="h-3.5 w-3.5" />
+                            )}
                           </button>
                         </TooltipTrigger>
                         <TooltipContent side="right" className="text-xs">

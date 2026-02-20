@@ -30,7 +30,7 @@ export function useCreateChat() {
   const utils = trpc.useUtils();
   const mutation = trpc.chats.create.useMutation({
     onSuccess: () => {
-      utils.chats.list.invalidate();
+      return utils.chats.list.invalidate();
     },
   });
 
@@ -57,6 +57,9 @@ export function useCreateChat() {
     }) => {
       mutation.mutate(data);
     },
+    isPending: mutation.isPending,
+    isError: mutation.isError,
+    error: mutation.error,
   };
 }
 
@@ -117,6 +120,9 @@ export function useUpdateChat() {
         ...data,
       });
     },
+    isPending: mutation.isPending,
+    isError: mutation.isError,
+    error: mutation.error,
   };
 }
 
@@ -127,7 +133,7 @@ export function useDeleteChat() {
   const utils = trpc.useUtils();
   const mutation = trpc.chats.remove.useMutation({
     onSuccess: () => {
-      utils.chats.list.invalidate();
+      return utils.chats.list.invalidate();
     },
   });
 
@@ -138,5 +144,8 @@ export function useDeleteChat() {
     mutate: (id: string) => {
       mutation.mutate({ chatId: id });
     },
+    isPending: mutation.isPending,
+    isError: mutation.isError,
+    error: mutation.error,
   };
 }

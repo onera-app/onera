@@ -49,7 +49,7 @@ export function useCreateFolder() {
   const utils = trpc.useUtils();
   const mutation = trpc.folders.create.useMutation({
     onSuccess: () => {
-      utils.folders.list.invalidate();
+      return utils.folders.list.invalidate();
     },
   });
 
@@ -70,6 +70,9 @@ export function useCreateFolder() {
         parentId: data.parentId,
       });
     },
+    isPending: mutation.isPending,
+    isError: mutation.isError,
+    error: mutation.error,
   };
 }
 
@@ -133,6 +136,9 @@ export function useUpdateFolder() {
 
       mutation.mutate(input);
     },
+    isPending: mutation.isPending,
+    isError: mutation.isError,
+    error: mutation.error,
   };
 }
 
@@ -140,7 +146,7 @@ export function useDeleteFolder() {
   const utils = trpc.useUtils();
   const mutation = trpc.folders.remove.useMutation({
     onSuccess: () => {
-      utils.folders.list.invalidate();
+      return utils.folders.list.invalidate();
     },
   });
 
@@ -151,5 +157,8 @@ export function useDeleteFolder() {
     mutate: (id: string) => {
       mutation.mutate({ folderId: id });
     },
+    isPending: mutation.isPending,
+    isError: mutation.isError,
+    error: mutation.error,
   };
 }
