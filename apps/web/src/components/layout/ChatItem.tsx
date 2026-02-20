@@ -186,7 +186,7 @@ export const ChatItem = memo(function ChatItem({
           )}
 
           {/* Title container */}
-          <div className="flex-1 min-w-0 overflow-hidden pr-9">
+          <div className="flex-1 min-w-0 overflow-hidden pr-14 md:pr-9">
             <div className="flex items-center gap-1.5 min-w-0 h-5">
               {isTitleGenerating && (
                 <Loader2 className="h-3.5 w-3.5 animate-spin text-gray-500 dark:text-gray-400 flex-shrink-0" />
@@ -201,7 +201,7 @@ export const ChatItem = memo(function ChatItem({
           </div>
 
           {!isActive && (
-            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[0.75rem] text-gray-500 dark:text-gray-400 tabular-nums transition-opacity duration-150 opacity-100 md:group-hover:opacity-0 md:group-focus-within:opacity-0">
+            <span className="absolute right-9 md:right-2.5 top-1/2 -translate-y-1/2 text-[0.75rem] text-gray-500 dark:text-gray-400 tabular-nums transition-opacity duration-150 opacity-100 md:group-hover:opacity-0 md:group-focus-within:opacity-0">
               {getTimeLabel(updatedAt)}
             </span>
           )}

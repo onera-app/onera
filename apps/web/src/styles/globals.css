@@ -254,21 +254,23 @@
   }
 
   html {
-    @apply h-full;
+    @apply h-full overflow-hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
     word-break: break-word;
+    overscroll-behavior: none;
   }
 
   body {
-    @apply bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 antialiased selection:bg-blue-500/25 min-h-full;
+    @apply bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 antialiased selection:bg-blue-500/25 min-h-[100dvh] overflow-hidden;
     font-feature-settings:
       "rlig" 1,
       "calt" 1,
       "ss01" 1,
       "ss02" 1;
     letter-spacing: -0.011em;
+    overscroll-behavior: none;
   }
 
   #root {

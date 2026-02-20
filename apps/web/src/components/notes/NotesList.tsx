@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import { useUIStore } from "@/stores/uiStore";
 import { useNotes, useCreateNote, useDeleteNote } from '@/hooks/queries/useNotes';
 import { useFolders } from '@/hooks/queries/useFolders';
+import { useE2EE } from '@/providers/E2EEProvider';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
@@ -41,6 +42,7 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
   const [deleteNoteId, setDeleteNoteId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const { toggleSidebar } = useUIStore();
+  const { isUnlocked } = useE2EE();
 
   const { data: notes = [], isLoading: notesLoading } = useNotes(selectedFolderId, showArchived);
   const { data: folders = [] } = useFolders();
@@ -209,13 +211,15 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
                     updatedAt = result.createdAt;
                   } else {
                     const note = noteOrResult as any;
-                    title = decryptNoteTitle(
-                      note.id,
-                      note.encryptedTitle,
-                      note.titleNonce,
-                      note.encryptedNoteKey ?? undefined,
-                      note.noteKeyNonce ?? undefined
-                    ) || 'Untitled Note';
+                    title = isUnlocked
+                      ? (decryptNoteTitle(
+                        note.id,
+                        note.encryptedTitle,
+                        note.titleNonce,
+                        note.encryptedNoteKey ?? undefined,
+                        note.noteKeyNonce ?? undefined
+                      ) || 'Untitled Note')
+                      : 'Encrypted';
                     updatedAt = note.updatedAt;
                     archived = note.archived;
                   }

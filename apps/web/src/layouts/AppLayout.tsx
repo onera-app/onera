@@ -82,7 +82,7 @@ export function AppLayout() {
     <TooltipProvider>
       <div
         className={cn(
-          "text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-900 h-screen max-h-[100dvh] overflow-hidden flex flex-row",
+          "text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-900 h-[100dvh] overflow-hidden flex flex-row",
           `chat-density-${chatDensity}`,
         )}
       >

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNote, useUpdateNote } from '@/hooks/queries/useNotes';
 import { useFolders } from '@/hooks/queries/useFolders';
+import { useE2EE } from '@/providers/E2EEProvider';
 import { RichTextEditor } from './RichTextEditor';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -60,6 +61,7 @@ interface NoteEditorProps {
 export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
   const { data: note, isLoading } = useNote(noteId);
   const { data: folders = [] } = useFolders();
+  const { isUnlocked } = useE2EE();
   const updateNote = useUpdateNote();
 
   const [title, setTitle] = useState('');
@@ -69,6 +71,7 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
   const [isSaving, setIsSaving] = useState(false);
   const isInitialLoad = useRef(true);
   const prevNoteId = useRef<string | null>(null);
+  const prevIsUnlocked = useRef(isUnlocked);
   const latestState = useRef({ title: '', content: '', folderId: null as string | null });
   const titleRef = useRef<HTMLTextAreaElement>(null);
 
@@ -83,11 +86,15 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
 
   // Load note data
   useEffect(() => {
-    if (!note) return;
+    if (!note || !isUnlocked) {
+      prevIsUnlocked.current = isUnlocked;
+      return;
+    }
 
     const isNewNote = prevNoteId.current !== note.id;
+    const wasJustUnlocked = isUnlocked && !prevIsUnlocked.current;
 
-    if (isNewNote || !hasChanges) {
+    if (isNewNote || wasJustUnlocked || !hasChanges) {
       try {
         const decryptedTitle = decryptNoteTitle(
           note.id,
@@ -109,10 +116,11 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
         setContent(decryptedContent);
         setFolderId(note.folderId);
 
-        if (isNewNote) {
+        if (isNewNote || wasJustUnlocked) {
           setHasChanges(false);
           isInitialLoad.current = true;
           prevNoteId.current = note.id;
+          prevIsUnlocked.current = isUnlocked;
         }
 
         // Reset the flag after a short delay to allow all children (editor) to finish their initial renders
@@ -126,7 +134,7 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
     } else {
       console.log('[NoteEditor] Background update skipped to preserve unsaved changes');
     }
-  }, [note, hasChanges]);
+  }, [note, hasChanges, isUnlocked]);
 
   // Handle auto-resizing title textarea
   useEffect(() => {
