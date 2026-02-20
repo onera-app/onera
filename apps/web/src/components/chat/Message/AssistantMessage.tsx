@@ -301,7 +301,7 @@ export const AssistantMessage = memo(function AssistantMessage({
           {displayContent ? (
             <div
               className={cn(
-                "text-left transition-opacity duration-200 text-base lg:text-lg leading-[1.65] tracking-[-0.01em] text-gray-800 dark:text-gray-100",
+                "text-left transition-opacity duration-200 text-sm leading-relaxed tracking-normal text-gray-800 dark:text-gray-100 prose dark:prose-invert max-w-none",
                 isLoading && "streaming-cursor",
               )}
             >

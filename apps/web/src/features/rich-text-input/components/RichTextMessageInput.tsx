@@ -217,10 +217,10 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
     editorProps: {
       attributes: {
         class: cn(
-          "prose prose-base dark:prose-invert max-w-none",
+          "prose text-sm dark:prose-invert max-w-none",
           "focus:outline-none min-h-[24px] max-h-[120px]",
           "[&_p]:my-0 [&_code]:bg-gray-100 dark:[&_code]:bg-gray-850 [&_code]:px-1 [&_code]:rounded",
-          "[&_pre]:bg-gray-100 dark:[&_pre]:bg-gray-850 [&_pre]:p-2 [&_pre]:rounded-lg [&_pre]:text-base",
+          "[&_pre]:bg-gray-100 dark:[&_pre]:bg-gray-850 [&_pre]:p-2 [&_pre]:rounded-lg [&_pre]:text-sm",
           "overflow-y-auto",
         ),
       },
@@ -515,7 +515,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
             {isStreaming ? (
               <Tooltip>
                 <TooltipTrigger asChild>
-                    <Button
+                  <Button
                     onClick={onStop}
                     size="icon"
                     className="h-10 w-10 lg:h-11 lg:w-11 rounded-2xl bg-black dark:bg-white text-white dark:text-black hover:bg-gray-900 dark:hover:bg-gray-100 transition-all duration-200 shadow-md"

@@ -771,14 +771,20 @@
   @apply text-gray-900 dark:text-gray-100 max-w-none;
 }
 
-.prose h1,
-.prose h2,
+.prose h1 {
+  @apply text-2xl font-bold mb-6 mt-8;
+}
+
+.prose h2 {
+  @apply text-xl font-semibold mb-4 mt-6;
+}
+
 .prose h3 {
-  @apply text-gray-900 dark:text-gray-100 font-semibold tracking-tight;
+  @apply text-lg font-semibold mb-3 mt-4;
 }
 
 .prose p {
-  @apply leading-relaxed;
+  @apply leading-relaxed mb-4 last:mb-0;
 }
 
 .prose code {

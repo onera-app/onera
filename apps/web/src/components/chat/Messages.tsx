@@ -317,10 +317,10 @@ export const Messages = memo(function Messages({
       <div className="flex flex-col items-center justify-center h-full px-4">
         {/* Empty state - clean and minimal */}
         <div className="text-center max-w-lg mx-auto px-2">
-          <h1 className="text-3xl sm:text-3xl font-semibold tracking-[-0.02em] mb-2 sm:mb-3 text-gray-800 dark:text-gray-100">
+          <h1 className="text-2xl sm:text-2xl font-semibold tracking-tight mb-2 sm:mb-3 text-gray-800 dark:text-gray-100">
             How can I help you today?
           </h1>
-          <p className="text-sm sm:text-base text-gray-400 dark:text-gray-500 leading-relaxed">
+          <p className="text-sm text-gray-400 dark:text-gray-500 leading-relaxed">
             Start a conversation below.
           </p>
         </div>

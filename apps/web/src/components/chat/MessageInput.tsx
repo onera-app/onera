@@ -306,7 +306,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
         ref={containerRef}
         className={cn(
           "relative flex-1 flex flex-col w-full shadow-lg rounded-3xl border transition px-1 cursor-text",
-          "bg-white dark:bg-gray-500/5 text-gray-900 dark:text-gray-100",
+          "bg-white dark:bg-gray-850 text-gray-900 dark:text-gray-100",
           isFocused
             ? "border-gray-100 dark:border-gray-800"
             : "border-gray-100/30 dark:border-gray-850/30 hover:border-gray-200 dark:hover:border-gray-800",
@@ -357,7 +357,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
               "w-full bg-transparent resize-none border-0 shadow-none p-0",
               "disabled:cursor-not-allowed",
               "max-h-[96px] sm:max-h-[120px] min-h-[24px]",
-              "text-base lg:text-lg leading-relaxed",
+              "text-sm leading-relaxed",
               "placeholder:text-gray-300 dark:placeholder:text-gray-600",
             )}
           />
