@@ -61,7 +61,7 @@ const RedactedWord = () => {
 
   return (
     <h1 
-      className="text-[clamp(60px,14vw,220px)] font-black leading-[1.1] tracking-[-0.06em] m-0 uppercase cursor-pointer flex justify-center"
+      className="text-[clamp(72px,20vw,220px)] font-black leading-[0.95] tracking-[-0.05em] m-0 uppercase cursor-pointer flex justify-center w-full"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -84,6 +84,31 @@ export function LandingPage() {
   const [count, setCount] = useState(0);
   const target = 142887;
   const statsRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const landingBg = "#f6f6f6";
+    const html = document.documentElement;
+    const body = document.body;
+    const meta = document.querySelector('meta[name="theme-color"]');
+
+    const prevHtmlBg = html.style.backgroundColor;
+    const prevBodyBg = body.style.backgroundColor;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = body.style.overflow;
+    const prevThemeColor = meta?.getAttribute("content") ?? "";
+
+    html.style.backgroundColor = landingBg;
+    body.style.backgroundColor = landingBg;
+    html.classList.add("landing-page-active");
+    meta?.setAttribute("content", landingBg);
+
+    return () => {
+      html.style.backgroundColor = prevHtmlBg;
+      body.style.backgroundColor = prevBodyBg;
+      html.classList.remove("landing-page-active");
+      meta?.setAttribute("content", prevThemeColor);
+    };
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -134,22 +159,22 @@ export function LandingPage() {
   };
 
   return (
-    <div className="h-[100dvh] w-full overflow-y-auto overflow-x-hidden bg-landing text-landing-foreground font-landing antialiased flex flex-col selection:bg-landing-foreground/10">
-      <nav className="fixed top-0 left-0 w-full px-8 py-8 md:px-16 flex justify-between items-center z-50 text-landing-foreground bg-landing/80 backdrop-blur-md border-b border-landing-border">
-        <Link to="/" className="font-bold text-2xl flex items-center gap-2 tracking-tight hover:opacity-80 transition-opacity">
-          <OneraLogo size={24} className="h-6 w-6" />
+    <div className="min-h-[100dvh] w-full bg-landing text-landing-foreground font-landing antialiased flex flex-col selection:bg-landing-foreground/10 overflow-x-hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <nav className="sticky top-0 w-full px-5 py-3 sm:px-8 sm:py-4 md:px-16 md:py-5 flex justify-between items-center z-50 text-landing-foreground bg-landing/80 backdrop-blur-md border-b border-landing-border">
+        <Link to="/" className="font-bold text-xl flex items-center gap-2 tracking-tight hover:opacity-80 transition-opacity">
+          <OneraLogo size={20} className="h-5 w-5" />
           onera
         </Link>
       </nav>
 
-      <main className="flex flex-col w-full mt-24">
+      <main className="flex flex-col w-full">
         {/* HERO SECTION */}
-        <section className="flex flex-col justify-center items-center text-center px-8 min-h-[80vh] relative">
-          <div className="opacity-0 translate-y-10 animate-fade-slide-up">
-            <div className="text-[clamp(1.5rem,3vw,2.5rem)] font-bold tracking-tight -mb-4 md:-mb-6">Making AI Chat</div>
+        <section className="flex flex-col justify-center items-center text-center px-5 sm:px-8 h-[calc(100dvh-3rem)] sm:h-[calc(100dvh-3.5rem)] md:h-[calc(100dvh-3.75rem)] relative">
+          <div className="opacity-0 translate-y-10 animate-fade-slide-up w-full max-w-[980px] mx-auto">
+            <div className="text-[clamp(2rem,5.5vw,2.5rem)] font-bold tracking-tight leading-tight">Making AI Chat</div>
             <RedactedWord />
-            <p className="max-w-[650px] mx-auto mt-6 text-[clamp(1.1rem,2vw,1.25rem)] font-medium leading-relaxed tracking-tight text-landing-muted-foreground">
-              An open-source, friendly AI companion that keeps your thoughts truly yours. Secured by end-to-end encryption and <span className="text-landing-foreground">Trusted Execution Environments</span> so not even we can peek at your chats.
+            <p className="max-w-[540px] md:mx-auto mt-5 md:mt-6 text-[clamp(1.05rem,2.5vw,1.25rem)] font-medium leading-relaxed tracking-tight text-landing-muted-foreground">
+              Open-source AI chat that can't expose your conversations to anyone — not even us.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:mt-10">
               <Link
@@ -166,23 +191,6 @@ export function LandingPage() {
               >
                 <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.379.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
                 GitHub
-              </a>
-              <a
-                href="https://apps.apple.com/us/app/onera-private-ai-chat/id6758128954"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-landing-foreground/20 text-landing-foreground transition-colors hover:bg-landing-foreground/5"
-                aria-label="Download on the App Store"
-              >
-                <svg
-                  viewBox="0 0 17 20"
-                  className="h-5 w-[17px]"
-                  fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
-                >
-                  <path d="M14.94 10.56a4.77 4.77 0 0 1 2.27-4 4.89 4.89 0 0 0-3.85-2.08c-1.62-.17-3.19.97-4.02.97-.84 0-2.1-.95-3.47-.93a5.12 5.12 0 0 0-4.31 2.63c-1.86 3.22-.47 7.97 1.31 10.58.9 1.28 1.94 2.71 3.31 2.66 1.34-.06 1.84-.85 3.45-.85 1.6 0 2.06.85 3.46.82 1.44-.02 2.34-1.28 3.2-2.57a10.6 10.6 0 0 0 1.47-2.98 4.61 4.61 0 0 1-2.82-4.25zM12.31 2.72A4.7 4.7 0 0 0 13.39.36 4.78 4.78 0 0 0 10.3 1.96a4.47 4.47 0 0 0-1.1 3.25 3.96 3.96 0 0 0 3.11-1.49z" />
-                </svg>
               </a>
             </div>
           </div>

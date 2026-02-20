@@ -278,6 +278,20 @@
   }
 }
 
+/* ── Landing Page Scroll Override ──────────────────────────────── */
+html.landing-page-active,
+html.landing-page-active body {
+  height: auto !important;
+  overflow: visible !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: auto !important;
+}
+
+html.landing-page-active #root {
+  height: auto !important;
+  overflow: visible !important;
+}
+
 /* ── Utility Classes ───────────────────────────────────────────── */
 @layer utilities {
   /* Font primary — Archivo display font (sidebar, nav, input) */
