@@ -93,8 +93,6 @@ export function LandingPage() {
 
     const prevHtmlBg = html.style.backgroundColor;
     const prevBodyBg = body.style.backgroundColor;
-    const prevHtmlOverflow = html.style.overflow;
-    const prevBodyOverflow = body.style.overflow;
     const prevThemeColor = meta?.getAttribute("content") ?? "";
 
     html.style.backgroundColor = landingBg;
