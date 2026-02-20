@@ -106,7 +106,7 @@
     "Helvetica Neue", "Helvetica", "Arial", sans-serif;
 
   /* Landing Page Tokens (unchanged) */
-  --color-landing: #F6F6F6;
+  --color-landing: #f6f6f6;
   --color-landing-foreground: #1d1d1f;
   --color-landing-card: #ffffff;
   --color-landing-muted: #f5f5f7;
@@ -280,7 +280,6 @@
 
 /* ── Utility Classes ───────────────────────────────────────────── */
 @layer utilities {
-
   /* Font primary — Archivo display font (sidebar, nav, input) */
   .font-primary {
     font-family: "Archivo", "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -474,10 +473,7 @@
   }
 
   .dark .shimmer {
-    background: linear-gradient(90deg,
-        #818286 25%,
-        #eae5e5 50%,
-        #818286 75%);
+    background: linear-gradient(90deg, #818286 25%, #eae5e5 50%, #818286 75%);
     background-size: 200% 100%;
     background-clip: text;
     -webkit-background-clip: text;
@@ -490,7 +486,6 @@
 
   /* Reduce motion */
   @media (prefers-reduced-motion: reduce) {
-
     .streaming-cursor::after,
     .typing-dot {
       animation: none;
@@ -559,7 +554,6 @@
 }
 
 @keyframes pulse-soft {
-
   0%,
   100% {
     opacity: 0.4;
@@ -573,7 +567,6 @@
 }
 
 @keyframes gradient-float {
-
   0%,
   100% {
     transform: translate(0, 0) scale(1);
@@ -597,7 +590,6 @@
 }
 
 @keyframes gradient-float-delayed {
-
   0%,
   100% {
     transform: translate(0, 0) scale(1);
@@ -616,7 +608,6 @@
 }
 
 @keyframes gradient-float-slow {
-
   0%,
   100% {
     transform: translate(0, 0) scale(1) rotate(0deg);
@@ -630,7 +621,6 @@
 }
 
 @keyframes gradient-float-reverse {
-
   0%,
   100% {
     transform: translate(0, 0) scale(1);
@@ -671,7 +661,6 @@
 }
 
 @keyframes typing-pulse {
-
   0%,
   100% {
     opacity: 0.25;
@@ -685,7 +674,6 @@
 }
 
 @keyframes streaming-blink {
-
   0%,
   100% {
     opacity: 1;
@@ -709,7 +697,6 @@
 }
 
 @keyframes cursor-blink {
-
   0%,
   100% {
     opacity: 0.7;
@@ -787,12 +774,14 @@
   @apply leading-relaxed mb-4 last:mb-0;
 }
 
-.prose code {
+/* Inline code only — exclude code inside fenced blocks (pre, streamdown) */
+.prose code:not(pre code):not([data-streamdown] code) {
   @apply px-1.5 py-0.5 rounded text-sm font-mono bg-gray-100 dark:bg-gray-850;
   color: #eb5757;
 }
 
-.prose pre {
+/* Standalone pre blocks — exclude streamdown-managed code blocks */
+.prose pre:not([data-streamdown] pre):not([data-streamdown="code-block-body"]) {
   @apply border border-gray-200 dark:border-gray-800 rounded-lg p-4 overflow-x-auto bg-gray-100 dark:bg-gray-850;
 }
 
