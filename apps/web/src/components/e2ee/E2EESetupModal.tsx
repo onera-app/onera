@@ -7,6 +7,7 @@
  */
 
 import { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Dialog,
   DialogContent,
@@ -16,14 +17,25 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 import { MandatoryLogoutConfirm } from './MandatoryLogoutConfirm';
 
 export function E2EESetupModal() {
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const { signOut } = useAuth();
 
-  const handleSignOut = () => {
-    window.location.href = '/auth';
+  const handleSignOut = async () => {
+    try {
+      setIsSigningOut(true);
+      await signOut();
+      window.location.href = '/auth';
+    } catch (err) {
+      console.error('Sign out failed:', err);
+      window.location.href = '/auth';
+    } finally {
+      setIsSigningOut(false);
+    }
   };
 
   return (
@@ -48,8 +60,20 @@ export function E2EESetupModal() {
           </div>
 
           <DialogFooter>
-            <Button onClick={handleSignOut} className="w-full sm:w-auto" variant="destructive">
-              Sign Out and Re-authenticate
+            <Button
+              onClick={handleSignOut}
+              className="w-full sm:w-auto"
+              variant="destructive"
+              disabled={isSigningOut}
+            >
+              {isSigningOut ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing out...
+                </>
+              ) : (
+                'Sign Out and Re-authenticate'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
