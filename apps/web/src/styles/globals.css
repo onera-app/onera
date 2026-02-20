@@ -785,6 +785,62 @@
   @apply border border-gray-200 dark:border-gray-800 rounded-lg p-4 overflow-x-auto bg-gray-100 dark:bg-gray-850;
 }
 
+/* ── Streamdown Code Block — Dark Mode Overrides ───────────────── */
+[data-streamdown="code-block"] {
+  @apply border-gray-200 bg-gray-50;
+}
+
+.dark [data-streamdown="code-block"],
+.oled-dark [data-streamdown="code-block"] {
+  border-color: #333333;
+  background-color: #1e1e1e;
+}
+
+[data-streamdown="code-block-header"] {
+  @apply bg-gray-100 text-gray-600;
+}
+
+.dark [data-streamdown="code-block-header"],
+.oled-dark [data-streamdown="code-block-header"] {
+  background-color: #2a2a2a;
+  color: #9b9b9b;
+}
+
+[data-streamdown="code-block-body"] {
+  @apply bg-gray-50;
+}
+
+.dark [data-streamdown="code-block-body"],
+.oled-dark [data-streamdown="code-block-body"] {
+  background-color: #1e1e1e !important;
+}
+
+/* Ensure Shiki token backgrounds match in dark mode */
+.dark [data-streamdown="code-block-body"] code span span,
+.oled-dark [data-streamdown="code-block-body"] code span span {
+  background-color: transparent !important;
+}
+
+/* Copy/download buttons in code block header */
+[data-streamdown="code-block-copy-button"],
+[data-streamdown="code-block-download-button"] {
+  @apply text-gray-500 hover:text-gray-900;
+}
+
+.dark [data-streamdown="code-block-copy-button"],
+.dark [data-streamdown="code-block-download-button"],
+.oled-dark [data-streamdown="code-block-copy-button"],
+.oled-dark [data-streamdown="code-block-download-button"] {
+  color: #676767;
+}
+
+.dark [data-streamdown="code-block-copy-button"]:hover,
+.dark [data-streamdown="code-block-download-button"]:hover,
+.oled-dark [data-streamdown="code-block-copy-button"]:hover,
+.oled-dark [data-streamdown="code-block-download-button"]:hover {
+  color: #e3e3e3;
+}
+
 .prose a {
   @apply text-primary hover:text-primary/80 transition-colors underline-offset-4;
 }
