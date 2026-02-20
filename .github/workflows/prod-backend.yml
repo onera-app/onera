@@ -96,7 +96,8 @@ jobs:
             --resource-group onera \
             --settings \
               SUPABASE_URL="$SUPABASE_URL" \
-              SUPABASE_SECRET_KEY="$SUPABASE_SECRET_KEY"
+              SUPABASE_SECRET_KEY="$SUPABASE_SECRET_KEY" \
+              DATABASE_URL="${{ secrets.DATABASE_URL }}"
 
       - name: Configure WebAuthn settings
         run: |
