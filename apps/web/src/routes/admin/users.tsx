@@ -1,8 +1,9 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowLeft01Icon, ArrowRight01Icon, Search01Icon } from "@hugeicons/core-free-icons";
 import { useState, useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 
@@ -41,7 +42,7 @@ export function AdminUsersPage() {
         <Label htmlFor="admin-user-search" className="sr-only">
           Search users
         </Label>
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+        <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
         <input
           id="admin-user-search"
           type="text"
@@ -170,7 +171,7 @@ export function AdminUsersPage() {
               disabled={page === 0}
               aria-label="Previous page"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4" />
             </Button>
             <Button
               variant="outline"
@@ -179,7 +180,7 @@ export function AdminUsersPage() {
               disabled={page >= totalPages - 1}
               aria-label="Next page"
             >
-              <ChevronRight className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowRight01Icon} className="h-4 w-4" />
             </Button>
           </div>
         </div>

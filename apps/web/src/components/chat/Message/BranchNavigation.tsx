@@ -1,6 +1,7 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface BranchInfo {
@@ -40,7 +41,7 @@ export function BranchNavigation({
             disabled={!canGoPrevious}
             className="h-6 w-6 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-30"
           >
-            <ChevronLeft className="h-3.5 w-3.5" />
+            <HugeiconsIcon icon={ArrowLeft01Icon} className="h-3.5 w-3.5" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>Previous version</TooltipContent>
@@ -59,7 +60,7 @@ export function BranchNavigation({
             disabled={!canGoNext}
             className="h-6 w-6 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-30"
           >
-            <ChevronRight className="h-3.5 w-3.5" />
+            <HugeiconsIcon icon={ArrowRight01Icon} className="h-3.5 w-3.5" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>Next version</TooltipContent>

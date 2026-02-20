@@ -1,7 +1,8 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowLeft01Icon, Message01Icon } from "@hugeicons/core-free-icons";
 import { useState } from 'react';
 import { PromptsList, PromptEditor } from '@/components/prompts';
 import { cn } from '@/lib/utils';
-import { MessageSquareText, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useMobileBreakpoint } from '@/hooks/useMobileBreakpoint';
 
@@ -81,7 +82,7 @@ export function PromptsPage() {
                 className="text-gray-500 dark:text-gray-400"
                 aria-label="Back to prompts list"
               >
-                <ChevronLeft className="h-4 w-4 mr-1" />
+                <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4 mr-1" />
                 Prompts
               </Button>
             </div>
@@ -104,7 +105,7 @@ export function PromptsPage() {
                 className="text-gray-500 dark:text-gray-400"
                 aria-label="Back to prompts list"
               >
-                <ChevronLeft className="h-4 w-4 mr-1" />
+                <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4 mr-1" />
                 Prompts
               </Button>
             </div>
@@ -115,7 +116,7 @@ export function PromptsPage() {
         ) : (
           <div className="flex items-center justify-center h-full px-4">
             <div className="text-center text-gray-500 dark:text-gray-400" role="status" aria-live="polite">
-              <MessageSquareText className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 opacity-50" />
+              <HugeiconsIcon icon={Message01Icon} className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 opacity-50" />
               <p className="text-base sm:text-lg font-medium">Select or create a prompt</p>
               <p className="text-sm mt-1">Choose a prompt from the sidebar to start editing</p>
             </div>

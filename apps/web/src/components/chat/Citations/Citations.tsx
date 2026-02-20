@@ -1,8 +1,9 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowDown01Icon, FileAttachmentIcon } from "@hugeicons/core-free-icons";
 import { useState, memo } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { FileText, ChevronDown } from 'lucide-react';
 
 export interface Citation {
   id: string;
@@ -32,9 +33,9 @@ export const Citations = memo(function Citations({ citations, className }: Citat
         onClick={() => setIsExpanded(!isExpanded)}
         className="h-auto py-1 px-2"
       >
-        <FileText className="h-4 w-4 mr-2" />
+        <HugeiconsIcon icon={FileAttachmentIcon} className="h-4 w-4 mr-2" />
         <span className="font-medium">{citations.length} sources</span>
-        <ChevronDown className={cn('h-3 w-3 ml-1 transition-transform', isExpanded && 'rotate-180')} />
+        <HugeiconsIcon icon={ArrowDown01Icon} className={cn('h-3 w-3 ml-1 transition-transform', isExpanded && 'rotate-180')} />
       </Button>
 
       {isExpanded && (

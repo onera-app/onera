@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Add01Icon, ArchiveIcon, ArrowRight01Icon, Cancel01Icon, Delete01Icon, Edit01Icon, Folder01Icon, FolderOpenIcon, Tick01Icon } from "@hugeicons/core-free-icons";
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { useFolders, useCreateFolder, useUpdateFolder, useDeleteFolder } from '@/hooks/queries/useFolders';
@@ -5,7 +7,6 @@ import type { Folder } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Folder as FolderIcon, FolderOpen, ChevronRight, Plus, Edit, Trash, Check, X, Archive } from 'lucide-react';
 
 interface FolderTreeProps {
   selectedFolderId?: string;
@@ -147,14 +148,14 @@ export function FolderTree({ selectedFolderId, onSelectFolder, showAllOption = t
               !hasChildren && 'invisible'
             )}
           >
-            <ChevronRight className={cn('h-3 w-3 transition-transform', isExpanded && 'rotate-90')} />
+            <HugeiconsIcon icon={ArrowRight01Icon} className={cn('h-3 w-3 transition-transform', isExpanded && 'rotate-90')} />
           </Button>
 
           {/* Folder icon */}
           {isExpanded ? (
-            <FolderOpen className={cn('h-4 w-4 flex-shrink-0', isSelected ? 'text-primary' : 'text-gray-500 dark:text-gray-400')} />
+            <HugeiconsIcon icon={FolderOpenIcon} className={cn('h-4 w-4 flex-shrink-0', isSelected ? 'text-primary' : 'text-gray-500 dark:text-gray-400')} />
           ) : (
-            <FolderIcon className={cn('h-4 w-4 flex-shrink-0', isSelected ? 'text-primary' : 'text-gray-500 dark:text-gray-400')} />
+            <HugeiconsIcon icon={Folder01Icon} className={cn('h-4 w-4 flex-shrink-0', isSelected ? 'text-primary' : 'text-gray-500 dark:text-gray-400')} />
           )}
 
           {/* Name */}
@@ -189,7 +190,7 @@ export function FolderTree({ selectedFolderId, onSelectFolder, showAllOption = t
                 className="h-6 w-6"
                 title="Add subfolder"
               >
-                <Plus className="h-3.5 w-3.5" />
+                <HugeiconsIcon icon={Add01Icon} className="h-3.5 w-3.5" />
               </Button>
               <Button
                 variant="ghost"
@@ -198,7 +199,7 @@ export function FolderTree({ selectedFolderId, onSelectFolder, showAllOption = t
                 className="h-6 w-6"
                 title="Rename"
               >
-                <Edit className="h-3.5 w-3.5" />
+                <HugeiconsIcon icon={Edit01Icon} className="h-3.5 w-3.5" />
               </Button>
               <Button
                 variant="ghost"
@@ -210,7 +211,7 @@ export function FolderTree({ selectedFolderId, onSelectFolder, showAllOption = t
                 className="h-6 w-6 text-destructive hover:text-destructive"
                 title="Delete"
               >
-                <Trash className="h-3.5 w-3.5" />
+                <HugeiconsIcon icon={Delete01Icon} className="h-3.5 w-3.5" />
               </Button>
             </div>
           )}
@@ -243,7 +244,7 @@ export function FolderTree({ selectedFolderId, onSelectFolder, showAllOption = t
           )}
           onClick={() => onSelectFolder(undefined)}
         >
-          <Archive className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+          <HugeiconsIcon icon={ArchiveIcon} className="h-4 w-4 text-gray-500 dark:text-gray-400" />
           <span className="text-sm">All items</span>
         </div>
       )}
@@ -274,7 +275,7 @@ export function FolderTree({ selectedFolderId, onSelectFolder, showAllOption = t
             disabled={!newFolderName.trim()}
             className="h-8 w-8"
           >
-            <Check className="h-4 w-4" />
+            <HugeiconsIcon icon={Tick01Icon} className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
@@ -282,7 +283,7 @@ export function FolderTree({ selectedFolderId, onSelectFolder, showAllOption = t
             onClick={() => setIsCreating(false)}
             className="h-8 w-8"
           >
-            <X className="h-4 w-4" />
+            <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4" />
           </Button>
         </div>
       ) : (
@@ -291,7 +292,7 @@ export function FolderTree({ selectedFolderId, onSelectFolder, showAllOption = t
           onClick={() => handleStartCreate()}
           className="w-full justify-start px-4 mt-2"
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <HugeiconsIcon icon={Add01Icon} className="h-4 w-4 mr-2" />
           New folder
         </Button>
       )}

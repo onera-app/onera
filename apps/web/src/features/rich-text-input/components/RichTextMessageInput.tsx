@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowUp01Icon, SquareIcon } from "@hugeicons/core-free-icons";
 import {
   useState,
   useRef,
@@ -22,7 +24,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ArrowUp, Square } from "lucide-react";
 import { toast } from "sonner";
 import {
   AttachmentButton,
@@ -520,7 +521,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
                     size="icon"
                     className="h-10 w-10 lg:h-11 lg:w-11 rounded-2xl bg-black dark:bg-white text-white dark:text-black hover:bg-gray-900 dark:hover:bg-gray-100 transition-all duration-200 shadow-md"
                   >
-                    <Square className="h-3.5 w-3.5 fill-current" />
+                    <HugeiconsIcon icon={SquareIcon} className="h-3.5 w-3.5 fill-current" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Stop generating</TooltipContent>
@@ -539,7 +540,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
                         : "bg-gray-100 dark:bg-gray-850 text-gray-500 dark:text-gray-400 cursor-not-allowed",
                     )}
                   >
-                    <ArrowUp className="h-4 w-4" strokeWidth={2.5} />
+                    <HugeiconsIcon icon={ArrowUp01Icon} className="h-4 w-4" strokeWidth={2.5} />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Send message</TooltipContent>

@@ -1,17 +1,5 @@
-/**
- * Tool Component
- * Displays tool invocations with approval/denial workflow
- * Adapted from Vercel AI Chatbot
- */
-
-import {
-  CheckCircleIcon,
-  ChevronDownIcon,
-  CircleIcon,
-  ClockIcon,
-  WrenchIcon,
-  XCircleIcon,
-} from 'lucide-react';
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowDown01Icon, CancelCircleIcon, CheckmarkCircle01Icon, CircleIcon, Clock01Icon, Wrench01Icon } from "@hugeicons/core-free-icons";
 import type { ComponentProps, ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -71,13 +59,13 @@ const getStatusBadge = (status: ToolState) => {
   };
 
   const icons: Record<ToolState, ReactNode> = {
-    'input-streaming': <CircleIcon className="size-4" />,
-    'input-available': <ClockIcon className="size-4 animate-pulse" />,
-    'approval-requested': <ClockIcon className="size-4 text-status-warning-text" />,
-    'approval-responded': <CheckCircleIcon className="size-4 text-primary" />,
-    'output-available': <CheckCircleIcon className="size-4 text-status-success-text" />,
-    'output-error': <XCircleIcon className="size-4 text-destructive" />,
-    'output-denied': <XCircleIcon className="size-4 text-status-warning-text" />,
+    'input-streaming': <HugeiconsIcon icon={CircleIcon} className="size-4" />,
+    'input-available': <HugeiconsIcon icon={Clock01Icon} className="size-4 animate-pulse" />,
+    'approval-requested': <HugeiconsIcon icon={Clock01Icon} className="size-4 text-status-warning-text" />,
+    'approval-responded': <HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-primary" />,
+    'output-available': <HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-4 text-status-success-text" />,
+    'output-error': <HugeiconsIcon icon={CancelCircleIcon} className="size-4 text-destructive" />,
+    'output-denied': <HugeiconsIcon icon={CancelCircleIcon} className="size-4 text-status-warning-text" />,
   };
 
   return (
@@ -105,12 +93,12 @@ export const ToolHeader = ({
     {...props}
   >
     <div className="flex min-w-0 flex-1 items-center gap-2">
-      <WrenchIcon className="size-4 shrink-0 text-gray-500 dark:text-gray-400" />
+      <HugeiconsIcon icon={Wrench01Icon} className="size-4 shrink-0 text-gray-500 dark:text-gray-400" />
       <span className="truncate font-medium text-sm">{getToolDisplayName(toolName)}</span>
     </div>
     <div className="flex shrink-0 items-center gap-2">
       {getStatusBadge(state)}
-      <ChevronDownIcon className="size-4 text-gray-500 dark:text-gray-400 transition-transform group-data-[state=open]:rotate-180" />
+      <HugeiconsIcon icon={ArrowDown01Icon} className="size-4 text-gray-500 dark:text-gray-400 transition-transform group-data-[state=open]:rotate-180" />
     </div>
   </CollapsibleTrigger>
 );

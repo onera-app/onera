@@ -1,6 +1,7 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { memo } from 'react';
 import { cn } from '@/lib/utils';
-import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface FollowUpsProps {
@@ -29,7 +30,7 @@ export const FollowUps = memo(function FollowUps({ followUps, onSelect, classNam
             'max-w-full'
           )}
         >
-          <ArrowRight className="h-4 w-4 mr-2 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400 shrink-0 transition-colors" />
+          <HugeiconsIcon icon={ArrowRight01Icon} className="h-4 w-4 mr-2 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400 shrink-0 transition-colors" />
           <span className="line-clamp-2">{followUp}</span>
         </Button>
       ))}

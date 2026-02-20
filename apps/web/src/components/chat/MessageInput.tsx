@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowUp01Icon, SquareIcon } from "@hugeicons/core-free-icons";
 import {
   useState,
   useRef,
@@ -16,7 +18,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ArrowUp, Square } from "lucide-react";
 import { toast } from "sonner";
 import { AttachmentButton } from "./AttachmentButton";
 import { AttachmentPreview, type PendingAttachment } from "./AttachmentPreview";
@@ -391,7 +392,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
                     onClick={onStop}
                     className="bg-white hover:bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-800 transition rounded-full p-1.5 self-center"
                   >
-                    <Square className="h-4 w-4 fill-current" />
+                    <HugeiconsIcon icon={SquareIcon} className="h-4 w-4 fill-current" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>Stop generating</TooltipContent>
@@ -409,7 +410,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
                         : "text-gray-400 bg-gray-200 dark:text-gray-600 dark:bg-gray-700 cursor-not-allowed",
                     )}
                   >
-                    <ArrowUp className="h-4 w-4" strokeWidth={2.5} />
+                    <HugeiconsIcon icon={ArrowUp01Icon} className="h-4 w-4" strokeWidth={2.5} />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>Send message</TooltipContent>

@@ -1,6 +1,7 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Tick01Icon } from "@hugeicons/core-free-icons";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/hooks/useAuth";
@@ -112,7 +113,7 @@ export function PricingPage() {
 
                     <ul className="space-y-3 mb-8 min-h-[124px]">
                       <li className="flex items-center gap-2 text-sm text-landing-foreground">
-                        <Check className="h-4 w-4 text-landing-green-text flex-shrink-0 mt-0.5" />
+                        <HugeiconsIcon icon={Tick01Icon} className="h-4 w-4 text-landing-green-text flex-shrink-0 mt-0.5" />
                         {formatLimit(
                           plan.inferenceRequestsLimit,
                           "private requests/mo",
@@ -120,7 +121,7 @@ export function PricingPage() {
                         )}
                       </li>
                       <li className="flex items-center gap-2 text-sm text-landing-foreground">
-                        <Check className="h-4 w-4 text-landing-green-text flex-shrink-0 mt-0.5" />
+                        <HugeiconsIcon icon={Tick01Icon} className="h-4 w-4 text-landing-green-text flex-shrink-0 mt-0.5" />
                         {formatLimit(
                           plan.byokInferenceRequestsLimit,
                           "BYOK requests/mo",
@@ -128,7 +129,7 @@ export function PricingPage() {
                         )}
                       </li>
                       <li className="flex items-center gap-2 text-sm text-landing-foreground">
-                        <Check className="h-4 w-4 text-landing-green-text flex-shrink-0 mt-0.5" />
+                        <HugeiconsIcon icon={Tick01Icon} className="h-4 w-4 text-landing-green-text flex-shrink-0 mt-0.5" />
                         {formatStorage(plan.storageLimitMb)}
                       </li>
                     </ul>

@@ -1,10 +1,5 @@
-/**
- * Passkey List Component
- *
- * Displays a list of registered passkeys with options to rename or delete them.
- * Used in the Encryption settings tab.
- */
-
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Cancel01Icon, CloudIcon, Delete02Icon, Loading02Icon, PencilIcon, SmartPhone01Icon, Tick01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -19,15 +14,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Cloud,
-  Smartphone,
-  Trash2,
-  Pencil,
-  Check,
-  X,
-  Loader2,
-} from "lucide-react";
 import {
   usePasskeyList,
   useDeletePasskey,
@@ -93,7 +79,7 @@ export function PasskeyList({ onDelete }: PasskeyListProps) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="h-5 w-5 animate-spin text-gray-500 dark:text-gray-400" />
+        <HugeiconsIcon icon={Loading02Icon} className="h-5 w-5 animate-spin text-gray-500 dark:text-gray-400" />
       </div>
     );
   }
@@ -126,9 +112,9 @@ export function PasskeyList({ onDelete }: PasskeyListProps) {
           >
             <div className="flex items-center gap-3 flex-1 min-w-0">
               {passkey.credentialDeviceType === "multiDevice" ? (
-                <Cloud className="h-5 w-5 text-primary flex-shrink-0" />
+                <HugeiconsIcon icon={CloudIcon} className="h-5 w-5 text-primary flex-shrink-0" />
               ) : (
-                <Smartphone className="h-5 w-5 text-primary flex-shrink-0" />
+                <HugeiconsIcon icon={SmartPhone01Icon} className="h-5 w-5 text-primary flex-shrink-0" />
               )}
 
               <div className="flex-1 min-w-0">
@@ -155,9 +141,9 @@ export function PasskeyList({ onDelete }: PasskeyListProps) {
                       disabled={renamePasskey.isPending}
                     >
                       {renamePasskey.isPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <HugeiconsIcon icon={Loading02Icon} className="h-4 w-4 animate-spin" />
                       ) : (
-                        <Check className="h-4 w-4" />
+                        <HugeiconsIcon icon={Tick01Icon} className="h-4 w-4" />
                       )}
                     </Button>
                     <Button
@@ -166,7 +152,7 @@ export function PasskeyList({ onDelete }: PasskeyListProps) {
                       className="h-8 w-8"
                       onClick={handleCancelEdit}
                     >
-                      <X className="h-4 w-4" />
+                      <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4" />
                     </Button>
                   </div>
                 ) : (
@@ -200,7 +186,7 @@ export function PasskeyList({ onDelete }: PasskeyListProps) {
                   }
                   title="Rename passkey"
                 >
-                  <Pencil className="h-4 w-4" />
+                  <HugeiconsIcon icon={PencilIcon} className="h-4 w-4" />
                 </Button>
                 <Button
                   size="icon"
@@ -209,7 +195,7 @@ export function PasskeyList({ onDelete }: PasskeyListProps) {
                   onClick={() => setDeleteConfirmId(passkey.credentialId)}
                   title="Delete passkey"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <HugeiconsIcon icon={Delete02Icon} className="h-4 w-4" />
                 </Button>
               </div>
             )}
@@ -241,7 +227,7 @@ export function PasskeyList({ onDelete }: PasskeyListProps) {
             >
               {deletePasskey.isPending ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <HugeiconsIcon icon={Loading02Icon} className="h-4 w-4 mr-2 animate-spin" />
                   Deleting...
                 </>
               ) : (

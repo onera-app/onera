@@ -1,5 +1,6 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
 import { OneraLogo } from "@/components/ui/onera-logo";
 import { Footer } from "@/components/landing";
 
@@ -19,7 +20,7 @@ export function TermsPage() {
             to="/" 
             className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
           >
-            <ArrowLeft className="size-4" />
+            <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
             Back to Home
           </Link>
         </div>

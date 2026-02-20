@@ -1,6 +1,7 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Alert01Icon, ArrowLeft01Icon, Loading02Icon } from "@hugeicons/core-free-icons";
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { ArrowLeft, AlertTriangle, Loader2 } from 'lucide-react';
 import { OneraLogo } from '@/components/ui/onera-logo';
 import { Footer } from '@/components/landing';
 import { useAuth } from '@/hooks/useAuth';
@@ -48,7 +49,7 @@ export function DeleteAccountPage() {
             to="/"
             className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
           >
-            <ArrowLeft className="size-4" />
+            <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
             Back to Home
           </Link>
         </div>
@@ -87,7 +88,7 @@ export function DeleteAccountPage() {
       <div className="max-w-lg mx-auto px-4 py-12 sm:py-16">
         <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 p-6 mb-8">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="size-5 text-red-600 dark:text-red-400 mt-0.5 shrink-0" />
+            <HugeiconsIcon icon={Alert01Icon} className="size-5 text-red-600 dark:text-red-400 mt-0.5 shrink-0" />
             <div>
               <h1 className="text-xl font-bold text-red-900 dark:text-red-100 mb-2">
                 Delete Account
@@ -154,7 +155,7 @@ export function DeleteAccountPage() {
           >
             {isDeleting ? (
               <>
-                <Loader2 className="size-4 animate-spin" />
+                <HugeiconsIcon icon={Loading02Icon} className="size-4 animate-spin" />
                 Deleting account...
               </>
             ) : (
@@ -190,7 +191,7 @@ function Header() {
           to="/"
           className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
         >
-          <ArrowLeft className="size-4" />
+          <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
           Back to Home
         </Link>
       </div>

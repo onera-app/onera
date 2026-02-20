@@ -1,14 +1,8 @@
-/**
- * Passkey Unlock Button
- *
- * Button that triggers WebAuthn authentication to unlock E2EE using a passkey.
- * Uses PRF extension to derive the key encryption key.
- */
-
+import { HugeiconsIcon } from "@hugeicons/react";
+import { FingerPrintIcon, Loading02Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Loader2, Fingerprint } from "lucide-react";
 import { usePasskeyAuthentication } from "@/hooks/useWebAuthn";
 import { useE2EEStore } from "@/stores/e2eeStore";
 import {
@@ -125,9 +119,9 @@ export function PasskeyUnlockButton({
         title="Unlock with passkey"
       >
         {isLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <HugeiconsIcon icon={Loading02Icon} className="h-4 w-4 animate-spin" />
         ) : (
-          <Fingerprint className="h-4 w-4" />
+          <HugeiconsIcon icon={FingerPrintIcon} className="h-4 w-4" />
         )}
       </Button>
     );
@@ -142,12 +136,12 @@ export function PasskeyUnlockButton({
     >
       {isLoading ? (
         <>
-          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          <HugeiconsIcon icon={Loading02Icon} className="h-4 w-4 mr-2 animate-spin" />
           Unlocking...
         </>
       ) : (
         <>
-          <Fingerprint className="h-4 w-4 mr-2" />
+          <HugeiconsIcon icon={FingerPrintIcon} className="h-4 w-4 mr-2" />
           Unlock with Passkey
         </>
       )}

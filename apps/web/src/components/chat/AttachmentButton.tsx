@@ -1,10 +1,6 @@
-/**
- * Attachment Button Component
- * Handles file selection via button click or drag-and-drop
- */
-
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Add01Icon, AttachmentIcon, FileAttachmentIcon, Image01Icon } from "@hugeicons/core-free-icons";
 import { useRef, useCallback, type DragEvent } from "react";
-import { Plus, Image, FileText, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -95,7 +91,7 @@ export function AttachmentButton({
                 disabled={disabled}
                 className="h-8 w-8 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-850 rounded-lg"
               >
-                <Plus className="h-5 w-5" />
+                <HugeiconsIcon icon={Add01Icon} className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
           </TooltipTrigger>
@@ -104,11 +100,11 @@ export function AttachmentButton({
 
         <DropdownMenuContent align="start" className="min-w-[160px]">
           <DropdownMenuItem onClick={handleSelectImages} className="gap-2">
-            <Image className="h-4 w-4" />
+            <HugeiconsIcon icon={Image01Icon} className="h-4 w-4" />
             Upload image
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleSelectFiles} className="gap-2">
-            <FileText className="h-4 w-4" />
+            <HugeiconsIcon icon={FileAttachmentIcon} className="h-4 w-4" />
             Upload file
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -130,7 +126,7 @@ export function DragDropOverlay({ isVisible }: DragDropOverlayProps) {
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/95 dark:bg-gray-900/95 border-2 border-dashed border-primary rounded-xl">
       <div className="flex flex-col items-center gap-2 text-primary">
-        <Paperclip className="h-8 w-8" />
+        <HugeiconsIcon icon={AttachmentIcon} className="h-8 w-8" />
         <span className="text-sm font-medium">Drop files here</span>
       </div>
     </div>

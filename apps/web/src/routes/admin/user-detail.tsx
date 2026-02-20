@@ -1,10 +1,11 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 import { useParams, Link } from "@tanstack/react-router";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { UsageMeter } from "@/components/billing/UsageMeter";
 import { InvoiceTable } from "@/components/billing/InvoiceTable";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
 
 export function AdminUserDetailPage() {
   const { userId } = useParams({ from: "/app/admin/users/$userId" });
@@ -45,7 +46,7 @@ export function AdminUserDetailPage() {
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon-sm" asChild>
           <Link to="/app/admin/users">
-            <ArrowLeft className="h-4 w-4" />
+            <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4" />
           </Link>
         </Button>
         <div className="flex items-center gap-3">

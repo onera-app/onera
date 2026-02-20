@@ -1,7 +1,12 @@
 import { trpc } from "@/lib/trpc";
 import { StatsCard } from "@/components/admin/StatsCard";
 import { InvoiceTable } from "@/components/billing/InvoiceTable";
-import { DollarSign, Users, CreditCard, TrendingUp } from "lucide-react";
+import {
+  ChartIncreaseIcon,
+  CreditCardIcon,
+  DollarCircleIcon,
+  UserGroupIcon,
+} from "@hugeicons/core-free-icons";
 
 export function AdminDashboard() {
   const { data: stats, isLoading, error } = trpc.admin.getStats.useQuery();
@@ -11,7 +16,10 @@ export function AdminDashboard() {
       <div className="animate-pulse space-y-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-28 rounded-xl bg-gray-100 dark:bg-gray-800" />
+            <div
+              key={i}
+              className="h-28 rounded-xl bg-gray-100 dark:bg-gray-800"
+            />
           ))}
         </div>
       </div>
@@ -20,9 +28,17 @@ export function AdminDashboard() {
 
   if (error) {
     return (
-      <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6" role="alert" aria-live="assertive">
-        <h2 className="font-semibold text-destructive">Unable to load dashboard stats</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{error.message}</p>
+      <div
+        className="rounded-xl border border-destructive/30 bg-destructive/5 p-6"
+        role="alert"
+        aria-live="assertive"
+      >
+        <h2 className="font-semibold text-destructive">
+          Unable to load dashboard stats
+        </h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          {error.message}
+        </p>
       </div>
     );
   }
@@ -40,22 +56,22 @@ export function AdminDashboard() {
         <StatsCard
           label="Monthly Recurring Revenue"
           value={`$${((stats?.mrr || 0) / 100).toFixed(2)}`}
-          icon={DollarSign}
+          icon={DollarCircleIcon}
         />
         <StatsCard
           label="Active Subscriptions"
           value={stats?.totalActiveSubscriptions || 0}
-          icon={CreditCard}
+          icon={CreditCardIcon}
         />
         <StatsCard
           label="Total Revenue"
           value={`$${((stats?.totalRevenue || 0) / 100).toFixed(2)}`}
-          icon={TrendingUp}
+          icon={ChartIncreaseIcon}
         />
         <StatsCard
           label="Pro Users"
           value={stats?.subscriptionsByPlan?.pro || 0}
-          icon={Users}
+          icon={UserGroupIcon}
         />
       </div>
 

@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Delete02Icon, FolderMinusIcon, Loading02Icon, LockIcon, MoreHorizontalIcon, PencilIcon, PinIcon, PinOffIcon } from "@hugeicons/core-free-icons";
 import { Link } from "@tanstack/react-router";
 import { useState, useRef, useEffect, memo } from "react";
 import { cn } from "@/lib/utils";
@@ -18,16 +20,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Lock,
-  Loader2,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-  FolderMinus,
-  Pin,
-  PinOff,
-} from "lucide-react";
 
 interface ChatItemProps {
   id: string;
@@ -182,14 +174,14 @@ export const ChatItem = memo(function ChatItem({
         >
           {/* Lock indicator */}
           {isLocked && (
-            <Lock className="w-3.5 h-3.5 mr-2 flex-shrink-0 text-gray-400 dark:text-gray-600" />
+            <HugeiconsIcon icon={LockIcon} className="w-3.5 h-3.5 mr-2 flex-shrink-0 text-gray-400 dark:text-gray-600" />
           )}
 
           {/* Title container */}
           <div className="flex-1 min-w-0 overflow-hidden pr-14 md:pr-9">
             <div className="flex items-center gap-1.5 min-w-0 h-5">
               {isTitleGenerating && (
-                <Loader2 className="h-3.5 w-3.5 animate-spin text-gray-500 dark:text-gray-400 flex-shrink-0" />
+                <HugeiconsIcon icon={Loading02Icon} className="h-3.5 w-3.5 animate-spin text-gray-500 dark:text-gray-400 flex-shrink-0" />
               )}
               <span
                 className="block whitespace-nowrap text-left text-[0.9rem] font-normal overflow-hidden h-5 leading-5 truncate"
@@ -223,7 +215,7 @@ export const ChatItem = memo(function ChatItem({
                 className="p-1 rounded-lg text-gray-400 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors focus-visible:outline-none"
                 onClick={(e) => e.preventDefault()}
               >
-                <MoreHorizontal className="h-4 w-4" />
+                <HugeiconsIcon icon={MoreHorizontalIcon} className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44">
@@ -231,19 +223,19 @@ export const ChatItem = memo(function ChatItem({
                 <DropdownMenuItem onClick={handleTogglePin} className="gap-2">
                   {isPinned ? (
                     <>
-                      <PinOff className="h-3.5 w-3.5" />
+                      <HugeiconsIcon icon={PinOffIcon} className="h-3.5 w-3.5" />
                       Unpin
                     </>
                   ) : (
                     <>
-                      <Pin className="h-3.5 w-3.5" />
+                      <HugeiconsIcon icon={PinIcon} className="h-3.5 w-3.5" />
                       Pin to top
                     </>
                   )}
                 </DropdownMenuItem>
               )}
               <DropdownMenuItem onClick={handleStartEdit} className="gap-2">
-                <Pencil className="h-3.5 w-3.5" />
+                <HugeiconsIcon icon={PencilIcon} className="h-3.5 w-3.5" />
                 Rename
               </DropdownMenuItem>
               {onRemoveFromFolder && (
@@ -251,7 +243,7 @@ export const ChatItem = memo(function ChatItem({
                   onClick={() => onRemoveFromFolder(id)}
                   className="gap-2"
                 >
-                  <FolderMinus className="h-3.5 w-3.5" />
+                  <HugeiconsIcon icon={FolderMinusIcon} className="h-3.5 w-3.5" />
                   Remove from folder
                 </DropdownMenuItem>
               )}
@@ -260,7 +252,7 @@ export const ChatItem = memo(function ChatItem({
                 onClick={() => setShowDeleteDialog(true)}
                 className="gap-2 text-destructive focus:text-destructive focus:bg-destructive/10"
               >
-                <Trash2 className="h-3.5 w-3.5" />
+                <HugeiconsIcon icon={Delete02Icon} className="h-3.5 w-3.5" />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>

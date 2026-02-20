@@ -1,4 +1,24 @@
-import { Link, useLocation, useParams, useNavigate } from "@tanstack/react-router";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  Add01Icon,
+  ArrowRight01Icon,
+  CreditCardIcon,
+  FileAttachmentIcon,
+  Logout01Icon,
+  Message01Icon,
+  PanelLeftCloseIcon,
+  PanelLeftOpenIcon,
+  PinIcon,
+  Search01Icon,
+  Settings01Icon,
+  Shield01Icon,
+} from "@hugeicons/core-free-icons";
+import {
+  Link,
+  useLocation,
+  useParams,
+  useNavigate,
+} from "@tanstack/react-router";
 import { useMemo, useState, useCallback, useRef, type UIEvent } from "react";
 import { toast } from "sonner";
 import { useUIStore } from "@/stores/uiStore";
@@ -44,20 +64,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Search,
-  FileText,
-  MessageSquare,
-  ChevronRight,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Plus,
-  Pin,
-  CreditCard,
-  Settings,
-  Shield,
-  LogOut,
-} from "lucide-react";
 import { OneraLogo } from "@/components/ui/onera-logo";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -246,12 +252,15 @@ export function Sidebar() {
 
   const isLoading = rawChats === undefined;
 
-  const handleDeleteChat = useCallback(async (chatId: string) => {
-    await deleteChatRef.current.mutateAsync(chatId);
-    if (chatId === currentChatId) {
-      navigate({ to: "/app" });
-    }
-  }, [currentChatId, navigate]);
+  const handleDeleteChat = useCallback(
+    async (chatId: string) => {
+      await deleteChatRef.current.mutateAsync(chatId);
+      if (chatId === currentChatId) {
+        navigate({ to: "/app" });
+      }
+    },
+    [currentChatId, navigate],
+  );
 
   const handleMobileNav = useCallback(() => {
     if (window.innerWidth < 768) {
@@ -361,7 +370,10 @@ export function Sidebar() {
               className="fixed top-3.5 left-3.5 z-50 p-2 rounded-xl text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden"
               aria-label="Open sidebar"
             >
-              <PanelLeftOpen className="h-[18px] w-[18px]" />
+              <HugeiconsIcon
+                icon={PanelLeftOpenIcon}
+                className="h-[18px] w-[18px]"
+              />
             </button>
           </TooltipTrigger>
           <TooltipContent side="right" className="text-xs">
@@ -389,7 +401,10 @@ export function Sidebar() {
                       <div className="group-hover:hidden">
                         <OneraLogo size={24} />
                       </div>
-                      <PanelLeftOpen className="size-5 hidden group-hover:flex text-gray-600 dark:text-gray-400" />
+                      <HugeiconsIcon
+                        icon={PanelLeftOpenIcon}
+                        className="size-5 hidden group-hover:flex text-gray-600 dark:text-gray-400"
+                      />
                     </div>
                   </div>
                 </TooltipTrigger>
@@ -411,7 +426,10 @@ export function Sidebar() {
                     draggable={false}
                   >
                     <div className="flex items-center justify-center size-9">
-                      <Plus className="size-[18px] text-gray-800 dark:text-gray-200" />
+                      <HugeiconsIcon
+                        icon={Add01Icon}
+                        className="size-[18px] text-gray-800 dark:text-gray-200"
+                      />
                     </div>
                   </Link>
                 </TooltipTrigger>
@@ -431,7 +449,10 @@ export function Sidebar() {
                     }}
                   >
                     <div className="flex items-center justify-center size-9">
-                      <Search className="size-[18px] text-gray-800 dark:text-gray-200" />
+                      <HugeiconsIcon
+                        icon={Search01Icon}
+                        className="size-[18px] text-gray-800 dark:text-gray-200"
+                      />
                     </div>
                   </button>
                 </TooltipTrigger>
@@ -450,7 +471,10 @@ export function Sidebar() {
                     draggable={false}
                   >
                     <div className="flex items-center justify-center size-9">
-                      <FileText className="size-[18px] text-gray-800 dark:text-gray-200" />
+                      <HugeiconsIcon
+                        icon={FileAttachmentIcon}
+                        className="size-[18px] text-gray-800 dark:text-gray-200"
+                      />
                     </div>
                   </Link>
                 </TooltipTrigger>
@@ -470,7 +494,10 @@ export function Sidebar() {
                       draggable={false}
                     >
                       <div className="flex items-center justify-center size-9">
-                        <Shield className="size-[18px] text-gray-800 dark:text-gray-200" />
+                        <HugeiconsIcon
+                          icon={Shield01Icon}
+                          className="size-[18px] text-gray-800 dark:text-gray-200"
+                        />
                       </div>
                     </Link>
                   </TooltipTrigger>
@@ -513,7 +540,10 @@ export function Sidebar() {
                 >
                   <DropdownMenuItem asChild>
                     <Link to="/app/billing" className="gap-2 cursor-pointer">
-                      <CreditCard className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                      <HugeiconsIcon
+                        icon={CreditCardIcon}
+                        className="h-4 w-4 text-gray-500 dark:text-gray-400"
+                      />
                       Manage plan
                     </Link>
                   </DropdownMenuItem>
@@ -521,7 +551,7 @@ export function Sidebar() {
                     onClick={() => openSettingsModal()}
                     className="gap-2"
                   >
-                    <Settings className="h-4 w-4" />
+                    <HugeiconsIcon icon={Settings01Icon} className="h-4 w-4" />
                     Settings
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -529,7 +559,7 @@ export function Sidebar() {
                     onClick={() => signOut()}
                     className="gap-2 text-destructive focus:text-destructive focus:bg-destructive/10"
                   >
-                    <LogOut className="h-4 w-4" />
+                    <HugeiconsIcon icon={Logout01Icon} className="h-4 w-4" />
                     Sign out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -589,7 +619,10 @@ export function Sidebar() {
                   onClick={toggleSidebar}
                   className="flex rounded-xl size-[34px] justify-center items-center text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors focus-visible:outline-none"
                 >
-                  <PanelLeftClose className="h-4 w-4" />
+                  <HugeiconsIcon
+                    icon={PanelLeftCloseIcon}
+                    className="h-4 w-4"
+                  />
                 </button>
               </TooltipTrigger>
               <TooltipContent side="right" className="text-xs">
@@ -599,13 +632,18 @@ export function Sidebar() {
           </header>
 
           {/* Top gradient fade — only visible when scrolled (Open WebUI style) */}
-          <div className={cn(
-            "absolute top-12 left-0 right-0 h-6 z-[5] pointer-events-none bg-linear-to-b from-gray-50 dark:from-black from-50% to-transparent transition-opacity duration-150",
-            scrollTop > 0 ? "opacity-100" : "opacity-0",
-          )} />
+          <div
+            className={cn(
+              "absolute top-12 left-0 right-0 h-6 z-[5] pointer-events-none bg-linear-to-b from-gray-50 dark:from-black from-50% to-transparent transition-opacity duration-150",
+              scrollTop > 0 ? "opacity-100" : "opacity-0",
+            )}
+          />
 
           {/* Main Content (scrollable) — includes nav menu + chat list */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hidden" onScroll={handleScroll}>
+          <div
+            className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hidden"
+            onScroll={handleScroll}
+          >
             {/* Navigation Menu — Open WebUI style */}
             <div className="px-1 py-2">
               {/* New Chat */}
@@ -614,8 +652,10 @@ export function Sidebar() {
                 onClick={handleMobileNav}
                 className="group grow flex items-center space-x-3 rounded-xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <Plus className="size-[18px]" />
-                <span className="font-primary text-[0.9rem] font-medium leading-none">New Chat</span>
+                <HugeiconsIcon icon={Add01Icon} className="size-[18px]" />
+                <span className="font-primary text-[0.9rem] font-medium leading-none">
+                  New Chat
+                </span>
               </Link>
 
               {/* Search */}
@@ -626,8 +666,10 @@ export function Sidebar() {
                 }}
                 className="w-full group grow flex items-center space-x-3 rounded-xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <Search className="size-[18px]" />
-                <span className="font-primary text-[0.9rem] font-medium leading-none">Search</span>
+                <HugeiconsIcon icon={Search01Icon} className="size-[18px]" />
+                <span className="font-primary text-[0.9rem] font-medium leading-none">
+                  Search
+                </span>
               </button>
 
               {/* Notes */}
@@ -636,8 +678,13 @@ export function Sidebar() {
                 onClick={handleMobileNav}
                 className="group grow flex items-center space-x-3 rounded-xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <FileText className="size-[18px]" />
-                <span className="font-primary text-[0.9rem] font-medium leading-none">Notes</span>
+                <HugeiconsIcon
+                  icon={FileAttachmentIcon}
+                  className="size-[18px]"
+                />
+                <span className="font-primary text-[0.9rem] font-medium leading-none">
+                  Notes
+                </span>
               </Link>
 
               {/* Admin */}
@@ -647,8 +694,10 @@ export function Sidebar() {
                   onClick={handleMobileNav}
                   className="group grow flex items-center space-x-3 rounded-xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  <Shield className="size-[18px]" />
-                  <span className="font-primary text-[0.9rem] font-medium leading-none">Admin</span>
+                  <HugeiconsIcon icon={Shield01Icon} className="size-[18px]" />
+                  <span className="font-primary text-[0.9rem] font-medium leading-none">
+                    Admin
+                  </span>
                 </Link>
               )}
             </div>
@@ -657,12 +706,20 @@ export function Sidebar() {
             <div className="px-1.5 mt-3 pb-4">
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-16 gap-3">
-                  <Spinner size="lg" className="text-gray-500 dark:text-gray-400" />
-                  <span className="text-xs text-gray-500 dark:text-gray-400">Loading...</span>
+                  <Spinner
+                    size="lg"
+                    className="text-gray-500 dark:text-gray-400"
+                  />
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Loading...
+                  </span>
                 </div>
               ) : chats.length === 0 && foldersWithState.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-                  <MessageSquare className="w-8 h-8 text-gray-400 dark:text-gray-600 mb-3" />
+                  <HugeiconsIcon
+                    icon={Message01Icon}
+                    className="w-8 h-8 text-gray-400 dark:text-gray-600 mb-3"
+                  />
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
                     No conversations yet
                   </p>
@@ -691,11 +748,10 @@ export function Sidebar() {
                             disabled={createFolder.isPending}
                             className="absolute right-1 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors focus-visible:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            {createFolder.isPending ? (
-                              <Spinner className="h-3.5 w-3.5" />
-                            ) : (
-                              <Plus className="h-3.5 w-3.5" />
-                            )}
+                            <HugeiconsIcon
+                              icon={Add01Icon}
+                              className="h-3.5 w-3.5"
+                            />
                           </button>
                         </TooltipTrigger>
                         <TooltipContent side="right" className="text-xs">
@@ -779,7 +835,7 @@ export function Sidebar() {
                       {pinnedChats.length > 0 && (
                         <div className="mb-2">
                           <div className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-gray-500 dark:text-gray-400 font-medium">
-                            <Pin className="h-3 w-3" />
+                            <HugeiconsIcon icon={PinIcon} className="h-3 w-3" />
                             <span>Pinned</span>
                           </div>
                           <div className="ml-3 pl-1 space-y-1 mt-1 border-s border-gray-100 dark:border-gray-900">
@@ -805,7 +861,10 @@ export function Sidebar() {
                       {/* Date Groups — Open WebUI style time labels */}
                       {Array.from(groupedChats.entries()).map(
                         ([group, groupChats], groupIndex) => (
-                          <div key={group} className={cn(groupIndex === 0 ? "mt-1.5" : "mt-4")}>
+                          <div
+                            key={group}
+                            className={cn(groupIndex === 0 ? "mt-1.5" : "mt-4")}
+                          >
                             <div className="w-full pl-2.5 text-[0.7rem] text-gray-500 dark:text-gray-500 font-medium pb-1.5">
                               {DATE_GROUP_LABELS[group as DateGroup]}
                             </div>
@@ -893,7 +952,10 @@ export function Sidebar() {
                     </div>
 
                     {/* Chevron */}
-                    <ChevronRight className="h-4 w-4 text-gray-400 dark:text-gray-600 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors flex-shrink-0" />
+                    <HugeiconsIcon
+                      icon={ArrowRight01Icon}
+                      className="h-4 w-4 text-gray-400 dark:text-gray-600 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors flex-shrink-0"
+                    />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -904,7 +966,8 @@ export function Sidebar() {
                 >
                   <DropdownMenuItem asChild>
                     <Link to="/app/billing" className="gap-2 cursor-pointer">
-                      <CreditCard
+                      <HugeiconsIcon
+                        icon={CreditCardIcon}
                         className={cn(
                           "h-4 w-4",
                           subData?.plan?.id === "pro"
@@ -925,7 +988,7 @@ export function Sidebar() {
                     onClick={() => openSettingsModal()}
                     className="gap-2"
                   >
-                    <Settings className="h-4 w-4" />
+                    <HugeiconsIcon icon={Settings01Icon} className="h-4 w-4" />
                     Settings
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -933,7 +996,7 @@ export function Sidebar() {
                     onClick={() => signOut()}
                     className="gap-2 text-destructive focus:text-destructive focus:bg-destructive/10"
                   >
-                    <LogOut className="h-4 w-4" />
+                    <HugeiconsIcon icon={Logout01Icon} className="h-4 w-4" />
                     Sign out
                   </DropdownMenuItem>
                 </DropdownMenuContent>

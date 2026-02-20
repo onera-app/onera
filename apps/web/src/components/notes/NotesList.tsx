@@ -1,13 +1,28 @@
-import { useState, useEffect } from 'react';
-import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  Add01Icon,
+  ArchiveArrowUpIcon,
+  ArchiveIcon,
+  Delete02Icon,
+  FileAttachmentIcon,
+  Loading02Icon,
+  Menu01Icon,
+  Search01Icon,
+} from "@hugeicons/core-free-icons";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
-import { useNotes, useCreateNote, useDeleteNote } from '@/hooks/queries/useNotes';
-import { useFolders } from '@/hooks/queries/useFolders';
-import { useE2EE } from '@/providers/E2EEProvider';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { SearchableSelect } from '@/components/ui/SearchableSelect';
+import {
+  useNotes,
+  useCreateNote,
+  useDeleteNote,
+} from "@/hooks/queries/useNotes";
+import { useFolders } from "@/hooks/queries/useFolders";
+import { useE2EE } from "@/providers/E2EEProvider";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,20 +32,19 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import dayjs from 'dayjs';
-import { v4 as uuid } from 'uuid';
-import { createEncryptedNote, decryptNoteTitle } from '@onera/crypto';
-import { Plus, FileText, Trash2, Search, Archive, ArchiveRestore, Menu, Loader2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Input } from '@/components/ui/input';
-import { useNoteSearch } from '@/hooks/useNoteSearch';
+} from "@/components/ui/alert-dialog";
+import dayjs from "dayjs";
+import { v4 as uuid } from "uuid";
+import { createEncryptedNote, decryptNoteTitle } from "@onera/crypto";
+import { motion, AnimatePresence } from "framer-motion";
+import { Input } from "@/components/ui/input";
+import { useNoteSearch } from "@/hooks/useNoteSearch";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from "@/components/ui/tooltip";
 
 interface NotesListProps {
   selectedNoteId?: string;
@@ -38,23 +52,32 @@ interface NotesListProps {
 }
 
 export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
-  const [selectedFolderId, setSelectedFolderId] = useState<string | undefined>();
+  const [selectedFolderId, setSelectedFolderId] = useState<
+    string | undefined
+  >();
   const [showArchived, setShowArchived] = useState(false);
   const [deleteNoteId, setDeleteNoteId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const { toggleSidebar } = useUIStore();
   const { isUnlocked } = useE2EE();
 
-  const { data: notes = [], isLoading: notesLoading } = useNotes(selectedFolderId, showArchived);
+  const { data: notes = [], isLoading: notesLoading } = useNotes(
+    selectedFolderId,
+    showArchived,
+  );
   const { data: folders = [] } = useFolders();
   const createNote = useCreateNote();
   const deleteNote = useDeleteNote();
-  const { search: performSearch, results: searchResults, isSearching } = useNoteSearch();
+  const {
+    search: performSearch,
+    results: searchResults,
+    isSearching,
+  } = useNoteSearch();
 
   const handleCreateNote = async () => {
     try {
       const noteId = uuid();
-      const encryptedData = createEncryptedNote(noteId, 'New Note', '<p></p>');
+      const encryptedData = createEncryptedNote(noteId, "New Note", "<p></p>");
 
       await createNote.mutateAsync({
         noteId,
@@ -68,8 +91,8 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
       });
       onSelectNote(noteId);
     } catch (error) {
-      console.error('[NotesList] Failed to create note:', error);
-      toast.error('Failed to create note');
+      console.error("[NotesList] Failed to create note:", error);
+      toast.error("Failed to create note");
     }
   };
 
@@ -77,7 +100,7 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
     if (!deleteNoteId) return;
     await deleteNote.mutateAsync(deleteNoteId);
     if (selectedNoteId === deleteNoteId) {
-      onSelectNote('');
+      onSelectNote("");
     }
     setDeleteNoteId(null);
   };
@@ -95,7 +118,7 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
   // Sync selectedFolderId with existing folders
   useEffect(() => {
     if (selectedFolderId && folders.length > 0) {
-      const folderExists = folders.some(f => f.id === selectedFolderId);
+      const folderExists = folders.some((f) => f.id === selectedFolderId);
       if (!folderExists) {
         setSelectedFolderId(undefined);
       }
@@ -116,9 +139,11 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
               onClick={toggleSidebar}
               className="h-9 w-9 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-850 rounded-xl md:hidden"
             >
-              <Menu className="h-[18px] w-[18px]" />
+              <HugeiconsIcon icon={Menu01Icon} className="h-[18px] w-[18px]" />
             </Button>
-            <h2 className="text-xl font-bold font-primary tracking-tight text-gray-900 dark:text-gray-100">Notes</h2>
+            <h2 className="text-xl font-bold font-primary tracking-tight text-gray-900 dark:text-gray-100">
+              Notes
+            </h2>
             <div className="flex-1" />
             <TooltipProvider>
               <Tooltip>
@@ -129,11 +154,7 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
                     disabled={createNote.isPending}
                     className="h-9 w-9 bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm rounded-xl transition-all active:scale-95 disabled:opacity-70"
                   >
-                    {createNote.isPending ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                    ) : (
-                      <Plus className="h-5 w-5" />
-                    )}
+                    <HugeiconsIcon icon={Add01Icon} className="h-5 w-5" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>New Note</TooltipContent>
@@ -144,7 +165,10 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
           <div className="space-y-3">
             {/* Search */}
             <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500 group-focus-within:text-primary transition-colors" />
+              <HugeiconsIcon
+                icon={Search01Icon}
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500 group-focus-within:text-primary transition-colors"
+              />
               <Input
                 placeholder="Search notes..."
                 value={searchQuery}
@@ -153,7 +177,10 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
               />
               {isSearching && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                  <HugeiconsIcon
+                    icon={Loading02Icon}
+                    className="h-4 w-4 animate-spin text-gray-400"
+                  />
                 </div>
               )}
             </div>
@@ -161,11 +188,13 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
             <div className="flex items-center gap-2">
               <div className="flex-1">
                 <SearchableSelect
-                  value={selectedFolderId || 'all'}
-                  onValueChange={(value) => setSelectedFolderId(value === 'all' ? undefined : value)}
+                  value={selectedFolderId || "all"}
+                  onValueChange={(value) =>
+                    setSelectedFolderId(value === "all" ? undefined : value)
+                  }
                   options={[
-                    { value: 'all', label: 'All Folders' },
-                    ...folders.map(f => ({ value: f.id, label: f.name }))
+                    { value: "all", label: "All Folders" },
+                    ...folders.map((f) => ({ value: f.id, label: f.name })),
                   ]}
                   placeholder="All Folders"
                   triggerClassName="h-9 w-full bg-white dark:bg-gray-850/50 border-gray-100 dark:border-gray-850 rounded-xl text-xs"
@@ -178,10 +207,19 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
                 onClick={() => setShowArchived(!showArchived)}
                 className={cn(
                   "h-9 w-9 rounded-xl transition-colors",
-                  showArchived ? "bg-primary/10 text-primary" : "text-gray-500 dark:text-gray-400"
+                  showArchived
+                    ? "bg-primary/10 text-primary"
+                    : "text-gray-500 dark:text-gray-400",
                 )}
               >
-                {showArchived ? <ArchiveRestore className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
+                {showArchived ? (
+                  <HugeiconsIcon
+                    icon={ArchiveArrowUpIcon}
+                    className="h-4 w-4"
+                  />
+                ) : (
+                  <HugeiconsIcon icon={ArchiveIcon} className="h-4 w-4" />
+                )}
               </Button>
             </div>
           </div>
@@ -191,7 +229,10 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
           {notesLoading ? (
             <div className="space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="p-4 rounded-2xl border border-transparent space-y-3">
+                <div
+                  key={i}
+                  className="p-4 rounded-2xl border border-transparent space-y-3"
+                >
                   <Skeleton className="h-5 w-3/4 rounded-lg" />
                   <Skeleton className="h-4 w-1/2 rounded-lg opacity-60" />
                 </div>
@@ -200,10 +241,17 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
           ) : displayNotes.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center p-6 text-center animate-fade-in">
               <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-gray-850 flex items-center justify-center mb-4 border border-gray-100 dark:border-gray-850">
-                <FileText className="h-8 w-8 text-gray-300 dark:text-gray-600" />
+                <HugeiconsIcon
+                  icon={FileAttachmentIcon}
+                  className="h-8 w-8 text-gray-300 dark:text-gray-600"
+                />
               </div>
               <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                {searchQuery ? 'No notes match your search' : showArchived ? 'No archived notes' : 'No notes yet'}
+                {searchQuery
+                  ? "No notes match your search"
+                  : showArchived
+                    ? "No archived notes"
+                    : "No notes yet"}
               </p>
               {!searchQuery && !showArchived && (
                 <Button
@@ -215,11 +263,14 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
                 >
                   {createNote.isPending ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <HugeiconsIcon
+                        icon={Loading02Icon}
+                        className="mr-2 h-4 w-4 animate-spin"
+                      />
                       Creating...
                     </>
                   ) : (
-                    'Create your first note'
+                    "Create your first note"
                   )}
                 </Button>
               )}
@@ -228,12 +279,14 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
             <div className="space-y-2 pb-20">
               <AnimatePresence mode="popLayout" initial={false}>
                 {displayNotes.map((noteOrResult) => {
-                  const isSearchResult = 'title' in noteOrResult && !('encryptedTitle' in noteOrResult);
+                  const isSearchResult =
+                    "title" in noteOrResult &&
+                    !("encryptedTitle" in noteOrResult);
                   const noteId = noteOrResult.id;
                   const isSelected = selectedNoteId === noteId;
 
-                  let title = '';
-                  let contentSnippet = '';
+                  let title = "";
+                  let contentSnippet = "";
                   let updatedAt = 0;
                   let archived = false;
 
@@ -245,14 +298,14 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
                   } else {
                     const note = noteOrResult as any;
                     title = isUnlocked
-                      ? (decryptNoteTitle(
-                        note.id,
-                        note.encryptedTitle,
-                        note.titleNonce,
-                        note.encryptedNoteKey ?? undefined,
-                        note.noteKeyNonce ?? undefined
-                      ) || 'Untitled Note')
-                      : 'Encrypted';
+                      ? decryptNoteTitle(
+                          note.id,
+                          note.encryptedTitle,
+                          note.titleNonce,
+                          note.encryptedNoteKey ?? undefined,
+                          note.noteKeyNonce ?? undefined,
+                        ) || "Untitled Note"
+                      : "Encrypted";
                     updatedAt = note.updatedAt;
                     archived = note.archived;
                   }
@@ -264,21 +317,29 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
                       initial={{ opacity: 0, y: 10, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                      transition={{
+                        type: "spring",
+                        damping: 25,
+                        stiffness: 300,
+                      }}
                       onClick={() => onSelectNote(noteId)}
                       className={cn(
-                        'group relative p-4 sm:p-5 rounded-2xl cursor-pointer transition-all duration-200 border',
+                        "group relative p-4 sm:p-5 rounded-2xl cursor-pointer transition-all duration-200 border",
                         isSelected
-                          ? 'bg-white dark:bg-gray-850 border-gray-200/50 dark:border-gray-800 shadow-sm ring-1 ring-primary/5'
-                          : 'bg-transparent border-transparent hover:bg-gray-100/50 dark:hover:bg-gray-850/50 hover:border-gray-100 dark:hover:border-gray-850'
+                          ? "bg-white dark:bg-gray-850 border-gray-200/50 dark:border-gray-800 shadow-sm ring-1 ring-primary/5"
+                          : "bg-transparent border-transparent hover:bg-gray-100/50 dark:hover:bg-gray-850/50 hover:border-gray-100 dark:hover:border-gray-850",
                       )}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <h3 className={cn(
-                            "font-semibold truncate text-[15px] sm:text-base transition-colors",
-                            isSelected ? "text-primary" : "text-gray-900 dark:text-gray-100"
-                          )}>
+                          <h3
+                            className={cn(
+                              "font-semibold truncate text-[15px] sm:text-base transition-colors",
+                              isSelected
+                                ? "text-primary"
+                                : "text-gray-900 dark:text-gray-100",
+                            )}
+                          >
                             {title}
                           </h3>
                           {contentSnippet && (
@@ -288,7 +349,7 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
                           )}
                           <div className="flex items-center gap-2 mt-2 sm:mt-2.5">
                             <span className="text-[10px] sm:text-[11px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-tight">
-                              {dayjs(updatedAt).format('MMM D')}
+                              {dayjs(updatedAt).format("MMM D")}
                             </span>
                             {archived && (
                               <span className="px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 font-medium">
@@ -308,10 +369,13 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
                             }}
                             className={cn(
                               "h-8 w-8 text-gray-400 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all",
-                              "opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                              "opacity-100 md:opacity-0 md:group-hover:opacity-100",
                             )}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <HugeiconsIcon
+                              icon={Delete02Icon}
+                              className="h-4 w-4"
+                            />
                           </Button>
                         </div>
                       </div>
@@ -319,7 +383,11 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
                         <motion.div
                           layoutId="active-indicator"
                           className="absolute left-0 top-3 bottom-3 sm:top-4 sm:bottom-4 w-1 bg-primary rounded-full transition-all"
-                          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                          transition={{
+                            type: "spring",
+                            damping: 25,
+                            stiffness: 300,
+                          }}
                         />
                       )}
                     </motion.div>
@@ -332,17 +400,24 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
       </div>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deleteNoteId} onOpenChange={() => setDeleteNoteId(null)}>
+      <AlertDialog
+        open={!!deleteNoteId}
+        onOpenChange={() => setDeleteNoteId(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete note?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete this note.
+              This action cannot be undone. This will permanently delete this
+              note.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteNote} className="bg-destructive text-white hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={handleDeleteNote}
+              className="bg-destructive text-white hover:bg-destructive/90"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

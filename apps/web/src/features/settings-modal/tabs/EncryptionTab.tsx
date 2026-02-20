@@ -1,9 +1,28 @@
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { useE2EE } from '@/providers/E2EEProvider';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  Add01Icon,
+  Alert01Icon,
+  Copy01Icon,
+  FingerPrintIcon,
+  Key01Icon,
+  LockIcon,
+  SecurityCheckIcon,
+  SquareUnlock01Icon,
+  ViewIcon,
+  ViewOffIcon,
+} from "@hugeicons/core-free-icons";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useE2EE } from "@/providers/E2EEProvider";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -11,12 +30,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { ShieldCheck, Lock, Unlock, Key, AlertTriangle, Eye, EyeOff, Copy, Fingerprint, Plus } from 'lucide-react';
-import { PasskeyList, PasskeyRegistrationModal } from '@/components/e2ee';
-import { usePasskeySupport } from '@/hooks/useWebAuthnSupport';
+} from "@/components/ui/dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { PasskeyList, PasskeyRegistrationModal } from "@/components/e2ee";
+import { usePasskeySupport } from "@/hooks/useWebAuthnSupport";
 
 export function EncryptionTab() {
   const { isUnlocked, lock } = useE2EE();
@@ -24,17 +42,18 @@ export function EncryptionTab() {
   const [showPhrase, setShowPhrase] = useState(false);
   const [showPasskeyRegistration, setShowPasskeyRegistration] = useState(false);
 
-  const { isSupported: passkeySupported, isLoading: isCheckingPasskeySupport } = usePasskeySupport();
+  const { isSupported: passkeySupported, isLoading: isCheckingPasskeySupport } =
+    usePasskeySupport();
 
   const handleCopyRecoveryPhrase = () => {
     // Recovery phrase should be stored securely and only shown once during setup
     // For now, show a message that it's not available
-    toast.info('Recovery phrase is only shown once during initial setup');
+    toast.info("Recovery phrase is only shown once during initial setup");
   };
 
   const handleLock = () => {
     lock();
-    toast.success('E2EE locked');
+    toast.success("E2EE locked");
   };
 
   return (
@@ -51,18 +70,25 @@ export function EncryptionTab() {
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-primary" />
+              <HugeiconsIcon
+                icon={SecurityCheckIcon}
+                size={20}
+                className="text-primary"
+              />
               <CardTitle className="text-base">E2EE Status</CardTitle>
             </div>
-            <Badge variant={isUnlocked ? 'success' : 'secondary'}>
+            <Badge variant={isUnlocked ? "success" : "secondary"}>
               {isUnlocked ? (
                 <>
-                  <Unlock className="h-3 w-3 mr-1" />
+                  <HugeiconsIcon
+                    icon={SquareUnlock01Icon}
+                    className="h-3 w-3 mr-1"
+                  />
                   Unlocked
                 </>
               ) : (
                 <>
-                  <Lock className="h-3 w-3 mr-1" />
+                  <HugeiconsIcon icon={LockIcon} className="h-3 w-3 mr-1" />
                   Locked
                 </>
               )}
@@ -74,19 +100,21 @@ export function EncryptionTab() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            End-to-end encryption ensures that only you can access your API keys and sensitive data.
-            Your encryption password never leaves your device.
+            End-to-end encryption ensures that only you can access your API keys
+            and sensitive data. Your encryption password never leaves your
+            device.
           </p>
         </CardContent>
       </Card>
 
       {/* Security Warning */}
       <Alert>
-        <AlertTriangle className="h-4 w-4" />
+        <HugeiconsIcon icon={Alert01Icon} className="h-4 w-4" />
         <AlertTitle>Important</AlertTitle>
         <AlertDescription>
-          If you forget your E2EE password and lose your recovery phrase, your encrypted data will
-          be permanently inaccessible. Keep your recovery phrase safe.
+          If you forget your E2EE password and lose your recovery phrase, your
+          encrypted data will be permanently inaccessible. Keep your recovery
+          phrase safe.
         </AlertDescription>
       </Alert>
 
@@ -96,7 +124,10 @@ export function EncryptionTab() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Fingerprint className="h-5 w-5 text-primary" />
+                <HugeiconsIcon
+                  icon={FingerPrintIcon}
+                  className="h-5 w-5 text-primary"
+                />
                 <CardTitle className="text-base">Passkeys</CardTitle>
               </div>
               {passkeySupported && !isCheckingPasskeySupport && (
@@ -105,19 +136,21 @@ export function EncryptionTab() {
                   size="sm"
                   onClick={() => setShowPasskeyRegistration(true)}
                 >
-                  <Plus className="h-4 w-4 mr-1" />
+                  <HugeiconsIcon icon={Add01Icon} className="h-4 w-4 mr-1" />
                   Add Passkey
                 </Button>
               )}
             </div>
             <CardDescription>
-              Use Face ID, Touch ID, or Windows Hello to unlock your encryption faster
+              Use Face ID, Touch ID, or Windows Hello to unlock your encryption
+              faster
             </CardDescription>
           </CardHeader>
           <CardContent>
             {!passkeySupported && !isCheckingPasskeySupport ? (
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Passkeys are not supported on this device or browser. Use your recovery phrase to unlock.
+                Passkeys are not supported on this device or browser. Use your
+                recovery phrase to unlock.
               </p>
             ) : (
               <PasskeyList />
@@ -139,7 +172,7 @@ export function EncryptionTab() {
                 </p>
               </div>
               <Button variant="outline" onClick={handleLock}>
-                <Lock className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={LockIcon} className="h-4 w-4 mr-2" />
                 Lock Now
               </Button>
             </div>
@@ -152,8 +185,11 @@ export function EncryptionTab() {
                   View your 24-word recovery phrase
                 </p>
               </div>
-              <Button variant="outline" onClick={() => setShowRecoveryDialog(true)}>
-                <Key className="h-4 w-4 mr-2" />
+              <Button
+                variant="outline"
+                onClick={() => setShowRecoveryDialog(true)}
+              >
+                <HugeiconsIcon icon={Key01Icon} className="h-4 w-4 mr-2" />
                 View Phrase
               </Button>
             </div>
@@ -173,31 +209,36 @@ export function EncryptionTab() {
           <DialogHeader>
             <DialogTitle>Recovery Phrase</DialogTitle>
             <DialogDescription>
-              Keep this phrase safe. It's the only way to recover your data if you forget your
-              password.
+              Keep this phrase safe. It's the only way to recover your data if
+              you forget your password.
             </DialogDescription>
           </DialogHeader>
 
           <div className="py-4">
             <Alert variant="destructive" className="mb-4">
-              <AlertTriangle className="h-4 w-4" />
+              <HugeiconsIcon icon={Alert01Icon} className="h-4 w-4" />
               <AlertDescription>
-                Never share this phrase with anyone. Anyone with this phrase can access your data.
+                Never share this phrase with anyone. Anyone with this phrase can
+                access your data.
               </AlertDescription>
             </Alert>
 
             <div className="relative">
               <div
                 className={`font-mono text-sm p-4 bg-gray-100 dark:bg-gray-850 rounded-lg break-words ${
-                  !showPhrase ? 'blur-sm select-none' : ''
+                  !showPhrase ? "blur-sm select-none" : ""
                 }`}
               >
-                Your recovery phrase was shown during initial setup. If you didn't save it, you may need to reset your encryption.
+                Your recovery phrase was shown during initial setup. If you
+                didn't save it, you may need to reset your encryption.
               </div>
               <div className="absolute inset-0 flex items-center justify-center">
                 {!showPhrase && (
-                  <Button variant="secondary" onClick={() => setShowPhrase(true)}>
-                    <Eye className="h-4 w-4 mr-2" />
+                  <Button
+                    variant="secondary"
+                    onClick={() => setShowPhrase(true)}
+                  >
+                    <HugeiconsIcon icon={ViewIcon} className="h-4 w-4 mr-2" />
                     Reveal Phrase
                   </Button>
                 )}
@@ -206,12 +247,20 @@ export function EncryptionTab() {
 
             {showPhrase && (
               <div className="flex gap-2 mt-3">
-                <Button variant="outline" onClick={() => setShowPhrase(false)} className="flex-1">
-                  <EyeOff className="h-4 w-4 mr-2" />
+                <Button
+                  variant="outline"
+                  onClick={() => setShowPhrase(false)}
+                  className="flex-1"
+                >
+                  <HugeiconsIcon icon={ViewOffIcon} className="h-4 w-4 mr-2" />
                   Hide
                 </Button>
-                <Button variant="outline" onClick={handleCopyRecoveryPhrase} className="flex-1">
-                  <Copy className="h-4 w-4 mr-2" />
+                <Button
+                  variant="outline"
+                  onClick={handleCopyRecoveryPhrase}
+                  className="flex-1"
+                >
+                  <HugeiconsIcon icon={Copy01Icon} className="h-4 w-4 mr-2" />
                   Copy
                 </Button>
               </div>

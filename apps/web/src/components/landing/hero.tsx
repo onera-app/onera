@@ -1,15 +1,24 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  SecurityCheckIcon,
+  SquareUnlock01Icon,
+} from "@hugeicons/core-free-icons";
 import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
-import { LockOpen, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 function FloatingPreview() {
-  const [phase, setPhase] = useState<"plaintext" | "scrambling" | "encrypted">("plaintext");
+  const [phase, setPhase] = useState<"plaintext" | "scrambling" | "encrypted">(
+    "plaintext",
+  );
   const [displayText, setDisplayText] = useState("");
 
-  const plaintext = "Confidential: projected Q3 revenue decline and restructuring options...";
-  const ciphertext = "xK9mZTv3nRqW8jLpY2aHdB5cVf9kL2pZ5mX8nRqW3jLpY2aHdB5cVf9kL2pZ5mX8...";
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+  const plaintext =
+    "Confidential: projected Q3 revenue decline and restructuring options...";
+  const ciphertext =
+    "xK9mZTv3nRqW8jLpY2aHdB5cVf9kL2pZ5mX8nRqW3jLpY2aHdB5cVf9kL2pZ5mX8...";
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
@@ -41,15 +50,19 @@ function FloatingPreview() {
           }
 
           // Generate scrambled text
-          const scrambled = plaintext.split('').map((char) => {
-            if (char === ' ') return ' ';
-            // Progressive scrambling: earlier chars scramble first, or random
-            return Math.random() * 100 < contrast ? chars[Math.floor(Math.random() * chars.length)] : char;
-          }).join('');
+          const scrambled = plaintext
+            .split("")
+            .map((char) => {
+              if (char === " ") return " ";
+              // Progressive scrambling: earlier chars scramble first, or random
+              return Math.random() * 100 < contrast
+                ? chars[Math.floor(Math.random() * chars.length)]
+                : char;
+            })
+            .join("");
 
           setDisplayText(scrambled);
         }, 50);
-
       }, 3000); // Hold plaintext for 3s
     };
 
@@ -68,40 +81,51 @@ function FloatingPreview() {
         <div className="relative">
           {/* Plaintext Badge */}
           <div
-            className={`absolute left-1/2 top-0 -translate-x-1/2 whitespace-nowrap inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 font-landing text-xs font-medium transition-all duration-500 ${phase === "plaintext" || phase === "scrambling"
-              ? "opacity-100 transform-none"
-              : "opacity-0 translate-y-2"
-              } bg-landing-warning-bg text-landing-warning-text`}
+            className={`absolute left-1/2 top-0 -translate-x-1/2 whitespace-nowrap inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 font-landing text-xs font-medium transition-all duration-500 ${
+              phase === "plaintext" || phase === "scrambling"
+                ? "opacity-100 transform-none"
+                : "opacity-0 translate-y-2"
+            } bg-landing-warning-bg text-landing-warning-text`}
           >
-            <LockOpen className="h-3 w-3" />
+            <HugeiconsIcon icon={SquareUnlock01Icon} className="h-3 w-3" />
             Visible to provider
           </div>
 
           {/* Encrypted Badge */}
           <div
-            className={`absolute left-1/2 top-0 -translate-x-1/2 whitespace-nowrap inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 font-landing text-xs font-medium transition-all duration-500 delay-100 ${phase === "encrypted"
-              ? "opacity-100 transform-none scale-100"
-              : "opacity-0 -translate-y-2 scale-95"
-              } bg-landing-green-bg text-landing-green-text`}
+            className={`absolute left-1/2 top-0 -translate-x-1/2 whitespace-nowrap inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 font-landing text-xs font-medium transition-all duration-500 delay-100 ${
+              phase === "encrypted"
+                ? "opacity-100 transform-none scale-100"
+                : "opacity-0 -translate-y-2 scale-95"
+            } bg-landing-green-bg text-landing-green-text`}
           >
-            <ShieldCheck className="h-3.5 w-3.5" />
-            <span className="font-semibold">Zero-knowledge encrypted by Onera</span>
+            <HugeiconsIcon icon={SecurityCheckIcon} size={14} />
+            <span className="font-semibold">
+              Zero-knowledge encrypted by Onera
+            </span>
           </div>
         </div>
       </div>
 
-      <div className="rounded-2xl bg-landing-muted/60 p-6 relative overflow-hidden group border border-transparent transition-colors duration-500 data-[phase=encrypted]:border-landing-green-border/30" data-phase={phase}>
+      <div
+        className="rounded-2xl bg-landing-muted/60 p-6 relative overflow-hidden group border border-transparent transition-colors duration-500 data-[phase=encrypted]:border-landing-green-border/30"
+        data-phase={phase}
+      >
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:animate-shimmer" />
 
         <p className="font-landing text-[11px] font-medium uppercase tracking-widest text-[#6e6e73] flex justify-between items-center">
           <span>What leaves your device</span>
-          <span className={`transition-colors duration-300 ${phase === 'encrypted' ? 'text-landing-green-text font-semibold' : 'text-landing-warning-text'}`}>
-            {phase === 'encrypted' ? 'PROTECTED' : 'UNSECURE'}
+          <span
+            className={`transition-colors duration-300 ${phase === "encrypted" ? "text-landing-green-text font-semibold" : "text-landing-warning-text"}`}
+          >
+            {phase === "encrypted" ? "PROTECTED" : "UNSECURE"}
           </span>
         </p>
 
         <p className="mt-4 font-landing text-lg leading-relaxed text-landing-foreground sm:text-xl min-h-[3.5rem] break-all">
-          <span className={`${phase === 'encrypted' ? 'font-mono text-sm sm:text-base text-landing-muted-foreground' : ''} transition-all duration-300`}>
+          <span
+            className={`${phase === "encrypted" ? "font-mono text-sm sm:text-base text-landing-muted-foreground" : ""} transition-all duration-300`}
+          >
             {displayText}
           </span>
         </p>
@@ -109,7 +133,7 @@ function FloatingPreview() {
         {/* Progress Bar / Visual Indicator */}
         <div className="mt-5 h-1 w-full bg-landing-muted-foreground/10 rounded-full overflow-hidden">
           <div
-            className={`h-full transition-all duration-1000 ease-in-out ${phase === 'encrypted' ? 'bg-landing-green-text w-full' : 'bg-landing-warning-text w-[10%]'}`}
+            className={`h-full transition-all duration-1000 ease-in-out ${phase === "encrypted" ? "bg-landing-green-text w-full" : "bg-landing-warning-text w-[10%]"}`}
           />
         </div>
       </div>
@@ -121,7 +145,10 @@ export function Hero() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <section id="home" className="px-4 pb-24 pt-36 sm:px-6 sm:pb-32 sm:pt-44 md:pb-40 md:pt-52">
+    <section
+      id="home"
+      className="px-4 pb-24 pt-36 sm:px-6 sm:pb-32 sm:pt-44 md:pb-40 md:pt-52"
+    >
       <div className="mx-auto max-w-[980px] text-center">
         <h1 className="mx-auto max-w-[820px] font-landing text-5xl font-semibold leading-[1.05] tracking-tight text-landing-foreground sm:text-7xl md:text-8xl">
           Your prompts are
@@ -130,7 +157,8 @@ export function Hero() {
         </h1>
 
         <p className="mx-auto mt-6 max-w-[540px] font-landing text-lg leading-relaxed text-landing-muted-foreground sm:mt-8 sm:text-xl">
-          AI chat that encrypts everything before it leaves your device. No provider, no server, not even Onera can read what you send.
+          AI chat that encrypts everything before it leaves your device. No
+          provider, no server, not even Onera can read what you send.
         </p>
 
         <div className="mt-8 flex items-center justify-center gap-3 sm:mt-10">

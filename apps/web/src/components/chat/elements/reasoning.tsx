@@ -1,10 +1,5 @@
-/**
- * Reasoning Component
- * Displays AI thinking/reasoning content with auto-collapse behavior
- * Adapted from Vercel AI Chatbot
- */
-
-import { BrainIcon, ChevronDownIcon } from 'lucide-react';
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowDown01Icon, BrainIcon } from "@hugeicons/core-free-icons";
 import type { ComponentProps } from 'react';
 import { createContext, memo, useContext, useEffect, useState, useCallback } from 'react';
 import {
@@ -135,18 +130,16 @@ export const ReasoningTrigger = memo(
       >
         {children ?? (
           <>
-            <BrainIcon className="size-3" />
+            <HugeiconsIcon icon={BrainIcon} className="size-3" />
             {isStreaming || duration === 0 ? (
               <span>Thinking</span>
             ) : (
               <span>{duration}s</span>
             )}
-            <ChevronDownIcon
-              className={cn(
-                'size-2.5 transition-transform',
-                isOpen ? 'rotate-180' : 'rotate-0'
-              )}
-            />
+            <HugeiconsIcon icon={ArrowDown01Icon} className={cn(
+                                    'size-2.5 transition-transform',
+                                    isOpen ? 'rotate-180' : 'rotate-0'
+                                  )} />
           </>
         )}
       </CollapsibleTrigger>

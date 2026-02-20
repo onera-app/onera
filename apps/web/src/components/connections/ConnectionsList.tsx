@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Add01Icon, Delete02Icon, LockIcon } from "@hugeicons/core-free-icons";
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useCredentials, useDeleteCredential } from '@/hooks/queries/useCredentials';
@@ -19,7 +21,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import dayjs from 'dayjs';
-import { Lock, Trash2, Plus } from 'lucide-react';
 
 interface ConnectionsListProps {
   onAddConnection: (providerId: string) => void;
@@ -47,7 +48,7 @@ export function ConnectionsList({ onAddConnection, onEditConnection }: Connectio
   if (!isUnlocked) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
-        <Lock className="w-16 h-16 text-gray-500/50 dark:text-gray-400/50 mb-4" />
+        <HugeiconsIcon icon={LockIcon} className="w-16 h-16 text-gray-500/50 dark:text-gray-400/50 mb-4" />
         <p className="text-gray-500 dark:text-gray-400">
           Unlock E2EE to manage your connections
         </p>
@@ -112,7 +113,7 @@ export function ConnectionsList({ onAddConnection, onEditConnection }: Connectio
 
           {credentials.length === 0 ? (
             <EmptyState
-              icon={Plus}
+              icon={Add01Icon}
               size="md"
               title="No connections yet"
               description="Add one above to get started"
@@ -151,7 +152,7 @@ export function ConnectionsList({ onAddConnection, onEditConnection }: Connectio
                           }}
                           className="opacity-0 group-hover:opacity-100 text-gray-500 dark:text-gray-400 hover:text-destructive"
                         >
-                          <Trash2 />
+                          <HugeiconsIcon icon={Delete02Icon} />
                         </Button>
                       </div>
                     </CardContent>

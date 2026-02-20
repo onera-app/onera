@@ -1,14 +1,15 @@
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Cone01Icon, VolumeHighIcon } from "@hugeicons/core-free-icons";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Volume2, Construction } from 'lucide-react';
+} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function AudioTab() {
   return (
@@ -21,7 +22,7 @@ export function AudioTab() {
       </div>
 
       <Alert>
-        <Construction className="h-4 w-4" />
+        <HugeiconsIcon icon={Cone01Icon} size={16} />
         <AlertDescription>
           Audio features are coming soon. Stay tuned for text-to-speech support.
         </AlertDescription>
@@ -30,7 +31,7 @@ export function AudioTab() {
       {/* Text-to-Speech Section */}
       <div className="space-y-4 opacity-50 pointer-events-none">
         <div className="flex items-center gap-2">
-          <Volume2 className="h-5 w-5" />
+          <HugeiconsIcon icon={VolumeHighIcon} size={20} />
           <h4 className="text-sm font-medium">Text-to-Speech</h4>
         </div>
 
@@ -40,7 +41,9 @@ export function AudioTab() {
               <Label htmlFor="tts-enabled" className="font-normal">
                 Enable TTS
               </Label>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Read responses aloud</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Read responses aloud
+              </p>
             </div>
             <Switch id="tts-enabled" disabled />
           </div>
@@ -52,7 +55,9 @@ export function AudioTab() {
                 <SelectValue placeholder="Select engine" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="browser">Browser (Web Speech API)</SelectItem>
+                <SelectItem value="browser">
+                  Browser (Web Speech API)
+                </SelectItem>
                 <SelectItem value="openai">OpenAI TTS</SelectItem>
                 <SelectItem value="elevenlabs">ElevenLabs</SelectItem>
               </SelectContent>
@@ -84,7 +89,6 @@ export function AudioTab() {
           </div>
         </div>
       </div>
-
     </div>
   );
 }

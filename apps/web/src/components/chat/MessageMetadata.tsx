@@ -1,10 +1,6 @@
-/**
- * MessageMetadata Component
- * Displays token usage and other metadata for AI responses
- */
-
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Clock01Icon, HashtagIcon } from "@hugeicons/core-free-icons";
 import { memo } from 'react';
-import { Clock, Hash } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Tooltip,
@@ -59,7 +55,7 @@ export const MessageMetadata = memo(function MessageMetadata({
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="flex items-center gap-1 cursor-help">
-              <Hash className="h-3 w-3" />
+              <HugeiconsIcon icon={HashtagIcon} className="h-3 w-3" />
               <span>{formatTokenCount(totalTokens)} tokens</span>
             </div>
           </TooltipTrigger>
@@ -85,7 +81,7 @@ export const MessageMetadata = memo(function MessageMetadata({
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="flex items-center gap-1 cursor-help">
-              <Clock className="h-3 w-3" />
+              <HugeiconsIcon icon={Clock01Icon} className="h-3 w-3" />
               <span>{formatLatency(latencyMs)}</span>
             </div>
           </TooltipTrigger>

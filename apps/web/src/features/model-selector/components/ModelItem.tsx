@@ -1,6 +1,7 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { PinIcon, PinOffIcon, Tick01Icon } from "@hugeicons/core-free-icons";
 import { memo, type MouseEvent, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { Check, Pin, PinOff } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -92,9 +93,9 @@ export const ModelItem = memo(function ModelItem({
               )}
             >
               {isPinned ? (
-                <PinOff className="h-3.5 w-3.5" />
+                <HugeiconsIcon icon={PinOffIcon} className="h-3.5 w-3.5" />
               ) : (
-                <Pin className="h-3.5 w-3.5" />
+                <HugeiconsIcon icon={PinIcon} className="h-3.5 w-3.5" />
               )}
             </button>
           </TooltipTrigger>
@@ -106,7 +107,7 @@ export const ModelItem = memo(function ModelItem({
         {/* Selected checkmark - Apple style: simple, clean */}
         <div className="w-6 flex items-center justify-center">
           {isSelected && (
-            <Check className="h-4 w-4 text-primary" strokeWidth={2.5} />
+            <HugeiconsIcon icon={Tick01Icon} className="h-4 w-4 text-primary" strokeWidth={2.5} />
           )}
         </div>
       </div>

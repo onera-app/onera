@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Alert01Icon, ArrowRight01Icon, LockIcon, Menu01Icon } from "@hugeicons/core-free-icons";
 import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -14,8 +16,6 @@ import { MessageInput } from "@/components/chat/MessageInput";
 import { ModelSelector } from "@/components/chat/ModelSelector";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
-import { Lock, AlertTriangle, ArrowRight, Menu } from "lucide-react";
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -144,7 +144,7 @@ export function HomePage() {
             onClick={toggleSidebar}
             className="h-9 w-9 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-850 rounded-xl transition-colors flex-shrink-0 md:hidden"
           >
-            <Menu className="h-[18px] w-[18px]" />
+            <HugeiconsIcon icon={Menu01Icon} className="h-[18px] w-[18px]" />
           </Button>
         )}
 
@@ -170,7 +170,7 @@ export function HomePage() {
           {/* No connections warning */}
           {!canChat && !isLoading && isUnlocked && (
             <Alert className="mb-6 sm:mb-8 border-gray-100 dark:border-gray-850 rounded-2xl bg-gray-50 dark:bg-gray-850">
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
+              <HugeiconsIcon icon={Alert01Icon} className="h-4 w-4 text-amber-500" />
               <AlertTitle className="text-gray-900 dark:text-gray-100 text-sm sm:text-base">
                 No Models Available
               </AlertTitle>
@@ -181,7 +181,7 @@ export function HomePage() {
                   className="p-0 h-auto flex items-center gap-1 text-gray-900 dark:text-gray-200 hover:text-gray-700 dark:hover:text-white self-start sm:self-auto transition-colors"
                   onClick={() => openSettingsModal("connections")}
                 >
-                  Add API Key <ArrowRight className="h-3.5 w-3.5" />
+                  Add API Key <HugeiconsIcon icon={ArrowRight01Icon} className="h-3.5 w-3.5" />
                 </Button>
               </AlertDescription>
             </Alert>
@@ -211,7 +211,7 @@ export function HomePage() {
       {/* Footer */}
       <footer className="px-4 py-4 sm:py-5 text-center w-full">
         <p className="text-xs text-gray-500 text-center line-clamp-1 flex items-center justify-center gap-1.5">
-          <Lock className="h-3 w-3" />
+          <HugeiconsIcon icon={LockIcon} className="h-3 w-3" />
           End-to-end encrypted
         </p>
       </footer>

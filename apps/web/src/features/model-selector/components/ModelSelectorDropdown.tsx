@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Alert01Icon, ArrowDown01Icon, Loading02Icon, LockIcon, PinIcon, Search01Icon } from "@hugeicons/core-free-icons";
 import {
   useState,
   useEffect,
@@ -21,14 +23,6 @@ import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
-import {
-  AlertTriangle,
-  ChevronDown,
-  Lock,
-  Search,
-  Loader2,
-  Pin,
-} from "lucide-react";
 import { useModelSelection } from "../hooks/useModelSelection";
 import { ModelItem } from "./ModelItem";
 
@@ -249,7 +243,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
         onClick={() => openSettingsModal("connections")}
         className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm text-amber-500 hover:text-amber-600 hover:bg-gray-900/[0.06] dark:hover:bg-gray-100/[0.06] transition-colors duration-150"
       >
-        <AlertTriangle className="h-3.5 w-3.5" />
+        <HugeiconsIcon icon={Alert01Icon} className="h-3.5 w-3.5" />
         <span>Add Connection</span>
       </button>
     );
@@ -259,7 +253,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
   if (!isUnlocked) {
     return (
       <div className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm text-gray-500 dark:text-gray-400">
-        <Lock className="h-3 w-3" />
+        <HugeiconsIcon icon={LockIcon} className="h-3 w-3" />
         <span>Unlock to select</span>
       </div>
     );
@@ -288,7 +282,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
         >
           {isLoading ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin text-gray-500 dark:text-gray-400" />
+              <HugeiconsIcon icon={Loading02Icon} className="h-4 w-4 animate-spin text-gray-500 dark:text-gray-400" />
               <span className="text-[15px] text-gray-500 dark:text-gray-400">Loading...</span>
             </>
           ) : models.length === 0 ? (
@@ -298,12 +292,10 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
               <span className="truncate text-[15px] text-gray-900 dark:text-gray-100 max-w-[164px] sm:max-w-[214px]">
                 {selectedModel?.name || "Select model"}
               </span>
-              <ChevronDown
-                className={cn(
-                  "h-3.5 w-3.5 text-gray-500 dark:text-gray-400 transition-transform duration-150",
-                  isOpen && "rotate-180",
-                )}
-              />
+              <HugeiconsIcon icon={ArrowDown01Icon} className={cn(
+                                                    "h-3.5 w-3.5 text-gray-500 dark:text-gray-400 transition-transform duration-150",
+                                                    isOpen && "rotate-180",
+                                                  )} />
             </>
           )}
         </button>
@@ -314,7 +306,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
             {/* Search input - cleaner, more subtle */}
             <div className="p-2 pb-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -340,7 +332,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
                     {pinnedModels.length > 0 && (
                       <>
                         <div className="px-3 pt-1 pb-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-                          <Pin className="h-2.5 w-2.5" />
+                          <HugeiconsIcon icon={PinIcon} className="h-2.5 w-2.5" />
                           Pinned
                         </div>
                         {pinnedModels.map((model) => {

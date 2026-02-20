@@ -1,8 +1,9 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Copy01Icon, Tick01Icon } from "@hugeicons/core-free-icons";
 import { useState, useCallback, useEffect, useRef } from 'react';
 import hljs from 'highlight.js';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Copy, Check } from 'lucide-react';
 
 interface CodeBlockProps {
   code: string;
@@ -75,12 +76,12 @@ export function CodeBlock({
         >
           {copied ? (
             <>
-              <Check className="h-3.5 w-3.5 mr-1.5" />
+              <HugeiconsIcon icon={Tick01Icon} className="h-3.5 w-3.5 mr-1.5" />
               Copied
             </>
           ) : (
             <>
-              <Copy className="h-3.5 w-3.5 mr-1.5" />
+              <HugeiconsIcon icon={Copy01Icon} className="h-3.5 w-3.5 mr-1.5" />
               Copy
             </>
           )}

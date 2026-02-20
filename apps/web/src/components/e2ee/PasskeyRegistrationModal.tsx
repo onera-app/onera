@@ -1,10 +1,12 @@
-/**
- * Passkey Registration Modal
- *
- * Wizard-style modal for registering a new passkey with PRF extension.
- * Explains the difference between single-device and cross-device passkeys.
- */
-
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  Alert01Icon,
+  CheckmarkCircle02Icon,
+  CloudIcon,
+  FingerPrintIcon,
+  Loading02Icon,
+  SmartPhone01Icon,
+} from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -18,14 +20,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Loader2,
-  Fingerprint,
-  Smartphone,
-  Cloud,
-  CheckCircle2,
-  AlertTriangle,
-} from "lucide-react";
 import { usePasskeyRegistration } from "@/hooks/useWebAuthn";
 import { usePasskeySupport } from "@/hooks/useWebAuthnSupport";
 import { getDecryptedMasterKey } from "@onera/crypto";
@@ -78,7 +72,7 @@ export function PasskeyRegistrationModal({
 
       if (!masterKey) {
         throw new Error(
-          "Encryption must be unlocked before registering a passkey"
+          "Encryption must be unlocked before registering a passkey",
         );
       }
 
@@ -89,7 +83,8 @@ export function PasskeyRegistrationModal({
       onSuccess?.();
     } catch (err) {
       console.error("Passkey registration failed:", err);
-      const error = err instanceof Error ? err : new Error("Registration failed");
+      const error =
+        err instanceof Error ? err : new Error("Registration failed");
 
       // Check for user cancellation
       if (
@@ -113,7 +108,10 @@ export function PasskeyRegistrationModal({
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+              <HugeiconsIcon
+                icon={Alert01Icon}
+                className="h-5 w-5 text-yellow-500"
+              />
               Passkey Not Supported
             </DialogTitle>
             <DialogDescription>
@@ -127,7 +125,9 @@ export function PasskeyRegistrationModal({
           </div>
 
           <DialogFooter>
-            <Button onClick={handleClose} className="w-full sm:w-auto">Close</Button>
+            <Button onClick={handleClose} className="w-full sm:w-auto">
+              Close
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -142,7 +142,10 @@ export function PasskeyRegistrationModal({
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Fingerprint className="h-5 w-5 text-primary" />
+                <HugeiconsIcon
+                  icon={FingerPrintIcon}
+                  className="h-5 w-5 text-primary"
+                />
                 Add a Passkey
               </DialogTitle>
               <DialogDescription>
@@ -153,7 +156,10 @@ export function PasskeyRegistrationModal({
 
             <div className="space-y-4 py-4">
               <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-850">
-                <Smartphone className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
+                <HugeiconsIcon
+                  icon={SmartPhone01Icon}
+                  className="h-5 w-5 mt-0.5 text-primary flex-shrink-0"
+                />
                 <div>
                   <p className="text-sm font-medium">Device Passkey</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -163,7 +169,10 @@ export function PasskeyRegistrationModal({
               </div>
 
               <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-850">
-                <Cloud className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
+                <HugeiconsIcon
+                  icon={CloudIcon}
+                  className="h-5 w-5 mt-0.5 text-primary flex-shrink-0"
+                />
                 <div>
                   <p className="text-sm font-medium">Synced Passkey</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -178,10 +187,19 @@ export function PasskeyRegistrationModal({
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={handleClose} className="w-full sm:w-auto">
+              <Button
+                variant="outline"
+                onClick={handleClose}
+                className="w-full sm:w-auto"
+              >
                 Cancel
               </Button>
-              <Button onClick={() => setStep("naming")} className="w-full sm:w-auto">Continue</Button>
+              <Button
+                onClick={() => setStep("naming")}
+                className="w-full sm:w-auto"
+              >
+                Continue
+              </Button>
             </DialogFooter>
           </>
         )}
@@ -213,11 +231,21 @@ export function PasskeyRegistrationModal({
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setStep("intro")} className="w-full sm:w-auto">
+              <Button
+                variant="outline"
+                onClick={() => setStep("intro")}
+                className="w-full sm:w-auto"
+              >
                 Back
               </Button>
-              <Button onClick={handleStartRegistration} className="w-full sm:w-auto">
-                <Fingerprint className="h-4 w-4 mr-2" />
+              <Button
+                onClick={handleStartRegistration}
+                className="w-full sm:w-auto"
+              >
+                <HugeiconsIcon
+                  icon={FingerPrintIcon}
+                  className="h-4 w-4 mr-2"
+                />
                 Create Passkey
               </Button>
             </DialogFooter>
@@ -235,7 +263,10 @@ export function PasskeyRegistrationModal({
             </DialogHeader>
 
             <div className="flex flex-col items-center justify-center py-8">
-              <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+              <HugeiconsIcon
+                icon={Loading02Icon}
+                className="h-10 w-10 animate-spin text-primary mb-4"
+              />
               <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
                 Use Face ID, Touch ID, or your device PIN when prompted...
               </p>
@@ -248,7 +279,11 @@ export function PasskeyRegistrationModal({
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                <HugeiconsIcon
+                  icon={CheckmarkCircle02Icon}
+                  size={20}
+                  className="text-green-500"
+                />
                 Passkey Created
               </DialogTitle>
               <DialogDescription>
@@ -265,7 +300,9 @@ export function PasskeyRegistrationModal({
             </div>
 
             <DialogFooter>
-              <Button onClick={handleClose} className="w-full sm:w-auto">Done</Button>
+              <Button onClick={handleClose} className="w-full sm:w-auto">
+                Done
+              </Button>
             </DialogFooter>
           </>
         )}
@@ -275,7 +312,10 @@ export function PasskeyRegistrationModal({
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
+                <HugeiconsIcon
+                  icon={Alert01Icon}
+                  className="h-5 w-5 text-destructive"
+                />
                 Registration Failed
               </DialogTitle>
               <DialogDescription>
@@ -290,10 +330,19 @@ export function PasskeyRegistrationModal({
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={handleClose} className="w-full sm:w-auto">
+              <Button
+                variant="outline"
+                onClick={handleClose}
+                className="w-full sm:w-auto"
+              >
                 Cancel
               </Button>
-              <Button onClick={() => setStep("naming")} className="w-full sm:w-auto">Try Again</Button>
+              <Button
+                onClick={() => setStep("naming")}
+                className="w-full sm:w-auto"
+              >
+                Try Again
+              </Button>
             </DialogFooter>
           </>
         )}

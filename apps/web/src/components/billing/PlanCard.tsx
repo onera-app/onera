@@ -1,5 +1,6 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Tick01Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface PlanCardProps {
@@ -100,23 +101,23 @@ export function PlanCard({
 
       <ul className="mb-8 flex-1 space-y-3">
         <li className="flex items-center gap-2 text-sm">
-          <Check className="h-4 w-4 text-primary flex-shrink-0" />
+          <HugeiconsIcon icon={Tick01Icon} className="h-4 w-4 text-primary flex-shrink-0" />
           {formatLimit(limits.inferenceRequests, "private requests/mo", "Unlimited private requests")}
         </li>
         {limits.byokInferenceRequests != null && (
           <li className="flex items-center gap-2 text-sm">
-            <Check className="h-4 w-4 text-primary flex-shrink-0" />
+            <HugeiconsIcon icon={Tick01Icon} className="h-4 w-4 text-primary flex-shrink-0" />
             {formatLimit(limits.byokInferenceRequests, "BYOK requests/mo", "Unlimited BYOK requests")}
           </li>
         )}
         <li className="flex items-center gap-2 text-sm">
-          <Check className="h-4 w-4 text-primary flex-shrink-0" />
+          <HugeiconsIcon icon={Tick01Icon} className="h-4 w-4 text-primary flex-shrink-0" />
           {formatStorage(limits.storageMb)}
         </li>
         {Object.entries(features).map(([key, enabled]) =>
           enabled && !universalFeatures.has(key) && !removedFeatureKeys.has(key) ? (
             <li key={key} className="flex items-center gap-2 text-sm">
-              <Check className="h-4 w-4 text-primary flex-shrink-0" />
+              <HugeiconsIcon icon={Tick01Icon} className="h-4 w-4 text-primary flex-shrink-0" />
               {featureLabels[key] || key}
             </li>
           ) : null

@@ -1,19 +1,16 @@
-/**
- * Tools Tab - Configure search providers and tool integrations
- */
-
-import { useState, useCallback } from "react";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  Globe,
-  Key,
-  ExternalLink,
-  Check,
-  Trash2,
-  Eye,
-  EyeOff,
-  Lock,
-  Wand2,
-} from "lucide-react";
+  Delete02Icon,
+  GlobeIcon,
+  Key01Icon,
+  LinkSquare01Icon,
+  LockIcon,
+  MagicWand01Icon,
+  Tick01Icon,
+  ViewIcon,
+  ViewOffIcon,
+} from "@hugeicons/core-free-icons";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -94,9 +91,14 @@ export function ToolsTab() {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
         <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-gray-850 flex items-center justify-center mb-4">
-          <Lock className="w-8 h-8 text-gray-500 dark:text-gray-400" />
+          <HugeiconsIcon
+            icon={LockIcon}
+            className="w-8 h-8 text-gray-500 dark:text-gray-400"
+          />
         </div>
-        <p className="text-gray-500 dark:text-gray-400 font-medium">Encryption locked</p>
+        <p className="text-gray-500 dark:text-gray-400 font-medium">
+          Encryption locked
+        </p>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
           Unlock E2EE to configure tool integrations
         </p>
@@ -118,7 +120,10 @@ export function ToolsTab() {
       {/* Web Search Settings */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <Globe className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+          <HugeiconsIcon
+            icon={GlobeIcon}
+            className="h-4 w-4 text-gray-500 dark:text-gray-400"
+          />
           <h4 className="text-sm font-medium">Web Search</h4>
         </div>
 
@@ -175,7 +180,11 @@ export function ToolsTab() {
       {/* Native AI Search */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <Wand2 className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+          <HugeiconsIcon
+            icon={MagicWand01Icon}
+            size={16}
+            className="text-gray-500 dark:text-gray-400"
+          />
           <h4 className="text-sm font-medium">Native AI Search</h4>
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400 -mt-2">
@@ -339,7 +348,7 @@ function ProviderCard({
               <span className="font-medium text-sm">{provider.name}</span>
               {isConfigured && (
                 <Badge variant="success" className="text-micro px-1.5 py-0">
-                  <Check className="h-3 w-3 mr-0.5" />
+                  <HugeiconsIcon icon={Tick01Icon} className="h-3 w-3 mr-0.5" />
                   Connected
                 </Badge>
               )}
@@ -354,7 +363,7 @@ function ProviderCard({
               className="inline-flex items-center gap-1 text-micro text-primary hover:underline mt-1.5"
             >
               Get API key
-              <ExternalLink className="h-2.5 w-2.5" />
+              <HugeiconsIcon icon={LinkSquare01Icon} className="h-2.5 w-2.5" />
             </a>
           </div>
 
@@ -367,7 +376,7 @@ function ProviderCard({
                     size="icon-sm"
                     className="text-gray-500 dark:text-gray-400 hover:text-destructive"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <HugeiconsIcon icon={Delete02Icon} className="h-4 w-4" />
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -398,7 +407,10 @@ function ProviderCard({
                 size="sm"
                 onClick={() => setIsEditing(true)}
               >
-                <Key className="h-3.5 w-3.5 mr-1.5" />
+                <HugeiconsIcon
+                  icon={Key01Icon}
+                  className="h-3.5 w-3.5 mr-1.5"
+                />
                 {isConfigured ? "Update" : "Add"}
               </Button>
             )}
@@ -428,9 +440,9 @@ function ProviderCard({
                 onClick={() => setShowKey(!showKey)}
               >
                 {showKey ? (
-                  <EyeOff className="h-4 w-4" />
+                  <HugeiconsIcon icon={ViewOffIcon} className="h-4 w-4" />
                 ) : (
-                  <Eye className="h-4 w-4" />
+                  <HugeiconsIcon icon={ViewIcon} className="h-4 w-4" />
                 )}
               </Button>
             </div>

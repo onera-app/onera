@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowDown01Icon, RotateLeft01Icon } from "@hugeicons/core-free-icons";
 import { useState, useMemo } from 'react';
 import {
   useModelParamsStore,
@@ -23,7 +25,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { ChevronDown, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Providers that have configurable settings
@@ -102,12 +103,10 @@ export function GeneralTab() {
           <CollapsibleTrigger asChild>
             <Button variant="ghost" className="w-full justify-between px-0">
               <span className="font-medium">Provider Settings</span>
-              <ChevronDown
-                className={cn(
-                  'h-4 w-4 transition-transform',
-                  providerOpen && 'rotate-180'
-                )}
-              />
+              <HugeiconsIcon icon={ArrowDown01Icon} className={cn(
+                                            'h-4 w-4 transition-transform',
+                                            providerOpen && 'rotate-180'
+                                          )} />
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-6 pt-4">
@@ -196,12 +195,10 @@ export function GeneralTab() {
         <CollapsibleTrigger asChild>
           <Button variant="ghost" className="w-full justify-between px-0">
             <span className="font-medium">Advanced Parameters</span>
-            <ChevronDown
-              className={cn(
-                'h-4 w-4 transition-transform',
-                advancedOpen && 'rotate-180'
-              )}
-            />
+            <HugeiconsIcon icon={ArrowDown01Icon} className={cn(
+                                      'h-4 w-4 transition-transform',
+                                      advancedOpen && 'rotate-180'
+                                    )} />
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-6 pt-4">
@@ -348,7 +345,7 @@ export function GeneralTab() {
             onClick={resetGlobalParams}
             className="w-full"
           >
-            <RotateCcw className="h-4 w-4 mr-2" />
+            <HugeiconsIcon icon={RotateLeft01Icon} className="h-4 w-4 mr-2" />
             Reset to Defaults
           </Button>
         </CollapsibleContent>

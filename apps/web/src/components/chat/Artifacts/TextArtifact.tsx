@@ -1,10 +1,6 @@
-/**
- * TextArtifact Component
- * Renders text content with markdown preview and editing capabilities
- */
-
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowLeft01Icon, ArrowRight01Icon, Copy01Icon, Download01Icon, Edit02Icon, Tick01Icon, ViewIcon } from "@hugeicons/core-free-icons";
 import { memo, useState, useCallback } from 'react';
-import { Copy, Check, Download, ChevronLeft, ChevronRight, Edit2, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { Streamdown } from 'streamdown';
 import { cn } from '@/lib/utils';
@@ -99,7 +95,7 @@ export const TextArtifact = memo(function TextArtifact({
                 onClick={handlePrevVersion}
                 disabled={currentVersionIndex === 0}
               >
-                <ChevronLeft className="h-4 w-4" />
+                <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4" />
               </Button>
               <span className="text-xs text-gray-500 dark:text-gray-400">
                 {currentVersionIndex + 1} / {versions.length}
@@ -110,7 +106,7 @@ export const TextArtifact = memo(function TextArtifact({
                 onClick={handleNextVersion}
                 disabled={currentVersionIndex === versions.length - 1}
               >
-                <ChevronRight className="h-4 w-4" />
+                <HugeiconsIcon icon={ArrowRight01Icon} className="h-4 w-4" />
               </Button>
             </div>
           )}
@@ -123,7 +119,7 @@ export const TextArtifact = memo(function TextArtifact({
               onClick={() => setShowPreview(!showPreview)}
               title={showPreview ? 'Edit' : 'Preview'}
             >
-              {showPreview ? <Edit2 className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showPreview ? <HugeiconsIcon icon={Edit02Icon} className="h-4 w-4" /> : <HugeiconsIcon icon={ViewIcon} className="h-4 w-4" />}
             </Button>
           )}
 
@@ -153,15 +149,15 @@ export const TextArtifact = memo(function TextArtifact({
           {/* Copy button */}
           <Button variant="ghost" size="icon-sm" onClick={handleCopy}>
             {copied ? (
-              <Check className="h-4 w-4 text-status-success-text" />
+              <HugeiconsIcon icon={Tick01Icon} className="h-4 w-4 text-status-success-text" />
             ) : (
-              <Copy className="h-4 w-4" />
+              <HugeiconsIcon icon={Copy01Icon} className="h-4 w-4" />
             )}
           </Button>
 
           {/* Download button */}
           <Button variant="ghost" size="icon-sm" onClick={handleDownload}>
-            <Download className="h-4 w-4" />
+            <HugeiconsIcon icon={Download01Icon} className="h-4 w-4" />
           </Button>
         </div>
       </div>

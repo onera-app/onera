@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { useRef, useEffect, memo, useCallback, useState } from "react";
 import { type ChatMessage, type ChatHistory } from "@onera/types";
 import {
@@ -13,7 +15,6 @@ import { getBranchInfo, getSiblings, getDeepestChild } from "@/lib/messageTree";
 import type { Source } from "./Sources";
 
 import { FollowUps } from "./FollowUps";
-import { ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -478,7 +479,7 @@ export const Messages = memo(function Messages({
             className="h-9 w-9 rounded-full shadow-lg bg-white dark:bg-gray-850 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 hover:shadow-xl transition-all duration-200 hover:scale-105"
             onClick={() => scrollToBottom("smooth")}
           >
-            <ArrowDown className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+            <HugeiconsIcon icon={ArrowDown01Icon} className="h-4 w-4 text-gray-500 dark:text-gray-400" />
             <span className="sr-only">Scroll to bottom</span>
           </Button>
         </div>

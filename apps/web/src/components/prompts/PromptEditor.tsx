@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { FloppyDiskIcon, Message01Icon } from "@hugeicons/core-free-icons";
 import { useState, useEffect, useCallback } from 'react';
 import { usePrompt, useUpdatePrompt, useCreatePrompt } from '@/hooks/queries/usePrompts';
 import { Button } from '@/components/ui/button';
@@ -7,7 +9,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import dayjs from 'dayjs';
-import { MessageSquareText, Save } from 'lucide-react';
 
 interface PromptEditorProps {
   promptId?: string;
@@ -112,7 +113,7 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center text-gray-500 dark:text-gray-400">
-          <MessageSquareText className="w-16 h-16 mx-auto mb-4 opacity-50" />
+          <HugeiconsIcon icon={Message01Icon} className="w-16 h-16 mx-auto mb-4 opacity-50" />
           <p>Select a prompt to edit</p>
         </div>
       </div>
@@ -153,7 +154,7 @@ export function PromptEditor({ promptId, isNew, onSaved, onCancel }: PromptEdito
             onClick={handleSave}
             disabled={(!hasChanges && !isNew) || isSaving || !name.trim() || !content.trim()}
           >
-            <Save className="h-4 w-4 mr-1" />
+            <HugeiconsIcon icon={FloppyDiskIcon} className="h-4 w-4 mr-1" />
             {isSaving ? 'Saving...' : isNew ? 'Create' : 'Save'}
           </Button>
         </div>

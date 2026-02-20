@@ -61,3 +61,6 @@ docs/whitepapers
 .env.staging.local
 .env.staging.*.local
 .env.production
+
+# Migration backups
+hugeicons-migrate-backup-*/

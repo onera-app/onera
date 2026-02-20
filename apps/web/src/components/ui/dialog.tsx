@@ -1,6 +1,7 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const Dialog = DialogPrimitive.Root
@@ -47,7 +48,7 @@ const DialogContent = React.forwardRef<
       {children}
       {!hideCloseButton && (
         <DialogPrimitive.Close className="absolute right-4 top-4 p-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors focus:outline-none disabled:pointer-events-none">
-          <X className="h-4 w-4" />
+          <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
       )}

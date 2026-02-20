@@ -1,35 +1,52 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  Alert01Icon,
+  FingerPrintIcon,
+  Key02Icon,
+  Loading02Icon,
+  LockIcon,
+  SecurityCheckIcon,
+  ViewIcon,
+  ViewOffIcon,
+} from "@hugeicons/core-free-icons";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useSSOCallback } from "@/providers/SupabaseAuthProvider";
 import { toast } from "sonner";
-import {
-  getDecryptedMasterKey,
-  type RecoveryKeyInfo,
-} from "@onera/crypto";
+import { getDecryptedMasterKey, type RecoveryKeyInfo } from "@onera/crypto";
 import { trpc } from "@/lib/trpc";
 import { usePasskeySupport } from "@/hooks/useWebAuthnSupport";
 import { usePasskeyRegistration } from "@/hooks/useWebAuthn";
 import { usePasswordSetup } from "@/hooks/usePasswordUnlock";
 import { OnboardingFlow } from "@/components/onboarding";
 import { RecoveryPhraseDisplay } from "@/components/e2ee/RecoveryPhraseDisplay";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  AlertTriangle,
-  Eye,
-  EyeOff,
-  Fingerprint,
-  KeyRound,
-  Loader2,
-  Lock,
-  ShieldCheck,
-} from "lucide-react";
 import { normalizeAppError } from "@/lib/errors/app-error";
 
-type CallbackView = "processing" | "onboarding" | "passkey" | "password" | "recovery" | "error";
+type CallbackView =
+  | "processing"
+  | "onboarding"
+  | "passkey"
+  | "password"
+  | "recovery"
+  | "error";
 
 type CallbackStage =
   | "oauth_complete"
@@ -63,14 +80,13 @@ function getDeviceName(): string {
 
 export function SSOCallbackPage() {
   const navigate = useNavigate();
-  const {
-    isReady,
-    processCallback,
-  } = useSSOCallback();
+  const { isReady, processCallback } = useSSOCallback();
   const [view, setView] = useState<CallbackView>("processing");
   const [stage, setStage] = useState<CallbackStage>("oauth_complete");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [recoveryInfo, setRecoveryInfo] = useState<RecoveryKeyInfo | null>(null);
+  const [recoveryInfo, setRecoveryInfo] = useState<RecoveryKeyInfo | null>(
+    null,
+  );
   const [passkeyError, setPasskeyError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [password, setPassword] = useState("");
@@ -78,9 +94,12 @@ export function SSOCallbackPage() {
   const [showPassword, setShowPassword] = useState(false);
   const processingRef = useRef(false);
 
-  const { isSupported: passkeySupported, isLoading: isCheckingPasskeySupport } = usePasskeySupport();
-  const { registerPasskey, isRegistering: isRegisteringPasskey } = usePasskeyRegistration();
-  const { setupPasswordEncryption, isSettingUp: isSettingUpPassword } = usePasswordSetup();
+  const { isSupported: passkeySupported, isLoading: isCheckingPasskeySupport } =
+    usePasskeySupport();
+  const { registerPasskey, isRegistering: isRegisteringPasskey } =
+    usePasskeyRegistration();
+  const { setupPasswordEncryption, isSettingUp: isSettingUpPassword } =
+    usePasswordSetup();
 
   const trpcUtils = trpc.useUtils();
 
@@ -98,12 +117,15 @@ export function SSOCallbackPage() {
     return map[stage];
   }, [stage]);
 
-  const failWith = useCallback((error: unknown, defaultMessage: string): void => {
-    const normalized = normalizeAppError(error, defaultMessage, { stage });
-    setErrorMessage(normalized.userMessage);
-    setStage("error");
-    setView("error");
-  }, [stage]);
+  const failWith = useCallback(
+    (error: unknown, defaultMessage: string): void => {
+      const normalized = normalizeAppError(error, defaultMessage, { stage });
+      setErrorMessage(normalized.userMessage);
+      setStage("error");
+      setView("error");
+    },
+    [stage],
+  );
 
   // This initialization must run once per callback entry.
   // Supabase handles OAuth session resolution automatically via onAuthStateChange.
@@ -171,7 +193,9 @@ export function SSOCallbackPage() {
       setStage("recovery_ack");
       setView("recovery");
     } catch (error) {
-      setPasswordError(normalizeAppError(error, "Failed to set password").userMessage);
+      setPasswordError(
+        normalizeAppError(error, "Failed to set password").userMessage,
+      );
     }
   };
 
@@ -187,9 +211,13 @@ export function SSOCallbackPage() {
       setStage("recovery_ack");
       setView("recovery");
     } catch (error) {
-      const normalized = normalizeAppError(error, "Passkey registration failed");
+      const normalized = normalizeAppError(
+        error,
+        "Passkey registration failed",
+      );
       const isCancellation =
-        normalized.message.includes("cancel") || normalized.message.includes("NotAllowedError");
+        normalized.message.includes("cancel") ||
+        normalized.message.includes("NotAllowedError");
       if (!isCancellation) {
         setPasskeyError(normalized.userMessage);
       }
@@ -201,9 +229,17 @@ export function SSOCallbackPage() {
       <div className="min-h-screen flex items-center justify-center p-4 bg-white dark:bg-gray-900">
         <Card className="w-full max-w-md bg-white dark:bg-gray-850 border-gray-100 dark:border-gray-850">
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
-            <p className="text-gray-500 dark:text-gray-400">Completing sign in...</p>
-            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400" aria-live="polite">
+            <HugeiconsIcon
+              icon={Loading02Icon}
+              className="w-8 h-8 animate-spin text-primary mb-4"
+            />
+            <p className="text-gray-500 dark:text-gray-400">
+              Completing sign in...
+            </p>
+            <p
+              className="mt-2 text-xs text-gray-500 dark:text-gray-400"
+              aria-live="polite"
+            >
               {stageLabel}
             </p>
           </CardContent>
@@ -218,14 +254,21 @@ export function SSOCallbackPage() {
         <Card className="w-full max-w-md bg-white dark:bg-gray-850 border-gray-100 dark:border-gray-850">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Sign In Failed</CardTitle>
-            <CardDescription aria-live="assertive">{stageLabel}</CardDescription>
+            <CardDescription aria-live="assertive">
+              {stageLabel}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>{errorMessage || "An error occurred during sign in"}</AlertDescription>
+              <HugeiconsIcon icon={Alert01Icon} className="h-4 w-4" />
+              <AlertDescription>
+                {errorMessage || "An error occurred during sign in"}
+              </AlertDescription>
             </Alert>
-            <Button onClick={() => navigate({ to: "/auth" })} className="w-full">
+            <Button
+              onClick={() => navigate({ to: "/auth" })}
+              className="w-full"
+            >
               Back to Sign In
             </Button>
           </CardContent>
@@ -254,11 +297,17 @@ export function SSOCallbackPage() {
         <div className="relative w-full max-w-lg rounded-3xl bg-white dark:bg-gray-850 p-6 sm:p-8 border border-gray-100 dark:border-gray-850">
           <div className="mb-6 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/20 via-orange-500/20 to-red-500/10 ring-1 ring-amber-500/20">
-              <Lock className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+              <HugeiconsIcon
+                icon={LockIcon}
+                className="h-8 w-8 text-amber-600 dark:text-amber-400"
+              />
             </div>
-            <h1 className="text-2xl font-semibold tracking-tight">Backup Recovery Phrase</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Backup Recovery Phrase
+            </h1>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Save this phrase securely in case you lose your passkey or password.
+              Save this phrase securely in case you lose your passkey or
+              password.
             </p>
           </div>
 
@@ -287,11 +336,18 @@ export function SSOCallbackPage() {
           <Card className="bg-white dark:bg-gray-850 border-gray-100 dark:border-gray-850">
             <CardHeader className="text-center space-y-4">
               <div className="mx-auto w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <KeyRound className="w-6 h-6 text-primary" />
+                <HugeiconsIcon
+                  icon={Key02Icon}
+                  className="w-6 h-6 text-primary"
+                />
               </div>
               <div>
-                <CardTitle className="text-2xl">Set Encryption Password</CardTitle>
-                <CardDescription>This password unlocks your encrypted data.</CardDescription>
+                <CardTitle className="text-2xl">
+                  Set Encryption Password
+                </CardTitle>
+                <CardDescription>
+                  This password unlocks your encrypted data.
+                </CardDescription>
               </div>
             </CardHeader>
 
@@ -314,9 +370,15 @@ export function SSOCallbackPage() {
                       type="button"
                       onClick={() => setShowPassword((prev) => !prev)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                     >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showPassword ? (
+                        <HugeiconsIcon icon={ViewOffIcon} className="w-4 h-4" />
+                      ) : (
+                        <HugeiconsIcon icon={ViewIcon} className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -335,20 +397,28 @@ export function SSOCallbackPage() {
                 </div>
 
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Use at least 8 characters. This is separate from your account password.
+                  Use at least 8 characters. This is separate from your account
+                  password.
                 </p>
 
                 {passwordError && (
                   <Alert variant="destructive" aria-live="assertive">
-                    <AlertTriangle className="h-4 w-4" />
+                    <HugeiconsIcon icon={Alert01Icon} className="h-4 w-4" />
                     <AlertDescription>{passwordError}</AlertDescription>
                   </Alert>
                 )}
 
-                <Button type="submit" className="w-full" disabled={isSettingUpPassword}>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isSettingUpPassword}
+                >
                   {isSettingUpPassword ? (
                     <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <HugeiconsIcon
+                        icon={Loading02Icon}
+                        className="w-4 h-4 mr-2 animate-spin"
+                      />
                       Setting up...
                     </>
                   ) : (
@@ -369,8 +439,13 @@ export function SSOCallbackPage() {
         <div className="min-h-screen flex items-center justify-center p-4 bg-white dark:bg-gray-900">
           <Card className="w-full max-w-md bg-white dark:bg-gray-850 border-gray-100 dark:border-gray-850">
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
-              <p className="text-gray-500 dark:text-gray-400">Checking device capabilities...</p>
+              <HugeiconsIcon
+                icon={Loading02Icon}
+                className="w-8 h-8 animate-spin text-primary mb-4"
+              />
+              <p className="text-gray-500 dark:text-gray-400">
+                Checking device capabilities...
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -387,18 +462,26 @@ export function SSOCallbackPage() {
           <Card className="bg-white dark:bg-gray-850 border-gray-100 dark:border-gray-850">
             <CardHeader className="text-center space-y-4">
               <div className="mx-auto w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Fingerprint className="w-6 h-6 text-primary" />
+                <HugeiconsIcon
+                  icon={FingerPrintIcon}
+                  className="w-6 h-6 text-primary"
+                />
               </div>
               <div>
                 <CardTitle className="text-2xl">Add a Passkey</CardTitle>
-                <CardDescription>Unlock using Face ID, Touch ID, or Windows Hello.</CardDescription>
+                <CardDescription>
+                  Unlock using Face ID, Touch ID, or Windows Hello.
+                </CardDescription>
               </div>
             </CardHeader>
 
             <CardContent className="space-y-4">
               <div className="space-y-3">
                 <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850">
-                  <Fingerprint className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                  <HugeiconsIcon
+                    icon={FingerPrintIcon}
+                    className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                  />
                   <div>
                     <p className="text-sm font-medium">Instant unlock</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -408,7 +491,11 @@ export function SSOCallbackPage() {
                 </div>
 
                 <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850">
-                  <ShieldCheck className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                  <HugeiconsIcon
+                    icon={SecurityCheckIcon}
+                    size={20}
+                    className="text-primary mt-0.5 flex-shrink-0"
+                  />
                   <div>
                     <p className="text-sm font-medium">Phishing resistant</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -420,20 +507,30 @@ export function SSOCallbackPage() {
 
               {passkeyError && (
                 <Alert variant="destructive" aria-live="assertive">
-                  <AlertTriangle className="h-4 w-4" />
+                  <HugeiconsIcon icon={Alert01Icon} className="h-4 w-4" />
                   <AlertDescription>{passkeyError}</AlertDescription>
                 </Alert>
               )}
 
-              <Button onClick={handleRegisterPasskey} disabled={isRegisteringPasskey} className="w-full">
+              <Button
+                onClick={handleRegisterPasskey}
+                disabled={isRegisteringPasskey}
+                className="w-full"
+              >
                 {isRegisteringPasskey ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <HugeiconsIcon
+                      icon={Loading02Icon}
+                      className="w-4 h-4 mr-2 animate-spin"
+                    />
                     Creating passkey...
                   </>
                 ) : (
                   <>
-                    <Fingerprint className="w-4 h-4 mr-2" />
+                    <HugeiconsIcon
+                      icon={FingerPrintIcon}
+                      className="w-4 h-4 mr-2"
+                    />
                     Create Passkey
                   </>
                 )}

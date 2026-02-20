@@ -1,8 +1,9 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Add01Icon, Menu01Icon } from "@hugeicons/core-free-icons";
 import { memo } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useUIStore } from "@/stores/uiStore";
 import { Button } from "@/components/ui/button";
-import { Menu, Plus } from "lucide-react";
 
 interface ChatNavbarProps {
   chatId: string;
@@ -28,7 +29,7 @@ export const ChatNavbar = memo(function ChatNavbar({
               title="Open sidebar"
               className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-850 h-9 w-9 flex-shrink-0 rounded-xl transition-colors md:hidden"
             >
-              <Menu className="h-[18px] w-[18px]" />
+              <HugeiconsIcon icon={Menu01Icon} className="h-[18px] w-[18px]" />
             </Button>
           )}
 
@@ -47,7 +48,7 @@ export const ChatNavbar = memo(function ChatNavbar({
             title="New chat"
             className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-850 hidden sm:flex h-8 px-3 rounded-xl transition-colors gap-1.5"
           >
-            <Plus className="h-4 w-4" />
+            <HugeiconsIcon icon={Add01Icon} className="h-4 w-4" />
             <span className="text-sm">New</span>
           </Button>
 
@@ -58,7 +59,7 @@ export const ChatNavbar = memo(function ChatNavbar({
             title="New chat"
             className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-850 sm:hidden h-8 w-8 rounded-xl transition-colors"
           >
-            <Plus className="h-[18px] w-[18px]" />
+            <HugeiconsIcon icon={Add01Icon} className="h-[18px] w-[18px]" />
           </Button>
         </div>
       </div>

@@ -1,5 +1,6 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowDown01Icon, Search01Icon, Tick01Icon } from "@hugeicons/core-free-icons";
 import * as React from "react";
-import { Search, Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -88,7 +89,7 @@ export function SearchableSelect({
                     )}
                 >
                     <span className="truncate max-w-[100px]">{selectedOption?.label || placeholder}</span>
-                    <ChevronDown className="h-3 w-3 opacity-50 shrink-0" />
+                    <HugeiconsIcon icon={ArrowDown01Icon} className="h-3 w-3 opacity-50 shrink-0" />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
@@ -97,7 +98,7 @@ export function SearchableSelect({
                 onCloseAutoFocus={(e) => e.preventDefault()}
             >
                 <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-50/50 dark:bg-gray-850/50 border-b border-gray-100 dark:border-gray-800">
-                    <Search className="h-3.5 w-3.5 text-gray-400" />
+                    <HugeiconsIcon icon={Search01Icon} className="h-3.5 w-3.5 text-gray-400" />
                     <input
                         autoFocus
                         className="flex-1 bg-transparent text-sm focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600 text-gray-900 dark:text-gray-100"
@@ -130,7 +131,7 @@ export function SearchableSelect({
                                 )}
                             >
                                 <span className="truncate text-xs">{option.label}</span>
-                                {value === option.value && <Check className="h-3 w-3" />}
+                                {value === option.value && <HugeiconsIcon icon={Tick01Icon} className="h-3 w-3" />}
                             </DropdownMenuItem>
                         ))
                     )}

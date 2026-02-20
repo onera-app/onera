@@ -1,6 +1,7 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Alert01Icon, CreditCardIcon, Tick01Icon } from "@hugeicons/core-free-icons";
 import { trpc } from "@/lib/trpc";
 import { UsageMeter } from "@/components/billing/UsageMeter";
-import { AlertTriangle, Check, CreditCard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -126,7 +127,7 @@ export function BillingPage() {
 
         {hasError && (
           <Alert className="mb-8 border-destructive/40 bg-destructive/5" aria-live="assertive">
-            <AlertTriangle className="h-4 w-4 text-destructive" />
+            <HugeiconsIcon icon={Alert01Icon} className="h-4 w-4 text-destructive" />
             <AlertTitle>Couldn&apos;t load billing data</AlertTitle>
             <AlertDescription>
               Billing details are temporarily unavailable. Please refresh and try again.
@@ -164,22 +165,20 @@ export function BillingPage() {
                               : "bg-gray-100 dark:bg-gray-850",
                   )}
                 >
-                  <CreditCard
-                    className={cn(
-                      "w-5 h-5",
-                      currentPlan?.id === "pro"
-                        ? "text-primary"
-                        : currentPlan?.id === "team"
-                          ? "text-primary"
-                        : currentPlan?.id === "starter"
-                            ? "text-status-success-text"
-                            : currentPlan?.id === "team"
-                              ? "text-status-warning-text"
-                              : currentPlan?.id === "enterprise"
-                                ? "text-primary"
-                                : "text-gray-500 dark:text-gray-400",
-                    )}
-                  />
+                  <HugeiconsIcon icon={CreditCardIcon} className={cn(
+                                                        "w-5 h-5",
+                                                        currentPlan?.id === "pro"
+                                                          ? "text-primary"
+                                                          : currentPlan?.id === "team"
+                                                            ? "text-primary"
+                                                          : currentPlan?.id === "starter"
+                                                              ? "text-status-success-text"
+                                                              : currentPlan?.id === "team"
+                                                                ? "text-status-warning-text"
+                                                                : currentPlan?.id === "enterprise"
+                                                                  ? "text-primary"
+                                                                  : "text-gray-500 dark:text-gray-400",
+                                                      )} />
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -240,7 +239,7 @@ export function BillingPage() {
                   className="flex items-center gap-2.5 text-sm text-gray-900/80 dark:text-gray-100/80"
                 >
                   <div className="w-4 h-4 rounded-full bg-status-success/15 flex items-center justify-center flex-shrink-0">
-                    <Check className="w-2.5 h-2.5 text-status-success-text" />
+                    <HugeiconsIcon icon={Tick01Icon} className="w-2.5 h-2.5 text-status-success-text" />
                   </div>
                   {feature}
                 </li>
@@ -370,7 +369,7 @@ export function BillingPage() {
                           key={`${plan.id}-${benefit}`}
                           className="flex items-center gap-2 text-sm text-gray-900/85 dark:text-gray-100/85"
                         >
-                          <Check className="w-3.5 h-3.5 text-status-success-text flex-shrink-0" />
+                          <HugeiconsIcon icon={Tick01Icon} className="w-3.5 h-3.5 text-status-success-text flex-shrink-0" />
                           {benefit}
                         </li>
                       ))}

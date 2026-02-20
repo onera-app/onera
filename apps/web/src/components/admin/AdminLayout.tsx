@@ -1,26 +1,21 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowLeft01Icon, CreditCardIcon, DashboardCircleIcon, Invoice01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import { Link, Navigate, Outlet, useMatchRoute } from "@tanstack/react-router";
 import { useAuth } from "@/providers/SupabaseAuthProvider";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
-import {
-  LayoutDashboard,
-  Users,
-  CreditCard,
-  Receipt,
-  ArrowLeft,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
-  { to: "/app/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/app/admin/users", label: "Users", icon: Users, exact: false },
+  { to: "/app/admin", label: "Dashboard", icon: DashboardCircleIcon, exact: true },
+  { to: "/app/admin/users", label: "Users", icon: UserGroupIcon, exact: false },
   {
     to: "/app/admin/subscriptions",
     label: "Subscriptions",
-    icon: CreditCard,
+    icon: CreditCardIcon,
     exact: false,
   },
-  { to: "/app/admin/invoices", label: "Invoices", icon: Receipt, exact: false },
+  { to: "/app/admin/invoices", label: "Invoices", icon: Invoice01Icon, exact: false },
 ] as const;
 
 export function AdminLayout() {
@@ -52,7 +47,7 @@ export function AdminLayout() {
         <div className="flex items-center gap-2 mb-6">
           <Button variant="ghost" size="icon-sm" asChild>
             <Link to="/app">
-              <ArrowLeft className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4" />
             </Link>
           </Button>
           <h2 className="font-semibold text-sm">Admin Panel</h2>
@@ -74,7 +69,7 @@ export function AdminLayout() {
                   : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-850"
               )}
             >
-              <item.icon className="h-4 w-4" />
+              <HugeiconsIcon icon={item.icon} className="h-4 w-4" />
               {item.label}
             </Link>
           );

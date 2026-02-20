@@ -1,9 +1,9 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { InvoiceTable } from "@/components/billing/InvoiceTable";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-
 type InvoiceStatus = "succeeded" | "failed" | "refunded";
 
 const statusOptions: { value: InvoiceStatus | undefined; label: string }[] = [
@@ -75,7 +75,7 @@ export function AdminInvoicesPage() {
               disabled={page === 0}
               aria-label="Previous page"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4" />
             </Button>
             <Button
               variant="outline"
@@ -84,7 +84,7 @@ export function AdminInvoicesPage() {
               disabled={page >= totalPages - 1}
               aria-label="Next page"
             >
-              <ChevronRight className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowRight01Icon} className="h-4 w-4" />
             </Button>
           </div>
         </div>

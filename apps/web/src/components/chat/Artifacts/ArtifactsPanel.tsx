@@ -1,8 +1,9 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowLeft01Icon, ArrowRight01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import { useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { CodeArtifact } from './CodeArtifact';
 import { TextArtifact } from './TextArtifact';
 
@@ -79,7 +80,7 @@ export function ArtifactsPanel({
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-850">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose}>
-            <X className="h-4 w-4" />
+            <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4" />
           </Button>
           <div className="flex flex-col">
             <span className="font-medium text-sm">
@@ -103,7 +104,7 @@ export function ArtifactsPanel({
               onClick={handlePrev}
               disabled={activeIndex === 0}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
@@ -112,7 +113,7 @@ export function ArtifactsPanel({
               onClick={handleNext}
               disabled={activeIndex === artifacts.length - 1}
             >
-              <ChevronRight className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowRight01Icon} className="h-4 w-4" />
             </Button>
           </div>
         )}

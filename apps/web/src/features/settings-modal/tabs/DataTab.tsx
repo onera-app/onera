@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Alert01Icon, ArchiveIcon, Delete02Icon, Download01Icon } from "@hugeicons/core-free-icons";
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -14,7 +16,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Download, Archive, Trash2, AlertTriangle } from 'lucide-react';
 
 export function DataTab() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -104,7 +105,7 @@ export function DataTab() {
           disabled={isExporting}
           className="w-full sm:w-auto"
         >
-          <Download className="h-4 w-4 mr-2" />
+          <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
           {isExporting ? 'Exporting...' : 'Export All Chats'}
         </Button>
       </div>
@@ -134,7 +135,7 @@ export function DataTab() {
           Archive all conversations to hide them from the sidebar
         </p>
         <Button variant="outline" disabled className="w-full sm:w-auto">
-          <Archive className="h-4 w-4 mr-2" />
+          <HugeiconsIcon icon={ArchiveIcon} className="h-4 w-4 mr-2" />
           Archive All Chats
         </Button>
         <p className="text-xs text-gray-500 dark:text-gray-400">Coming soon</p>
@@ -144,7 +145,7 @@ export function DataTab() {
       <div className="space-y-3 pt-4 border-t">
         <Label className="text-destructive">Danger Zone</Label>
         <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
+          <HugeiconsIcon icon={Alert01Icon} className="h-4 w-4" />
           <AlertDescription>
             Deleting all chats is permanent and cannot be undone. Make sure to export your data
             first.
@@ -155,7 +156,7 @@ export function DataTab() {
           onClick={() => setShowDeleteDialog(true)}
           className="w-full sm:w-auto"
         >
-          <Trash2 className="h-4 w-4 mr-2" />
+          <HugeiconsIcon icon={Delete02Icon} className="h-4 w-4 mr-2" />
           Delete All Chats
         </Button>
       </div>

@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Alert01Icon } from "@hugeicons/core-free-icons";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate, useSearch } from "@tanstack/react-router";
 import { v4 as uuidv4 } from "uuid";
@@ -58,7 +60,6 @@ import { getTextContent, pendingTriggerSignature } from "@/lib/chat/pipeline";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle } from "lucide-react";
 import { normalizeAppError } from "@/lib/errors/app-error";
 
 interface DecryptedChat {
@@ -1294,7 +1295,7 @@ export function ChatPage() {
       <div className="flex items-center justify-center h-full bg-white dark:bg-gray-900">
         <div className="text-center max-w-md px-4">
           <Alert variant="destructive" className="bg-gray-50 dark:bg-gray-850 border-gray-100 dark:border-gray-850">
-            <AlertTriangle className="h-4 w-4" />
+            <HugeiconsIcon icon={Alert01Icon} className="h-4 w-4" />
             <AlertTitle className="text-gray-900 dark:text-gray-100">Chat not found</AlertTitle>
             <AlertDescription className="text-gray-500 dark:text-gray-400">
               This conversation may have been deleted or doesn't exist.
@@ -1313,7 +1314,7 @@ export function ChatPage() {
       {chat.decryptionError && (
         <div className="px-4 pt-16 sm:px-6">
           <Alert className="bg-amber-500/10 border-amber-500/30">
-            <AlertTriangle className="h-4 w-4 text-amber-500" />
+            <HugeiconsIcon icon={Alert01Icon} className="h-4 w-4 text-amber-500" />
             <AlertTitle className="text-gray-900 dark:text-gray-100">
               Couldn&apos;t decrypt conversation
             </AlertTitle>

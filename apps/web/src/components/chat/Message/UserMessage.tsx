@@ -1,5 +1,6 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { FileAttachmentIcon } from "@hugeicons/core-free-icons";
 import { useState, useRef, useEffect, memo, useCallback } from "react";
-import { FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MessageActions } from "./MessageActions";
 import { Button } from "@/components/ui/button";
@@ -279,7 +280,7 @@ export const UserMessage = memo(function UserMessage({
                     "text-sm text-gray-900 dark:text-gray-100",
                   )}
                 >
-                  <FileText className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  <HugeiconsIcon icon={FileAttachmentIcon} className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                   <span className="truncate max-w-[200px]">{doc.fileName}</span>
                 </a>
               ))}

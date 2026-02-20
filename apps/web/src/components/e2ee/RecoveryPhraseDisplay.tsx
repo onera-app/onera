@@ -1,11 +1,7 @@
-/**
- * Recovery Phrase Display Component
- * A premium, security-focused UI for displaying and saving recovery phrases
- */
-
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Copy01Icon, Download01Icon, Shield01Icon, Tick01Icon, ViewIcon, ViewOffIcon } from "@hugeicons/core-free-icons";
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
-import { Check, Copy, Download, Shield, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { RecoveryKeyInfo } from '@onera/crypto';
@@ -78,7 +74,7 @@ Delete this file after storing the phrase safely.
         <div className="absolute -bottom-4 -left-4 h-20 w-20 rounded-full bg-orange-500/10 blur-2xl" />
         <div className="relative flex gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 ring-1 ring-amber-500/30">
-            <Shield className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            <HugeiconsIcon icon={Shield01Icon} className="h-5 w-5 text-amber-600 dark:text-amber-400" />
           </div>
           <div>
             <p className="font-medium text-amber-900 dark:text-amber-100">
@@ -100,7 +96,7 @@ Delete this file after storing the phrase safely.
             onClick={() => setIsRevealed(true)}
           >
             <div className="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
-              <Eye className="h-6 w-6" />
+              <HugeiconsIcon icon={ViewIcon} className="h-6 w-6" />
               <span className="text-sm font-medium">Click to reveal</span>
             </div>
           </div>
@@ -142,12 +138,12 @@ Delete this file after storing the phrase safely.
         >
           {isRevealed ? (
             <>
-              <EyeOff className="h-4 w-4" />
+              <HugeiconsIcon icon={ViewOffIcon} className="h-4 w-4" />
               Hide
             </>
           ) : (
             <>
-              <Eye className="h-4 w-4" />
+              <HugeiconsIcon icon={ViewIcon} className="h-4 w-4" />
               Reveal
             </>
           )}
@@ -163,12 +159,12 @@ Delete this file after storing the phrase safely.
         >
           {copied ? (
             <>
-              <Check className="h-4 w-4" />
+              <HugeiconsIcon icon={Tick01Icon} className="h-4 w-4" />
               Copied
             </>
           ) : (
             <>
-              <Copy className="h-4 w-4" />
+              <HugeiconsIcon icon={Copy01Icon} className="h-4 w-4" />
               Copy
             </>
           )}
@@ -179,7 +175,7 @@ Delete this file after storing the phrase safely.
           onClick={handleDownload}
           className="flex-1 gap-2"
         >
-          <Download className="h-4 w-4" />
+          <HugeiconsIcon icon={Download01Icon} className="h-4 w-4" />
           Download
         </Button>
       </div>

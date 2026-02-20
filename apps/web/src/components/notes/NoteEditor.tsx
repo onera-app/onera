@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArchiveArrowUpIcon, ArchiveIcon, ArrowLeft01Icon, Clock01Icon, Delete02Icon, FileAttachmentIcon, FloppyDiskIcon, Folder01Icon, Loading02Icon, MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNote, useUpdateNote } from '@/hooks/queries/useNotes';
 import { useFolders } from '@/hooks/queries/useFolders';
@@ -37,18 +39,6 @@ import {
   createEncryptedNote,
   type EncryptedNoteData,
 } from '@onera/crypto';
-import {
-  FileText,
-  Archive,
-  ArchiveRestore,
-  Save,
-  Clock,
-  Folder,
-  Trash2,
-  ChevronLeft,
-  MoreHorizontal,
-  Loader2
-} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDeleteNote } from '@/hooks/queries/useNotes';
 import { toast } from 'sonner';
@@ -331,7 +321,7 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
                 onClick={onBack}
                 className="h-9 w-9 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-850 rounded-xl sm:hidden"
               >
-                <ChevronLeft className="h-6 w-6" />
+                <HugeiconsIcon icon={ArrowLeft01Icon} className="h-6 w-6" />
               </Button>
             )}
 
@@ -340,7 +330,7 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
               "hidden sm:flex items-center gap-2 px-2 py-1 bg-gray-50/50 dark:bg-gray-850/50 rounded-xl border border-gray-100 dark:border-gray-800 transition-all hover:bg-gray-100 dark:hover:bg-gray-800",
               note.archived && "opacity-50 pointer-events-none"
             )}>
-              <Folder className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500 ml-1" />
+              <HugeiconsIcon icon={Folder01Icon} className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500 ml-1" />
               <SearchableSelect
                 value={folderId || 'none'}
                 onValueChange={handleFolderChange}
@@ -363,7 +353,7 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
                   exit={{ opacity: 0, scale: 0.9, x: -10 }}
                 >
                   <Badge variant="secondary" className="bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-500 border-amber-100 dark:border-amber-900/50 px-2 py-0.5 rounded-lg flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider">
-                    <Archive className="h-3 w-3" />
+                    <HugeiconsIcon icon={ArchiveIcon} className="h-3 w-3" />
                     Archived
                   </Badge>
                 </motion.div>
@@ -403,10 +393,10 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
                 )}
               >
                 {isSaving ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <HugeiconsIcon icon={Loading02Icon} className="h-4 w-4 animate-spin" />
                 ) : (
                   <div className="flex items-center gap-1.5">
-                    <Save className="h-3.5 w-3.5" />
+                    <HugeiconsIcon icon={FloppyDiskIcon} className="h-3.5 w-3.5" />
                     <span className="text-sm px-1">Save</span>
                   </div>
                 )}
@@ -421,7 +411,7 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
                   size="icon"
                   className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-850"
                 >
-                  <MoreHorizontal className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <HugeiconsIcon icon={MoreHorizontalIcon} className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-xl border-gray-100 dark:border-gray-850 z-50">
@@ -449,7 +439,7 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
                   )}
                 >
                   <div className="flex items-center gap-2">
-                    {note.archived ? <ArchiveRestore className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
+                    {note.archived ? <HugeiconsIcon icon={ArchiveArrowUpIcon} className="h-4 w-4" /> : <HugeiconsIcon icon={ArchiveIcon} className="h-4 w-4" />}
                     <span className="font-medium">{note.archived ? 'Restore Note' : 'Archive Note'}</span>
                   </div>
                 </DropdownMenuItem>
@@ -459,7 +449,7 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
                   className="rounded-xl flex items-center justify-between px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
-                    <Trash2 className="h-4 w-4" />
+                    <HugeiconsIcon icon={Delete02Icon} className="h-4 w-4" />
                     <span className="font-medium">Delete Permanently</span>
                   </div>
                 </DropdownMenuItem>
@@ -468,11 +458,11 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
 
                 <div className="px-3 py-2 text-[10px] text-gray-400 dark:text-gray-500 flex flex-col gap-1">
                   <div className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
+                    <HugeiconsIcon icon={Clock01Icon} className="h-3 w-3" />
                     <span>Edited {dayjs(note.updatedAt).fromNow()}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <FileText className="h-3 w-3" />
+                    <HugeiconsIcon icon={FileAttachmentIcon} className="h-3 w-3" />
                     <span>{content.replace(/<[^>]*>/g, '').length} characters</span>
                   </div>
                 </div>

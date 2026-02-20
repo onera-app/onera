@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowRight01Icon, Delete02Icon, MoreHorizontalIcon, PencilIcon } from "@hugeicons/core-free-icons";
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import {
@@ -22,12 +24,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import {
-  ChevronRight,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-} from 'lucide-react';
 
 interface FolderItemProps {
   id: string;
@@ -154,12 +150,10 @@ export function FolderItem({
                   'text-gray-600 dark:text-gray-100 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900 transition-all duration-150 focus-visible:outline-none'
                 )}
               >
-                <ChevronRight
-                  className={cn(
-                    'h-3.5 w-3.5 transition-transform duration-200 flex-shrink-0 text-gray-500 dark:text-gray-400',
-                    isExpanded && 'rotate-90'
-                  )}
-                />
+                <HugeiconsIcon icon={ArrowRight01Icon} className={cn(
+                                                      'h-3.5 w-3.5 transition-transform duration-200 flex-shrink-0 text-gray-500 dark:text-gray-400',
+                                                      isExpanded && 'rotate-90'
+                                                    )} />
                 <span className="flex-1 text-[0.9rem] font-primary truncate">{name}</span>
               </button>
             </CollapsibleTrigger>
@@ -174,12 +168,12 @@ export function FolderItem({
                     className="p-1 rounded-lg text-gray-400 dark:text-gray-600 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors focus-visible:outline-none"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <MoreHorizontal className="h-4 w-4" />
+                    <HugeiconsIcon icon={MoreHorizontalIcon} className="h-4 w-4" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-36">
                   <DropdownMenuItem onClick={handleStartEdit} className="gap-2">
-                    <Pencil className="h-3.5 w-3.5" />
+                    <HugeiconsIcon icon={PencilIcon} className="h-3.5 w-3.5" />
                     Rename
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -187,7 +181,7 @@ export function FolderItem({
                     onClick={() => setShowDeleteDialog(true)}
                     className="gap-2 text-destructive focus:text-destructive focus:bg-destructive/10"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <HugeiconsIcon icon={Delete02Icon} className="h-3.5 w-3.5" />
                     Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>

@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Delete02Icon, Loading02Icon, LockIcon, Mail01Icon, UserIcon } from "@hugeicons/core-free-icons";
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
@@ -14,7 +16,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { User, Mail, Lock, Loader2, Trash2 } from 'lucide-react';
 
 export function AccountTab() {
   const { user } = useAuth();
@@ -93,7 +94,7 @@ export function AccountTab() {
         {/* Name */}
         <div className="space-y-2">
           <Label htmlFor="name">
-            <User className="h-4 w-4 inline mr-2" />
+            <HugeiconsIcon icon={UserIcon} className="h-4 w-4 inline mr-2" />
             Name
           </Label>
           <Input
@@ -107,7 +108,7 @@ export function AccountTab() {
         {/* Email */}
         <div className="space-y-2">
           <Label htmlFor="email">
-            <Mail className="h-4 w-4 inline mr-2" />
+            <HugeiconsIcon icon={Mail01Icon} className="h-4 w-4 inline mr-2" />
             Email
           </Label>
           <Input
@@ -130,7 +131,7 @@ export function AccountTab() {
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label htmlFor="change-password" className="font-normal">
-              <Lock className="h-4 w-4 inline mr-2" />
+              <HugeiconsIcon icon={LockIcon} className="h-4 w-4 inline mr-2" />
               Password
             </Label>
             <p className="text-xs text-gray-500 dark:text-gray-400">Change your account password</p>
@@ -148,7 +149,7 @@ export function AccountTab() {
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label className="font-normal">
-              <Trash2 className="h-4 w-4 inline mr-2" />
+              <HugeiconsIcon icon={Delete02Icon} className="h-4 w-4 inline mr-2" />
               Delete Account
             </Label>
             <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -227,7 +228,7 @@ export function AccountTab() {
             <Button onClick={handlePasswordChange} disabled={isChangingPassword}>
               {isChangingPassword ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <HugeiconsIcon icon={Loading02Icon} className="mr-2 h-4 w-4 animate-spin" />
                   Changing...
                 </>
               ) : (

@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Add01Icon, Delete02Icon, Message01Icon, Search01Icon } from "@hugeicons/core-free-icons";
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { usePrompts, useDeletePrompt } from '@/hooks/queries/usePrompts';
@@ -15,7 +17,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import dayjs from 'dayjs';
-import { Plus, Search, MessageSquareText, Trash2 } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 
 interface PromptsListProps {
@@ -52,7 +53,7 @@ export function PromptsList({ selectedPromptId, onSelectPrompt, onCreatePrompt }
         <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-100 dark:border-gray-850">
           <h2 className="text-lg font-semibold">Prompts</h2>
           <Button size="sm" onClick={onCreatePrompt}>
-            <Plus className="h-4 w-4 mr-1" />
+            <HugeiconsIcon icon={Add01Icon} className="h-4 w-4 mr-1" />
             New Prompt
           </Button>
         </div>
@@ -60,7 +61,7 @@ export function PromptsList({ selectedPromptId, onSelectPrompt, onCreatePrompt }
         {/* Search */}
         <div className="px-3 py-2.5 border-b border-gray-100 dark:border-gray-850">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
+            <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
             <Input
               type="text"
               placeholder="Search prompts..."
@@ -85,7 +86,7 @@ export function PromptsList({ selectedPromptId, onSelectPrompt, onCreatePrompt }
             </div>
           ) : filteredPrompts.length === 0 ? (
             <EmptyState
-              icon={MessageSquareText}
+              icon={Message01Icon}
               size="md"
               title={searchQuery ? 'No prompts match your search' : 'No prompts yet'}
               description={searchQuery ? undefined : 'Create one to get started'}
@@ -126,7 +127,7 @@ export function PromptsList({ selectedPromptId, onSelectPrompt, onCreatePrompt }
                       }}
                       className="opacity-0 group-hover:opacity-100 text-gray-500 dark:text-gray-400 hover:text-destructive"
                     >
-                      <Trash2 />
+                      <HugeiconsIcon icon={Delete02Icon} />
                     </Button>
                   </div>
                 </div>

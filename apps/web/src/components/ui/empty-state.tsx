@@ -1,62 +1,73 @@
-import { cn } from '@/lib/utils';
-import type { LucideIcon } from 'lucide-react';
+import { cn } from "@/lib/utils";
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 
 interface EmptyStateProps {
-  icon: LucideIcon;
+  icon: IconSvgElement;
   title: string;
   description?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
   className?: string;
   children?: React.ReactNode;
 }
 
 const sizeStyles = {
   sm: {
-    container: 'py-6',
-    iconWrapper: 'w-10 h-10 rounded-lg',
-    icon: 'w-5 h-5',
-    title: 'text-sm font-medium',
-    description: 'text-xs',
+    container: "py-6",
+    iconWrapper: "w-10 h-10 rounded-lg",
+    iconSize: 20,
+    title: "text-sm font-medium",
+    description: "text-xs",
   },
   md: {
-    container: 'py-8',
-    iconWrapper: 'w-12 h-12 rounded-xl',
-    icon: 'w-6 h-6',
-    title: 'text-base font-medium',
-    description: 'text-sm',
+    container: "py-8",
+    iconWrapper: "w-12 h-12 rounded-xl",
+    iconSize: 24,
+    title: "text-base font-medium",
+    description: "text-sm",
   },
   lg: {
-    container: 'py-12',
-    iconWrapper: 'w-16 h-16 rounded-2xl',
-    icon: 'w-8 h-8',
-    title: 'text-lg font-semibold',
-    description: 'text-sm',
+    container: "py-12",
+    iconWrapper: "w-16 h-16 rounded-2xl",
+    iconSize: 32,
+    title: "text-lg font-semibold",
+    description: "text-sm",
   },
 };
 
 export function EmptyState({
-  icon: Icon,
+  icon,
   title,
   description,
-  size = 'md',
+  size = "md",
   className,
   children,
 }: EmptyStateProps) {
   const styles = sizeStyles[size];
 
   return (
-    <div className={cn('text-center', styles.container, className)}>
+    <div className={cn("text-center", styles.container, className)}>
       <div
         className={cn(
-          'mx-auto mb-3 flex items-center justify-center bg-gray-100 dark:bg-gray-850',
-          styles.iconWrapper
+          "mx-auto mb-3 flex items-center justify-center bg-gray-100 dark:bg-gray-850",
+          styles.iconWrapper,
         )}
       >
-        <Icon className={cn('text-gray-500 dark:text-gray-400', styles.icon)} />
+        <HugeiconsIcon
+          icon={icon}
+          size={styles.iconSize}
+          className="text-gray-500 dark:text-gray-400"
+        />
       </div>
-      <p className={cn('text-gray-900 dark:text-gray-100', styles.title)}>{title}</p>
+      <p className={cn("text-gray-900 dark:text-gray-100", styles.title)}>
+        {title}
+      </p>
       {description && (
-        <p className={cn('text-gray-500 dark:text-gray-400 mt-1', styles.description)}>
+        <p
+          className={cn(
+            "text-gray-500 dark:text-gray-400 mt-1",
+            styles.description,
+          )}
+        >
           {description}
         </p>
       )}

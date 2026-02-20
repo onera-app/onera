@@ -1,40 +1,50 @@
-import { Lock, Shield, Zap, Layers, Cpu, KeyRound } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
+import {
+  CpuIcon,
+  FlashIcon,
+  Key02Icon,
+  Layers01Icon,
+  LockIcon,
+  Shield01Icon,
+} from "@hugeicons/core-free-icons";
 
 interface Feature {
-  icon: LucideIcon;
+  icon: IconSvgElement;
   title: string;
   description: string;
 }
 
 const features: Feature[] = [
   {
-    icon: Lock,
+    icon: LockIcon,
     title: "Encrypted on-device",
     description: "Messages are encrypted before they leave your browser.",
   },
   {
-    icon: Cpu,
+    icon: CpuIcon,
     title: "Secure enclave inference",
-    description: "Models run inside trusted execution environments. Your data stays sealed in hardware.",
+    description:
+      "Models run inside trusted execution environments. Your data stays sealed in hardware.",
   },
   {
-    icon: Shield,
+    icon: Shield01Icon,
     title: "Zero retention",
     description: "No logs, no training data, no copies on third-party servers.",
   },
   {
-    icon: KeyRound,
+    icon: Key02Icon,
     title: "Passkey authentication",
-    description: "No passwords to phish or leak. Your key never leaves your device.",
+    description:
+      "No passwords to phish or leak. Your key never leaves your device.",
   },
   {
-    icon: Layers,
+    icon: Layers01Icon,
     title: "Multi-model, single workspace",
-    description: "OpenAI, Anthropic, Google — one private interface for all of them.",
+    description:
+      "OpenAI, Anthropic, Google — one private interface for all of them.",
   },
   {
-    icon: Zap,
+    icon: FlashIcon,
     title: "No infrastructure needed",
     description: "Air-gapped privacy, cloud convenience. Nothing to deploy.",
   },
@@ -49,14 +59,20 @@ export function FeaturesSection() {
             Private by design.
           </h2>
           <p className="mx-auto mt-4 max-w-[480px] font-landing text-base leading-relaxed text-landing-muted-foreground sm:text-lg">
-            Not by policy — by encryption, secure enclaves, and zero-knowledge architecture.
+            Not by policy — by encryption, secure enclaves, and zero-knowledge
+            architecture.
           </p>
         </div>
 
         <div className="mt-14 grid gap-x-10 gap-y-8 sm:mt-20 sm:grid-cols-2 md:grid-cols-3">
           {features.map((feature) => (
             <div key={feature.title}>
-              <feature.icon className="h-5 w-5 text-landing-foreground" strokeWidth={1.5} />
+              <HugeiconsIcon
+                icon={feature.icon}
+                size={20}
+                strokeWidth={1.5}
+                className="text-landing-foreground"
+              />
               <h3 className="mt-2.5 font-landing text-base font-semibold text-landing-foreground">
                 {feature.title}
               </h3>

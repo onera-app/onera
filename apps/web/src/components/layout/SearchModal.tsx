@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowRight01Icon, Cancel01Icon, Message01Icon, Search01Icon, StickyNote01Icon } from "@hugeicons/core-free-icons";
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
@@ -14,7 +16,6 @@ import {
   DATE_GROUP_LABELS,
 } from "@/lib/dateGrouping";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Search, X, MessageSquare, ArrowRight, StickyNote } from "lucide-react";
 
 interface SearchModalProps {
   open: boolean;
@@ -199,7 +200,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             {/* Search Input */}
             <div className="p-4">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-gray-400" />
+                <HugeiconsIcon icon={Search01Icon} className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-gray-400" />
                 <input
                   ref={inputRef}
                   type="text"
@@ -213,7 +214,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                     onClick={() => setSearchQuery("")}
                     className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors"
                   >
-                    <X className="h-4 w-4" />
+                    <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4" />
                   </button>
                 )}
               </div>
@@ -255,7 +256,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
               {filteredChats.length === 0 && messageResults.length === 0 && noteResults.length === 0 && !isSearching ? (
                 <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400 pb-20">
                   <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-850 flex items-center justify-center mb-4">
-                    <MessageSquare className="h-8 w-8 text-gray-500/60 dark:text-gray-400/60" />
+                    <HugeiconsIcon icon={Message01Icon} className="h-8 w-8 text-gray-500/60 dark:text-gray-400/60" />
                   </div>
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
                     {searchQuery ? "No results found" : "No conversations yet"}
@@ -289,7 +290,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                           >
                             <div className="flex items-center justify-between w-full">
                               <span className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate flex items-center gap-2">
-                                <StickyNote className="h-3 w-3" />
+                                <HugeiconsIcon icon={StickyNote01Icon} className="h-3 w-3" />
                                 {note.title}
                               </span>
                               <span className="text-[10px] text-gray-500 dark:text-gray-400">
@@ -403,7 +404,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
               <div className="flex-1 flex flex-col p-5">
                 {/* Chat icon */}
                 <div className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850 flex items-center justify-center mb-4">
-                  <MessageSquare className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                  <HugeiconsIcon icon={Message01Icon} className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                 </div>
 
                 {/* Title */}
@@ -425,13 +426,13 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                   className="flex items-center justify-center gap-2 w-full h-11 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors group"
                 >
                   <span>Open conversation</span>
-                  <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                  <HugeiconsIcon icon={ArrowRight01Icon} className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
                 </button>
               </div>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
                 <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-gray-850 flex items-center justify-center mb-4">
-                  <Search className="h-7 w-7 text-gray-500 dark:text-gray-400" />
+                  <HugeiconsIcon icon={Search01Icon} className="h-7 w-7 text-gray-500 dark:text-gray-400" />
                 </div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Select a conversation to preview

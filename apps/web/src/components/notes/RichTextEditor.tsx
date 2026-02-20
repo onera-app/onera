@@ -1,11 +1,28 @@
-import { useEffect } from 'react';
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Placeholder from '@tiptap/extension-placeholder';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Bold, Italic, Strikethrough, List, ListOrdered, Code, Quote, Heading1, Heading2, Heading3 } from 'lucide-react';
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  CodeIcon,
+  Heading01Icon,
+  Heading02Icon,
+  Heading03Icon,
+  LeftToRightListBulletIcon,
+  LeftToRightListNumberIcon,
+  QuoteUpIcon,
+  TextBoldIcon,
+  TextItalicIcon,
+  TextStrikethroughIcon,
+} from "@hugeicons/core-free-icons";
+import { useEffect } from "react";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Placeholder from "@tiptap/extension-placeholder";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface RichTextEditorProps {
   content: string;
@@ -18,7 +35,7 @@ interface RichTextEditorProps {
 export function RichTextEditor({
   content,
   onChange,
-  placeholder = 'Start writing...',
+  placeholder = "Start writing...",
   className,
   editable = true,
 }: RichTextEditorProps) {
@@ -27,7 +44,7 @@ export function RichTextEditor({
       StarterKit,
       Placeholder.configure({
         placeholder,
-        emptyEditorClass: 'is-editor-empty',
+        emptyEditorClass: "is-editor-empty",
       }),
     ],
     content,
@@ -35,18 +52,18 @@ export function RichTextEditor({
     editorProps: {
       attributes: {
         class: cn(
-          'prose dark:prose-invert max-w-none',
-          'focus:outline-none min-h-[500px] pt-0 pb-8',
-          'text-lg sm:text-xl leading-relaxed text-gray-800 dark:text-gray-200',
-          '[&_.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.is-editor-empty:first-child::before]:text-gray-300 dark:[&_.is-editor-empty:first-child::before]:text-gray-700 [&_.is-editor-empty:first-child::before]:float-left [&_.is-editor-empty:first-child::before]:pointer-events-none [&_.is-editor-empty:first-child::before]:h-0',
-          '[&_p]:my-4 [&_h1]:text-4xl [&_h1]:font-black [&_h1]:tracking-tight [&_h1]:mb-8',
-          '[&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-10 [&_h2]:mb-4',
-          '[&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-8 [&_h3]:mb-3',
-          '[&_ul]:list-disc [&_ul]:ml-6 [&_ul]:my-4 [&_ol]:list-decimal [&_ol]:ml-6 [&_ol]:my-4',
-          '[&_li]:my-1 [&_li_p]:my-0',
-          '[&_code]:bg-gray-100 dark:[&_code]:bg-gray-800 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-md [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:text-primary',
-          '[&_pre]:bg-gray-950 [&_pre]:text-gray-100 [&_pre]:p-6 [&_pre]:rounded-2xl [&_pre]:my-6 [&_pre]:shadow-lg [&_pre]:border [&_pre]:border-white/5',
-          '[&_blockquote]:border-l-4 [&_blockquote]:border-primary/20 [&_blockquote]:pl-6 [&_blockquote]:italic [&_blockquote]:text-gray-500 dark:text-gray-400 [&_blockquote]:my-8'
+          "prose dark:prose-invert max-w-none",
+          "focus:outline-none min-h-[500px] pt-0 pb-8",
+          "text-lg sm:text-xl leading-relaxed text-gray-800 dark:text-gray-200",
+          "[&_.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.is-editor-empty:first-child::before]:text-gray-300 dark:[&_.is-editor-empty:first-child::before]:text-gray-700 [&_.is-editor-empty:first-child::before]:float-left [&_.is-editor-empty:first-child::before]:pointer-events-none [&_.is-editor-empty:first-child::before]:h-0",
+          "[&_p]:my-4 [&_h1]:text-4xl [&_h1]:font-black [&_h1]:tracking-tight [&_h1]:mb-8",
+          "[&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-10 [&_h2]:mb-4",
+          "[&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-8 [&_h3]:mb-3",
+          "[&_ul]:list-disc [&_ul]:ml-6 [&_ul]:my-4 [&_ol]:list-decimal [&_ol]:ml-6 [&_ol]:my-4",
+          "[&_li]:my-1 [&_li_p]:my-0",
+          "[&_code]:bg-gray-100 dark:[&_code]:bg-gray-800 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-md [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:text-primary",
+          "[&_pre]:bg-gray-950 [&_pre]:text-gray-100 [&_pre]:p-6 [&_pre]:rounded-2xl [&_pre]:my-6 [&_pre]:shadow-lg [&_pre]:border [&_pre]:border-white/5",
+          "[&_blockquote]:border-l-4 [&_blockquote]:border-primary/20 [&_blockquote]:pl-6 [&_blockquote]:italic [&_blockquote]:text-gray-500 dark:text-gray-400 [&_blockquote]:my-8",
         ),
       },
     },
@@ -78,7 +95,7 @@ export function RichTextEditor({
   }
 
   return (
-    <div className={cn('relative flex flex-col', className)}>
+    <div className={cn("relative flex flex-col", className)}>
       {/* Refined Toolbar */}
       {editable && (
         <TooltipProvider>
@@ -86,26 +103,29 @@ export function RichTextEditor({
             <div className="flex items-center gap-1 p-1 bg-gray-50/50 dark:bg-gray-850/50 rounded-xl border border-gray-100 dark:border-gray-850 flex-shrink-0">
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleBold().run()}
-                active={editor.isActive('bold')}
+                active={editor.isActive("bold")}
                 tooltip="Bold"
               >
-                <Bold className="h-4 w-4" />
+                <HugeiconsIcon icon={TextBoldIcon} className="h-4 w-4" />
               </ToolbarButton>
 
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleItalic().run()}
-                active={editor.isActive('italic')}
+                active={editor.isActive("italic")}
                 tooltip="Italic"
               >
-                <Italic className="h-4 w-4" />
+                <HugeiconsIcon icon={TextItalicIcon} className="h-4 w-4" />
               </ToolbarButton>
 
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleStrike().run()}
-                active={editor.isActive('strike')}
+                active={editor.isActive("strike")}
                 tooltip="Strikethrough"
               >
-                <Strikethrough className="h-4 w-4" />
+                <HugeiconsIcon
+                  icon={TextStrikethroughIcon}
+                  className="h-4 w-4"
+                />
               </ToolbarButton>
             </div>
 
@@ -113,27 +133,33 @@ export function RichTextEditor({
 
             <div className="flex items-center gap-1 p-1 bg-gray-50/50 dark:bg-gray-850/50 rounded-xl border border-gray-100 dark:border-gray-850 flex-shrink-0">
               <ToolbarButton
-                onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-                active={editor.isActive('heading', { level: 1 })}
+                onClick={() =>
+                  editor.chain().focus().toggleHeading({ level: 1 }).run()
+                }
+                active={editor.isActive("heading", { level: 1 })}
                 tooltip="Heading 1"
               >
-                <Heading1 className="h-4 w-4" />
+                <HugeiconsIcon icon={Heading01Icon} className="h-4 w-4" />
               </ToolbarButton>
 
               <ToolbarButton
-                onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-                active={editor.isActive('heading', { level: 2 })}
+                onClick={() =>
+                  editor.chain().focus().toggleHeading({ level: 2 }).run()
+                }
+                active={editor.isActive("heading", { level: 2 })}
                 tooltip="Heading 2"
               >
-                <Heading2 className="h-4 w-4" />
+                <HugeiconsIcon icon={Heading02Icon} className="h-4 w-4" />
               </ToolbarButton>
 
               <ToolbarButton
-                onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-                active={editor.isActive('heading', { level: 3 })}
+                onClick={() =>
+                  editor.chain().focus().toggleHeading({ level: 3 }).run()
+                }
+                active={editor.isActive("heading", { level: 3 })}
                 tooltip="Heading 3"
               >
-                <Heading3 className="h-4 w-4" />
+                <HugeiconsIcon icon={Heading03Icon} className="h-4 w-4" />
               </ToolbarButton>
             </div>
 
@@ -142,18 +168,24 @@ export function RichTextEditor({
             <div className="flex items-center gap-1 p-1 bg-gray-50/50 dark:bg-gray-850/50 rounded-xl border border-gray-100 dark:border-gray-850 flex-shrink-0">
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleBulletList().run()}
-                active={editor.isActive('bulletList')}
+                active={editor.isActive("bulletList")}
                 tooltip="Bullet List"
               >
-                <List className="h-4 w-4" />
+                <HugeiconsIcon
+                  icon={LeftToRightListBulletIcon}
+                  className="h-4 w-4"
+                />
               </ToolbarButton>
 
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                active={editor.isActive('orderedList')}
+                active={editor.isActive("orderedList")}
                 tooltip="Numbered List"
               >
-                <ListOrdered className="h-4 w-4" />
+                <HugeiconsIcon
+                  icon={LeftToRightListNumberIcon}
+                  className="h-4 w-4"
+                />
               </ToolbarButton>
             </div>
 
@@ -162,18 +194,18 @@ export function RichTextEditor({
             <div className="flex items-center gap-1 p-1 bg-gray-50/50 dark:bg-gray-850/50 rounded-xl border border-gray-100 dark:border-gray-850 flex-shrink-0">
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-                active={editor.isActive('codeBlock')}
+                active={editor.isActive("codeBlock")}
                 tooltip="Code Block"
               >
-                <Code className="h-4 w-4" />
+                <HugeiconsIcon icon={CodeIcon} className="h-4 w-4" />
               </ToolbarButton>
 
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleBlockquote().run()}
-                active={editor.isActive('blockquote')}
+                active={editor.isActive("blockquote")}
                 tooltip="Quote"
               >
-                <Quote className="h-4 w-4" />
+                <HugeiconsIcon icon={QuoteUpIcon} className="h-4 w-4" />
               </ToolbarButton>
             </div>
           </div>
@@ -192,7 +224,12 @@ interface ToolbarButtonProps {
   children: React.ReactNode;
 }
 
-function ToolbarButton({ onClick, active, tooltip, children }: ToolbarButtonProps) {
+function ToolbarButton({
+  onClick,
+  active,
+  tooltip,
+  children,
+}: ToolbarButtonProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -205,7 +242,7 @@ function ToolbarButton({ onClick, active, tooltip, children }: ToolbarButtonProp
             "h-8 w-8 rounded-lg transition-all duration-200",
             active
               ? "bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary"
-              : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-850"
+              : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-850",
           )}
         >
           {children}

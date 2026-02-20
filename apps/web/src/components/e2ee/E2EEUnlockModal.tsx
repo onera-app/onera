@@ -1,14 +1,5 @@
-/**
- * E2EE Unlock Modal
- * Prompts user to unlock E2EE via passkey, password, or recovery phrase
- *
- * SECURITY: The old "auto-unlock" using user ID was removed as a vulnerability.
- * Users must now either:
- * 1. Use a passkey (with PRF extension for key derivation)
- * 2. Use an encryption password (Argon2id key derivation)
- * 3. Enter their recovery phrase
- */
-
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Alert01Icon, Delete02Icon, Key01Icon, Key02Icon, Loading02Icon, LockIcon, ViewIcon, ViewOffIcon } from "@hugeicons/core-free-icons";
 import { useState } from 'react';
 import { useAuth } from '@/providers/SupabaseAuthProvider';
 import { toast } from 'sonner';
@@ -32,7 +23,6 @@ import {
 } from '@/components/ui/dialog';
 import { MandatoryLogoutConfirm } from './MandatoryLogoutConfirm';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Lock, AlertTriangle, Key, KeyRound, Eye, EyeOff, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -231,7 +221,7 @@ export function E2EEUnlockModal() {
           <DialogContent className="sm:max-w-md bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850" onInteractOutside={(e) => e.preventDefault()}>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Lock className="h-5 w-5 text-primary" />
+                <HugeiconsIcon icon={LockIcon} className="h-5 w-5 text-primary" />
                 Loading Encryption Keys
               </DialogTitle>
               <DialogDescription>
@@ -240,7 +230,7 @@ export function E2EEUnlockModal() {
             </DialogHeader>
 
             <div className="flex flex-col items-center justify-center py-8">
-              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              <HugeiconsIcon icon={Loading02Icon} className="h-10 w-10 animate-spin text-primary" />
             </div>
           </DialogContent>
         </Dialog>
@@ -254,7 +244,7 @@ export function E2EEUnlockModal() {
           <DialogContent className="sm:max-w-md bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850" onInteractOutside={(e) => e.preventDefault()}>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
+                <HugeiconsIcon icon={Alert01Icon} className="h-5 w-5 text-destructive" />
                 No Encryption Keys Found
               </DialogTitle>
               <DialogDescription>
@@ -285,7 +275,7 @@ export function E2EEUnlockModal() {
           <DialogContent className="sm:max-w-md bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850" onInteractOutside={(e) => e.preventDefault()}>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
+                <HugeiconsIcon icon={Alert01Icon} className="h-5 w-5 text-destructive" />
                 Unlock Failed
               </DialogTitle>
               <DialogDescription>
@@ -319,7 +309,7 @@ export function E2EEUnlockModal() {
           <DialogContent className="sm:max-w-md bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850" onInteractOutside={(e) => e.preventDefault()}>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Lock className="h-5 w-5 text-primary" />
+                <HugeiconsIcon icon={LockIcon} className="h-5 w-5 text-primary" />
                 Unlocking Encryption
               </DialogTitle>
               <DialogDescription>
@@ -328,7 +318,7 @@ export function E2EEUnlockModal() {
             </DialogHeader>
 
             <div className="flex flex-col items-center justify-center py-8">
-              <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+              <HugeiconsIcon icon={Loading02Icon} className="h-10 w-10 animate-spin text-primary mb-4" />
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Please wait while we unlock your encrypted data.
               </p>
@@ -361,7 +351,7 @@ export function E2EEUnlockModal() {
           <DialogContent className="sm:max-w-md bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850" onInteractOutside={(e) => e.preventDefault()}>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Lock className="h-5 w-5 text-primary" />
+                <HugeiconsIcon icon={LockIcon} className="h-5 w-5 text-primary" />
                 Unlock Encryption
               </DialogTitle>
               <DialogDescription>
@@ -372,7 +362,7 @@ export function E2EEUnlockModal() {
             <div className="py-4">
               {isLoadingUnlockInfo ? (
                 <div className="flex items-center justify-center py-4">
-                  <Loader2 className="h-5 w-5 animate-spin text-gray-500 dark:text-gray-400" />
+                  <HugeiconsIcon icon={Loading02Icon} className="h-5 w-5 animate-spin text-gray-500 dark:text-gray-400" />
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -386,7 +376,7 @@ export function E2EEUnlockModal() {
                       className="w-full justify-start"
                       onClick={() => setCurrentView('password')}
                     >
-                      <KeyRound className="h-4 w-4 mr-2" />
+                      <HugeiconsIcon icon={Key02Icon} className="h-4 w-4 mr-2" />
                       Unlock with Password
                     </Button>
                   )}
@@ -396,7 +386,7 @@ export function E2EEUnlockModal() {
                     className="w-full justify-start"
                     onClick={() => setCurrentView('recovery')}
                   >
-                    <Key className="h-4 w-4 mr-2" />
+                    <HugeiconsIcon icon={Key01Icon} className="h-4 w-4 mr-2" />
                     Use Recovery Phrase
                   </Button>
                 </div>
@@ -420,7 +410,7 @@ export function E2EEUnlockModal() {
           <DialogContent className="sm:max-w-md bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850" onInteractOutside={(e) => e.preventDefault()}>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <KeyRound className="h-5 w-5 text-primary" />
+                <HugeiconsIcon icon={Key02Icon} className="h-5 w-5 text-primary" />
                 Enter Password
               </DialogTitle>
               <DialogDescription>
@@ -446,7 +436,7 @@ export function E2EEUnlockModal() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPassword ? <HugeiconsIcon icon={ViewOffIcon} className="w-4 h-4" /> : <HugeiconsIcon icon={ViewIcon} className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
@@ -463,7 +453,7 @@ export function E2EEUnlockModal() {
               >
                 {isUnlockingWithPassword ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <HugeiconsIcon icon={Loading02Icon} className="h-4 w-4 mr-2 animate-spin" />
                     Unlocking...
                   </>
                 ) : (
@@ -483,7 +473,7 @@ export function E2EEUnlockModal() {
           <DialogContent className="sm:max-w-md bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850" onInteractOutside={(e) => e.preventDefault()}>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Key className="h-5 w-5 text-primary" />
+                <HugeiconsIcon icon={Key01Icon} className="h-5 w-5 text-primary" />
                 Recovery Phrase
               </DialogTitle>
               <DialogDescription>
@@ -541,7 +531,7 @@ export function E2EEUnlockModal() {
         <DialogContent className="sm:max-w-md bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Trash2 className="h-5 w-5 text-destructive" />
+              <HugeiconsIcon icon={Delete02Icon} className="h-5 w-5 text-destructive" />
               Reset Encryption
             </DialogTitle>
             <DialogDescription>
@@ -551,7 +541,7 @@ export function E2EEUnlockModal() {
 
           <div className="py-4 space-y-4">
             <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
+              <HugeiconsIcon icon={Alert01Icon} className="h-4 w-4" />
               <AlertDescription>
                 <strong>Warning:</strong> This will permanently delete your encryption keys.
                 Any encrypted data (chats, notes, API keys) will become inaccessible forever.
@@ -574,7 +564,7 @@ export function E2EEUnlockModal() {
 
             {resetError && (
               <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
+                <HugeiconsIcon icon={Alert01Icon} className="h-4 w-4" />
                 <AlertDescription>{resetError}</AlertDescription>
               </Alert>
             )}
@@ -592,12 +582,12 @@ export function E2EEUnlockModal() {
             >
               {resetEncryptionMutation.isPending ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <HugeiconsIcon icon={Loading02Icon} className="h-4 w-4 mr-2 animate-spin" />
                   Resetting...
                 </>
               ) : (
                 <>
-                  <Trash2 className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={Delete02Icon} className="h-4 w-4 mr-2" />
                   Reset Encryption
                 </>
               )}

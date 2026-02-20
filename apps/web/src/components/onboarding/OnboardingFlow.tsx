@@ -1,16 +1,17 @@
 "use client";
 
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
+import {
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  CheckmarkCircle01Icon,
+  LockIcon,
+  Message01Icon,
+  Shield01Icon,
+  Tick01Icon,
+} from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Shield,
-  Lock,
-  CheckCircle,
-  ArrowRight,
-  ArrowLeft,
-  Check,
-  MessageSquare,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -88,7 +89,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         <div className="mt-8 flex gap-3">
           {currentStep > 0 && (
             <Button variant="outline" onClick={handleBack} className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4" />
               Back
             </Button>
           )}
@@ -96,12 +97,12 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             {currentStep === steps.length - 1 ? (
               <>
                 I Understand
-                <Check className="h-4 w-4" />
+                <HugeiconsIcon icon={Tick01Icon} className="h-4 w-4" />
               </>
             ) : (
               <>
                 Continue
-                <ArrowRight className="h-4 w-4" />
+                <HugeiconsIcon icon={ArrowRight01Icon} className="h-4 w-4" />
               </>
             )}
           </Button>
@@ -125,7 +126,10 @@ function WelcomeStep() {
   return (
     <div className="text-center">
       <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850">
-        <MessageSquare className="h-9 w-9 text-gray-900/80 dark:text-gray-100/80" />
+        <HugeiconsIcon
+          icon={Message01Icon}
+          className="h-9 w-9 text-gray-900/80 dark:text-gray-100/80"
+        />
       </div>
       <h1 className="text-3xl font-bold tracking-tight mb-3">
         Welcome to Onera
@@ -134,13 +138,13 @@ function WelcomeStep() {
         Private AI chat that actually keeps your conversations private.
       </p>
       <div className="space-y-3 text-left">
-        <Feature icon={Lock} text="Your chats are end-to-end encrypted" />
+        <Feature icon={LockIcon} text="Your chats are end-to-end encrypted" />
         <Feature
-          icon={Shield}
+          icon={Shield01Icon}
           text="Processed in secure hardware we can't access"
         />
         <Feature
-          icon={CheckCircle}
+          icon={CheckmarkCircle01Icon}
           text="Your browser verifies every connection"
         />
       </div>
@@ -152,7 +156,10 @@ function RecoveryStep() {
   return (
     <div className="text-center">
       <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/15 via-orange-500/15 to-red-500/10 ring-1 ring-amber-500/20">
-        <Lock className="h-10 w-10 text-amber-600 dark:text-amber-400" />
+        <HugeiconsIcon
+          icon={LockIcon}
+          className="h-10 w-10 text-amber-600 dark:text-amber-400"
+        />
       </div>
       <h1 className="text-3xl font-bold tracking-tight mb-3">
         Your Recovery Phrase
@@ -163,7 +170,10 @@ function RecoveryStep() {
 
       <div className="rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/5 via-amber-500/8 to-orange-500/5 p-4 text-left space-y-3">
         <div className="flex gap-3">
-          <Shield className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          <HugeiconsIcon
+            icon={Shield01Icon}
+            className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5"
+          />
           <div>
             <p className="font-medium text-sm text-amber-900 dark:text-amber-100">
               It's your backup key
@@ -175,7 +185,10 @@ function RecoveryStep() {
           </div>
         </div>
         <div className="flex gap-3">
-          <Shield className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          <HugeiconsIcon
+            icon={Shield01Icon}
+            className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5"
+          />
           <div>
             <p className="font-medium text-sm text-amber-900 dark:text-amber-100">
               We can't reset it
@@ -195,17 +208,11 @@ function RecoveryStep() {
   );
 }
 
-function Feature({
-  icon: Icon,
-  text,
-}: {
-  icon: React.ElementType;
-  text: string;
-}) {
+function Feature({ icon, text }: { icon: IconSvgElement; text: string }) {
   return (
     <div className="flex items-center gap-3 rounded-xl bg-gray-50 dark:bg-gray-850/50 border border-gray-100 dark:border-gray-850 p-3">
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/12">
-        <Icon className="h-4 w-4 text-primary" />
+        <HugeiconsIcon icon={icon} size={16} className="text-primary" />
       </div>
       <span className="text-sm font-medium">{text}</span>
     </div>

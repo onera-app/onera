@@ -1,3 +1,5 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ComputerIcon, MoonIcon, SmartPhone01Icon, Sun01Icon } from "@hugeicons/core-free-icons";
 import { useTranslation } from 'react-i18next';
 import { useUIStore, type Theme, type ChatDensity } from '@/stores/uiStore';
 import { supportedLanguages } from '@/i18n';
@@ -13,7 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Sun, Moon, Monitor, Smartphone } from 'lucide-react';
 
 export function InterfaceTab() {
   const { t, i18n } = useTranslation();
@@ -29,10 +30,10 @@ export function InterfaceTab() {
   } = useUIStore();
 
   const themes: { value: Theme; label: string; icon: React.ReactNode }[] = [
-    { value: 'light', label: 'Light', icon: <Sun className="h-5 w-5" /> },
-    { value: 'dark', label: 'Dark', icon: <Moon className="h-5 w-5" /> },
-    { value: 'oled-dark', label: 'OLED Dark', icon: <Smartphone className="h-5 w-5" /> },
-    { value: 'system', label: 'System', icon: <Monitor className="h-5 w-5" /> },
+    { value: 'light', label: 'Light', icon: <HugeiconsIcon icon={Sun01Icon} className="h-5 w-5" /> },
+    { value: 'dark', label: 'Dark', icon: <HugeiconsIcon icon={MoonIcon} className="h-5 w-5" /> },
+    { value: 'oled-dark', label: 'OLED Dark', icon: <HugeiconsIcon icon={SmartPhone01Icon} className="h-5 w-5" /> },
+    { value: 'system', label: 'System', icon: <HugeiconsIcon icon={ComputerIcon} className="h-5 w-5" /> },
   ];
 
   const densities: { value: ChatDensity; label: string }[] = [

@@ -1,10 +1,13 @@
-/**
- * Attachment Preview Component
- * Shows pending attachments before sending a message
- */
-
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  AlertCircleIcon,
+  Cancel01Icon,
+  File01Icon,
+  FileAttachmentIcon,
+  Image01Icon,
+  Loading02Icon,
+} from "@hugeicons/core-free-icons";
 import { memo } from "react";
-import { X, FileText, File, Loader2, AlertCircle, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ProcessedFile } from "@/lib/fileProcessing";
@@ -76,7 +79,7 @@ function AttachmentItem({ attachment, onRemove }: AttachmentItemProps) {
         )}
         onClick={onRemove}
       >
-        <X className="h-3 w-3" />
+        <HugeiconsIcon icon={Cancel01Icon} className="h-3 w-3" />
       </Button>
 
       {/* Content based on status and type */}
@@ -87,7 +90,10 @@ function AttachmentItem({ attachment, onRemove }: AttachmentItemProps) {
             isImage ? "w-full h-full" : "",
           )}
         >
-          <Loader2 className="h-5 w-5 animate-spin text-gray-500 dark:text-gray-400" />
+          <HugeiconsIcon
+            icon={Loading02Icon}
+            className="h-5 w-5 animate-spin text-gray-500 dark:text-gray-400"
+          />
           {!isImage && (
             <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 truncate max-w-[120px]">
               Processing...
@@ -101,7 +107,10 @@ function AttachmentItem({ attachment, onRemove }: AttachmentItemProps) {
             isImage ? "w-full h-full justify-center" : "gap-2",
           )}
         >
-          <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0" />
+          <HugeiconsIcon
+            icon={AlertCircleIcon}
+            className="h-4 w-4 text-destructive flex-shrink-0"
+          />
           {!isImage && (
             <span className="text-xs text-destructive truncate max-w-[120px]">
               {error || "Failed"}
@@ -136,13 +145,33 @@ function AttachmentItem({ attachment, onRemove }: AttachmentItemProps) {
 function FileIcon({ type }: { type: string }) {
   switch (type) {
     case "image":
-      return <Image className="h-4 w-4 text-primary flex-shrink-0" />;
+      return (
+        <HugeiconsIcon
+          icon={Image01Icon}
+          className="h-4 w-4 text-primary flex-shrink-0"
+        />
+      );
     case "document":
-      return <FileText className="h-4 w-4 text-primary flex-shrink-0" />;
+      return (
+        <HugeiconsIcon
+          icon={FileAttachmentIcon}
+          className="h-4 w-4 text-primary flex-shrink-0"
+        />
+      );
     case "text":
-      return <File className="h-4 w-4 text-gray-500 dark:text-gray-400 flex-shrink-0" />;
+      return (
+        <HugeiconsIcon
+          icon={File01Icon}
+          className="h-4 w-4 text-gray-500 dark:text-gray-400 flex-shrink-0"
+        />
+      );
     default:
-      return <File className="h-4 w-4 text-gray-500 dark:text-gray-400 flex-shrink-0" />;
+      return (
+        <HugeiconsIcon
+          icon={File01Icon}
+          className="h-4 w-4 text-gray-500 dark:text-gray-400 flex-shrink-0"
+        />
+      );
   }
 }
 

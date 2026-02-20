@@ -1,8 +1,9 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Copy01Icon, Delete02Icon, PencilIcon } from "@hugeicons/core-free-icons";
 import { memo } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Copy, Pencil, Trash2 } from 'lucide-react';
 import { BranchNavigation, type BranchInfo } from './BranchNavigation';
 import { RegenerateMenu } from './RegenerateMenu';
 import type { RegenerateOptions } from './AssistantMessage';
@@ -52,7 +53,7 @@ export const MessageActions = memo(function MessageActions({
               onClick={onCopy}
               className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850"
             >
-              <Copy className="h-4 w-4" />
+              <HugeiconsIcon icon={Copy01Icon} className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Copy</TooltipContent>
@@ -68,7 +69,7 @@ export const MessageActions = memo(function MessageActions({
               onClick={onEdit}
               className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850"
             >
-              <Pencil className="h-4 w-4" />
+              <HugeiconsIcon icon={PencilIcon} className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Edit</TooltipContent>
@@ -95,7 +96,7 @@ export const MessageActions = memo(function MessageActions({
               onClick={onDelete}
               className="text-gray-500 dark:text-gray-400 hover:text-destructive rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850"
             >
-              <Trash2 className="h-4 w-4" />
+              <HugeiconsIcon icon={Delete02Icon} className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Delete</TooltipContent>

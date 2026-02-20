@@ -1,18 +1,13 @@
-/**
- * RegenerateMenu Component
- * Dropdown menu for regenerating AI responses with different options
- * Inspired by open-webui's implementation
- */
-
-import { useState, memo } from "react";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  RefreshCw,
-  ChevronDown,
-  Zap,
-  FileText,
-  Minimize2,
-  MessageSquare,
-} from "lucide-react";
+  ArrowDown01Icon,
+  FileAttachmentIcon,
+  FlashIcon,
+  Message01Icon,
+  Minimize02Icon,
+  Refresh01Icon,
+} from "@hugeicons/core-free-icons";
+import { useState, memo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -34,28 +29,28 @@ const REGENERATE_OPTIONS = [
     id: "retry",
     label: "Try Again",
     description: "Regenerate the response",
-    icon: RefreshCw,
+    icon: Refresh01Icon,
     modifier: undefined,
   },
   {
     id: "details",
     label: "Add Details",
     description: "Ask for more detailed explanation",
-    icon: FileText,
+    icon: FileAttachmentIcon,
     modifier: "Please provide more details and expand on your explanation.",
   },
   {
     id: "concise",
     label: "More Concise",
     description: "Ask for a shorter response",
-    icon: Minimize2,
+    icon: Minimize02Icon,
     modifier: "Please be more concise and brief in your response.",
   },
   {
     id: "creative",
     label: "Be Creative",
     description: "Ask for a more creative response",
-    icon: Zap,
+    icon: FlashIcon,
     modifier: "Please be more creative and think outside the box.",
   },
 ] as const;
@@ -89,8 +84,8 @@ export const RegenerateMenu = memo(function RegenerateMenu({
           disabled={disabled}
           className="h-7 gap-1 px-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
         >
-          <RefreshCw className="h-4 w-4" />
-          <ChevronDown className="h-3 w-3" />
+          <HugeiconsIcon icon={Refresh01Icon} className="h-4 w-4" />
+          <HugeiconsIcon icon={ArrowDown01Icon} className="h-3 w-3" />
         </Button>
       </DropdownMenuTrigger>
 
@@ -101,7 +96,10 @@ export const RegenerateMenu = memo(function RegenerateMenu({
             onClick={() => handleRegenerate(option.modifier)}
             className="flex items-start gap-3 px-3 py-2.5 cursor-pointer"
           >
-            <option.icon className="h-4 w-4 mt-0.5 shrink-0 text-gray-500 dark:text-gray-400" />
+            <HugeiconsIcon
+              icon={option.icon}
+              className="h-4 w-4 mt-0.5 shrink-0 text-gray-500 dark:text-gray-400"
+            />
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-medium">{option.label}</span>
               <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -116,7 +114,10 @@ export const RegenerateMenu = memo(function RegenerateMenu({
         {/* Custom prompt input */}
         <form onSubmit={handleCustomSubmit} className="p-2">
           <div className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4 shrink-0 text-gray-500 dark:text-gray-400" />
+            <HugeiconsIcon
+              icon={Message01Icon}
+              className="h-4 w-4 shrink-0 text-gray-500 dark:text-gray-400"
+            />
             <Input
               value={customPrompt}
               onChange={(e) => setCustomPrompt(e.target.value)}

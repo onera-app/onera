@@ -1,9 +1,24 @@
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { useDevices, useRevokeDevice, useDeleteDevice } from '@/hooks/queries/useDevices';
-import { getOrCreateDeviceId } from '@onera/crypto';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  ComputerIcon,
+  Delete02Icon,
+  LaptopIcon,
+  Loading02Icon,
+  SecurityCheckIcon,
+  Shield02Icon,
+  SmartPhone01Icon,
+  Tablet01Icon,
+} from "@hugeicons/core-free-icons";
+import { useState } from "react";
+import { toast } from "sonner";
+import {
+  useDevices,
+  useRevokeDevice,
+  useDeleteDevice,
+} from "@/hooks/queries/useDevices";
+import { getOrCreateDeviceId } from "@onera/crypto";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,9 +28,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
-import { Smartphone, Monitor, Tablet, Laptop, Loader2, Trash2, ShieldOff, ShieldCheck } from 'lucide-react';
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 
 interface Device {
   id: string;
@@ -28,19 +42,22 @@ interface Device {
 }
 
 function getDeviceIcon(userAgent: string | null) {
-  if (!userAgent) return Monitor;
+  if (!userAgent) return ComputerIcon;
 
   const ua = userAgent.toLowerCase();
-  if (ua.includes('iphone') || ua.includes('android') && ua.includes('mobile')) {
-    return Smartphone;
+  if (
+    ua.includes("iphone") ||
+    (ua.includes("android") && ua.includes("mobile"))
+  ) {
+    return SmartPhone01Icon;
   }
-  if (ua.includes('ipad') || ua.includes('tablet')) {
-    return Tablet;
+  if (ua.includes("ipad") || ua.includes("tablet")) {
+    return Tablet01Icon;
   }
-  if (ua.includes('macbook') || ua.includes('laptop')) {
-    return Laptop;
+  if (ua.includes("macbook") || ua.includes("laptop")) {
+    return LaptopIcon;
   }
-  return Monitor;
+  return ComputerIcon;
 }
 
 function formatLastSeen(date: Date | string) {
@@ -50,7 +67,7 @@ function formatLastSeen(date: Date | string) {
   const hours = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
 
-  if (minutes < 1) return 'Just now';
+  if (minutes < 1) return "Just now";
   if (minutes < 60) return `${minutes}m ago`;
   if (hours < 24) return `${hours}h ago`;
   if (days < 7) return `${days}d ago`;
@@ -71,10 +88,10 @@ export function DevicesTab() {
 
     try {
       await revokeDevice.mutateAsync({ deviceId: deviceToRevoke.deviceId });
-      toast.success('Device access revoked');
+      toast.success("Device access revoked");
       setDeviceToRevoke(null);
     } catch {
-      toast.error('Failed to revoke device');
+      toast.error("Failed to revoke device");
     }
   };
 
@@ -83,10 +100,10 @@ export function DevicesTab() {
 
     try {
       await deleteDevice.mutateAsync({ deviceId: deviceToDelete.deviceId });
-      toast.success('Device removed');
+      toast.success("Device removed");
       setDeviceToDelete(null);
     } catch {
-      toast.error('Failed to remove device');
+      toast.error("Failed to remove device");
     }
   };
 
@@ -109,7 +126,10 @@ export function DevicesTab() {
 
         {isLoading && (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-gray-500 dark:text-gray-400" />
+            <HugeiconsIcon
+              icon={Loading02Icon}
+              className="h-6 w-6 animate-spin text-gray-500 dark:text-gray-400"
+            />
           </div>
         )}
 
@@ -128,7 +148,7 @@ export function DevicesTab() {
         {devices && devices.length > 0 && (
           <div className="space-y-2">
             {devices.map((device: Device) => {
-              const DeviceIcon = getDeviceIcon(device.userAgent);
+              const deviceIcon = getDeviceIcon(device.userAgent);
               const isCurrentDevice = device.deviceId === currentDeviceId;
 
               return (
@@ -138,12 +158,16 @@ export function DevicesTab() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-850">
-                      <DeviceIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                      <HugeiconsIcon
+                        icon={deviceIcon}
+                        size={20}
+                        className="text-gray-500 dark:text-gray-400"
+                      />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-medium">
-                          {device.deviceName || 'Unknown Device'}
+                          {device.deviceName || "Unknown Device"}
                         </span>
                         {isCurrentDevice && (
                           <Badge variant="secondary" className="text-xs">
@@ -151,9 +175,16 @@ export function DevicesTab() {
                           </Badge>
                         )}
                         {device.trusted ? (
-                          <ShieldCheck className="h-4 w-4 text-green-500" />
+                          <HugeiconsIcon
+                            icon={SecurityCheckIcon}
+                            size={16}
+                            className="text-green-500"
+                          />
                         ) : (
-                          <ShieldOff className="h-4 w-4 text-amber-500" />
+                          <HugeiconsIcon
+                            icon={Shield02Icon}
+                            className="h-4 w-4 text-amber-500"
+                          />
                         )}
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -171,7 +202,10 @@ export function DevicesTab() {
                           onClick={() => setDeviceToRevoke(device)}
                           disabled={revokeDevice.isPending}
                         >
-                          <ShieldOff className="h-4 w-4 mr-1" />
+                          <HugeiconsIcon
+                            icon={Shield02Icon}
+                            className="h-4 w-4 mr-1"
+                          />
                           Revoke
                         </Button>
                       )}
@@ -181,7 +215,10 @@ export function DevicesTab() {
                         onClick={() => setDeviceToDelete(device)}
                         disabled={deleteDevice.isPending}
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <HugeiconsIcon
+                          icon={Delete02Icon}
+                          className="h-4 w-4 text-destructive"
+                        />
                       </Button>
                     </div>
                   )}
@@ -192,18 +229,23 @@ export function DevicesTab() {
         )}
 
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Revoking a device will require re-authentication with your recovery phrase to access your data from that device.
+          Revoking a device will require re-authentication with your recovery
+          phrase to access your data from that device.
         </p>
       </div>
 
       {/* Revoke Confirmation Dialog */}
-      <AlertDialog open={!!deviceToRevoke} onOpenChange={() => setDeviceToRevoke(null)}>
+      <AlertDialog
+        open={!!deviceToRevoke}
+        onOpenChange={() => setDeviceToRevoke(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Revoke Device Access?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will mark "{deviceToRevoke?.deviceName || 'this device'}" as untrusted.
-              The device will need to re-authenticate with your recovery phrase to access encrypted data.
+              This will mark "{deviceToRevoke?.deviceName || "this device"}" as
+              untrusted. The device will need to re-authenticate with your
+              recovery phrase to access encrypted data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -216,18 +258,25 @@ export function DevicesTab() {
       </AlertDialog>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deviceToDelete} onOpenChange={() => setDeviceToDelete(null)}>
+      <AlertDialog
+        open={!!deviceToDelete}
+        onOpenChange={() => setDeviceToDelete(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Remove Device?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will remove "{deviceToDelete?.deviceName || 'this device'}" from your account.
-              The device will need to set up encryption again to access your data.
+              This will remove "{deviceToDelete?.deviceName || "this device"}"
+              from your account. The device will need to set up encryption again
+              to access your data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-white hover:bg-destructive/90"
+            >
               Remove Device
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -1,10 +1,6 @@
-/**
- * CodeArtifact Component
- * Renders code with Monaco editor for editing and syntax highlighting
- */
-
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowLeft01Icon, ArrowRight01Icon, Copy01Icon, Download01Icon, Tick01Icon } from "@hugeicons/core-free-icons";
 import { memo, useState, useCallback, lazy, Suspense } from 'react';
-import { Copy, Check, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -148,7 +144,7 @@ export const CodeArtifact = memo(function CodeArtifact({
                 onClick={handlePrevVersion}
                 disabled={currentVersionIndex === 0}
               >
-                <ChevronLeft className="h-4 w-4" />
+                <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4" />
               </Button>
               <span className="text-xs text-gray-500 dark:text-gray-400">
                 {currentVersionIndex + 1} / {versions.length}
@@ -159,7 +155,7 @@ export const CodeArtifact = memo(function CodeArtifact({
                 onClick={handleNextVersion}
                 disabled={currentVersionIndex === versions.length - 1}
               >
-                <ChevronRight className="h-4 w-4" />
+                <HugeiconsIcon icon={ArrowRight01Icon} className="h-4 w-4" />
               </Button>
             </div>
           )}
@@ -185,15 +181,15 @@ export const CodeArtifact = memo(function CodeArtifact({
           {/* Copy button */}
           <Button variant="ghost" size="icon-sm" onClick={handleCopy}>
             {copied ? (
-              <Check className="h-4 w-4 text-status-success-text" />
+              <HugeiconsIcon icon={Tick01Icon} className="h-4 w-4 text-status-success-text" />
             ) : (
-              <Copy className="h-4 w-4" />
+              <HugeiconsIcon icon={Copy01Icon} className="h-4 w-4" />
             )}
           </Button>
 
           {/* Download button */}
           <Button variant="ghost" size="icon-sm" onClick={handleDownload}>
-            <Download className="h-4 w-4" />
+            <HugeiconsIcon icon={Download01Icon} className="h-4 w-4" />
           </Button>
         </div>
       </div>

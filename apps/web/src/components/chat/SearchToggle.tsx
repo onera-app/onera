@@ -1,10 +1,6 @@
-/**
- * Search Toggle Component
- * Per-message toggle for web search functionality — Open WebUI style
- */
-
+import { HugeiconsIcon } from "@hugeicons/react";
+import { GlobeIcon, Loading02Icon, SparklesIcon, Tick01Icon } from "@hugeicons/core-free-icons";
 import { memo } from "react";
-import { Globe, Loader2, Check, Sparkles } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -53,7 +49,7 @@ export const SearchToggle = memo(function SearchToggle({
             disabled
             className="p-[7px] rounded-full bg-transparent text-gray-400 dark:text-gray-600 transition-colors"
           >
-            <Sparkles className="h-4 w-4" />
+            <HugeiconsIcon icon={SparklesIcon} className="h-4 w-4" />
           </button>
         </TooltipTrigger>
         <TooltipContent>
@@ -85,9 +81,9 @@ export const SearchToggle = memo(function SearchToggle({
             onClick={() => onToggle(!enabled)}
           >
             {isSearching ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <HugeiconsIcon icon={Loading02Icon} className="h-4 w-4 animate-spin" />
             ) : (
-              <Sparkles className="h-4 w-4" />
+              <HugeiconsIcon icon={SparklesIcon} className="h-4 w-4" />
             )}
           </button>
         </TooltipTrigger>
@@ -116,9 +112,9 @@ export const SearchToggle = memo(function SearchToggle({
               )}
             >
               {isSearching ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <HugeiconsIcon icon={Loading02Icon} className="h-4 w-4 animate-spin" />
               ) : (
-                <Sparkles className="h-4 w-4" />
+                <HugeiconsIcon icon={SparklesIcon} className="h-4 w-4" />
               )}
             </button>
           </DropdownMenuTrigger>
@@ -137,7 +133,7 @@ export const SearchToggle = memo(function SearchToggle({
           className="flex items-center justify-between"
         >
           <span>{enabled ? "Disable" : "Enable"} search</span>
-          {enabled && <Check className="h-4 w-4 ml-2" />}
+          {enabled && <HugeiconsIcon icon={Tick01Icon} className="h-4 w-4 ml-2" />}
         </DropdownMenuItem>
 
         {enabled && availableProviders.length > 1 && (
@@ -154,7 +150,7 @@ export const SearchToggle = memo(function SearchToggle({
               >
                 <span>{provider.name}</span>
                 {provider.id === currentProvider && (
-                  <Check className="h-4 w-4 ml-2" />
+                  <HugeiconsIcon icon={Tick01Icon} className="h-4 w-4 ml-2" />
                 )}
               </DropdownMenuItem>
             ))}
@@ -187,7 +183,7 @@ export function SearchBadge({
         className,
       )}
     >
-      <Globe className="h-3 w-3" />
+      <HugeiconsIcon icon={GlobeIcon} className="h-3 w-3" />
       <span>
         {resultCount} result{resultCount !== 1 ? "s" : ""} via {provider}
       </span>

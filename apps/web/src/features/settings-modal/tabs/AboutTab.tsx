@@ -1,11 +1,24 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { ExternalLink, Github, MessageCircle, BookOpen, Heart } from 'lucide-react';
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  BookOpen01Icon,
+  BubbleChatIcon,
+  FavouriteIcon,
+  GithubIcon,
+  LinkSquare01Icon,
+} from "@hugeicons/core-free-icons";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 // Version info - should be injected at build time in production
-const APP_VERSION = '0.1.0';
-const BUILD_DATE = new Date().toISOString().split('T')[0];
+const APP_VERSION = "0.1.0";
+const BUILD_DATE = new Date().toISOString().split("T")[0];
 
 export function AboutTab() {
   return (
@@ -39,8 +52,8 @@ export function AboutTab() {
 
           <div className="space-y-2">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Onera is an open-source AI chat interface that puts privacy first. Your API keys and
-              conversations are encrypted end-to-end.
+              Onera is an open-source AI chat interface that puts privacy first.
+              Your API keys and conversations are encrypted end-to-end.
             </p>
           </div>
         </CardContent>
@@ -56,9 +69,12 @@ export function AboutTab() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Github className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={GithubIcon} className="h-4 w-4 mr-2" />
               GitHub Repository
-              <ExternalLink className="h-3 w-3 ml-auto" />
+              <HugeiconsIcon
+                icon={LinkSquare01Icon}
+                className="h-3 w-3 ml-auto"
+              />
             </a>
           </Button>
 
@@ -68,9 +84,12 @@ export function AboutTab() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <BookOpen className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={BookOpen01Icon} className="h-4 w-4 mr-2" />
               Documentation
-              <ExternalLink className="h-3 w-3 ml-auto" />
+              <HugeiconsIcon
+                icon={LinkSquare01Icon}
+                className="h-3 w-3 ml-auto"
+              />
             </a>
           </Button>
 
@@ -80,9 +99,12 @@ export function AboutTab() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <MessageCircle className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={BubbleChatIcon} className="h-4 w-4 mr-2" />
               Community Discord
-              <ExternalLink className="h-3 w-3 ml-auto" />
+              <HugeiconsIcon
+                icon={LinkSquare01Icon}
+                className="h-3 w-3 ml-auto"
+              />
             </a>
           </Button>
         </div>
@@ -94,12 +116,17 @@ export function AboutTab() {
         <Card>
           <CardContent className="pt-4">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Built with React, TanStack Router, tRPC, and Tailwind CSS. Inspired by open-webui
-              and other excellent open-source AI interfaces.
+              Built with React, TanStack Router, tRPC, and Tailwind CSS.
+              Inspired by open-webui and other excellent open-source AI
+              interfaces.
             </p>
             <div className="flex items-center gap-1 mt-3 text-sm text-gray-500 dark:text-gray-400">
               <span>Made with</span>
-              <Heart className="h-4 w-4 text-red-500 fill-red-500" />
+              <HugeiconsIcon
+                icon={FavouriteIcon}
+                size={16}
+                className="text-red-500"
+              />
               <span>by the Onera team</span>
             </div>
           </CardContent>
@@ -110,7 +137,8 @@ export function AboutTab() {
       <div className="space-y-3">
         <h4 className="text-sm font-medium">License</h4>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Onera is open-source software licensed under the GNU Affero General Public License v3.0.
+          Onera is open-source software licensed under the GNU Affero General
+          Public License v3.0.
         </p>
       </div>
 
@@ -120,19 +148,31 @@ export function AboutTab() {
         <div className="grid gap-2 text-sm">
           <div className="flex items-center justify-between">
             <span className="text-gray-500 dark:text-gray-400">New Chat</span>
-            <kbd className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-850 rounded">⌘ N</kbd>
+            <kbd className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-850 rounded">
+              ⌘ N
+            </kbd>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-gray-500 dark:text-gray-400">Toggle Sidebar</span>
-            <kbd className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-850 rounded">⌘ B</kbd>
+            <span className="text-gray-500 dark:text-gray-400">
+              Toggle Sidebar
+            </span>
+            <kbd className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-850 rounded">
+              ⌘ B
+            </kbd>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-gray-500 dark:text-gray-400">Settings</span>
-            <kbd className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-850 rounded">⌘ ,</kbd>
+            <kbd className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-850 rounded">
+              ⌘ ,
+            </kbd>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-gray-500 dark:text-gray-400">Search Chats</span>
-            <kbd className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-850 rounded">⌘ K</kbd>
+            <span className="text-gray-500 dark:text-gray-400">
+              Search Chats
+            </span>
+            <kbd className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-850 rounded">
+              ⌘ K
+            </kbd>
           </div>
         </div>
       </div>

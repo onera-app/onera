@@ -1,7 +1,8 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type SubscriptionStatus = "active" | "on_hold" | "cancelled" | "trialing" | "expired";
@@ -126,7 +127,7 @@ export function AdminSubscriptionsPage() {
               disabled={page === 0}
               aria-label="Previous page"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4" />
             </Button>
             <Button
               variant="outline"
@@ -135,7 +136,7 @@ export function AdminSubscriptionsPage() {
               disabled={page >= totalPages - 1}
               aria-label="Next page"
             >
-              <ChevronRight className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowRight01Icon} className="h-4 w-4" />
             </Button>
           </div>
         </div>
