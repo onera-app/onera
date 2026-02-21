@@ -79,9 +79,35 @@ export function useCreateFolder() {
 export function useUpdateFolder() {
   const utils = trpc.useUtils();
   const mutation = trpc.folders.update.useMutation({
-    onSuccess: (data) => {
+    onMutate: async (variables) => {
+      await utils.folders.list.cancel();
+      const previousFolders = utils.folders.list.getData();
+
+      if (previousFolders) {
+        // We only have encryptedName and parentId in variables
+        // We can't optimistically decrypt name without useE2EE state which we don't have here. 
+        // But we can trigger an optimistic update on the basic structure.
+        utils.folders.list.setData(
+          undefined,
+          previousFolders.map((f) =>
+            f.id === variables.folderId
+              ? { ...f, ...variables, updatedAt: Date.now() }
+              : f
+          )
+        );
+      }
+      return { previousFolders };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousFolders) {
+        utils.folders.list.setData(undefined, context.previousFolders);
+      }
+    },
+    onSettled: (data) => {
       utils.folders.list.invalidate();
-      utils.folders.get.invalidate({ folderId: data.id });
+      if (data?.id) {
+        utils.folders.get.invalidate({ folderId: data.id });
+      }
     },
   });
 
@@ -145,7 +171,23 @@ export function useUpdateFolder() {
 export function useDeleteFolder() {
   const utils = trpc.useUtils();
   const mutation = trpc.folders.remove.useMutation({
-    onSuccess: () => {
+    onMutate: async ({ folderId }) => {
+      await utils.folders.list.cancel();
+      const previousFolders = utils.folders.list.getData();
+      if (previousFolders) {
+        utils.folders.list.setData(
+          undefined,
+          previousFolders.filter((f) => f.id !== folderId)
+        );
+      }
+      return { previousFolders };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousFolders) {
+        utils.folders.list.setData(undefined, context.previousFolders);
+      }
+    },
+    onSettled: () => {
       return utils.folders.list.invalidate();
     },
   });

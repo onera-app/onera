@@ -1025,10 +1025,12 @@ export function ChatPage() {
       const { encryptedChatKey, chatKeyNonce } = encryptionKeysRef.current;
       if (!chatId || !encryptedChatKey || !chatKeyNonce) return;
 
+      const prevHistory = currentHistoryRef.current;
+
       try {
         // Create a new branch from the edit
         const { history: newHistory } = createBranchFromEdit(
-          currentHistoryRef.current,
+          prevHistory,
           messageId,
           newContent,
         );
@@ -1036,6 +1038,20 @@ export function ChatPage() {
         // Update history ref and local state for immediate UI updates
         currentHistoryRef.current = newHistory;
         setLocalHistory(newHistory);
+
+        // Now re-send to get a new AI response (Optimistic Update)
+        // The AI messages need to be updated to reflect the new branch
+        const newMessages = createMessagesList(newHistory);
+        const uiMessages = newMessages.map(toUIMessage);
+        setMessages(uiMessages);
+
+        // Trigger a new AI response by sending the edited message securely
+        if (selectedModelId && isReady) {
+          // Find the user message we just created and get its ID
+          const editedUserMessage = newMessages[newMessages.length - 1]; // This is usually the last message in an edit-branch re-run
+          // We don't await this immediately so that UI updates without blocking on server mutation
+          sendMessage(newContent, { id: editedUserMessage?.id }).catch(console.error);
+        }
 
         // Encrypt and save to server
         const encrypted = encryptChatContent(
@@ -1053,21 +1069,13 @@ export function ChatPage() {
           },
         });
 
-        toast.success("Message edited - new branch created");
-
-        // Now re-send to get a new AI response
-        // The AI messages need to be updated to reflect the new branch
-        const newMessages = createMessagesList(newHistory);
-        const uiMessages = newMessages.map(toUIMessage);
-        setMessages(uiMessages);
-
-        // Trigger a new AI response by sending the edited message
-        if (selectedModelId && isReady) {
-          // Find the user message we just created and get its ID
-          const editedUserMessage = newMessages[newMessages.length - 1]; // This is usually the last message in an edit-branch re-run
-          await sendMessage(newContent, { id: editedUserMessage?.id });
-        }
       } catch (error) {
+        // Rollback state
+        currentHistoryRef.current = prevHistory;
+        setLocalHistory(prevHistory);
+        const prevMessages = createMessagesList(prevHistory);
+        setMessages(prevMessages.map(toUIMessage));
+
         console.error("Failed to edit message:", error);
         toast.error("Failed to edit message");
       }
@@ -1081,15 +1089,17 @@ export function ChatPage() {
       const { encryptedChatKey, chatKeyNonce } = encryptionKeysRef.current;
       if (!chatId || !encryptedChatKey || !chatKeyNonce) return;
 
+      const prevHistory = currentHistoryRef.current;
+
       try {
         // Switch to the new branch
-        const newHistory = switchToBranch(currentHistoryRef.current, messageId);
+        const newHistory = switchToBranch(prevHistory, messageId);
 
         // Update history ref and local state immediately for responsive UI
         currentHistoryRef.current = newHistory;
         setLocalHistory(newHistory);
 
-        // Update AI messages to reflect the switched branch
+        // Update AI messages to reflect the switched branch OPTIMISTICALLY
         const newMessages = createMessagesList(newHistory);
         const uiMessages = newMessages.map(toUIMessage);
         setMessages(uiMessages);
@@ -1122,6 +1132,12 @@ export function ChatPage() {
           },
         });
       } catch (error) {
+        // Rollback state
+        currentHistoryRef.current = prevHistory;
+        setLocalHistory(prevHistory);
+        const prevMessages = createMessagesList(prevHistory);
+        setMessages(prevMessages.map(toUIMessage));
+
         console.error("Failed to switch branch:", error);
         toast.error("Failed to switch branch");
       }
@@ -1209,10 +1225,12 @@ export function ChatPage() {
       const { encryptedChatKey, chatKeyNonce } = encryptionKeysRef.current;
       if (!chatId || !encryptedChatKey || !chatKeyNonce) return;
 
+      const prevHistory = currentHistoryRef.current;
+
       try {
         // Delete the message and its children from history
         const newHistory = deleteMessage(
-          currentHistoryRef.current,
+          prevHistory,
           messageId,
           true,
         );
@@ -1220,6 +1238,19 @@ export function ChatPage() {
         // Update history ref and local state for immediate UI updates
         currentHistoryRef.current = newHistory;
         setLocalHistory(newHistory);
+
+        // Update AI messages to reflect the deletion OPTIMISTICALLY
+        const newMessages = createMessagesList(newHistory);
+        const uiMessages = newMessages.map(toUIMessage);
+        setMessages(uiMessages);
+
+        // Clear follow-ups if we deleted the last message
+        if (
+          newMessages.length === 0 ||
+          newMessages[newMessages.length - 1]?.role !== "assistant"
+        ) {
+          setFollowUps([]);
+        }
 
         // Encrypt and save to server
         const encrypted = encryptChatContent(
@@ -1237,21 +1268,13 @@ export function ChatPage() {
           },
         });
 
-        // Update AI messages to reflect the deletion
-        const newMessages = createMessagesList(newHistory);
-        const uiMessages = newMessages.map(toUIMessage);
-        setMessages(uiMessages);
-
-        // Clear follow-ups if we deleted the last message
-        if (
-          newMessages.length === 0 ||
-          newMessages[newMessages.length - 1]?.role !== "assistant"
-        ) {
-          setFollowUps([]);
-        }
-
-        toast.success("Message deleted");
       } catch (error) {
+        // Rollback state
+        currentHistoryRef.current = prevHistory;
+        setLocalHistory(prevHistory);
+        const prevMessages = createMessagesList(prevHistory);
+        setMessages(prevMessages.map(toUIMessage));
+
         console.error("Failed to delete message:", error);
         toast.error("Failed to delete message");
       }

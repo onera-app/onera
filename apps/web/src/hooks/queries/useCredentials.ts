@@ -84,7 +84,27 @@ export function useCreateCredential() {
 export function useUpdateCredential() {
   const utils = trpc.useUtils();
   const mutation = trpc.credentials.update.useMutation({
-    onSuccess: () => {
+    onMutate: async (variables) => {
+      await utils.credentials.list.cancel();
+      const previousCredentials = utils.credentials.list.getData();
+      if (previousCredentials) {
+        utils.credentials.list.setData(
+          undefined,
+          previousCredentials.map((c) =>
+            c.id === variables.credentialId
+              ? { ...c, ...variables, updatedAt: Date.now() }
+              : c
+          )
+        );
+      }
+      return { previousCredentials };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousCredentials) {
+        utils.credentials.list.setData(undefined, context.previousCredentials);
+      }
+    },
+    onSettled: () => {
       utils.credentials.list.invalidate();
     },
   });
@@ -186,7 +206,23 @@ export function useUpdateCredential() {
 export function useDeleteCredential() {
   const utils = trpc.useUtils();
   const mutation = trpc.credentials.remove.useMutation({
-    onSuccess: () => {
+    onMutate: async ({ credentialId }) => {
+      await utils.credentials.list.cancel();
+      const previousCredentials = utils.credentials.list.getData();
+      if (previousCredentials) {
+        utils.credentials.list.setData(
+          undefined,
+          previousCredentials.filter((c) => c.id !== credentialId)
+        );
+      }
+      return { previousCredentials };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousCredentials) {
+        utils.credentials.list.setData(undefined, context.previousCredentials);
+      }
+    },
+    onSettled: () => {
       utils.credentials.list.invalidate();
     },
   });

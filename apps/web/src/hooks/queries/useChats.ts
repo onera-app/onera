@@ -76,16 +76,37 @@ export function useCreateChat() {
 export function useUpdateChat() {
   const utils = trpc.useUtils();
   const mutation = trpc.chats.update.useMutation({
+    onMutate: async (variables) => {
+      await utils.chats.list.cancel();
+      const previousChats = utils.chats.list.getData();
+      if (previousChats) {
+        utils.chats.list.setData(
+          undefined,
+          previousChats.map((chat) =>
+            chat.id === variables.chatId
+              ? { ...chat, ...variables, updatedAt: Date.now() }
+              : chat
+          )
+        );
+      }
+      return { previousChats };
+    },
     onSuccess: (_data, variables) => {
       // Invalidate list if title, folder, or pinned status was updated (for sidebar display)
       // Don't invalidate on message saves to avoid re-render cascade
-      if (variables.encryptedTitle || variables.folderId !== undefined || variables.pinned !== undefined) {
+      if (variables.encryptedTitle || variables.folderId !== undefined || variables.pinned !== undefined || variables.archived !== undefined) {
         utils.chats.list.invalidate();
       }
       // Never invalidate chats.get - local state is source of truth
     },
-    onError: (error) => {
+    onError: (error, _variables, context) => {
+      if (context?.previousChats) {
+        utils.chats.list.setData(undefined, context.previousChats);
+      }
       toast.error("Failed to sync chat to server: " + error.message);
+    },
+    onSettled: () => {
+      return utils.chats.list.invalidate();
     },
   });
 
@@ -142,11 +163,25 @@ export function useUpdateChat() {
 export function useDeleteChat() {
   const utils = trpc.useUtils();
   const mutation = trpc.chats.remove.useMutation({
-    onSuccess: () => {
-      return utils.chats.list.invalidate();
+    onMutate: async ({ chatId }) => {
+      await utils.chats.list.cancel();
+      const previousChats = utils.chats.list.getData();
+      if (previousChats) {
+        utils.chats.list.setData(
+          undefined,
+          previousChats.filter((chat) => chat.id !== chatId)
+        );
+      }
+      return { previousChats };
     },
-    onError: (error) => {
+    onError: (error, _variables, context) => {
+      if (context?.previousChats) {
+        utils.chats.list.setData(undefined, context.previousChats);
+      }
       toast.error("Failed to delete chat: " + error.message);
+    },
+    onSettled: () => {
+      return utils.chats.list.invalidate();
     },
   });
 

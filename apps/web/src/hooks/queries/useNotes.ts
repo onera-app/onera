@@ -59,11 +59,33 @@ export function useCreateNote() {
 export function useUpdateNote() {
   const utils = trpc.useUtils();
   const mutation = trpc.notes.update.useMutation({
-    onSuccess: (data) => {
-      return Promise.all([
-        utils.notes.list.invalidate(),
-        utils.notes.get.invalidate({ noteId: data.id }),
-      ]);
+    onMutate: async (variables) => {
+      await utils.notes.list.cancel();
+      const previousNotes = utils.notes.list.getData();
+      if (previousNotes) {
+        // We can't optimistically decrypt everything if keys are needed, but we can optimistically structure it
+        utils.notes.list.setData(
+          undefined,
+          previousNotes.map((n) =>
+            n.id === variables.noteId
+              ? { ...n, ...variables, updatedAt: Date.now() }
+              : n
+          )
+        );
+      }
+      return { previousNotes };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousNotes) {
+        utils.notes.list.setData(undefined, context.previousNotes);
+      }
+    },
+    onSettled: (data) => {
+      const promises = [utils.notes.list.invalidate()];
+      if (data?.id) {
+        promises.push(utils.notes.get.invalidate({ noteId: data.id }));
+      }
+      return Promise.all(promises);
     },
   });
 
@@ -121,7 +143,23 @@ export function useUpdateNote() {
 export function useDeleteNote() {
   const utils = trpc.useUtils();
   const mutation = trpc.notes.remove.useMutation({
-    onSuccess: () => {
+    onMutate: async ({ noteId }) => {
+      await utils.notes.list.cancel();
+      const previousNotes = utils.notes.list.getData();
+      if (previousNotes) {
+        utils.notes.list.setData(
+          undefined,
+          previousNotes.filter((n) => n.id !== noteId)
+        );
+      }
+      return { previousNotes };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousNotes) {
+        utils.notes.list.setData(undefined, context.previousNotes);
+      }
+    },
+    onSettled: () => {
       return utils.notes.list.invalidate();
     },
   });

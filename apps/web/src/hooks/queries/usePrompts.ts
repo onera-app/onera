@@ -127,9 +127,31 @@ export function useCreatePrompt() {
 export function useUpdatePrompt() {
   const utils = trpc.useUtils();
   const mutation = trpc.prompts.update.useMutation({
-    onSuccess: (data) => {
+    onMutate: async (variables) => {
+      await utils.prompts.list.cancel();
+      const previousPrompts = utils.prompts.list.getData();
+      if (previousPrompts) {
+        utils.prompts.list.setData(
+          undefined,
+          previousPrompts.map((p) =>
+            p.id === variables.promptId
+              ? { ...p, ...variables, updatedAt: Date.now() }
+              : p
+          )
+        );
+      }
+      return { previousPrompts };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousPrompts) {
+        utils.prompts.list.setData(undefined, context.previousPrompts);
+      }
+    },
+    onSettled: (data) => {
       utils.prompts.list.invalidate();
-      utils.prompts.get.invalidate({ promptId: data.id });
+      if (data?.id) {
+        utils.prompts.get.invalidate({ promptId: data.id });
+      }
     },
   });
 
@@ -224,7 +246,23 @@ export function useUpdatePrompt() {
 export function useDeletePrompt() {
   const utils = trpc.useUtils();
   const mutation = trpc.prompts.remove.useMutation({
-    onSuccess: () => {
+    onMutate: async ({ promptId }) => {
+      await utils.prompts.list.cancel();
+      const previousPrompts = utils.prompts.list.getData();
+      if (previousPrompts) {
+        utils.prompts.list.setData(
+          undefined,
+          previousPrompts.filter((p) => p.id !== promptId)
+        );
+      }
+      return { previousPrompts };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousPrompts) {
+        utils.prompts.list.setData(undefined, context.previousPrompts);
+      }
+    },
+    onSettled: () => {
       utils.prompts.list.invalidate();
     },
   });
