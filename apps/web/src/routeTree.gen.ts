@@ -18,6 +18,7 @@ import { PricingPage } from './routes/pricing';
 import { BillingPage } from './routes/billing';
 import { AdminLayout } from './components/admin/AdminLayout';
 import { RouteErrorFallback } from './components/system/RouteErrorFallback';
+import { ChatErrorFallback } from './components/chat/ChatErrorFallback';
 import { AdminDashboard } from './routes/admin/index';
 import { AdminUsersPage } from './routes/admin/users';
 import { AdminUserDetailPage } from './routes/admin/user-detail';
@@ -99,6 +100,7 @@ const chatRoute = createRoute({
   getParentRoute: () => appRoute,
   path: '/c/$chatId',
   component: ChatPage,
+  errorComponent: ChatErrorFallback,
   validateSearch: (search: Record<string, unknown>): { pending: boolean; messageId?: string } => ({
     pending: search.pending === 'true' || search.pending === true,
     messageId: typeof search.messageId === 'string' ? search.messageId : undefined,
