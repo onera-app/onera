@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Manrope:wght@400;500;600;700&family=Prata&display=swap");
 @source "../node_modules/streamdown/dist/*.js";
 
 /*
@@ -101,6 +101,7 @@
     sans-serif;
   --font-mono: "SF Mono", "JetBrains Mono", ui-monospace, monospace;
   --font-primary: "Archivo", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-prata: "Prata", serif;
   --font-landing:
     -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
     "Helvetica Neue", "Helvetica", "Arial", sans-serif;
@@ -294,6 +295,7 @@ html.landing-page-active #root {
 
 /* ── Utility Classes ───────────────────────────────────────────── */
 @layer utilities {
+
   /* Font primary — Archivo display font (sidebar, nav, input) */
   .font-primary {
     font-family: "Archivo", "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -504,6 +506,7 @@ html.landing-page-active #root {
 
   /* Reduce motion */
   @media (prefers-reduced-motion: reduce) {
+
     .streaming-cursor::after,
     .typing-dot {
       animation: none;
@@ -572,6 +575,7 @@ html.landing-page-active #root {
 }
 
 @keyframes pulse-soft {
+
   0%,
   100% {
     opacity: 0.4;
@@ -585,6 +589,7 @@ html.landing-page-active #root {
 }
 
 @keyframes gradient-float {
+
   0%,
   100% {
     transform: translate(0, 0) scale(1);
@@ -608,6 +613,7 @@ html.landing-page-active #root {
 }
 
 @keyframes gradient-float-delayed {
+
   0%,
   100% {
     transform: translate(0, 0) scale(1);
@@ -626,6 +632,7 @@ html.landing-page-active #root {
 }
 
 @keyframes gradient-float-slow {
+
   0%,
   100% {
     transform: translate(0, 0) scale(1) rotate(0deg);
@@ -639,6 +646,7 @@ html.landing-page-active #root {
 }
 
 @keyframes gradient-float-reverse {
+
   0%,
   100% {
     transform: translate(0, 0) scale(1);
@@ -671,6 +679,7 @@ html.landing-page-active #root {
     opacity: 0;
     transform: translateY(40px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -690,6 +699,7 @@ html.landing-page-active #root {
 }
 
 @keyframes typing-pulse {
+
   0%,
   100% {
     opacity: 0.25;
@@ -703,6 +713,7 @@ html.landing-page-active #root {
 }
 
 @keyframes streaming-blink {
+
   0%,
   100% {
     opacity: 1;
@@ -726,6 +737,7 @@ html.landing-page-active #root {
 }
 
 @keyframes cursor-blink {
+
   0%,
   100% {
     opacity: 0.7;

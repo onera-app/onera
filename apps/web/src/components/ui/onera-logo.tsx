@@ -6,17 +6,16 @@ interface OneraLogoProps {
 }
 
 /**
- * Onera logo component - renders the brand logo SVG
+ * Onera logo component - renders the brand logo
  * Use this component consistently across the app for brand identity
  */
 export function OneraLogo({ className, size = 24 }: OneraLogoProps) {
   return (
     <img
-      src="/favicon.svg"
+      src="/onera-logo.png"
       alt="Onera"
-      width={size}
-      height={size}
-      className={cn("object-contain", className)}
+      style={{ width: size, height: size }}
+      className={cn("object-cover", className)}
     />
   );
 }
