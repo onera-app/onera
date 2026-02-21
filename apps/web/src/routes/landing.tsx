@@ -87,7 +87,7 @@ export function LandingPage() {
   const statsRef = useRef < HTMLElement > (null);
 
   useEffect(() => {
-    const landingBg = "#f6f6f6";
+    const landingBg = "#ffffff";
     const html = document.documentElement;
     const body = document.body;
     const meta = document.querySelector('meta[name="theme-color"]');
