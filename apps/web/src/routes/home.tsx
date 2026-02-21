@@ -93,25 +93,48 @@ export function HomePage() {
 
         const initialTitle = "New Chat";
 
-        const { data: encryptedData } = await createEncryptedChat(
+        const { chatId: newChatId, data: encryptedData } = await createEncryptedChat(
           initialTitle,
           history as unknown as Record<string, unknown>,
         );
 
-        const createdChat = await createChat.mutateAsync({
+        // Pre-populate the cache with an optimistic chat object
+        // This ensures the ChatPage can render immediately even before the mutation finishes
+        const optimisticChat = {
+          id: newChatId,
+          userId: "temp",
+          isEncrypted: true,
           encryptedChatKey: encryptedData.encryptedChatKey,
           chatKeyNonce: encryptedData.chatKeyNonce,
           encryptedTitle: encryptedData.encryptedTitle,
           titleNonce: encryptedData.titleNonce,
           encryptedChat: encryptedData.encryptedChat,
           chatNonce: encryptedData.chatNonce,
+          folderId: null,
+          pinned: false,
+          archived: false,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+
+        // Update caches
+        utils.chats.get.setData({ chatId: newChatId }, optimisticChat as any);
+
+        const currentList = utils.chats.list.getData();
+        if (currentList) {
+          utils.chats.list.setData(undefined, [optimisticChat as any, ...currentList]);
+        }
+
+        // Fire mutation in the background
+        createChat.mutate({
+          id: newChatId,
+          ...encryptedData,
         });
 
-        utils.chats.get.setData({ chatId: createdChat.id }, createdChat);
-
+        // Navigate immediately - ChatPage will see 'pending: true' and start the AI stream
         navigate({
           to: "/app/c/$chatId",
-          params: { chatId: createdChat.id },
+          params: { chatId: newChatId },
           search: { pending: true },
         });
       } catch (err) {

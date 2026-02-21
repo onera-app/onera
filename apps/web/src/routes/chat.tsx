@@ -1013,8 +1013,18 @@ export function ChatPage() {
               chatKeyNonce: encryptedData.chatKeyNonce,
             };
 
-            // Don't navigate yet! Stay on /app to preserve the component and streaming state.
-            // We'll navigate in handleFinish once the stream is done.
+            // Navigate immediately to the newly created chat ID.
+            // We use replace: true to update the current "new chat" state to the real chat URL.
+            // We set pending: true so the new mount triggers the AI stream.
+            navigate({
+              to: "/app/c/$chatId",
+              params: { chatId: newChatId },
+              search: { pending: true },
+              replace: true,
+            });
+
+            // Stop execution in this component instance to allow the new mount to handle the stream.
+            return;
 
           } catch (err) {
             console.error("Failed to create chat:", err);

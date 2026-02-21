@@ -1,5 +1,7 @@
 import { trpc } from "@/lib/trpc";
 
+import { toast } from "sonner";
+
 /**
  * List all chats for the current user
  */
@@ -31,6 +33,9 @@ export function useCreateChat() {
   const mutation = trpc.chats.create.useMutation({
     onSuccess: () => {
       return utils.chats.list.invalidate();
+    },
+    onError: (error) => {
+      toast.error("Failed to sync new chat to server: " + error.message);
     },
   });
 
@@ -78,6 +83,9 @@ export function useUpdateChat() {
         utils.chats.list.invalidate();
       }
       // Never invalidate chats.get - local state is source of truth
+    },
+    onError: (error) => {
+      toast.error("Failed to sync chat to server: " + error.message);
     },
   });
 
@@ -136,6 +144,9 @@ export function useDeleteChat() {
   const mutation = trpc.chats.remove.useMutation({
     onSuccess: () => {
       return utils.chats.list.invalidate();
+    },
+    onError: (error) => {
+      toast.error("Failed to delete chat: " + error.message);
     },
   });
 
