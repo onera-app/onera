@@ -25,7 +25,7 @@ export function toChatMessage(msg: UIMessage, model?: string): ChatMessage {
     return {
       id: msg.id,
       role: msg.role,
-      content: '', // UIMessage no longer has content, must use parts
+      content: (msg as any).content || '',
       created_at: Date.now(),
       model: msg.role === 'assistant' ? model : undefined,
     };

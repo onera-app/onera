@@ -431,14 +431,14 @@ export function ChatPage() {
               setIsGeneratingFollowUps(false);
             });
 
-          // Generate AI title for new chats (first exchange only)
-          const messageCount = Object.keys(
-            currentHistoryRef.current.messages,
-          ).length;
-          if (messageCount === 2) {
+          // Generate AI title for new chats if the title is still default
+          const isDefaultTitle = chat.title === "New Chat" || chat.title === "Untitled" || !chat.title;
+          const messageCount = Object.keys(currentHistoryRef.current.messages).length;
+
+          if (messageCount >= 2 && isDefaultTitle) {
             generateChatTitle(messagesForFollowUps, selectedModelId)
               .then(async (generatedTitle) => {
-                if (generatedTitle) {
+                if (generatedTitle && generatedTitle !== chat.title) {
                   try {
                     const encryptedTitle = encryptChatTitle(
                       currentChatId,
