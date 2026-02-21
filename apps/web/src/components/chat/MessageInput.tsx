@@ -302,15 +302,15 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
 
   return (
     <div className="relative w-full">
-      {/* Main input container — Open WebUI style */}
+      {/* Main input container — Premium Glassmorphic style */}
       <div
         ref={containerRef}
         className={cn(
-          "relative flex-1 flex flex-col w-full shadow-lg rounded-3xl border transition px-1 cursor-text",
-          "bg-white dark:bg-gray-850 text-gray-900 dark:text-gray-100",
+          "relative flex-1 flex flex-col w-full rounded-3xl border transition-all duration-300 px-1.5 py-1.5 cursor-text",
+          "bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl text-gray-900 dark:text-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.16)]",
           isFocused
-            ? "border-gray-100 dark:border-gray-800"
-            : "border-gray-100/30 dark:border-gray-850/30 hover:border-gray-200 dark:hover:border-gray-800",
+            ? "border-gray-300/80 dark:border-gray-600/80 ring-4 ring-gray-100/50 dark:ring-gray-800/50"
+            : "border-gray-200/50 dark:border-gray-700/50 hover:border-gray-300/60 dark:hover:border-gray-600/60 hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.25)]",
           disabled && "opacity-50 cursor-not-allowed",
         )}
         onClick={() => textareaRef.current?.focus()}

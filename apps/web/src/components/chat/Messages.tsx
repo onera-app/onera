@@ -315,14 +315,17 @@ export const Messages = memo(function Messages({
 
   if (messages.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full px-4">
-        {/* Empty state - clean and minimal */}
-        <div className="text-center max-w-lg mx-auto px-2">
-          <h1 className="text-2xl sm:text-2xl font-semibold tracking-tight mb-2 sm:mb-3 text-gray-800 dark:text-gray-100">
+      <div className="flex flex-col items-center justify-center h-full px-4 w-full">
+        {/* Empty state - enhanced robust and premium look */}
+        <div className="relative text-center max-w-2xl mx-auto px-8 py-14 rounded-[2rem] bg-white/40 dark:bg-gray-900/40 backdrop-blur-2xl border border-gray-200/50 dark:border-gray-800/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.16)] flex flex-col items-center transition-all duration-500 hover:shadow-[0_16px_48px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_16px_48px_rgba(0,0,0,0.25)] hover:bg-white/60 dark:hover:bg-gray-900/60 hover:scale-[1.01]">
+          <div className="w-16 h-16 mb-6 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/25 ring-4 ring-white dark:ring-gray-900">
+            <HugeiconsIcon icon={ArrowDown01Icon} className="h-8 w-8 text-white rotate-[135deg]" />
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-br from-gray-900 via-gray-800 to-gray-500 dark:from-white dark:via-gray-200 dark:to-gray-500 leading-tight">
             How can I help you today?
           </h1>
-          <p className="text-sm text-gray-400 dark:text-gray-500 leading-relaxed">
-            Start a conversation below.
+          <p className="text-base font-medium text-gray-500 dark:text-gray-400 leading-relaxed max-w-sm mx-auto">
+            Leverage robust, end-to-end encrypted AI for maximum privacy. Start a conversation below to begin securely.
           </p>
         </div>
       </div>

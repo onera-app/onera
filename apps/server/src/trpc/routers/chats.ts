@@ -69,12 +69,14 @@ export const chatsRouter = router({
         encryptedChat: z.string(),
         chatNonce: z.string(),
         folderId: z.string().uuid().optional(),
+        id: z.string().uuid().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
       const [chat] = await db
         .insert(chats)
         .values({
+          ...(input.id ? { id: input.id } : {}),
           userId: ctx.user.id,
           isEncrypted: true,
           encryptedChatKey: input.encryptedChatKey,

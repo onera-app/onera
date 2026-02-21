@@ -36,6 +36,7 @@ export function useCreateChat() {
 
   return {
     mutateAsync: async (data: {
+      id?: string;
       encryptedChatKey: string;
       chatKeyNonce: string;
       encryptedTitle: string;
@@ -47,6 +48,7 @@ export function useCreateChat() {
       return mutation.mutateAsync(data);
     },
     mutate: (data: {
+      id?: string;
       encryptedChatKey: string;
       chatKeyNonce: string;
       encryptedTitle: string;

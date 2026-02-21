@@ -100,6 +100,7 @@ export function ChatPage() {
   const [followUps, setFollowUps] = useState<string[]>([]);
   const [isGeneratingFollowUps, setIsGeneratingFollowUps] = useState(false);
   const [decryptAttempt, setDecryptAttempt] = useState(0);
+  const [pendingMessageId, setPendingMessageId] = useState<string | null>(null);
 
   // Search sources state - stores results from the current/last search
   const [searchSources, setSearchSources] = useState<Source[]>([]);
@@ -268,7 +269,8 @@ export function ChatPage() {
   // Handle message completion - persist user + assistant messages
   const handleFinish = useCallback(
     async (message: UIMessage) => {
-      if (!chatId || !chat?.encryptedChatKey || !chat?.chatKeyNonce) return;
+      const currentChatId = lastChatIdRef.current || chatId;
+      if (!currentChatId || !chat?.encryptedChatKey || !chat?.chatKeyNonce) return;
 
       // Capture encryption keys for use in async callbacks
       const encryptedChatKey = chat.encryptedChatKey;
@@ -322,6 +324,7 @@ export function ChatPage() {
         }
 
         pendingUserMessageRef.current = null; // Clear pending
+        setPendingMessageId(null);
       }
 
       // Add assistant message to history
@@ -352,14 +355,14 @@ export function ChatPage() {
       // Encrypt and save to server
       try {
         const encrypted = encryptChatContent(
-          chatId,
+          currentChatId,
           encryptedChatKey,
           chatKeyNonce,
           history as unknown as Record<string, unknown>,
         );
 
         await updateChatMutation.mutateAsync({
-          id: chatId,
+          id: currentChatId,
           data: {
             encryptedChat: encrypted.encryptedChat,
             chatNonce: encrypted.chatNonce,
@@ -396,7 +399,7 @@ export function ChatPage() {
                 // Re-encrypt and save with follow-ups
                 try {
                   const encryptedWithFollowUps = encryptChatContent(
-                    chatId,
+                    currentChatId,
                     encryptedChatKey,
                     chatKeyNonce,
                     currentHistoryRef.current as unknown as Record<
@@ -406,7 +409,7 @@ export function ChatPage() {
                   );
 
                   await updateChatMutation.mutateAsync({
-                    id: chatId,
+                    id: currentChatId,
                     data: {
                       encryptedChat: encryptedWithFollowUps.encryptedChat,
                       chatNonce: encryptedWithFollowUps.chatNonce,
@@ -437,14 +440,14 @@ export function ChatPage() {
                 if (generatedTitle) {
                   try {
                     const encryptedTitle = encryptChatTitle(
-                      chatId,
+                      currentChatId,
                       encryptedChatKey,
                       chatKeyNonce,
                       generatedTitle,
                     );
 
                     await updateChatMutation.mutateAsync({
-                      id: chatId,
+                      id: currentChatId,
                       data: {
                         encryptedTitle: encryptedTitle.encryptedTitle,
                         titleNonce: encryptedTitle.titleNonce,
@@ -467,6 +470,18 @@ export function ChatPage() {
         console.error("Failed to save chat:", saveError);
         toast.error("Message sent but failed to save");
       }
+
+      // If this was a new chat, now navigate to update the URL
+      if (!chatId && currentChatId) {
+        // Force refetch so the new component mounts with the generated messages
+        await utils.chats.get.invalidate({ chatId: currentChatId });
+        navigate({
+          to: "/app/c/$chatId",
+          params: { chatId: currentChatId },
+          search: { pending: false },
+          replace: true,
+        });
+      }
     },
     [
       chatId,
@@ -474,6 +489,8 @@ export function ChatPage() {
       chat?.chatKeyNonce,
       selectedModelId,
       updateChatMutation,
+      navigate,
+      utils,
     ],
   );
 
@@ -593,7 +610,6 @@ export function ChatPage() {
           .finally(() => {
             setIsGeneratingFollowUps(false);
           });
-      } else {
         // Clear any stale follow-ups
         setFollowUps([]);
       }
@@ -665,7 +681,7 @@ export function ChatPage() {
   }, [pending, chat, isReady, selectedModelId, chatId, navigate, sendMessage]);
 
   // Derive streaming state from AI SDK status
-  const isStreaming = status === "streaming" || status === "submitted";
+  const isStreaming = status === "streaming" || status === "submitted" || !!pendingMessageId;
 
   useEffect(() => {
     if (!chatId) {
@@ -701,34 +717,33 @@ export function ChatPage() {
     return [];
   }, [aiMessages, isStreaming]);
 
-  // Get display messages - combine stored messages with streaming state
-  // Uses ref comparison to return stable reference when content unchanged
   const displayMessages = useMemo(() => {
     // Use localHistory for stored messages to reflect branch switches immediately
     const storedMessages = createMessagesList(localHistory);
-    let result: ChatMessage[];
+    let result: ChatMessage[] = [];
 
-    // If we have AI messages that include more than stored (user sent new message)
-    // Include ALL messages - streaming message stays in array (like Vercel's approach)
-    if (aiMessages.length > storedMessages.length) {
-      // Use pendingUserMessageRef for user message to preserve multimodal content (images/docs)
-      const pendingUser = pendingUserMessageRef.current;
+    // Map AI messages taking care of pending message
+    const pendingUser = pendingUserMessageRef.current;
 
-      result = aiMessages.map((m) => {
-        // If this message ID matches our pending message ID, use the pending ref
-        // This ensures the message doesn't flicker/downgrade to text-only during the start of streaming
-        if (pendingUser && m.id === pendingUser.id) {
-          return pendingUser;
-        }
+    // Use AI SDK messages as the source of truth if active, swapping in pendingUser for rich content
+    const mappedAiMessages = aiMessages.map((m) => {
+      if (pendingUser && m.id === pendingUser.id) {
+        return pendingUser;
+      }
+      return toChatMessage(
+        m,
+        m.role === "assistant" ? selectedModelId || undefined : undefined,
+      );
+    });
 
-        return toChatMessage(
-          m,
-          m.role === "assistant" ? selectedModelId || undefined : undefined,
-        );
-      });
+    if (mappedAiMessages.length > storedMessages.length) {
+      result = mappedAiMessages;
     } else {
-      // Use stored messages from localHistory
-      result = storedMessages;
+      result = [...storedMessages];
+    }
+
+    if (pendingUser && !result.some((m) => m.id === pendingUser.id)) {
+      result.push(pendingUser);
     }
 
     // Return same reference if content unchanged to prevent re-renders
@@ -737,7 +752,7 @@ export function ChatPage() {
     }
     prevDisplayMessagesRef.current = result;
     return result;
-  }, [localHistory, aiMessages, selectedModelId]);
+  }, [localHistory, aiMessages, selectedModelId, pendingMessageId]);
 
   // Keep displayMessagesRef in sync for stable callbacks
   displayMessagesRef.current = displayMessages;
@@ -769,139 +784,80 @@ export function ChatPage() {
         setSearchSources([]);
       }
 
-      let currentChatId = chatId;
-      let encryptionKeys = {
-        encryptedChatKey: chat?.encryptedChatKey,
-        chatKeyNonce: chat?.chatKeyNonce,
-      };
+      const pendingUserMessageId = uuidv4();
 
-      // Lazy creation: Create chat if it doesn't exist yet
-      if (!currentChatId) {
-        try {
-          setIsGeneratingFollowUps(true); // Show loading state
+      let messageContent: string | MessageContent[] = content;
+      const uiParts: Array<{ type: string; text?: string; image?: string }> = [];
+      const sendParts: Array<{
+        type: "text" | "file";
+        text?: string;
+        url?: string;
+        mediaType?: string;
+      }> = [];
 
-          // Use placeholder until AI title generation completes after first exchange
-          const initialTitle = "New Chat";
+      if (options?.attachments && options.attachments.length > 0) {
+        const contentParts: MessageContent[] = [];
 
-          // We'll construct the real message content later, but for initial creation we need something
-          // The empty history is fine because handleFinish will add the messages properly
-          const history: ChatHistory = {
-            currentId: null,
-            messages: {},
-          };
-
-          // Encrypt and create chat
-          const { data: encryptedData } = await createEncryptedChat(
-            initialTitle,
-            history as unknown as Record<string, unknown>,
-          );
-
-          const createdChat = await createChatMutation.mutateAsync({
-            encryptedChatKey: encryptedData.encryptedChatKey,
-            chatKeyNonce: encryptedData.chatKeyNonce,
-            encryptedTitle: encryptedData.encryptedTitle,
-            titleNonce: encryptedData.titleNonce,
-            encryptedChat: encryptedData.encryptedChat,
-            chatNonce: encryptedData.chatNonce,
-          });
-
-          currentChatId = createdChat.id;
-          encryptionKeys = {
-            encryptedChatKey: createdChat.encryptedChatKey,
-            chatKeyNonce: createdChat.chatKeyNonce,
-          };
-
-          // Pre-populate the cache to avoid loading flicker
-          utils.chats.get.setData({ chatId: createdChat.id }, createdChat);
-
-          // Update URL without reloading (replace history)
-          navigate({
-            to: "/app/c/$chatId",
-            params: { chatId: createdChat.id },
-            search: { pending: false },
-            replace: true,
-          });
-
-          // Update refs for this new chat
-          lastChatIdRef.current = createdChat.id;
-          encryptionKeysRef.current = encryptionKeys;
-
-        } catch (err) {
-          console.error("Failed to create chat:", err);
-          toast.error("Failed to create new chat");
-          setIsGeneratingFollowUps(false);
-          return;
-        }
-      }
-
-      try {
-        // Build the message content
-        let messageContent: string | MessageContent[] = content;
-        const uiParts: Array<{ type: string; text?: string; image?: string }> =
-          [];
-        // Parts for sendMessage in AI SDK format
-        const sendParts: Array<{
-          type: "text" | "file";
-          text?: string;
-          url?: string;
-          mediaType?: string;
-        }> = [];
-
-        // Process attachments if provided
-        if (options?.attachments && options.attachments.length > 0) {
-          const contentParts: MessageContent[] = [];
-
-          for (const attachment of options.attachments) {
-            if (attachment.type === "image") {
-              // Add image to content parts - stored in E2EE message history
-              const dataUrl = `data:${attachment.mimeType};base64,${attachment.data}`;
-              contentParts.push({
-                type: "image_url",
-                image_url: { url: dataUrl },
-              });
-              uiParts.push({ type: "image", image: dataUrl });
-              // Add to sendParts in AI SDK format
-              sendParts.push({
-                type: "file",
+        for (const attachment of options.attachments) {
+          if (attachment.type === "image") {
+            const dataUrl = `data:${attachment.mimeType};base64,${attachment.data}`;
+            contentParts.push({
+              type: "image_url",
+              image_url: { url: dataUrl },
+            });
+            uiParts.push({ type: "image", image: dataUrl });
+            sendParts.push({
+              type: "file",
+              url: dataUrl,
+              mediaType: attachment.mimeType,
+            });
+          } else if (
+            attachment.type === "document" ||
+            attachment.type === "text"
+          ) {
+            const dataUrl = `data:${attachment.mimeType};base64,${attachment.data}`;
+            contentParts.push({
+              type: "document_url",
+              document_url: {
                 url: dataUrl,
-                mediaType: attachment.mimeType,
-              });
-            } else if (
-              attachment.type === "document" ||
-              attachment.type === "text"
-            ) {
-              // Store original document in E2EE message history
-              const dataUrl = `data:${attachment.mimeType};base64,${attachment.data}`;
-              contentParts.push({
-                type: "document_url",
-                document_url: {
-                  url: dataUrl,
-                  fileName: attachment.fileName,
-                  mimeType: attachment.mimeType,
-                  extractedText: attachment.metadata?.extractedText,
-                },
-              });
+                fileName: attachment.fileName,
+                mimeType: attachment.mimeType,
+                extractedText: attachment.metadata?.extractedText,
+              },
+            });
 
-              // Send extracted text to the LLM for context
-              if (attachment.metadata?.extractedText) {
-                const docContext = `[Document: ${attachment.fileName}]\n${attachment.metadata.extractedText}\n\n`;
-                sendParts.push({ type: "text", text: docContext });
-              }
+            if (attachment.metadata?.extractedText) {
+              const docContext = `[Document: ${attachment.fileName}]\n${attachment.metadata.extractedText}\n\n`;
+              sendParts.push({ type: "text", text: docContext });
             }
           }
-
-          // Add user's text message
-          if (content) {
-            contentParts.push({ type: "text", text: content });
-            uiParts.push({ type: "text", text: content });
-            sendParts.push({ type: "text", text: content });
-          }
-
-          messageContent = contentParts;
         }
 
+        if (content) {
+          contentParts.push({ type: "text", text: content });
+          uiParts.push({ type: "text", text: content });
+          sendParts.push({ type: "text", text: content });
+        }
+
+        messageContent = contentParts;
+      }
+
+      // Show immediately on the current UI if possible
+      const userMessage: ChatMessage = {
+        id: pendingUserMessageId,
+        role: "user",
+        content: messageContent,
+        created_at: Date.now(),
+      };
+
+      pendingUserMessageRef.current = userMessage;
+      setPendingMessageId(userMessage.id);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      let searchContext = "";
+
+      try {
         // Execute search if enabled
-        let searchContext = "";
         if (options?.searchEnabled) {
           try {
             const searchResult = await executeSearch(
@@ -983,14 +939,90 @@ export function ChatPage() {
           uiParts.push({ type: "text", text: finalContent });
         }
 
-        // Create and store pending user message for persistence
-        const userMessage: ChatMessage = {
-          id: uuidv4(),
-          role: "user",
+        // Update the pending user message with the fully processed content (including context)
+        const fullyProcessedMessage = {
+          ...userMessage,
           content: messageContent,
-          created_at: Date.now(),
         };
-        pendingUserMessageRef.current = userMessage;
+        pendingUserMessageRef.current = fullyProcessedMessage;
+
+        let currentChatId = chatId;
+
+        // Lazy creation: Create chat if it doesn't exist yet
+        if (!currentChatId) {
+          try {
+            setIsGeneratingFollowUps(true);
+
+            const initialTitle = "New Chat";
+
+            // Initialize the history with the fully processed user message so the new 'mounting' ChatPage sees it!
+            const history: ChatHistory = {
+              currentId: fullyProcessedMessage.id,
+              messages: {
+                [fullyProcessedMessage.id]: {
+                  ...fullyProcessedMessage,
+                  childrenIds: []
+                }
+              },
+            };
+
+            const { chatId: newChatId, data: encryptedData } = await createEncryptedChat(
+              initialTitle,
+              history as unknown as Record<string, unknown>,
+            );
+
+            createChatMutation.mutate({
+              id: newChatId,
+              encryptedChatKey: encryptedData.encryptedChatKey,
+              chatKeyNonce: encryptedData.chatKeyNonce,
+              encryptedTitle: encryptedData.encryptedTitle,
+              titleNonce: encryptedData.titleNonce,
+              encryptedChat: encryptedData.encryptedChat,
+              chatNonce: encryptedData.chatNonce,
+            });
+
+            const optimisticChat = {
+              id: newChatId,
+              userId: "temp",
+              isEncrypted: true,
+              encryptedChatKey: encryptedData.encryptedChatKey,
+              chatKeyNonce: encryptedData.chatKeyNonce,
+              encryptedTitle: encryptedData.encryptedTitle,
+              titleNonce: encryptedData.titleNonce,
+              encryptedChat: encryptedData.encryptedChat,
+              chatNonce: encryptedData.chatNonce,
+              folderId: null,
+              pinned: false,
+              archived: false,
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+            };
+
+            // Pre-populate the cache with the populated history
+            utils.chats.get.setData({ chatId: newChatId }, optimisticChat as any);
+
+            const currentList = utils.chats.list.getData();
+            if (currentList) {
+              utils.chats.list.setData(undefined, [optimisticChat as any, ...currentList]);
+            }
+
+            // Update refs for the global track so handleFinish knows about it
+            lastChatIdRef.current = newChatId;
+            encryptionKeysRef.current = {
+              encryptedChatKey: encryptedData.encryptedChatKey,
+              chatKeyNonce: encryptedData.chatKeyNonce,
+            };
+
+            // Don't navigate yet! Stay on /app to preserve the component and streaming state.
+            // We'll navigate in handleFinish once the stream is done.
+
+          } catch (err) {
+            console.error("Failed to create chat:", err);
+            toast.error("Failed to create new chat");
+            setIsGeneratingFollowUps(false);
+            return;
+          }
+        }
 
         // Send to AI via the hook - use multimodal parts if we have attachments
         if (sendParts.length > 0) {
@@ -1006,9 +1038,9 @@ export function ChatPage() {
               sendParts.unshift({ type: "text", text: searchContext });
             }
           }
-          await sendMessage({ parts: sendParts }, { id: userMessage.id });
+          await sendMessage({ parts: sendParts }, { id: fullyProcessedMessage.id });
         } else {
-          await sendMessage(finalContent, { id: userMessage.id });
+          await sendMessage(finalContent, { id: fullyProcessedMessage.id });
         }
       } catch (err) {
         pendingUserMessageRef.current = null; // Clear on error
@@ -1027,6 +1059,8 @@ export function ChatPage() {
       isUnlocked,
       selectedModelId,
       sendMessage,
+      createChatMutation,
+      utils,
     ],
   );
 

@@ -49,7 +49,7 @@ export const ChatNavbar = memo(function ChatNavbar({
             className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-850 hidden sm:flex h-8 px-3 rounded-xl transition-colors gap-1.5"
           >
             <HugeiconsIcon icon={Add01Icon} className="h-4 w-4" />
-            <span className="text-sm">New</span>
+            <span className="text-sm">New Chat</span>
           </Button>
 
           <Button

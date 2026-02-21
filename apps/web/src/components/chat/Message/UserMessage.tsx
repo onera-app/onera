@@ -287,10 +287,10 @@ export const UserMessage = memo(function UserMessage({
             </div>
           )}
 
-          {/* Text bubble - refined with subtle background, fully rounded */}
+          {/* Text bubble - Premium robust appearance */}
           {textContent && (
-            <div className="inline-block w-fit rounded-[22px] px-4 py-2.5 text-left bg-[var(--chat-pill)] text-gray-900 dark:text-gray-100 select-text chat-soft-border">
-              <span className="whitespace-pre-wrap break-words text-sm leading-relaxed tracking-normal">
+            <div className="inline-block w-fit rounded-[22px] rounded-br-[8px] px-5 py-3 text-left bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-850 text-gray-900 dark:text-gray-100 select-text shadow-sm border border-gray-200/50 dark:border-gray-700/50 hover:shadow-md transition-shadow duration-200">
+              <span className="whitespace-pre-wrap break-words text-[15px] font-medium leading-relaxed tracking-normal">
                 {textContent}
               </span>
             </div>

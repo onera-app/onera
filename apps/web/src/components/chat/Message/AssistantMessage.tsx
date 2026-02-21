@@ -281,9 +281,11 @@ export const AssistantMessage = memo(function AssistantMessage({
         >
           {/* Model name indicator */}
           {name && (
-            <span className="text-xs font-medium text-gray-400 dark:text-gray-500 tracking-[-0.01em]">
-              {name}
-            </span>
+            <div className="flex items-center mb-1">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold tracking-wide uppercase bg-gray-100/80 dark:bg-gray-800/80 text-gray-600 dark:text-gray-400 border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+                {name}
+              </span>
+            </div>
           )}
 
           {/* Reasoning/Thinking block */}
