@@ -153,7 +153,7 @@ export function OnboardingCompletionModal({
       return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
           <DialogContent
-            className="sm:max-w-md bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850"
+            className="sm:max-w-md"
             onInteractOutside={(e) => e.preventDefault()}
           >
             <DialogHeader>
@@ -227,7 +227,7 @@ export function OnboardingCompletionModal({
       return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
           <DialogContent
-            className="sm:max-w-md bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850"
+            className="sm:max-w-md"
             onInteractOutside={(e) => e.preventDefault()}
           >
             <DialogHeader>
@@ -323,7 +323,7 @@ export function OnboardingCompletionModal({
     return (
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent
-          className="sm:max-w-md bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850"
+          className="sm:max-w-md"
           onInteractOutside={(e) => e.preventDefault()}
         >
           <DialogHeader>

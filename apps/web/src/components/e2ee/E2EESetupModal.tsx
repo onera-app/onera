@@ -39,7 +39,7 @@ export function E2EESetupModal() {
         onOpenChange={(open) => !open && setShowSignOutConfirm(true)}
       >
         <DialogContent
-          className="sm:max-w-md bg-white dark:bg-gray-850 border border-gray-100 dark:border-gray-850"
+          className="sm:max-w-md"
           onInteractOutside={(e) => e.preventDefault()}
         >
           <DialogHeader>

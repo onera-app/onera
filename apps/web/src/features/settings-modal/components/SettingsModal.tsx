@@ -205,12 +205,12 @@ export function SettingsModal({
 
   const filteredTabs = searchQuery
     ? tabs.filter(
-        (tab) =>
-          tab.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          tab.keywords.some((kw) =>
-            kw.toLowerCase().includes(searchQuery.toLowerCase()),
-          ),
-      )
+      (tab) =>
+        tab.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        tab.keywords.some((kw) =>
+          kw.toLowerCase().includes(searchQuery.toLowerCase()),
+        ),
+    )
     : tabs;
 
   const handleTabChange = useCallback((tabId: TabId) => {
@@ -232,7 +232,7 @@ export function SettingsModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         hideCloseButton
-        className="max-w-4xl h-[85vh] max-h-[85vh] sm:h-[85vh] p-0 gap-0 flex flex-col w-[calc(100vw-2rem)] sm:w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border border-white dark:border-gray-850 rounded-[2rem] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]"
+        className="max-w-4xl h-[100dvh] max-h-[100dvh] sm:h-[85vh] sm:max-h-[85vh] p-0 gap-0 flex flex-col w-full sm:w-[calc(100vw-2rem)] md:w-full bg-white dark:bg-gray-900 sm:bg-white/95 sm:dark:bg-gray-900/95 backdrop-blur-sm border-0 sm:border border-white dark:border-gray-850 rounded-none sm:rounded-[2rem] shadow-none sm:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]"
       >
         {/* Desktop Header — Open WebUI style */}
         <DialogHeader className="hidden sm:flex flex-row items-center justify-between dark:text-gray-300 px-4 md:px-[1.125rem] pt-[1.125rem] pb-0.5 md:pb-2.5 shrink-0">

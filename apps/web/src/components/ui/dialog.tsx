@@ -40,15 +40,35 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border border-white dark:border-gray-850 p-4 sm:p-6 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-[2rem] max-h-[calc(100dvh-2rem)] overflow-hidden",
+        // Base structure
+        "fixed z-50 gap-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm p-6 shadow-xl duration-200 outline-none flex flex-col sm:grid",
+
+        // Base animations (fade)
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+
+        // Mobile styling: Bottom sheet
+        "inset-x-0 bottom-0 top-auto mt-auto w-full max-h-[96dvh] rounded-t-[24px] border-t border-gray-200 dark:border-gray-850 overflow-y-auto pb-8 sm:pb-6",
+
+        // Mobile animations: slide from bottom
+        "data-[state=closed]:slide-out-to-bottom-[100%] data-[state=open]:slide-in-from-bottom-[100%]",
+
+        // Desktop styling: Centered modal
+        "sm:left-[50%] sm:top-[50%] sm:bottom-auto sm:mt-0 sm:w-[calc(100%-2rem)] sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-[2rem] sm:border sm:border-white sm:dark:border-gray-850 sm:max-h-[calc(100dvh-2rem)]",
+
+        // Desktop animations: zoom and center slide
+        "sm:data-[state=closed]:slide-out-to-left-1/2 sm:data-[state=closed]:slide-out-to-top-[48%] sm:data-[state=open]:slide-in-from-left-1/2 sm:data-[state=open]:slide-in-from-top-[48%] sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95",
+
         className
       )}
       {...props}
     >
+      {/* Mobile drag handle pill */}
+      <div className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full sm:hidden" />
+
       {children}
       {!hideCloseButton && (
-        <DialogPrimitive.Close className="absolute right-4 top-4 p-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors focus:outline-none disabled:pointer-events-none">
-          <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4" />
+        <DialogPrimitive.Close className="absolute right-4 top-4 p-1.5 rounded-full bg-gray-100/50 dark:bg-gray-800/50 sm:bg-transparent sm:dark:bg-transparent text-gray-500 hover:text-gray-700 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors focus:outline-none disabled:pointer-events-none">
+          <HugeiconsIcon icon={Cancel01Icon} className="h-5 w-5 sm:h-4 sm:w-4" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
       )}
