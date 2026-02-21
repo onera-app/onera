@@ -554,63 +554,8 @@ export function ChatPage() {
       ) {
         // Use persisted follow-ups
         setFollowUps(lastMessage.followUps);
-      } else if (lastMessage?.role === "assistant" && selectedModelId) {
-        // No persisted follow-ups - generate them now
-        // This handles the case when coming from home.tsx before follow-ups were persisted
-        setFollowUps([]);
-        setIsGeneratingFollowUps(true);
-        generateFollowUps(chat.messages, selectedModelId, 3)
-          .then(async (suggestions) => {
-            setFollowUps(suggestions);
-
-            // Persist follow-ups to the assistant message if we have encryption keys
-            if (
-              suggestions.length > 0 &&
-              chat.encryptedChatKey &&
-              chat.chatKeyNonce &&
-              chatId
-            ) {
-              try {
-                const updatedHistory: ChatHistory = {
-                  ...chat.history,
-                  messages: {
-                    ...chat.history.messages,
-                    [lastMessage.id]: {
-                      ...chat.history.messages[lastMessage.id],
-                      followUps: suggestions,
-                    },
-                  },
-                };
-
-                const encryptedWithFollowUps = encryptChatContent(
-                  chatId,
-                  chat.encryptedChatKey,
-                  chat.chatKeyNonce,
-                  updatedHistory as unknown as Record<string, unknown>,
-                );
-
-                await updateChatMutation.mutateAsync({
-                  id: chatId,
-                  data: {
-                    encryptedChat: encryptedWithFollowUps.encryptedChat,
-                    chatNonce: encryptedWithFollowUps.chatNonce,
-                  },
-                });
-
-                // Update local history ref
-                currentHistoryRef.current = updatedHistory;
-              } catch (err) {
-                console.warn("Failed to persist follow-ups:", err);
-              }
-            }
-          })
-          .catch((err) => {
-            console.warn("Failed to generate follow-ups:", err);
-          })
-          .finally(() => {
-            setIsGeneratingFollowUps(false);
-          });
-        // Clear any stale follow-ups
+      } else {
+        // Clear any stale follow-ups if the last message doesn't have them
         setFollowUps([]);
       }
     }
