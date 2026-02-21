@@ -25,7 +25,7 @@ export function toChatMessage(msg: UIMessage, model?: string): ChatMessage {
     return {
       id: msg.id,
       role: msg.role,
-      content: '',
+      content: '', // UIMessage no longer has content, must use parts
       created_at: Date.now(),
       model: msg.role === 'assistant' ? model : undefined,
     };
@@ -49,7 +49,7 @@ export function toChatMessage(msg: UIMessage, model?: string): ChatMessage {
     return {
       id: msg.id,
       role: msg.role,
-      content: textContent,
+      content: textContent || '',
       created_at: Date.now(),
       model: msg.role === 'assistant' ? model : undefined,
     };
@@ -103,9 +103,16 @@ export function getMessageText(message: ChatMessage): string {
  */
 export function areMessagesEqual(a: ChatMessage[], b: ChatMessage[]): boolean {
   if (a.length !== b.length) return false;
-  return a.every((msg, i) =>
-    msg.id === b[i].id &&
-    msg.content === b[i].content &&
-    msg.role === b[i].role
-  );
+  return a.every((msg, i) => {
+    if (msg.id !== b[i].id) return false;
+    if (msg.role !== b[i].role) return false;
+
+    // Compare content
+    if (typeof msg.content === 'string' && typeof b[i].content === 'string') {
+      return msg.content === b[i].content;
+    }
+
+    // Compare object content by stringifying
+    return JSON.stringify(msg.content) === JSON.stringify(b[i].content);
+  });
 }

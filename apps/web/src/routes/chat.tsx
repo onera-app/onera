@@ -61,6 +61,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { normalizeAppError } from "@/lib/errors/app-error";
+import { cn } from "@/lib/utils";
 
 interface DecryptedChat {
   id: string;
@@ -610,8 +611,26 @@ export function ChatPage() {
       pendingUserMessageRef.current = lastMessage;
 
       try {
-        // Send the message to trigger AI response
-        await sendMessage(userContent);
+        // Reconstruct multimodal payload if necessary
+        let contentInput: any = userContent;
+        if (Array.isArray(lastMessage.content)) {
+          const parts: any[] = [];
+          for (const c of lastMessage.content as any[]) {
+            if (c.type === 'text') {
+              parts.push({ type: 'text', text: c.text });
+            } else if (c.type === 'image_url') {
+              parts.push({ type: 'file', url: c.image_url?.url, mediaType: 'image/png' });
+            } else if (c.type === 'document_url') {
+              if (c.document_url?.extractedText) {
+                parts.push({ type: 'text', text: `[Document: ${c.document_url.fileName}]\n${c.document_url.extractedText}\n\n` });
+              }
+            }
+          }
+          if (parts.length > 0) contentInput = { parts };
+        }
+
+        // Send the message to trigger AI response, PRESERVING the user message ID
+        await sendMessage(contentInput, { id: lastMessage.id });
       } catch (err) {
         lastPendingSignatureRef.current = null;
         if ((err as Error).name !== "AbortError") {
@@ -1366,9 +1385,15 @@ export function ChatPage() {
         />
       </div>
 
-      {/* Input area - Floating at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 px-4 sm:px-6 bg-white dark:bg-gray-900 pb-5 sm:pb-6 pt-4 sm:pt-5 w-full">
-        <div className="max-w-6xl mx-auto w-full">
+      {/* Input area - Fixed at bottom with iOS-style glassmorphism */}
+      <footer className={cn(
+        "z-20 w-full transition-all duration-300",
+        // Mobile: Fixed bottom bar with glass effect
+        "fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-800/50 px-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] pt-3",
+        // Desktop: Standard absolute positioning (existing style)
+        "sm:absolute sm:bottom-0 sm:left-0 sm:right-0 sm:bg-transparent sm:backdrop-blur-none sm:border-0 sm:px-6 sm:pb-6 sm:pt-0 sm:pointer-events-none"
+      )}>
+        <div className="max-w-4xl mx-auto w-full pointer-events-auto">
           <MessageInput
             onSend={handleSendMessage}
             onStop={stop}
@@ -1383,7 +1408,7 @@ export function ChatPage() {
             }
           />
         </div>
-      </div>
+      </footer>
     </div>
   );
 }

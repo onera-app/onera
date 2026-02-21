@@ -451,7 +451,11 @@ export function useDirectChat({
 
       // Handle string input (text only)
       if (typeof content === 'string') {
-        await chat.sendMessage({ text: content, ...(options?.id && { id: options.id }) });
+        await chat.sendMessage({
+          role: 'user',
+          parts: [{ type: 'text', text: content }],
+          ...(options?.id && { id: options.id })
+        });
         return;
       }
 
@@ -533,7 +537,11 @@ export function useDirectChat({
       chat.setMessages(messagesToKeep);
 
       // Re-send the user message to get a new response
-      await chat.sendMessage({ text: userContent, ...(options?.id && { id: options.id }) });
+      await chat.sendMessage({
+        role: 'user',
+        parts: [{ type: 'text', text: userContent }],
+        ...(options?.id && { id: options.id })
+      });
     },
     [chat, enclaveConfig, enforceAllowance, isReady, isUnlocked, selectedModelId]
   );

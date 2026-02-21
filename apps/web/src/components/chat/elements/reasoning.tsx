@@ -137,9 +137,9 @@ export const ReasoningTrigger = memo(
               <span>{duration}s</span>
             )}
             <HugeiconsIcon icon={ArrowDown01Icon} className={cn(
-                                    'size-2.5 transition-transform',
-                                    isOpen ? 'rotate-180' : 'rotate-0'
-                                  )} />
+              'size-2.5 transition-transform',
+              isOpen ? 'rotate-180' : 'rotate-0'
+            )} />
           </>
         )}
       </CollapsibleTrigger>
@@ -161,7 +161,7 @@ export const ReasoningContent = memo(
       )}
       {...props}
     >
-      <div className="max-h-48 overflow-y-auto rounded-xl bg-gray-50 dark:bg-gray-850 p-2.5">
+      <div className="max-h-48 overflow-y-auto rounded-[20px] rounded-tl-[4px] bg-gray-50 dark:bg-gray-850 p-3 sm:p-2.5">
         <Streamdown className="grid gap-1 text-caption **:text-caption [&_li]:my-0 [&_ol]:my-1 [&_p]:my-0 [&_ul]:my-1">
           {children}
         </Streamdown>

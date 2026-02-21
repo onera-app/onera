@@ -228,7 +228,10 @@ export const UserMessage = memo(function UserMessage({
     >
       <div className="flex w-full items-start gap-2 sm:gap-2.5 justify-end">
         {/* Actions - show on hover */}
-        <div className="self-center flex items-center gap-1 opacity-0 group-hover/message:opacity-100 transition-opacity duration-200">
+        <div className={cn(
+          "self-center flex items-center gap-1 transition-opacity duration-200",
+          "opacity-100 sm:opacity-0 sm:group-hover/message:opacity-100"
+        )}>
           <MessageActions
             onCopy={handleCopy}
             onEdit={hasEdit ? handleStartEdit : undefined}
@@ -289,8 +292,18 @@ export const UserMessage = memo(function UserMessage({
 
           {/* Text bubble - Premium robust appearance */}
           {textContent && (
-            <div className="inline-block w-fit rounded-[22px] rounded-br-[8px] px-5 py-3 text-left bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-850 text-gray-900 dark:text-gray-100 select-text shadow-sm border border-gray-200/50 dark:border-gray-700/50 hover:shadow-md transition-shadow duration-200">
-              <span className="whitespace-pre-wrap break-words text-[15px] font-medium leading-relaxed tracking-normal">
+            <div className={cn(
+              "inline-block w-fit px-5 py-3 text-left select-text transition-all duration-200 shadow-sm",
+              // Mobile: iOS Blue Gradient
+              "rounded-[20px] rounded-br-[4px] bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-blue-500/10",
+              // Desktop: Material Gray Gradient (matching existing style)
+              "sm:rounded-[22px] sm:rounded-br-[8px] sm:bg-gradient-to-br sm:from-gray-100 sm:to-gray-200 sm:dark:from-gray-800 sm:dark:to-gray-850 sm:text-gray-900 sm:dark:text-gray-100 sm:border sm:border-gray-200/50 sm:dark:border-gray-700/50 sm:hover:shadow-md"
+            )}>
+              <span className={cn(
+                "whitespace-pre-wrap break-words text-[15px] leading-relaxed tracking-normal font-medium",
+                // Mobile: High contrast text
+                "text-white sm:text-gray-900 sm:dark:text-gray-100"
+              )}>
                 {textContent}
               </span>
             </div>

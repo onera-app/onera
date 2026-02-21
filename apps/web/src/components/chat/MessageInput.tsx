@@ -306,11 +306,14 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
       <div
         ref={containerRef}
         className={cn(
-          "relative flex-1 flex flex-col w-full rounded-3xl border transition-all duration-300 px-1.5 py-1.5 cursor-text",
-          "bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl text-gray-900 dark:text-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.16)]",
+          "relative flex-1 flex flex-col w-full transition-all duration-300 px-1 py-1 cursor-text",
+          // Mobile: Native bar appearance
+          "rounded-[28px] border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 shadow-none sm:px-1.5 sm:py-1.5",
+          // Desktop: Original glassmorphism
+          "sm:bg-white/80 sm:dark:bg-gray-900/80 sm:backdrop-blur-xl sm:text-gray-900 sm:dark:text-gray-100 sm:shadow-[0_8px_30px_rgb(0,0,0,0.06)] sm:dark:shadow-[0_8px_30px_rgb(0,0,0,0.16)]",
           isFocused
-            ? "border-gray-300/80 dark:border-gray-600/80 ring-4 ring-gray-100/50 dark:ring-gray-800/50"
-            : "border-gray-200/50 dark:border-gray-700/50 hover:border-gray-300/60 dark:hover:border-gray-600/60 hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.25)]",
+            ? "border-gray-300 dark:border-gray-600 ring-2 ring-gray-100/50 dark:ring-gray-800/50"
+            : "border-gray-200/50 dark:border-gray-700/50 hover:border-gray-300/60 dark:hover:border-gray-600/60 sm:hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] sm:dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.25)]",
           disabled && "opacity-50 cursor-not-allowed",
         )}
         onClick={() => textareaRef.current?.focus()}

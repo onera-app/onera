@@ -303,7 +303,10 @@ export const AssistantMessage = memo(function AssistantMessage({
           {displayContent ? (
             <div
               className={cn(
-                "text-left transition-opacity duration-200 text-sm leading-relaxed tracking-normal text-gray-800 dark:text-gray-100 prose dark:prose-invert max-w-none",
+                "text-left transition-opacity duration-200 text-sm leading-relaxed tracking-normal",
+                "prose dark:prose-invert max-w-none",
+                // Mobile: Subtle bubble container
+                "px-4 py-3 rounded-[20px] rounded-bl-[4px] bg-gray-50/80 dark:bg-gray-850/80 border border-gray-100 dark:border-gray-800 shadow-sm sm:p-0 sm:bg-transparent sm:border-0 sm:shadow-none sm:dark:bg-transparent sm:dark:border-0 sm:text-gray-800 sm:dark:text-gray-100",
                 isLoading && "streaming-cursor",
               )}
             >
@@ -320,7 +323,10 @@ export const AssistantMessage = memo(function AssistantMessage({
 
           {/* Actions and Metadata */}
           {!isLoading && content && (
-            <div className="flex items-center justify-between flex-wrap gap-2 mt-1 opacity-0 group-hover/message:opacity-100 transition-opacity duration-200">
+            <div className={cn(
+              "flex items-center justify-between flex-wrap gap-2 mt-1 transition-opacity duration-200",
+              "opacity-100 sm:opacity-0 sm:group-hover/message:opacity-100"
+            )}>
               <div className="flex items-center gap-1">
                 <MessageActions
                   onCopy={handleCopy}
