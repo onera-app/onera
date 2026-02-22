@@ -279,10 +279,10 @@ export const AssistantMessage = memo(function AssistantMessage({
               : "",
           )}
         >
-          {/* Model name indicator */}
+          {/* Model name indicator - Subtle text, no card feel */}
           {name && (
-            <div className="flex items-center mb-1">
-              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold tracking-wide uppercase bg-gray-100/80 dark:bg-gray-800/80 text-gray-600 dark:text-gray-400 border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+            <div className="flex items-center -mb-1 opacity-60">
+              <span className="text-[10px] font-bold tracking-tight uppercase text-gray-500 dark:text-gray-400">
                 {name}
               </span>
             </div>
@@ -303,10 +303,10 @@ export const AssistantMessage = memo(function AssistantMessage({
           {displayContent ? (
             <div
               className={cn(
-                "text-left transition-opacity duration-200 text-sm leading-relaxed tracking-normal",
-                "prose dark:prose-invert max-w-none",
-                // Mobile: Subtle bubble container
-                "px-4 py-3 rounded-[20px] rounded-bl-[4px] bg-gray-50/80 dark:bg-gray-850/80 border border-gray-100 dark:border-gray-800 shadow-sm sm:p-0 sm:bg-transparent sm:border-0 sm:shadow-none sm:dark:bg-transparent sm:dark:border-0 sm:text-gray-800 sm:dark:text-gray-100",
+                "text-left transition-opacity duration-200 text-[0.9375rem] leading-relaxed tracking-normal font-medium",
+                "prose dark:prose-invert max-w-none prose-p:my-0 prose-pre:my-2",
+                // Mobile: Modern clean look, reduced spacing
+                "px-3.5 py-2.5 rounded-[18px] rounded-tl-[4px] bg-gray-100/50 dark:bg-gray-800/50 border-0 sm:p-0 sm:bg-transparent sm:border-0 sm:shadow-none sm:dark:bg-transparent sm:dark:border-0 sm:text-gray-800 sm:dark:text-gray-100",
                 isLoading && "streaming-cursor",
               )}
             >

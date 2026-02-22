@@ -294,15 +294,12 @@ export const UserMessage = memo(function UserMessage({
           {textContent && (
             <div className={cn(
               "inline-block w-fit px-5 py-3 text-left select-text transition-all duration-200 shadow-sm",
-              // Mobile: iOS Blue Gradient
-              "rounded-[20px] rounded-br-[4px] bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-blue-500/10",
-              // Desktop: Material Gray Gradient (matching existing style)
-              "sm:rounded-[22px] sm:rounded-br-[8px] sm:bg-gradient-to-br sm:from-gray-100 sm:to-gray-200 sm:dark:from-gray-800 sm:dark:to-gray-850 sm:text-gray-900 sm:dark:text-gray-100 sm:border sm:border-gray-200/50 sm:dark:border-gray-700/50 sm:hover:shadow-md"
+              // Unified Material Gray Style (no more blue)
+              "rounded-[22px] rounded-br-[8px] bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-850 text-gray-900 dark:text-gray-100 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-md"
             )}>
               <span className={cn(
-                "whitespace-pre-wrap break-words text-[15px] leading-relaxed tracking-normal font-medium",
-                // Mobile: High contrast text
-                "text-white sm:text-gray-900 sm:dark:text-gray-100"
+                "whitespace-pre-wrap break-words text-[0.9375rem] leading-relaxed tracking-normal font-medium",
+                "text-gray-900 dark:text-gray-100"
               )}>
                 {textContent}
               </span>
