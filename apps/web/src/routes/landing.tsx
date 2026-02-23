@@ -211,7 +211,7 @@ export function LandingPage() {
             Unlocking truly private intelligence.
           </p>
 
-          <a href="https://docs.onera.ai" className="inline-block border-[3px] border-landing-foreground rounded-full px-8 py-3 font-bold text-lg uppercase tracking-wide hover:bg-landing-foreground hover:text-landing transition-colors mb-24">
+          <a href="https://docs.onera.chat" className="inline-block border-[3px] border-landing-foreground rounded-full px-8 py-3 font-bold text-lg uppercase tracking-wide hover:bg-landing-foreground hover:text-landing transition-colors mb-24">
             READ DOCS
           </a>
 
