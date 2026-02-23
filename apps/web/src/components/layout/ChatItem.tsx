@@ -184,7 +184,7 @@ export const ChatItem = memo(function ChatItem({
                 <HugeiconsIcon icon={Loading02Icon} className="h-3.5 w-3.5 animate-spin text-gray-500 dark:text-gray-400 flex-shrink-0" />
               )}
               <span
-                className="block whitespace-nowrap text-left text-[0.9rem] font-normal overflow-hidden h-5 leading-5 truncate"
+                className="block whitespace-nowrap text-left text-sm font-normal overflow-hidden h-5 leading-5 truncate"
                 dir="auto"
               >
                 {isTitleGenerating ? "New Chat" : title}
@@ -193,7 +193,7 @@ export const ChatItem = memo(function ChatItem({
           </div>
 
           {!isActive && (
-            <span className="absolute right-9 md:right-2.5 top-1/2 -translate-y-1/2 text-[0.75rem] text-gray-500 dark:text-gray-400 tabular-nums transition-opacity duration-150 opacity-100 md:group-hover:opacity-0 md:group-focus-within:opacity-0">
+            <span className="absolute right-9 md:right-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400 tabular-nums transition-opacity duration-150 opacity-100 md:group-hover:opacity-0 md:group-focus-within:opacity-0">
               {getTimeLabel(updatedAt)}
             </span>
           )}

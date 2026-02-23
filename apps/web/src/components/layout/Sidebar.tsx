@@ -608,7 +608,7 @@ export function Sidebar() {
               <div className="w-8 h-8 rounded-full overflow-hidden">
                 <OneraLogo size={32} />
               </div>
-              <span className="font-primary font-semibold text-[0.9rem] text-gray-850 dark:text-white tracking-tight">
+              <span className="font-primary font-semibold text-sm text-gray-850 dark:text-white tracking-tight">
                 Onera
               </span>
             </Link>
@@ -653,7 +653,7 @@ export function Sidebar() {
                 className="group grow flex items-center space-x-3 rounded-xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <HugeiconsIcon icon={Add01Icon} className="size-[18px]" />
-                <span className="font-primary text-[0.9rem] font-medium leading-none">
+                <span className="font-primary text-sm font-medium leading-none">
                   New Chat
                 </span>
               </Link>
@@ -667,7 +667,7 @@ export function Sidebar() {
                 className="w-full group grow flex items-center space-x-3 rounded-xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <HugeiconsIcon icon={Search01Icon} className="size-[18px]" />
-                <span className="font-primary text-[0.9rem] font-medium leading-none">
+                <span className="font-primary text-sm font-medium leading-none">
                   Search
                 </span>
               </button>
@@ -682,7 +682,7 @@ export function Sidebar() {
                   icon={FileAttachmentIcon}
                   className="size-[18px]"
                 />
-                <span className="font-primary text-[0.9rem] font-medium leading-none">
+                <span className="font-primary text-sm font-medium leading-none">
                   Notes
                 </span>
               </Link>
@@ -695,7 +695,7 @@ export function Sidebar() {
                   className="group grow flex items-center space-x-3 rounded-xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-gray-800 dark:text-gray-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <HugeiconsIcon icon={Shield01Icon} className="size-[18px]" />
-                  <span className="font-primary text-[0.9rem] font-medium leading-none">
+                  <span className="font-primary text-sm font-medium leading-none">
                     Admin
                   </span>
                 </Link>
@@ -865,7 +865,7 @@ export function Sidebar() {
                             key={group}
                             className={cn(groupIndex === 0 ? "mt-1.5" : "mt-4")}
                           >
-                            <div className="w-full pl-2.5 text-[0.7rem] text-gray-500 dark:text-gray-500 font-medium pb-1.5">
+                            <div className="w-full pl-2.5 text-xs text-gray-500 dark:text-gray-500 font-medium pb-1.5">
                               {DATE_GROUP_LABELS[group as DateGroup]}
                             </div>
                             <div className="space-y-1 mt-0.5">
