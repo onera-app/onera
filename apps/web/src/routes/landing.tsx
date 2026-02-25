@@ -293,7 +293,7 @@ export function LandingPage() {
               <div className="bg-landing p-10 flex flex-col h-full rounded-2xl border border-landing-border shadow-sm">
                 <h3 className="text-landing-foreground text-2xl font-bold mb-4">Onera Network</h3>
                 <p className="text-landing-muted-foreground text-lg leading-relaxed mb-16">
-                  TEE enclaves and end to end encryption keep chats private without slowing you down.
+                  Trusted hardware enclaves and full encryption keep every conversation private without slowing you down.
                 </p>
                 <div className="mt-auto flex justify-center">
                   <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -311,7 +311,7 @@ export function LandingPage() {
               <div className="bg-landing p-10 flex flex-col h-full rounded-2xl border border-landing-border shadow-sm">
                 <h3 className="text-landing-foreground text-2xl font-bold mb-4">Onera Models</h3>
                 <p className="text-landing-muted-foreground text-lg leading-relaxed mb-16">
-                  Use OpenAI, Anthropic, Google, and open weight models in one encrypted interface.
+                  Access OpenAI, Anthropic, Google, and open source models through one encrypted interface.
                 </p>
                 <div className="mt-auto flex justify-center">
                   <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -339,7 +339,7 @@ export function LandingPage() {
               <div className="bg-landing p-10 flex flex-col h-full rounded-2xl border border-landing-border shadow-sm">
                 <h3 className="text-landing-foreground text-2xl font-bold mb-4">Open Source Client</h3>
                 <p className="text-landing-muted-foreground text-lg leading-relaxed mb-16">
-                  A clean web client with local encryption. Fully open source and auditable.
+                  A clean, open source web client you can audit and verify. Encryption happens entirely on your device.
                 </p>
                 <div className="mt-auto flex justify-center">
                   <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -388,20 +388,20 @@ export function LandingPage() {
                 <div className="md:absolute md:left-0 md:bottom-12 lg:-left-12 lg:bottom-12 max-w-[280px] md:max-w-[200px] mx-auto md:mx-0 flex flex-col items-center md:items-start">
                   <div className="h-px w-24 bg-landing mb-4 md:mb-2 opacity-50"></div>
                   <h4 className="font-bold text-lg mb-1">Local Encryption</h4>
-                  <p className="text-sm opacity-70">Keys never leave your device. All data is encrypted locally.</p>
+                  <p className="text-sm opacity-70">Encryption keys stay on your device. Data is encrypted before it leaves.</p>
                 </div>
 
                 <div className="md:absolute md:left-1/2 md:bottom-[-30px] lg:bottom-[-40px] md:transform md:-translate-x-1/2 max-w-[280px] md:max-w-[200px] mx-auto text-center flex flex-col items-center">
                   <div className="hidden md:block h-12 w-px bg-landing mb-2 opacity-50"></div>
                   <div className="md:hidden h-px w-24 bg-landing mb-4 opacity-50"></div>
                   <h4 className="font-bold text-lg mb-1">TEE Enclaves</h4>
-                  <p className="text-sm opacity-70">Models run in hardware-isolated environments.</p>
+                  <p className="text-sm opacity-70">AI models run inside secure hardware that no one, including Onera, can access.</p>
                 </div>
 
                 <div className="md:absolute md:right-0 md:top-0 lg:-right-12 lg:top-12 max-w-[280px] md:max-w-[200px] mx-auto md:mx-0 flex flex-col items-center md:items-start md:text-left">
                   <div className="h-px w-24 bg-landing mb-4 md:mb-2 opacity-50"></div>
                   <h4 className="font-bold text-lg mb-1">Secure Storage</h4>
-                  <p className="text-sm opacity-70">Store your encrypted history safely, anywhere you choose.</p>
+                  <p className="text-sm opacity-70">Your conversation history is stored fully encrypted and unreadable without your keys.</p>
                 </div>
               </div>
             </div>
@@ -458,7 +458,7 @@ export function LandingPage() {
             {count.toLocaleString()}+
           </div>
           <div className="font-mono text-sm tracking-widest flex items-center justify-center whitespace-pre-wrap text-landing-muted-foreground">
-            End to end encrypted with zero knowledge architecture
+            Fully encrypted. Zero knowledge. Your data stays yours.
           </div>
         </section>
 
