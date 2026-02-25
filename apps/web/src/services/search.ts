@@ -288,7 +288,14 @@ export class SearchService {
     private idbInstance: IDBDatabase | null = null;
 
     private async getIDB(): Promise<IDBDatabase> {
-        if (this.idbInstance) return this.idbInstance;
+        if (this.idbInstance) {
+            if (!this.idbInstance.objectStoreNames.contains("index")) {
+                this.idbInstance.close();
+                this.idbInstance = null;
+            } else {
+                return this.idbInstance;
+            }
+        }
         return new Promise((resolve, reject) => {
             const request = indexedDB.open("onera-search-db", 1);
             request.onupgradeneeded = (event) => {
@@ -298,8 +305,19 @@ export class SearchService {
                 }
             };
             request.onsuccess = () => {
-                this.idbInstance = request.result;
-                resolve(request.result);
+                const db = request.result;
+                // If store is missing (DB exists but corrupted), delete and retry
+                if (!db.objectStoreNames.contains("index")) {
+                    db.close();
+                    const deleteReq = indexedDB.deleteDatabase("onera-search-db");
+                    deleteReq.onsuccess = () => {
+                        this.getIDB().then(resolve, reject);
+                    };
+                    deleteReq.onerror = () => reject(new Error("Failed to reset search IndexedDB"));
+                    return;
+                }
+                this.idbInstance = db;
+                resolve(db);
             };
             request.onerror = () => reject(request.error);
         });
@@ -341,14 +359,23 @@ export class SearchService {
             this.idbInstance = null;
         }
         // Delete encrypted index data from IDB
-        const request = indexedDB.open("onera-search-db", 1);
-        request.onsuccess = () => {
-            const db = request.result;
-            const tx = db.transaction("index", "readwrite");
-            tx.objectStore("index").delete("main-index");
-            tx.objectStore("index").delete("notes-index");
-            tx.oncomplete = () => db.close();
-        };
+        try {
+            const request = indexedDB.open("onera-search-db", 1);
+            request.onsuccess = () => {
+                const db = request.result;
+                if (db.objectStoreNames.contains("index")) {
+                    const tx = db.transaction("index", "readwrite");
+                    tx.objectStore("index").delete("main-index");
+                    tx.objectStore("index").delete("notes-index");
+                    tx.oncomplete = () => db.close();
+                } else {
+                    db.close();
+                    indexedDB.deleteDatabase("onera-search-db");
+                }
+            };
+        } catch {
+            // Ignore errors during cleanup
+        }
     }
 }
 
