@@ -248,19 +248,21 @@ export function LandingPage() {
 
             {/* Feature 2 */}
             <div className="flex flex-col items-center">
-              <div className="h-40 w-full flex flex-col items-center justify-center gap-3 mb-8">
-                <div className="relative w-52 h-10 bg-landing-muted flex items-center justify-center overflow-hidden rounded-md border border-landing-border/50">
-                  <div className="absolute inset-y-0 w-2/3 bg-landing"></div>
-                  <span className="relative z-10 text-[1.1rem] font-mono tracking-[0.2em] text-landing-foreground">msg_***8A</span>
-                </div>
-                <div className="relative w-48 h-10 bg-landing-muted flex items-center justify-center overflow-hidden rounded-md border border-landing-border/50">
-                  <div className="absolute inset-y-0 w-[80%] right-0 bg-landing"></div>
-                  <span className="relative z-10 text-[1.1rem] font-mono tracking-[0.2em] text-landing-foreground">***chat*</span>
-                </div>
-                <div className="relative w-52 h-10 bg-landing-muted flex items-center justify-center overflow-hidden rounded-md border border-landing-border/50">
-                  <div className="absolute inset-y-0 w-1/2 left-2 bg-landing"></div>
-                  <span className="relative z-10 text-[1.1rem] font-mono tracking-[0.2em] text-landing-foreground">usr_***9b</span>
-                </div>
+              <div className="h-40 w-40 flex items-center justify-center mb-8 relative">
+                <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  {/* Primary chat bubble */}
+                  <rect x="12" y="16" width="38" height="26" rx="7" stroke="currentColor" className="text-landing-foreground" strokeWidth="3" fill="none" />
+                  <path d="M22 42V49L29 42" stroke="currentColor" className="text-landing-foreground" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                  {/* Secondary chat bubble */}
+                  <rect x="34" y="34" width="34" height="22" rx="6" stroke="currentColor" className="text-landing-foreground" strokeWidth="3" fill="none" />
+                  {/* Redacted message lines */}
+                  <line x1="18" y1="26" x2="41" y2="26" stroke="currentColor" className="text-landing-foreground" strokeWidth="3" strokeLinecap="round" />
+                  <line x1="18" y1="33" x2="35" y2="33" stroke="currentColor" className="text-landing-foreground" strokeWidth="3" strokeLinecap="round" />
+                  <line x1="40" y1="45" x2="60" y2="45" stroke="currentColor" className="text-landing-foreground" strokeWidth="3" strokeLinecap="round" />
+                  {/* Privacy marker */}
+                  <rect x="53" y="53" width="12" height="10" rx="2" stroke="currentColor" className="text-landing-foreground" strokeWidth="2.5" fill="none" />
+                  <path d="M56 53V50C56 47.7909 57.7909 46 60 46C62.2091 46 64 47.7909 64 50V53" stroke="currentColor" className="text-landing-foreground" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                </svg>
               </div>
               <h3 className="text-2xl font-bold tracking-tight mb-2">Privacy for all your<br />conversations.</h3>
             </div>
@@ -417,43 +419,29 @@ export function LandingPage() {
             </Link>
           </div>
 
-          <div className="relative w-[300px] h-[600px] shrink-0 translate-y-12 md:translate-y-24">
-            {/* Phone Shadow / Back Phone */}
-            <div className="absolute inset-0 bg-landing-border rounded-[40px] translate-x-8 -translate-y-8 opacity-50 flex items-center justify-center p-8">
-              <div className="opacity-30">
-                <OneraLogo size={64} className="h-16 w-16" />
-              </div>
-            </div>
+          <div className="relative w-full max-w-[760px] shrink-0 md:translate-y-12">
+            <div className="flex items-end justify-center gap-4 sm:gap-6">
+              <figure className="relative w-[44%] max-w-[270px] aspect-[1206/2622] overflow-hidden rounded-[28px] border-4 border-landing-foreground/15 bg-landing-card shadow-2xl rotate-[-5deg]">
+                <img
+                  src="/screenshots/ios-onboarding.jpg"
+                  alt="Onera iOS onboarding screen"
+                  className="h-full w-full object-cover object-top"
+                />
+                <figcaption className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-landing-foreground/80 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-landing">
+                  Onboarding
+                </figcaption>
+              </figure>
 
-            {/* Main Phone Frame */}
-            <div className="absolute inset-0 bg-landing-card border-8 border-landing-foreground rounded-[44px] shadow-2xl flex flex-col overflow-hidden">
-              {/* Dynamic Island */}
-              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-7 bg-landing-foreground rounded-b-3xl z-20"></div>
-
-              {/* Phone Content */}
-              <div className="flex-1 bg-landing p-6 flex flex-col">
-                <div className="flex justify-between items-center mt-8 mb-12">
-                  <div className="flex items-center gap-1 font-bold text-lg text-landing-foreground">
-                    <OneraLogo size={16} className="h-4 w-4" />
-                    onera
-                  </div>
-                  <div className="bg-landing-foreground text-landing text-xs px-3 py-1 rounded-full font-bold">SECURE</div>
-                </div>
-
-                <div className="text-landing-foreground font-black text-6xl tracking-tighter mb-4">Hello.</div>
-                <div className="text-landing-muted-foreground font-medium text-lg mb-auto">Ready for a private chat?</div>
-
-                <div className="flex gap-4 w-full h-32">
-                  <div className="flex-1 bg-landing-foreground rounded-2xl p-4 text-landing flex flex-col justify-between shadow-xl">
-                    <span className="font-bold">NEW CHAT</span>
-                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                  </div>
-                  <div className="flex-1 border-2 border-landing-foreground rounded-2xl p-4 text-landing-foreground flex flex-col justify-between hover:bg-landing-foreground hover:text-landing transition-colors">
-                    <span className="font-bold">HISTORY</span>
-                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                  </div>
-                </div>
-              </div>
+              <figure className="relative w-[48%] max-w-[295px] aspect-[1206/2622] overflow-hidden rounded-[30px] border-4 border-landing-foreground/25 bg-landing-card shadow-2xl rotate-[4deg]">
+                <img
+                  src="/screenshots/ios-chat.jpg"
+                  alt="Onera iOS chat screen"
+                  className="h-full w-full object-cover object-top"
+                />
+                <figcaption className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-landing-foreground/85 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-landing">
+                  Chat
+                </figcaption>
+              </figure>
             </div>
           </div>
         </section>
