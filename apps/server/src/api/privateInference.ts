@@ -151,7 +151,8 @@ function normalizeMessages(messages: z.infer<typeof completionMessageSchema>[]):
 }
 
 async function listPrivateModels() {
-  const rows = await db
+  // First try: get models from server_models table
+  const dbModels = await db
     .select({
       id: serverModels.modelId,
       name: serverModels.modelName,
@@ -161,7 +162,51 @@ async function listPrivateModels() {
     .from(serverModels)
     .innerJoin(modelServers, and(eq(serverModels.serverId, modelServers.id), eq(modelServers.status, "ready")));
 
-  return MODEL_LIST_SCHEMA.parse(rows);
+  if (dbModels.length > 0) {
+    return MODEL_LIST_SCHEMA.parse(dbModels);
+  }
+
+  // Fallback: query ready enclaves directly for their models
+  const readyEnclaves = await db
+    .select()
+    .from(enclaves)
+    .where(eq(enclaves.status, "ready"));
+
+  if (readyEnclaves.length === 0) {
+    return [];
+  }
+
+  const allModels: z.infer<typeof MODEL_LIST_SCHEMA> = [];
+
+  for (const enclave of readyEnclaves) {
+    try {
+      const baseUrl = enclave.attestationEndpoint.replace("/attestation", "");
+      const response = await fetch(`${baseUrl}/models`, {
+        signal: AbortSignal.timeout(5000),
+      });
+
+      if (response.ok) {
+        const models = (await response.json()) as Array<{
+          id: string;
+          name: string;
+          displayName: string;
+          contextLength?: number;
+        }>;
+        for (const m of models) {
+          allModels.push({
+            id: m.id,
+            name: m.name,
+            displayName: m.displayName,
+            contextLength: m.contextLength ?? null,
+          });
+        }
+      }
+    } catch (error) {
+      console.warn(`Failed to fetch models from enclave ${enclave.id}:`, error);
+    }
+  }
+
+  return allModels;
 }
 
 export const privateInferenceApi = new Hono<{ Variables: { userId: string } }>();
