@@ -59,6 +59,10 @@ export class NoiseWebSocketSession implements NoiseSession {
       throw new Error('WebSocket is not available. On Node.js, pass a WebSocket implementation via options.');
     }
 
+    // WebSocket.OPEN is always 1 per spec, but use the constructor constant
+    // to avoid referencing the global WebSocket (which doesn't exist in Node.js)
+    const WS_OPEN = WS.OPEN ?? 1;
+
     // Establish WebSocket connection
     session.ws = new WS(endpoint) as WebSocket;
     session.ws.binaryType = 'arraybuffer';
@@ -107,7 +111,7 @@ export class NoiseWebSocketSession implements NoiseSession {
     session.ciphers = await performNKHandshake(
       serverPublicKey,
       async (message) => {
-        if (!session.ws || session.ws.readyState !== WebSocket.OPEN) {
+        if (!session.ws || session.ws.readyState !== WS_OPEN) {
           throw new Error('WebSocket not connected');
         }
         session.ws.send(message);
