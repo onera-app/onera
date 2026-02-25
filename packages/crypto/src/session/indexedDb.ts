@@ -17,16 +17,8 @@ let dbPromise: Promise<IDBDatabase> | null = null;
 /**
  * Open or get the IndexedDB database
  */
-async function getDatabase(): Promise<IDBDatabase> {
-  if (dbInstance) {
-    return dbInstance;
-  }
-
-  if (dbPromise) {
-    return dbPromise;
-  }
-
-  dbPromise = new Promise((resolve, reject) => {
+async function openDatabase(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
     if (typeof indexedDB === 'undefined') {
       reject(new Error('IndexedDB not available'));
       return;
@@ -35,20 +27,32 @@ async function getDatabase(): Promise<IDBDatabase> {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
     request.onerror = () => {
-      dbPromise = null;
       reject(new Error('Failed to open IndexedDB'));
     };
 
     request.onsuccess = () => {
-      dbInstance = request.result;
+      const db = request.result;
 
-      // Handle database closing (e.g., browser clearing data)
-      dbInstance.onclose = () => {
+      // Verify the object store exists — if not, the DB is corrupt/stale.
+      // Delete it and re-open so onupgradeneeded fires.
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.close();
+        const deleteReq = indexedDB.deleteDatabase(DB_NAME);
+        deleteReq.onsuccess = () => {
+          openDatabase().then(resolve, reject);
+        };
+        deleteReq.onerror = () => {
+          reject(new Error('Failed to reset corrupt IndexedDB'));
+        };
+        return;
+      }
+
+      db.onclose = () => {
         dbInstance = null;
         dbPromise = null;
       };
 
-      resolve(dbInstance);
+      resolve(db);
     };
 
     request.onupgradeneeded = (event) => {
@@ -59,6 +63,31 @@ async function getDatabase(): Promise<IDBDatabase> {
         db.createObjectStore(STORE_NAME, { keyPath: 'id' });
       }
     };
+  });
+}
+
+async function getDatabase(): Promise<IDBDatabase> {
+  if (dbInstance) {
+    // Verify the cached instance still has our store (guards against external DB deletion)
+    if (!dbInstance.objectStoreNames.contains(STORE_NAME)) {
+      dbInstance.close();
+      dbInstance = null;
+      dbPromise = null;
+    } else {
+      return dbInstance;
+    }
+  }
+
+  if (dbPromise) {
+    return dbPromise;
+  }
+
+  dbPromise = openDatabase().then((db) => {
+    dbInstance = db;
+    return db;
+  }).catch((err) => {
+    dbPromise = null;
+    throw err;
   });
 
   return dbPromise;
