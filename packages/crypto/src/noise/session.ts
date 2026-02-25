@@ -42,17 +42,25 @@ export class NoiseWebSocketSession implements NoiseSession {
    *
    * @param endpoint - WebSocket URL (wss://...)
    * @param serverPublicKey - Base64-encoded X25519 public key from attestation
+   * @param options - Optional configuration (e.g., custom WebSocket constructor for Node.js)
    * @returns Connected and encrypted session
    * @throws If connection or handshake fails
    */
   static async connect(
     endpoint: string,
-    serverPublicKey: string
+    serverPublicKey: string,
+    options?: { WebSocket?: typeof globalThis.WebSocket }
   ): Promise<NoiseWebSocketSession> {
     const session = new NoiseWebSocketSession();
 
+    // Use provided WebSocket constructor or fall back to global (browser)
+    const WS = options?.WebSocket ?? globalThis.WebSocket;
+    if (!WS) {
+      throw new Error('WebSocket is not available. On Node.js, pass a WebSocket implementation via options.');
+    }
+
     // Establish WebSocket connection
-    session.ws = new WebSocket(endpoint);
+    session.ws = new WS(endpoint) as WebSocket;
     session.ws.binaryType = 'arraybuffer';
 
     await new Promise<void>((resolve, reject) => {

@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { randomUUID } from "crypto";
 import { and, eq, isNull, lt, sql } from "drizzle-orm";
+import WebSocket from "ws";
 import { NoiseWebSocketSession } from "@onera/crypto/noise";
 import { db, schema } from "../db/client";
 import { authenticateApiRequest } from "../auth/apiTokens";
@@ -291,7 +292,8 @@ privateInferenceApi.post("/chat/completions", async (c) => {
 
     const session = await NoiseWebSocketSession.connect(
       allocation.enclave.wsEndpoint,
-      publicKey
+      publicKey,
+      { WebSocket: WebSocket as unknown as typeof globalThis.WebSocket }
     );
 
     try {
