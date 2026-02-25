@@ -312,34 +312,83 @@ privateInferenceApi.post("/chat/completions", async (c) => {
       { WebSocket: WebSocket as unknown as typeof globalThis.WebSocket }
     );
 
-    try {
-      const requestPayload = {
-        model: input.model,
-        messages: normalizeMessages(input.messages),
-        stream: !!input.stream,
-        temperature: input.temperature,
-        max_tokens: input.max_tokens ?? input.max_completion_tokens,
-      };
+    const requestPayload = {
+      model: input.model,
+      messages: normalizeMessages(input.messages),
+      stream: !!input.stream,
+      temperature: input.temperature,
+      max_tokens: input.max_tokens ?? input.max_completion_tokens,
+    };
 
-      if (input.stream) {
-        const stream = new ReadableStream({
-          async start(controller) {
-            const encoder = new TextEncoder();
-            const completionId = `chatcmpl_${randomUUID()}`;
-            const created = Math.floor(Date.now() / 1000);
+    if (input.stream) {
+      // For streaming, session and assignment cleanup must happen inside the
+      // stream lifecycle, not in outer finally blocks, because the response
+      // is returned before streaming completes.
+      const currentAssignmentId = assignmentId;
+      assignmentId = null; // Prevent outer finally from releasing
 
-            const sendChunk = (payload: unknown) => {
-              const line = `data: ${JSON.stringify(payload)}\n\n`;
-              controller.enqueue(encoder.encode(line));
-            };
+      const stream = new ReadableStream({
+        async start(controller) {
+          const encoder = new TextEncoder();
+          const completionId = `chatcmpl_${randomUUID()}`;
+          const created = Math.floor(Date.now() / 1000);
 
-            try {
-              const requestBytes = new TextEncoder().encode(JSON.stringify(requestPayload));
+          const sendChunk = (payload: unknown) => {
+            const line = `data: ${JSON.stringify(payload)}\n\n`;
+            controller.enqueue(encoder.encode(line));
+          };
 
-              for await (const chunk of session.sendAndStream(requestBytes)) {
-                const decoded = JSON.parse(new TextDecoder().decode(chunk));
+          try {
+            const requestBytes = new TextEncoder().encode(JSON.stringify(requestPayload));
 
-                if (decoded.type === "text-delta") {
+            for await (const chunk of session.sendAndStream(requestBytes)) {
+              const decoded = JSON.parse(new TextDecoder().decode(chunk));
+
+              if (decoded.type === "text-delta") {
+                sendChunk({
+                  id: completionId,
+                  object: "chat.completion.chunk",
+                  created,
+                  model: input.model,
+                  choices: [
+                    {
+                      index: 0,
+                      delta: {
+                        content: decoded.text || "",
+                      },
+                      finish_reason: null,
+                    },
+                  ],
+                });
+              } else if (decoded.type === "finish") {
+                sendChunk({
+                  id: completionId,
+                  object: "chat.completion.chunk",
+                  created,
+                  model: input.model,
+                  choices: [
+                    {
+                      index: 0,
+                      delta: {},
+                      finish_reason: decoded.finish_reason || "stop",
+                    },
+                  ],
+                });
+                controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+                controller.close();
+                return;
+              } else if (decoded.type === "error") {
+                console.error("Enclave streaming error:", decoded.message);
+                const errorLine = `data: ${JSON.stringify({
+                  error: { message: decoded.message || "Streaming error", type: "server_error" },
+                })}\n\n`;
+                controller.enqueue(encoder.encode(errorLine));
+                controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+                controller.close();
+                return;
+              } else if (decoded.content !== undefined) {
+                // Fallback: InferenceResponse format (non-streaming response on stream path)
+                if (decoded.content) {
                   sendChunk({
                     id: completionId,
                     object: "chat.completion.chunk",
@@ -349,92 +398,66 @@ privateInferenceApi.post("/chat/completions", async (c) => {
                       {
                         index: 0,
                         delta: {
-                          content: decoded.text || "",
+                          content: decoded.content,
                         },
                         finish_reason: null,
                       },
                     ],
                   });
-                } else if (decoded.type === "finish") {
-                  sendChunk({
-                    id: completionId,
-                    object: "chat.completion.chunk",
-                    created,
-                    model: input.model,
-                    choices: [
-                      {
-                        index: 0,
-                        delta: {},
-                        finish_reason: decoded.finishReason || "stop",
-                      },
-                    ],
-                  });
-                  controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-                  controller.close();
-                  return;
-                } else if (decoded.content !== undefined) {
-                  if (decoded.content) {
-                    sendChunk({
-                      id: completionId,
-                      object: "chat.completion.chunk",
-                      created,
-                      model: input.model,
-                      choices: [
-                        {
-                          index: 0,
-                          delta: {
-                            content: decoded.content,
-                          },
-                          finish_reason: null,
-                        },
-                      ],
-                    });
-                  }
-                  sendChunk({
-                    id: completionId,
-                    object: "chat.completion.chunk",
-                    created,
-                    model: input.model,
-                    choices: [
-                      {
-                        index: 0,
-                        delta: {},
-                        finish_reason: decoded.finish_reason || "stop",
-                      },
-                    ],
-                  });
-                  controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-                  controller.close();
-                  return;
                 }
+                sendChunk({
+                  id: completionId,
+                  object: "chat.completion.chunk",
+                  created,
+                  model: input.model,
+                  choices: [
+                    {
+                      index: 0,
+                      delta: {},
+                      finish_reason: decoded.finish_reason || "stop",
+                    },
+                  ],
+                });
+                controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+                controller.close();
+                return;
               }
-
-              controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-              controller.close();
-            } catch (error) {
-              console.error("Private inference streaming error:", error);
-              const errorLine = `data: ${JSON.stringify({
-                error: {
-                  message: "Streaming request failed",
-                  type: "server_error",
-                },
-              })}\n\n`;
-              controller.enqueue(new TextEncoder().encode(errorLine));
-              controller.close();
             }
-          },
-        });
 
-        return c.newResponse(stream, {
-          status: 200,
-          headers: {
-            "Content-Type": "text/event-stream",
-            "Cache-Control": "no-cache, no-transform",
-            Connection: "keep-alive",
-          },
-        });
-      }
+            // Stream ended without explicit finish chunk
+            controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+            controller.close();
+          } catch (error) {
+            console.error("Private inference streaming error:", error);
+            const errorLine = `data: ${JSON.stringify({
+              error: {
+                message: "Streaming request failed",
+                type: "server_error",
+              },
+            })}\n\n`;
+            controller.enqueue(new TextEncoder().encode(errorLine));
+            controller.close();
+          } finally {
+            session.close();
+            if (currentAssignmentId) {
+              await releaseAssignment(currentAssignmentId);
+            }
+          }
+        },
+      });
 
+      return c.newResponse(stream, {
+        status: 200,
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache, no-transform",
+          Connection: "keep-alive",
+        },
+      });
+    }
+
+    // Non-streaming path
+    try {
       const requestBytes = new TextEncoder().encode(JSON.stringify(requestPayload));
       const responseBytes = await session.sendAndReceive(requestBytes);
       const response = JSON.parse(new TextDecoder().decode(responseBytes));
@@ -451,15 +474,15 @@ privateInferenceApi.post("/chat/completions", async (c) => {
               role: "assistant",
               content: response.content || "",
             },
-            finish_reason: response.finishReason || "stop",
+            finish_reason: response.finish_reason || "stop",
           },
         ],
         usage: {
-          prompt_tokens: response.usage?.promptTokens || 0,
-          completion_tokens: response.usage?.completionTokens || 0,
+          prompt_tokens: response.usage?.prompt_tokens || 0,
+          completion_tokens: response.usage?.completion_tokens || 0,
           total_tokens:
-            (response.usage?.promptTokens || 0) +
-            (response.usage?.completionTokens || 0),
+            (response.usage?.prompt_tokens || 0) +
+            (response.usage?.completion_tokens || 0),
         },
       });
     } finally {

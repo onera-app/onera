@@ -399,11 +399,12 @@ impl Router {
     }
 
     /// Forward a streaming inference request to the appropriate model server.
-    /// Returns a channel receiver that yields response chunks as they arrive.
+    /// Returns a channel receiver that yields raw decrypted JSON bytes as they arrive.
+    /// The caller is responsible for re-encrypting and forwarding to the client.
     pub async fn forward_request_streaming(
         &self,
         request: InferenceRequest,
-    ) -> Result<mpsc::Receiver<Result<InferenceResponse>>> {
+    ) -> Result<mpsc::Receiver<Result<Vec<u8>>>> {
         let model_id = request.model.as_deref().unwrap_or("default");
         info!("forward_request_streaming: model={}, messages={}", model_id, request.messages.len());
 
@@ -426,7 +427,9 @@ impl Router {
         // Create channel for streaming responses
         let (tx, rx) = mpsc::channel(32);
 
-        // Read responses until we get an empty end-of-stream signal
+        // Read responses until we get an empty end-of-stream signal.
+        // Forward raw decrypted bytes without parsing to preserve the
+        // original StreamChunk format from the model server.
         loop {
             let msg = match timeout(REQUEST_TIMEOUT, conn.ws.next()).await {
                 Ok(Some(Ok(msg))) => msg,
@@ -454,16 +457,8 @@ impl Router {
                 Message::Binary(ciphertext) => {
                     match conn.transport.read_message(&ciphertext, &mut buf) {
                         Ok(len) => {
-                            match serde_json::from_slice::<InferenceResponse>(&buf[..len]) {
-                                Ok(response) => {
-                                    if tx.send(Ok(response)).await.is_err() {
-                                        break; // Receiver dropped
-                                    }
-                                }
-                                Err(e) => {
-                                    let _ = tx.send(Err(anyhow!("Failed to parse response: {}", e))).await;
-                                    break;
-                                }
+                            if tx.send(Ok(buf[..len].to_vec())).await.is_err() {
+                                break; // Receiver dropped
                             }
                         }
                         Err(e) => {

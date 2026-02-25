@@ -328,14 +328,14 @@ async fn handle_messages(
                             drop(state_guard); // Release lock before async call
 
                             if request.stream {
-                                // Streaming mode: relay chunks from model server
+                                // Streaming mode: relay raw decrypted chunks from model server
                                 match router.forward_request_streaming(request).await {
                                     Ok(mut rx) => {
                                         while let Some(chunk_result) = rx.recv().await {
                                             match chunk_result {
-                                                Ok(chunk) => {
-                                                    let chunk_json = serde_json::to_vec(&chunk)?;
-                                                    let len = transport.write_message(&chunk_json, &mut buf)?;
+                                                Ok(chunk_bytes) => {
+                                                    // Forward raw decrypted bytes, re-encrypting for client
+                                                    let len = transport.write_message(&chunk_bytes, &mut buf)?;
                                                     write.send(Message::Binary(buf[..len].to_vec())).await?;
                                                 }
                                                 Err(e) => {
