@@ -9,8 +9,17 @@ import { db, schema } from "../db/client";
 import { authenticateApiRequest } from "../auth/apiTokens";
 import { checkInferenceAllowance } from "../billing/usage";
 
-// Initialize libsodium at module load (required for Noise protocol handshake)
-const sodiumReady = initSodium();
+// Lazy libsodium initialization (deferred to first inference request)
+let sodiumReady: Promise<unknown> | null = null;
+function ensureSodium(): Promise<unknown> {
+  if (!sodiumReady) {
+    sodiumReady = initSodium().catch((err) => {
+      sodiumReady = null; // Allow retry on failure
+      throw err;
+    });
+  }
+  return sodiumReady;
+}
 
 const { enclaves, enclaveAssignments, serverModels, modelServers } = schema;
 
@@ -287,7 +296,7 @@ privateInferenceApi.post("/chat/completions", async (c) => {
 
   try {
     // Ensure libsodium is initialized before Noise handshake
-    await sodiumReady;
+    await ensureSodium();
 
     const allocation = await allocateSharedEnclave(userId);
     assignmentId = allocation.assignmentId;
