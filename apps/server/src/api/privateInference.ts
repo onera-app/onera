@@ -82,9 +82,9 @@ async function fetchEnclavePublicKey(enclaveId: string, attestationEndpoint: str
     throw new Error(`Invalid public key length: ${keyBytes.length}`);
   }
 
-  const hexKey = keyBytes.toString("hex");
-  publicKeyCache.set(enclaveId, { key: hexKey, fetchedAt: Date.now() });
-  return hexKey;
+  // NoiseWebSocketSession.connect expects base64, not hex
+  publicKeyCache.set(enclaveId, { key: attestation.public_key, fetchedAt: Date.now() });
+  return attestation.public_key;
 }
 
 async function allocateSharedEnclave(userId: string): Promise<{ assignmentId: string; enclave: typeof enclaves.$inferSelect }> {
