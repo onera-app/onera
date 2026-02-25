@@ -10,6 +10,7 @@ import { foldersRouter } from "./routers/folders";
 import { chatsRouter } from "./routers/chats";
 import { notesRouter } from "./routers/notes";
 import { credentialsRouter } from "./routers/credentials";
+import { apiTokensRouter } from "./routers/apiTokens";
 import { promptsRouter } from "./routers/prompts";
 import { enclavesRouter } from "./routers/enclaves";
 import { modelServersRouter } from "./routers/modelServers";
@@ -27,6 +28,7 @@ export const appRouter = router({
   chats: chatsRouter,
   notes: notesRouter,
   credentials: credentialsRouter,
+  apiTokens: apiTokensRouter,
   prompts: promptsRouter,
   enclaves: enclavesRouter,
   modelServers: modelServersRouter,

@@ -326,6 +326,30 @@ export const credentials = pgTable(
   (table) => [index("idx_credentials_user_id").on(table.userId)]
 );
 
+// Personal API tokens for bot and API access
+export const apiTokens = pgTable(
+  "api_tokens",
+  {
+    id: uuidPrimaryKey("id"),
+    userId: text("user_id").notNull(),
+    name: text("name").notNull().default("Default"),
+    tokenHash: text("token_hash").notNull(),
+    tokenPrefix: text("token_prefix").notNull(),
+    lastUsedAt: timestamp("last_used_at", { mode: "date" }),
+    revokedAt: timestamp("revoked_at", { mode: "date" }),
+    createdAt: timestamp("created_at", { mode: "date" })
+      .default(sql`now()`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .default(sql`now()`)
+      .notNull(),
+  },
+  (table) => [
+    index("idx_api_tokens_user_id").on(table.userId),
+    uniqueIndex("idx_api_tokens_token_hash").on(table.tokenHash),
+  ]
+);
+
 // Prompts (templates)
 export const prompts = pgTable(
   "prompts",
@@ -411,6 +435,8 @@ export type Note = typeof notes.$inferSelect;
 export type NewNote = typeof notes.$inferInsert;
 export type Credential = typeof credentials.$inferSelect;
 export type NewCredential = typeof credentials.$inferInsert;
+export type ApiToken = typeof apiTokens.$inferSelect;
+export type NewApiToken = typeof apiTokens.$inferInsert;
 export type Prompt = typeof prompts.$inferSelect;
 export type NewPrompt = typeof prompts.$inferInsert;
 

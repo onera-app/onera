@@ -34,6 +34,7 @@ export const {
   chats,
   notes,
   credentials,
+  apiTokens,
   prompts,
   plans,
   subscriptions,

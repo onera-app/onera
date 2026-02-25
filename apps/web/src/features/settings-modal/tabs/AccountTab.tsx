@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
+import { useApiTokens, useCreateApiToken, useRevokeApiToken } from '@/hooks/queries/useApiTokens';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -19,13 +20,21 @@ import {
 
 export function AccountTab() {
   const { user } = useAuth();
+  const { data: apiTokensData } = useApiTokens();
+  const createApiToken = useCreateApiToken();
+  const revokeApiToken = useRevokeApiToken();
+
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [showTokenDialog, setShowTokenDialog] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [newTokenName, setNewTokenName] = useState('Moltbot');
+  const [newlyCreatedToken, setNewlyCreatedToken] = useState<string | null>(null);
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
+  const apiTokens = apiTokensData ?? [];
 
   const handlePasswordChange = async () => {
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
@@ -67,6 +76,34 @@ export function AccountTab() {
         .join('')
         .toUpperCase()
     : user?.email?.[0]?.toUpperCase() || '?';
+
+  const handleCreateApiToken = async () => {
+    try {
+      const result = await createApiToken.mutateAsync({
+        name: newTokenName.trim() || 'Moltbot',
+      });
+      setNewlyCreatedToken(result.token);
+      setShowTokenDialog(true);
+      toast.success('API token created');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create API token');
+    }
+  };
+
+  const handleRevokeApiToken = async (tokenId: string) => {
+    try {
+      await revokeApiToken.mutateAsync({ tokenId });
+      toast.success('API token revoked');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to revoke API token');
+    }
+  };
+
+  const copyToken = async () => {
+    if (!newlyCreatedToken) return;
+    await navigator.clipboard.writeText(newlyCreatedToken);
+    toast.success('Token copied');
+  };
 
   return (
     <div className="space-y-6">
@@ -139,6 +176,53 @@ export function AccountTab() {
           <Button variant="outline" size="sm" onClick={() => setShowPasswordDialog(true)}>
             Change Password
           </Button>
+        </div>
+      </div>
+
+      {/* API Access */}
+      <div className="space-y-4 pt-4 border-t">
+        <Label className="text-base">API Access</Label>
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          Create a personal token to route Moltbot or other bot traffic through private inference.
+        </p>
+
+        <div className="flex items-center gap-2">
+          <Input
+            value={newTokenName}
+            onChange={(e) => setNewTokenName(e.target.value)}
+            placeholder="Token name"
+            className="max-w-xs"
+          />
+          <Button onClick={handleCreateApiToken} disabled={createApiToken.isPending}>
+            {createApiToken.isPending ? 'Creating...' : 'Create Token'}
+          </Button>
+        </div>
+
+        <div className="space-y-2">
+          {apiTokens.length === 0 ? (
+            <p className="text-xs text-gray-500 dark:text-gray-400">No API tokens yet.</p>
+          ) : (
+            apiTokens.map((token) => (
+              <div key={token.id} className="flex items-center justify-between rounded-lg border px-3 py-2">
+                <div>
+                  <p className="text-sm font-medium">{token.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {token.tokenPrefix}... {token.revokedAt ? 'Revoked' : 'Active'}
+                  </p>
+                </div>
+                {!token.revokedAt && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleRevokeApiToken(token.id)}
+                    disabled={revokeApiToken.isPending}
+                  >
+                    Revoke
+                  </Button>
+                )}
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -234,6 +318,31 @@ export function AccountTab() {
               ) : (
                 'Change Password'
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showTokenDialog} onOpenChange={setShowTokenDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Copy API Token</DialogTitle>
+            <DialogDescription>
+              This token is shown only once. Copy it now and store it securely.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2 py-2">
+            <Label htmlFor="new-api-token">Token</Label>
+            <Input id="new-api-token" value={newlyCreatedToken ?? ''} readOnly />
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTokenDialog(false)}>
+              Close
+            </Button>
+            <Button onClick={copyToken} disabled={!newlyCreatedToken}>
+              Copy Token
             </Button>
           </DialogFooter>
         </DialogContent>

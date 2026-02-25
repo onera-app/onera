@@ -8,6 +8,7 @@ import { createContext } from "./trpc/context";
 import { initWebSocket } from "./websocket";
 import { startStaleAssignmentCleanup } from "./jobs/cleanupStaleAssignments";
 import { webhookApp } from "./billing/webhook";
+import { privateInferenceApi } from "./api/privateInference";
 
 const app = new Hono();
 // Deployment touch: non-functional change to retrigger backend CI/CD.
@@ -32,7 +33,7 @@ app.use(
     },
     credentials: true,
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowHeaders: ["Content-Type", "Authorization"],
+    allowHeaders: ["Content-Type", "Authorization", "x-api-key"],
   })
 );
 
@@ -59,6 +60,7 @@ app.get("/.well-known/apple-app-site-association", (c) => {
 
 // Dodo Payments webhook endpoint (no auth — uses signature verification)
 app.route("/webhooks", webhookApp);
+app.route("/v1", privateInferenceApi);
 
 // Note: Authentication is handled by Supabase Auth
 // JWT tokens are verified in the tRPC context via the Authorization header
