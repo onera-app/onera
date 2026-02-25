@@ -179,10 +179,10 @@ export function LandingPage() {
             <div className="flex items-center justify-center mb-8 md:mb-12">
               <OneraLogo size={48} className="h-[40px] w-[40px] md:h-[48px] md:w-[48px] rounded-xl" />
             </div>
-            <div className="text-[clamp(2rem,5.5vw,2.5rem)] font-bold tracking-tight leading-tight">Making AI Chat</div>
+            <div className="text-[clamp(2rem,5.5vw,2.5rem)] font-bold tracking-tight leading-tight">Private AI Chat</div>
             <RedactedWord />
             <p className="max-w-[540px] md:mx-auto mt-5 md:mt-6 text-[clamp(1.05rem,2.5vw,1.25rem)] font-medium leading-relaxed tracking-tight text-landing-muted-foreground">
-              Onera is an open-source AI chat that can't expose your conversations to anyone. Not even us.
+              Onera encrypts messages on your device before they are sent. Onera cannot read your conversations.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:mt-10">
               <Link
@@ -218,10 +218,10 @@ export function LandingPage() {
         {/* FEATURES SECTION */}
         <section className="py-24 px-8 md:px-16 w-full max-w-6xl mx-auto flex flex-col items-center">
           <h2 className="text-[clamp(2.5rem,6vw,4.5rem)] font-black uppercase leading-[1] tracking-[-0.04em] text-center mb-6">
-            ONERA IS A <span className="bg-landing-foreground text-landing px-2 py-1 inline-block -skew-x-6 mr-1"><span className="skew-x-6 inline-block">PRIVACY FIRST</span></span> OPEN SOURCE AI CHAT
+            ONERA IS A <span className="bg-landing-foreground text-landing px-2 py-1 inline-block -skew-x-6 mr-1"><span className="skew-x-6 inline-block">PRIVACY FIRST</span></span> OPEN SOURCE AI CHAT APPLICATION
           </h2>
           <p className="text-xl md:text-2xl font-bold tracking-tight text-center mb-12 text-landing-muted-foreground">
-            Unlocking truly private intelligence.
+            Private AI without compromise.
           </p>
 
           <a href="https://docs.onera.chat" className="inline-block border-[3px] border-landing-foreground rounded-full px-8 py-3 font-bold text-lg uppercase tracking-wide hover:bg-landing-foreground hover:text-landing transition-colors mb-24">
@@ -243,7 +243,7 @@ export function LandingPage() {
                   <line x1="12" y1="68" x2="68" y2="12" stroke="currentColor" className="text-landing-foreground" strokeWidth="3" strokeLinecap="round" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold tracking-tight mb-2">Zero data retention<br />on our servers.</h3>
+              <h3 className="text-2xl font-bold tracking-tight mb-2">No data retention<br />on our servers.</h3>
             </div>
 
             {/* Feature 2 */}
@@ -264,7 +264,7 @@ export function LandingPage() {
                   <path d="M56 53V50C56 47.7909 57.7909 46 60 46C62.2091 46 64 47.7909 64 50V53" stroke="currentColor" className="text-landing-foreground" strokeWidth="2.5" strokeLinecap="round" fill="none" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold tracking-tight mb-2">Privacy for all your<br />conversations.</h3>
+              <h3 className="text-2xl font-bold tracking-tight mb-2">Private by default for<br />every conversation.</h3>
             </div>
 
             {/* Feature 3 */}
@@ -286,14 +286,14 @@ export function LandingPage() {
         <section className="py-32 bg-landing-card text-landing-foreground w-full border-y border-landing-border">
           <div className="max-w-7xl mx-auto px-8 md:px-16">
             <h2 className="text-[clamp(3rem,6vw,5rem)] font-black uppercase tracking-tight text-center mb-20">
-              ONERA ECOSYSTEM
+              THE ONERA ECOSYSTEM
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* Card 1 */}
               <div className="bg-landing p-10 flex flex-col h-full rounded-2xl border border-landing-border shadow-sm">
                 <h3 className="text-landing-foreground text-2xl font-bold mb-4">Onera Network</h3>
                 <p className="text-landing-muted-foreground text-lg leading-relaxed mb-16">
-                  High performance TEE enclaves + E2E encryption enable seamless privacy without compromising speed.
+                  TEE enclaves and end to end encryption keep chats private without slowing you down.
                 </p>
                 <div className="mt-auto flex justify-center">
                   <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -311,7 +311,7 @@ export function LandingPage() {
               <div className="bg-landing p-10 flex flex-col h-full rounded-2xl border border-landing-border shadow-sm">
                 <h3 className="text-landing-foreground text-2xl font-bold mb-4">Onera Models</h3>
                 <p className="text-landing-muted-foreground text-lg leading-relaxed mb-16">
-                  Use OpenAI, Anthropic, Google, and open-weights models. One encrypted interface with TEE-backed private inference.
+                  Use OpenAI, Anthropic, Google, and open weight models in one encrypted interface.
                 </p>
                 <div className="mt-auto flex justify-center">
                   <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -337,9 +337,9 @@ export function LandingPage() {
 
               {/* Card 3 */}
               <div className="bg-landing p-10 flex flex-col h-full rounded-2xl border border-landing-border shadow-sm">
-                <h3 className="text-landing-foreground text-2xl font-bold mb-4">Open-Source Client</h3>
+                <h3 className="text-landing-foreground text-2xl font-bold mb-4">Open Source Client</h3>
                 <p className="text-landing-muted-foreground text-lg leading-relaxed mb-16">
-                  Beautiful, minimal web client that handles all encryption locally on your device. Fully open-source and auditable.
+                  A clean web client with local encryption. Fully open source and auditable.
                 </p>
                 <div className="mt-auto flex justify-center">
                   <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -412,7 +412,7 @@ export function LandingPage() {
         <section className="py-32 px-8 bg-landing-muted w-full flex flex-col md:flex-row items-center justify-center gap-16 overflow-hidden">
           <div className="max-w-xl text-left z-10">
             <h2 className="text-[clamp(3rem,6vw,5rem)] font-black uppercase leading-[0.95] tracking-tight text-landing-foreground mb-8">
-              START YOUR<br />AI JOURNEY,<br />PRIVATELY.
+              START YOUR<br />PRIVATE AI<br />JOURNEY.
             </h2>
             <Link to="/auth" className="inline-block bg-landing-foreground text-landing rounded-full px-10 py-5 font-bold text-xl uppercase tracking-wide hover:scale-105 transition-transform shadow-lg shadow-landing-foreground/20">
               GET ONERA APP
@@ -458,7 +458,7 @@ export function LandingPage() {
             {count.toLocaleString()}+
           </div>
           <div className="font-mono text-sm tracking-widest flex items-center justify-center whitespace-pre-wrap text-landing-muted-foreground">
-            End-to-end encrypted with zero-knowledge architecture
+            End to end encrypted with zero knowledge architecture
           </div>
         </section>
 
