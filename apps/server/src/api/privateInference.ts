@@ -448,11 +448,14 @@ privateInferenceApi.post("/chat/completions", async (c) => {
       session.close();
     }
   } catch (error) {
-    console.error("Private inference API error:", error);
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error("Private inference API error:", errMsg, error);
     return c.json(
       {
         error: {
-          message: "Private inference request failed",
+          message: process.env.NODE_ENV === "production"
+            ? "Private inference request failed"
+            : `Private inference request failed: ${errMsg}`,
           type: "server_error",
         },
       },
