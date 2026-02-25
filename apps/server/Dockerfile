@@ -20,6 +20,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/server/node_modules ./apps/server/node_modules
 COPY --from=deps /app/packages/types/node_modules ./packages/types/node_modules
 COPY . .
+# Build workspace packages first (bun can run .ts but compile for safety)
+RUN cd packages/types && bunx tsc && cd ../.. && \
+    cd packages/crypto && bunx tsc && cd ../..
 WORKDIR /app/apps/server
 RUN bun build src/index.ts --outdir dist --target bun --external @onera/crypto
 

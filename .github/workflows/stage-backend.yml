@@ -29,6 +29,11 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Build workspace packages
+        run: |
+          cd packages/types && bunx tsc && cd ../..
+          cd packages/crypto && bunx tsc && cd ../..
+
       - name: Build server
         working-directory: apps/server
         run: bun build src/index.ts --outdir dist --target node --external @onera/crypto
@@ -79,11 +84,29 @@ jobs:
           cd deploy
           bun install --production
           
-          # Copy @onera/crypto and @onera/types workspace packages (externalized from bundle)
-          mkdir -p node_modules/@onera
-          cp -r ../packages/crypto node_modules/@onera/crypto
-          cp -r ../packages/types node_modules/@onera/types
-          rm -rf node_modules/@onera/crypto/node_modules node_modules/@onera/types/node_modules
+          # Copy @onera/crypto and @onera/types workspace packages (compiled JS from dist/)
+          mkdir -p node_modules/@onera/crypto node_modules/@onera/types
+          cp -r ../packages/crypto/dist node_modules/@onera/crypto/dist
+          cp ../packages/crypto/package.json node_modules/@onera/crypto/
+          cp -r ../packages/types/dist node_modules/@onera/types/dist
+          cp ../packages/types/package.json node_modules/@onera/types/
+          
+          # Rewrite package.json exports to point to compiled JS (Node.js can't run .ts)
+          bun -e "
+            const fs = require('fs');
+            for (const pkg of ['node_modules/@onera/crypto/package.json', 'node_modules/@onera/types/package.json']) {
+              const p = JSON.parse(fs.readFileSync(pkg, 'utf8'));
+              if (p.main) p.main = p.main.replace('./src/', './dist/').replace('.ts', '.js');
+              if (p.types) p.types = p.types.replace('./src/', './dist/').replace('.ts', '.d.ts');
+              if (p.exports) {
+                for (const [k, v] of Object.entries(p.exports)) {
+                  if (typeof v === 'string') p.exports[k] = v.replace('./src/', './dist/').replace('.ts', '.js');
+                }
+              }
+              delete p.dependencies;
+              fs.writeFileSync(pkg, JSON.stringify(p, null, 2));
+            }
+          "
           
           # Create startup script for Node.js
           cat > startup.sh << 'EOF'
