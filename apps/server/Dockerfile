@@ -20,11 +20,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/server/node_modules ./apps/server/node_modules
 COPY --from=deps /app/packages/types/node_modules ./packages/types/node_modules
 COPY . .
-# Build workspace packages first (bun can run .ts but compile for safety)
-RUN cd packages/types && bunx tsc && cd ../.. && \
-    cd packages/crypto && bunx tsc && cd ../..
 WORKDIR /app/apps/server
-RUN bun build src/index.ts --outdir dist --target bun --external @onera/crypto
+RUN bun build src/index.ts --outdir dist --target bun --external libsodium-wrappers-sumo --external libsodium-sumo
 
 # Production
 FROM oven/bun:alpine AS runner
@@ -40,10 +37,6 @@ COPY --from=builder /app/apps/server/src/db ./src/db
 
 # Copy package files and install dependencies
 COPY --from=builder /app/apps/server/package.json ./package.json
-
-# Copy @onera/crypto workspace package (externalized from bundle)
-COPY --from=builder /app/packages/crypto ./node_modules/@onera/crypto
-COPY --from=builder /app/packages/types ./node_modules/@onera/types
 
 RUN bun install --production && \
     rm -rf ~/.bun/install/cache

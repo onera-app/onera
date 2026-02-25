@@ -12,7 +12,7 @@
   },
   "scripts": {
     "dev": "bun run --watch src/index.ts",
-    "build": "bun build src/index.ts --outdir dist --target node --external @onera/crypto",
+    "build": "bun build src/index.ts --outdir dist --target node --external libsodium-wrappers-sumo --external libsodium-sumo",
     "start": "node dist/index.js",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "bun run src/db/migrate.ts",
