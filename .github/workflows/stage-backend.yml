@@ -31,7 +31,7 @@ jobs:
 
       - name: Build server
         working-directory: apps/server
-        run: bun build src/index.ts --outdir dist --target node
+        run: bun build src/index.ts --outdir dist --target node --external @onera/crypto
 
       - name: Run database migrations
         working-directory: apps/server
@@ -57,6 +57,11 @@ jobs:
           cp -r apps/server/drizzle deploy/
           cp -r apps/server/src/db deploy/src/
           cp apps/server/package.json deploy/
+          
+          # Copy @onera/crypto workspace package (externalized from bundle)
+          mkdir -p deploy/node_modules/@onera
+          cp -r packages/crypto deploy/node_modules/@onera/crypto
+          cp -r packages/types deploy/node_modules/@onera/types
           
           # Install production dependencies
           cd deploy

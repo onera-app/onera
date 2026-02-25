@@ -34,7 +34,7 @@ jobs:
         run: bun install
 
       - name: Build server for Node.js
-        run: bun build src/index.ts --outdir dist --target node
+        run: bun build src/index.ts --outdir dist --target node --external @onera/crypto
         working-directory: apps/server
 
       - name: Run database migrations
@@ -66,6 +66,11 @@ jobs:
             delete pkg.devDependencies;
             console.log(JSON.stringify(pkg, null, 2));
           " > deploy/package.json
+          
+          # Copy @onera/crypto workspace package (externalized from bundle)
+          mkdir -p deploy/node_modules/@onera
+          cp -r packages/crypto deploy/node_modules/@onera/crypto
+          cp -r packages/types deploy/node_modules/@onera/types
 
       - name: Install production dependencies
         run: |
