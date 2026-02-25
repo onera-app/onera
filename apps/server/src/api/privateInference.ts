@@ -4,9 +4,13 @@ import { randomUUID } from "crypto";
 import { and, eq, isNull, lt, sql } from "drizzle-orm";
 import WebSocket from "ws";
 import { NoiseWebSocketSession } from "@onera/crypto/noise";
+import { initSodium } from "@onera/crypto";
 import { db, schema } from "../db/client";
 import { authenticateApiRequest } from "../auth/apiTokens";
 import { checkInferenceAllowance } from "../billing/usage";
+
+// Initialize libsodium at module load (required for Noise protocol handshake)
+const sodiumReady = initSodium();
 
 const { enclaves, enclaveAssignments, serverModels, modelServers } = schema;
 
@@ -282,6 +286,9 @@ privateInferenceApi.post("/chat/completions", async (c) => {
   let assignmentId: string | null = null;
 
   try {
+    // Ensure libsodium is initialized before Noise handshake
+    await sodiumReady;
+
     const allocation = await allocateSharedEnclave(userId);
     assignmentId = allocation.assignmentId;
 
