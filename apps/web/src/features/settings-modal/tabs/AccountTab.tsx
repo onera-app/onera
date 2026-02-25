@@ -183,8 +183,23 @@ export function AccountTab() {
       <div className="space-y-4 pt-4 border-t">
         <Label className="text-base">API Access</Label>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Create a personal token to route Moltbot or other bot traffic through private inference.
+          Create a personal token to use with any OpenAI compatible client. Set the base URL to:
         </p>
+        <div className="flex items-center gap-2">
+          <code className="flex-1 rounded-md border bg-muted px-3 py-2 text-xs font-mono select-all">
+            {`${import.meta.env.VITE_API_URL || 'https://api.onera.chat'}/v1`}
+          </code>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              navigator.clipboard.writeText(`${import.meta.env.VITE_API_URL || 'https://api.onera.chat'}/v1`);
+              toast.success('URL copied');
+            }}
+          >
+            Copy
+          </Button>
+        </div>
 
         <div className="flex items-center gap-2">
           <Input
@@ -324,17 +339,33 @@ export function AccountTab() {
       </Dialog>
 
       <Dialog open={showTokenDialog} onOpenChange={setShowTokenDialog}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Copy API Token</DialogTitle>
+            <DialogTitle>API Token Created</DialogTitle>
             <DialogDescription>
               This token is shown only once. Copy it now and store it securely.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-2 py-2">
-            <Label htmlFor="new-api-token">Token</Label>
-            <Input id="new-api-token" value={newlyCreatedToken ?? ''} readOnly />
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="new-api-token">Token</Label>
+              <Input id="new-api-token" value={newlyCreatedToken ?? ''} readOnly className="font-mono text-xs" />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Base URL</Label>
+              <code className="block rounded-md border bg-muted px-3 py-2 text-xs font-mono select-all">
+                {`${import.meta.env.VITE_API_URL || 'https://api.onera.chat'}/v1`}
+              </code>
+            </div>
+
+            <div className="rounded-md border bg-muted/50 p-3 space-y-1">
+              <p className="text-xs font-medium">OpenAI compatible</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Use this token with any OpenAI SDK or client. Set the base URL and pass the token as the API key.
+              </p>
+            </div>
           </div>
 
           <DialogFooter>
