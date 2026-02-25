@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
-import { Footer } from "@/components/landing";
+import { Footer, Header } from "@/components/landing";
 import { OneraLogo } from "@/components/ui/onera-logo";
 import { FlickeringGrid } from "@/components/ui/flickering-grid";
 
@@ -84,7 +84,7 @@ export function LandingPage() {
   const [hasAnimated, setHasAnimated] = useState(false);
   const [count, setCount] = useState(0);
   const target = 142887;
-  const statsRef = useRef < HTMLElement > (null);
+  const statsRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const landingBg = "#ffffff";
@@ -160,6 +160,8 @@ export function LandingPage() {
   return (
     <div className="min-h-[100dvh] w-full bg-landing text-landing-foreground font-landing antialiased flex flex-col selection:bg-landing-foreground/10 overflow-x-hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
 
+      <Header />
+
       <main className="flex flex-col w-full">
         {/* HERO SECTION */}
         <section className="flex flex-col justify-center items-center text-center px-5 sm:px-8 min-h-[100dvh] py-20 relative overflow-hidden">
@@ -180,7 +182,7 @@ export function LandingPage() {
             <div className="text-[clamp(2rem,5.5vw,2.5rem)] font-bold tracking-tight leading-tight">Making AI Chat</div>
             <RedactedWord />
             <p className="max-w-[540px] md:mx-auto mt-5 md:mt-6 text-[clamp(1.05rem,2.5vw,1.25rem)] font-medium leading-relaxed tracking-tight text-landing-muted-foreground">
-              Onera is a Open source AI chat that can't expose your conversations to anyone, not even us.
+              Onera is an open-source AI chat that can't expose your conversations to anyone. Not even us.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:mt-10">
               <Link
@@ -197,6 +199,17 @@ export function LandingPage() {
               >
                 <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.379.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z" /></svg>
                 GitHub
+              </a>
+              <a
+                href="https://apps.apple.com/us/app/onera-private-ai-chat/id6758128954"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-landing-foreground/20 text-landing-foreground transition-colors hover:bg-landing-foreground/5"
+                aria-label="Download on the App Store"
+              >
+                <svg viewBox="0 0 17 20" className="h-5 w-[17px]" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M14.94 10.56a4.77 4.77 0 0 1 2.27-4 4.89 4.89 0 0 0-3.85-2.08c-1.62-.17-3.19.97-4.02.97-.84 0-2.1-.95-3.47-.93a5.12 5.12 0 0 0-4.31 2.63c-1.86 3.22-.47 7.97 1.31 10.58.9 1.28 1.94 2.71 3.31 2.66 1.34-.06 1.84-.85 3.45-.85 1.6 0 2.06.85 3.46.82 1.44-.02 2.34-1.28 3.2-2.57a10.6 10.6 0 0 0 1.47-2.98 4.61 4.61 0 0 1-2.82-4.25zM12.31 2.72A4.7 4.7 0 0 0 13.39.36 4.78 4.78 0 0 0 10.3 1.96a4.47 4.47 0 0 0-1.1 3.25 3.96 3.96 0 0 0 3.11-1.49z" />
+                </svg>
               </a>
             </div>
           </div>
@@ -219,9 +232,15 @@ export function LandingPage() {
             {/* Feature 1 */}
             <div className="flex flex-col items-center">
               <div className="h-40 w-40 flex items-center justify-center mb-8 relative">
-                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="24" y="0" width="24" height="24" fill="currentColor" className="text-landing-foreground" />
-                  <rect x="0" y="24" width="24" height="24" fill="currentColor" className="text-landing-foreground" />
+                <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  {/* Server shape */}
+                  <rect x="16" y="20" width="48" height="16" rx="4" stroke="currentColor" className="text-landing-foreground" strokeWidth="3" fill="none" />
+                  <rect x="16" y="44" width="48" height="16" rx="4" stroke="currentColor" className="text-landing-foreground" strokeWidth="3" fill="none" />
+                  {/* Drive indicator dots */}
+                  <circle cx="52" cy="28" r="2.5" fill="currentColor" className="text-landing-foreground" />
+                  <circle cx="52" cy="52" r="2.5" fill="currentColor" className="text-landing-foreground" />
+                  {/* Slash-through line = nothing retained */}
+                  <line x1="12" y1="68" x2="68" y2="12" stroke="currentColor" className="text-landing-foreground" strokeWidth="3" strokeLinecap="round" />
                 </svg>
               </div>
               <h3 className="text-2xl font-bold tracking-tight mb-2">Zero data retention<br />on our servers.</h3>
@@ -249,21 +268,11 @@ export function LandingPage() {
             {/* Feature 3 */}
             <div className="flex flex-col items-center">
               <div className="h-40 w-40 flex items-center justify-center mb-8 relative">
-                <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  {/* Central Diamond/Spark */}
-                  <path d="M50 20C50 36.5685 36.5685 50 20 50C36.5685 50 50 63.4315 50 80C50 63.4315 63.4315 50 80 50C63.4315 50 50 36.5685 50 20Z" fill="currentColor" className="text-landing-foreground" />
-
-                  {/* Top Left Lock */}
-                  <g transform="translate(15, 20)">
-                    <rect x="3" y="6" width="10" height="8" rx="1.5" fill="currentColor" className="text-landing-foreground" />
-                    <path d="M5 6V4C5 2.89543 5.89543 2 7 2V2C8.10457 2 9 2.89543 9 4V6" stroke="currentColor" className="text-landing-foreground" strokeWidth="1.5" />
-                  </g>
-
-                  {/* Right floating card */}
-                  <g transform="translate(75, 45)">
-                    <rect x="0" y="0" width="16" height="12" rx="3" fill="currentColor" className="text-landing-muted" />
-                    <circle cx="12" cy="6" r="1.5" fill="currentColor" className="text-landing-foreground" />
-                  </g>
+                <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  {/* Circle */}
+                  <circle cx="40" cy="40" r="28" stroke="currentColor" className="text-landing-foreground" strokeWidth="3" fill="none" />
+                  {/* Checkmark */}
+                  <path d="M26 40L35 49L54 30" stroke="currentColor" className="text-landing-foreground" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
                 </svg>
               </div>
               <h3 className="text-2xl font-bold tracking-tight mb-2">No complex setup<br />required.</h3>
@@ -300,19 +309,26 @@ export function LandingPage() {
               <div className="bg-landing p-10 flex flex-col h-full rounded-2xl border border-landing-border shadow-sm">
                 <h3 className="text-landing-foreground text-2xl font-bold mb-4">Onera Models</h3>
                 <p className="text-landing-muted-foreground text-lg leading-relaxed mb-16">
-                  Chat with leading open-weights models running securely inside hardware-isolated enclaves.
+                  Use OpenAI, Anthropic, Google, and open-weights models. One encrypted interface with TEE-backed private inference.
                 </p>
                 <div className="mt-auto flex justify-center">
-                  <svg width="140" height="180" viewBox="0 0 140 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="10" y="20" width="120" height="160" rx="16" stroke="currentColor" className="text-landing-foreground" strokeWidth="4" fill="none" />
-                    {/* Server rack/chip nodes */}
-                    <rect x="30" y="50" width="80" height="24" rx="4" fill="currentColor" className="text-landing-muted-foreground" opacity="0.3" />
-                    <rect x="30" y="90" width="80" height="24" rx="4" fill="currentColor" className="text-landing-foreground" />
-                    <rect x="30" y="130" width="80" height="24" rx="4" fill="currentColor" className="text-landing-muted-foreground" opacity="0.3" />
-                    {/* Blinking lights equivalent */}
-                    <circle cx="95" cy="102" r="3" fill="currentColor" className="text-landing" />
-                    <circle cx="95" cy="62" r="3" fill="currentColor" className="text-landing-foreground" />
-                    <circle cx="95" cy="142" r="3" fill="currentColor" className="text-landing-foreground" />
+                  <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Interconnected nodes representing multiple models */}
+                    <g stroke="currentColor" className="text-landing-foreground" strokeWidth="2" opacity="0.8">
+                      {/* Outer hexagonal arrangement of nodes */}
+                      <circle cx="100" cy="50" r="14" fill="none" />
+                      <circle cx="148" cy="80" r="14" fill="none" />
+                      <circle cx="148" cy="130" r="14" fill="none" />
+                      <circle cx="100" cy="160" r="14" fill="none" />
+                      <circle cx="52" cy="130" r="14" fill="none" />
+                      <circle cx="52" cy="80" r="14" fill="none" />
+                      {/* Connecting lines */}
+                      <line x1="100" y1="64" x2="100" y2="146" />
+                      <line x1="64" y1="86" x2="136" y2="124" />
+                      <line x1="64" y1="124" x2="136" y2="86" />
+                    </g>
+                    {/* Center node - the unified interface */}
+                    <circle cx="100" cy="105" r="20" fill="currentColor" className="text-landing-foreground" />
                   </svg>
                 </div>
               </div>
@@ -324,21 +340,22 @@ export function LandingPage() {
                   Beautiful, minimal web client that handles all encryption locally on your device. Fully open-source and auditable.
                 </p>
                 <div className="mt-auto flex justify-center">
-                  <div className="w-[160px] h-[200px] border-[4px] border-landing-foreground rounded-t-[32px] rounded-b-none relative flex flex-col p-5 border-b-0 bg-landing overflow-hidden">
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-4 bg-landing-foreground rounded-b-xl"></div>
-                    <div className="flex justify-between items-center mt-4 mb-8">
-                      <OneraLogo size={16} className="h-4 w-4" />
-                      <div className="w-8 h-4 rounded-full bg-landing-muted flex items-center justify-end px-1 border border-landing-border">
-                        <div className="w-2 h-2 rounded-full bg-landing-foreground"></div>
-                      </div>
-                    </div>
-                    <div className="w-[85%] h-10 bg-landing-foreground rounded-xl self-end mb-4 flex items-center px-3">
-                      <div className="w-8 h-2 bg-landing opacity-50 rounded-full"></div>
-                    </div>
-                    <div className="w-[75%] h-12 bg-landing-muted rounded-xl self-start border border-landing-border/50 flex items-center px-3">
-                      <div className="w-12 h-2 bg-landing-muted-foreground opacity-50 rounded-full"></div>
-                    </div>
-                  </div>
+                  <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Code brackets representing open source */}
+                    <g stroke="currentColor" className="text-landing-foreground" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.8">
+                      {/* Left bracket < */}
+                      <polyline points="75,70 45,100 75,130" fill="none" />
+                      {/* Right bracket > */}
+                      <polyline points="125,70 155,100 125,130" fill="none" />
+                      {/* Forward slash / */}
+                      <line x1="112" y1="60" x2="88" y2="140" />
+                    </g>
+                    {/* Lock overlay at bottom-right = secure + open */}
+                    <g transform="translate(140, 140)">
+                      <rect x="4" y="14" width="24" height="18" rx="4" stroke="currentColor" className="text-landing-foreground" strokeWidth="2.5" fill="none" />
+                      <path d="M10 14V10C10 6.68629 12.6863 4 16 4V4C19.3137 4 22 6.68629 22 10V14" stroke="currentColor" className="text-landing-foreground" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                    </g>
+                  </svg>
                 </div>
               </div>
             </div>
@@ -393,7 +410,7 @@ export function LandingPage() {
         <section className="py-32 px-8 bg-landing-muted w-full flex flex-col md:flex-row items-center justify-center gap-16 overflow-hidden">
           <div className="max-w-xl text-left z-10">
             <h2 className="text-[clamp(3rem,6vw,5rem)] font-black uppercase leading-[0.95] tracking-tight text-landing-foreground mb-8">
-              START YOUR<br />AI JOURNEY—<br />PRIVATELY.
+              START YOUR<br />AI JOURNEY,<br />PRIVATELY.
             </h2>
             <Link to="/auth" className="inline-block bg-landing-foreground text-landing rounded-full px-10 py-5 font-bold text-xl uppercase tracking-wide hover:scale-105 transition-transform shadow-lg shadow-landing-foreground/20">
               GET ONERA APP
@@ -433,7 +450,7 @@ export function LandingPage() {
                   </div>
                   <div className="flex-1 border-2 border-landing-foreground rounded-2xl p-4 text-landing-foreground flex flex-col justify-between hover:bg-landing-foreground hover:text-landing transition-colors">
                     <span className="font-bold">HISTORY</span>
-                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                   </div>
                 </div>
               </div>
@@ -447,13 +464,13 @@ export function LandingPage() {
           className="px-8 py-24 bg-landing-card flex flex-col items-center text-center justify-center border-t border-landing-border"
         >
           <div className="font-bold text-sm tracking-[0.15em] mb-4 flex items-center gap-2 uppercase text-landing-muted-foreground">
-            <span className="text-landing-foreground">▊</span> SECURE MESSAGES THIS WEEK ↗
+            SECURE MESSAGES PROCESSED
           </div>
           <div className="text-[clamp(40px,8vw,80px)] font-black leading-none tracking-[-0.04em] mb-6 tabular-nums text-landing-foreground">
-            {count.toLocaleString()}
+            {count.toLocaleString()}+
           </div>
           <div className="font-mono text-sm tracking-widest flex items-center justify-center whitespace-pre-wrap text-landing-muted-foreground">
-            <span className="text-landing-foreground">▊</span> MSG #A7F3B…   FROM: **** — TO: ****
+            End-to-end encrypted with zero-knowledge architecture
           </div>
         </section>
 

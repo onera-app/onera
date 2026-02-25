@@ -19,7 +19,7 @@ const faqs = [
   {
     question: "What AI models can I use?",
     answer:
-      "Onera supports models from OpenAI, Anthropic, Google, and other providers. You choose the model — Onera handles the encryption layer on top.",
+      "Onera supports models from OpenAI, Anthropic, Google, and other providers. You choose the model. Onera handles the encryption layer on top.",
   },
   {
     question: "Are my prompts used to train AI models?",

@@ -8,7 +8,7 @@ const footerLinks = [
     href: "https://apps.apple.com/us/app/onera-private-ai-chat/id6758128954",
   },
   { label: "GitHub", href: "https://github.com/onera-app/onera" },
-  { label: "X", href: "https://x.com/onaborai" },
+  { label: "X", href: "https://x.com/onerachat" },
 ];
 
 export function Footer() {

@@ -41,7 +41,7 @@ const features: Feature[] = [
     icon: Layers01Icon,
     title: "Multi-model, single workspace",
     description:
-      "OpenAI, Anthropic, Google — one private interface for all of them.",
+      "OpenAI, Anthropic, Google. One private interface for all of them.",
   },
   {
     icon: FlashIcon,
@@ -59,7 +59,7 @@ export function FeaturesSection() {
             Private by design.
           </h2>
           <p className="mx-auto mt-4 max-w-[480px] font-landing text-base leading-relaxed text-landing-muted-foreground sm:text-lg">
-            Not by policy — by encryption, secure enclaves, and zero-knowledge
+            Not by policy. By encryption, secure enclaves, and zero-knowledge
             architecture.
           </p>
         </div>
