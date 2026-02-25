@@ -1,5 +1,5 @@
 import { HugeiconsIcon } from "@hugeicons/react";
-import { GlobeIcon, Loading02Icon, SparklesIcon, Tick01Icon } from "@hugeicons/core-free-icons";
+import { GlobeIcon, Loading02Icon, Tick01Icon } from "@hugeicons/core-free-icons";
 import { memo } from "react";
 import {
   Tooltip,
@@ -49,7 +49,7 @@ export const SearchToggle = memo(function SearchToggle({
             disabled
             className="p-[7px] rounded-full bg-transparent text-gray-400 dark:text-gray-600 transition-colors"
           >
-            <HugeiconsIcon icon={SparklesIcon} className="h-4 w-4" />
+            <HugeiconsIcon icon={GlobeIcon} className="h-4 w-4" />
           </button>
         </TooltipTrigger>
         <TooltipContent>
@@ -83,7 +83,7 @@ export const SearchToggle = memo(function SearchToggle({
             {isSearching ? (
               <HugeiconsIcon icon={Loading02Icon} className="h-4 w-4 animate-spin" />
             ) : (
-              <HugeiconsIcon icon={SparklesIcon} className="h-4 w-4" />
+              <HugeiconsIcon icon={GlobeIcon} className="h-4 w-4" />
             )}
           </button>
         </TooltipTrigger>
@@ -114,7 +114,7 @@ export const SearchToggle = memo(function SearchToggle({
               {isSearching ? (
                 <HugeiconsIcon icon={Loading02Icon} className="h-4 w-4 animate-spin" />
               ) : (
-                <HugeiconsIcon icon={SparklesIcon} className="h-4 w-4" />
+                <HugeiconsIcon icon={GlobeIcon} className="h-4 w-4" />
               )}
             </button>
           </DropdownMenuTrigger>
