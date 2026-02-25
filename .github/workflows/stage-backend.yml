@@ -58,14 +58,32 @@ jobs:
           cp -r apps/server/src/db deploy/src/
           cp apps/server/package.json deploy/
           
-          # Copy @onera/crypto workspace package (externalized from bundle)
-          mkdir -p deploy/node_modules/@onera
-          cp -r packages/crypto deploy/node_modules/@onera/crypto
-          cp -r packages/types deploy/node_modules/@onera/types
+          # Rewrite package.json: replace workspace:* refs with actual deps
+          # Merges @onera/crypto's dependencies so they're available at runtime
+          bun -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('deploy/package.json', 'utf8'));
+            const cryptoPkg = JSON.parse(fs.readFileSync('packages/crypto/package.json', 'utf8'));
+            // Remove workspace refs
+            for (const [k, v] of Object.entries(pkg.dependencies || {})) {
+              if (String(v).startsWith('workspace:')) delete pkg.dependencies[k];
+            }
+            // Merge crypto's non-workspace deps so they resolve at runtime
+            for (const [k, v] of Object.entries(cryptoPkg.dependencies || {})) {
+              if (!String(v).startsWith('workspace:')) pkg.dependencies[k] = v;
+            }
+            fs.writeFileSync('deploy/package.json', JSON.stringify(pkg, null, 2));
+          "
           
-          # Install production dependencies
+          # Install production dependencies (includes @onera/crypto's deps)
           cd deploy
           bun install --production
+          
+          # Copy @onera/crypto and @onera/types workspace packages (externalized from bundle)
+          mkdir -p node_modules/@onera
+          cp -r ../packages/crypto node_modules/@onera/crypto
+          cp -r ../packages/types node_modules/@onera/types
+          rm -rf node_modules/@onera/crypto/node_modules node_modules/@onera/types/node_modules
           
           # Create startup script for Node.js
           cat > startup.sh << 'EOF'

@@ -59,23 +59,35 @@ jobs:
           cp -r apps/server/drizzle deploy/
           cp -r apps/server/src/db deploy/src/db
           cp apps/server/package.json deploy/
-          # Create package.json with Node.js start script
-          bun -e "
-            const orig = require('./apps/server/package.json');
-            const pkg = { ...orig, scripts: { start: 'node dist/index.js' }, main: 'dist/index.js' };
-            delete pkg.devDependencies;
-            console.log(JSON.stringify(pkg, null, 2));
-          " > deploy/package.json
           
-          # Copy @onera/crypto workspace package (externalized from bundle)
-          mkdir -p deploy/node_modules/@onera
-          cp -r packages/crypto deploy/node_modules/@onera/crypto
-          cp -r packages/types deploy/node_modules/@onera/types
+          # Rewrite package.json: set start script, replace workspace:* refs
+          # Merges @onera/crypto's dependencies so they're available at runtime
+          bun -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('deploy/package.json', 'utf8'));
+            const cryptoPkg = JSON.parse(fs.readFileSync('packages/crypto/package.json', 'utf8'));
+            pkg.scripts = { start: 'node dist/index.js' };
+            pkg.main = 'dist/index.js';
+            delete pkg.devDependencies;
+            for (const [k, v] of Object.entries(pkg.dependencies || {})) {
+              if (String(v).startsWith('workspace:')) delete pkg.dependencies[k];
+            }
+            for (const [k, v] of Object.entries(cryptoPkg.dependencies || {})) {
+              if (!String(v).startsWith('workspace:')) pkg.dependencies[k] = v;
+            }
+            fs.writeFileSync('deploy/package.json', JSON.stringify(pkg, null, 2));
+          "
 
       - name: Install production dependencies
         run: |
           cd deploy
           bun install --production
+          
+          # Copy @onera/crypto and @onera/types workspace packages (externalized from bundle)
+          mkdir -p node_modules/@onera
+          cp -r ../packages/crypto node_modules/@onera/crypto
+          cp -r ../packages/types node_modules/@onera/types
+          rm -rf node_modules/@onera/crypto/node_modules node_modules/@onera/types/node_modules
         
       - name: Login to Azure
         uses: azure/login@v2
