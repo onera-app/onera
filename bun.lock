@@ -61,6 +61,8 @@
         "dodopayments": "2.19.0",
         "drizzle-orm": "^0.38.4",
         "hono": "^4.7.4",
+        "libsodium-sumo": "0.7.16",
+        "libsodium-wrappers-sumo": "0.7.16",
         "pg": "^8.13.1",
         "socket.io": "^4.8.1",
         "ws": "8.19.0",

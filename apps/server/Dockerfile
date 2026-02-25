@@ -35,10 +35,21 @@ COPY --from=builder /app/apps/server/drizzle ./drizzle
 # Copy migration files for runtime migrations
 COPY --from=builder /app/apps/server/src/db ./src/db
 
-# Copy package files and install dependencies
+# Copy package files, strip workspace deps, and install production dependencies
 COPY --from=builder /app/apps/server/package.json ./package.json
 
-RUN bun install --production && \
+RUN bun -e " \
+  const fs = require('fs'); \
+  const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8')); \
+  pkg.scripts = { start: 'bun run dist/index.js' }; \
+  for (const [k, v] of Object.entries(pkg.dependencies || {})) { \
+    if (String(v).startsWith('workspace:')) delete pkg.dependencies[k]; \
+  } \
+  pkg.dependencies['libsodium-wrappers-sumo'] = '0.7.16'; \
+  pkg.dependencies['libsodium-sumo'] = '0.7.16'; \
+  delete pkg.devDependencies; \
+  fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2)); \
+" && bun install --production && \
     rm -rf ~/.bun/install/cache
 
 # Create entrypoint script that runs migrations then starts server

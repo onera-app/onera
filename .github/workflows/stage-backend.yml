@@ -65,8 +65,8 @@ jobs:
             for (const [k, v] of Object.entries(pkg.dependencies || {})) {
               if (String(v).startsWith('workspace:')) delete pkg.dependencies[k];
             }
-            pkg.dependencies['libsodium-wrappers-sumo'] = '^0.7.16';
-            pkg.dependencies['libsodium-sumo'] = '^0.7.16';
+            pkg.dependencies['libsodium-wrappers-sumo'] = '0.7.16';
+            pkg.dependencies['libsodium-sumo'] = '0.7.16';
             fs.writeFileSync('deploy/package.json', JSON.stringify(pkg, null, 2));
           "
           
