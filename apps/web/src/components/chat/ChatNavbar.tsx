@@ -5,6 +5,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useUIStore } from "@/stores/uiStore";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { TrustBadge } from "./TrustBadge";
 
 interface ChatNavbarProps {
   chatId: string;
@@ -43,6 +44,7 @@ export const ChatNavbar = memo(function ChatNavbar({
           <div className="flex-1 min-w-0 sm:flex-none">
             {children}
           </div>
+          <TrustBadge />
         </div>
 
         {/* New chat button */}
