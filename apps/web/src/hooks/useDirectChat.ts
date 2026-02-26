@@ -25,6 +25,7 @@ import { trpc } from '@/lib/trpc';
 import type { NativeSearchSettings } from '@/stores/toolsStore';
 import { useModelParamsStore } from '@/stores/modelParamsStore';
 import { AppError, normalizeAppError } from '@/lib/errors/app-error';
+import { useAttestationStore } from '@/stores/attestationStore';
 
 interface UseDirectChatOptions {
   /**
@@ -212,6 +213,7 @@ export function useDirectChat({
       setEnclaveAssignmentId(null);
       setEnclaveConfig(null);
       setEnclaveConfigForTasks(null);
+      useAttestationStore.getState().clear();
       if (heartbeatIntervalRef.current) {
         clearInterval(heartbeatIntervalRef.current);
         heartbeatIntervalRef.current = null;
@@ -258,6 +260,8 @@ export function useDirectChat({
     const { modelName } = parseModelId(selectedModelId);
     const sessionId = crypto.randomUUID();
     requestInFlightRef.current = true;
+
+    useAttestationStore.getState().setConnecting();
 
     requestMutationRef.current.mutate(
       { modelId: modelName, tier: 'shared', sessionId },
@@ -325,6 +329,7 @@ export function useDirectChat({
       if (heartbeatIntervalRef.current) {
         clearInterval(heartbeatIntervalRef.current);
       }
+      useAttestationStore.getState().clear();
     };
   }, []);
 
