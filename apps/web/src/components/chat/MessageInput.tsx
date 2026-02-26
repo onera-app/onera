@@ -109,6 +109,7 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const encryptPulseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Initialize search state from store
   const searchEnabledByDefault = useToolsStore((s) => s.searchEnabledByDefault);
@@ -124,6 +125,13 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
   // Auto-focus on mount
   useEffect(() => {
     textareaRef.current?.focus();
+  }, []);
+
+  // Cleanup encrypt pulse timer on unmount
+  useEffect(() => {
+    return () => {
+      if (encryptPulseTimerRef.current) clearTimeout(encryptPulseTimerRef.current);
+    };
   }, []);
 
   // Process files and add to attachments
@@ -280,8 +288,9 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
 
     // Trigger encrypt pulse animation
     if (isE2EEUnlocked) {
+      if (encryptPulseTimerRef.current) clearTimeout(encryptPulseTimerRef.current);
       setShowEncryptPulse(true);
-      setTimeout(() => setShowEncryptPulse(false), 400);
+      encryptPulseTimerRef.current = setTimeout(() => setShowEncryptPulse(false), 400);
     }
 
     setValue("");

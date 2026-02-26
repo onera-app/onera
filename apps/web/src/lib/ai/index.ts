@@ -38,6 +38,7 @@ export {
 export {
   getModelForCredential,
   clearProviderCache,
+  clearPrivateInferenceCache,
   getDefaultBaseUrl,
 } from './providers';
 

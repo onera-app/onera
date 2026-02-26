@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 interface TrustDetailPanelProps {
   onClose: () => void;
+  containerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 function CopyableHash({ label, value }: { label: string; value: string }) {
@@ -37,6 +38,7 @@ function CopyableHash({ label, value }: { label: string; value: string }) {
 
 export const TrustDetailPanel = memo(function TrustDetailPanel({
   onClose,
+  containerRef,
 }: TrustDetailPanelProps) {
   const e2eeStatus = useE2EEStore((s) => s.status);
   const enclaveStatus = useAttestationStore((s) => s.enclaveStatus);
@@ -46,13 +48,15 @@ export const TrustDetailPanel = memo(function TrustDetailPanel({
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
-        onClose();
-      }
+      const target = e.target as Node;
+      // Check if click is inside the panel or the parent container (includes toggle button)
+      if (panelRef.current?.contains(target)) return;
+      if (containerRef?.current?.contains(target)) return;
+      onClose();
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [onClose]);
+  }, [onClose, containerRef]);
 
   useEffect(() => {
     function handleEscape(e: KeyboardEvent) {
@@ -107,7 +111,7 @@ export const TrustDetailPanel = memo(function TrustDetailPanel({
             {e2eeStatus === 'unlocked' ? 'Active' : 'Locked'}
           </span>
         </div>
-        <p className="text-[10px] text-gray-500 dark:text-gray-400 pl-5.5">
+        <p className="text-[10px] text-gray-500 dark:text-gray-400 pl-[22px]">
           XChaCha20-Poly1305 · All data encrypted client-side
         </p>
       </div>
@@ -137,7 +141,7 @@ export const TrustDetailPanel = memo(function TrustDetailPanel({
         </div>
 
         {hasEnclave && (
-          <p className="text-[10px] text-gray-500 dark:text-gray-400 pl-5.5">
+          <p className="text-[10px] text-gray-500 dark:text-gray-400 pl-[22px]">
             {isVerified
               ? 'AMD SEV-SNP · Noise NK (ChaCha20-Poly1305)'
               : 'Attestation could not be verified'}
@@ -145,7 +149,7 @@ export const TrustDetailPanel = memo(function TrustDetailPanel({
         )}
 
         {!hasEnclave && (
-          <p className="text-[10px] text-gray-500 dark:text-gray-400 pl-5.5">
+          <p className="text-[10px] text-gray-500 dark:text-gray-400 pl-[22px]">
             No enclave session active · Using standard API
           </p>
         )}

@@ -1,4 +1,4 @@
-import { memo, useState, useCallback } from "react";
+import { memo, useState, useCallback, useRef } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { SecurityCheckIcon, Alert01Icon, Shield01Icon } from "@hugeicons/core-free-icons";
 import { useE2EEStore } from "@/stores/e2eeStore";
@@ -31,6 +31,13 @@ function getBadgeConfig(e2eeStatus: string, enclaveStatus: EnclaveStatus) {
         color: 'text-gray-400 dark:text-gray-500',
         bgColor: 'bg-gray-500/10 dark:bg-gray-400/10 border-gray-500/20 dark:border-gray-400/20',
       };
+    case 'error':
+      return {
+        icon: Alert01Icon,
+        label: 'Attestation Error',
+        color: 'text-red-500 dark:text-red-400',
+        bgColor: 'bg-red-500/10 dark:bg-red-400/10 border-red-500/20 dark:border-red-400/20',
+      };
     default:
       return {
         icon: Shield01Icon,
@@ -45,6 +52,7 @@ export const TrustBadge = memo(function TrustBadge() {
   const e2eeStatus = useE2EEStore((s) => s.status);
   const enclaveStatus = useAttestationStore((s) => s.enclaveStatus);
   const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const togglePanel = useCallback(() => {
     setIsOpen((prev) => !prev);
@@ -54,7 +62,7 @@ export const TrustBadge = memo(function TrustBadge() {
   if (!config) return null;
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <button
         onClick={togglePanel}
         className={cn(
@@ -69,7 +77,10 @@ export const TrustBadge = memo(function TrustBadge() {
       </button>
 
       {isOpen && (
-        <TrustDetailPanel onClose={() => setIsOpen(false)} />
+        <TrustDetailPanel
+          onClose={() => setIsOpen(false)}
+          containerRef={containerRef}
+        />
       )}
     </div>
   );

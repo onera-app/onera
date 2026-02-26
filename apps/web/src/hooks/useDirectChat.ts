@@ -15,6 +15,7 @@ import {
   setCredentialCache,
   clearCredentialCache,
   clearProviderCache,
+  clearPrivateInferenceCache,
   isPrivateModel,
   parseModelId,
   setEnclaveConfigForTasks,
@@ -214,6 +215,7 @@ export function useDirectChat({
       setEnclaveConfig(null);
       setEnclaveConfigForTasks(null);
       useAttestationStore.getState().clear();
+      clearPrivateInferenceCache();
       if (heartbeatIntervalRef.current) {
         clearInterval(heartbeatIntervalRef.current);
         heartbeatIntervalRef.current = null;
