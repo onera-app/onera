@@ -15,8 +15,12 @@ function CopyableHash({ label, value }: { label: string; value: string }) {
   const truncated = value.length > 24 ? `${value.slice(0, 12)}...${value.slice(-12)}` : value;
 
   const handleCopy = useCallback(async () => {
-    await navigator.clipboard.writeText(value);
-    toast.success('Copied to clipboard');
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success('Copied to clipboard');
+    } catch {
+      toast.error('Failed to copy');
+    }
   }, [value]);
 
   return (

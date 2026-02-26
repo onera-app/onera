@@ -58,6 +58,8 @@ export const TrustBadge = memo(function TrustBadge() {
     setIsOpen((prev) => !prev);
   }, []);
 
+  const closePanel = useCallback(() => setIsOpen(false), []);
+
   const config = getBadgeConfig(e2eeStatus, enclaveStatus);
   if (!config) return null;
 
@@ -65,6 +67,8 @@ export const TrustBadge = memo(function TrustBadge() {
     <div className="relative" ref={containerRef}>
       <button
         onClick={togglePanel}
+        aria-label={config.label}
+        aria-expanded={isOpen}
         className={cn(
           "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide border transition-all duration-200",
           "hover:opacity-80 active:scale-[0.97]",
@@ -78,7 +82,7 @@ export const TrustBadge = memo(function TrustBadge() {
 
       {isOpen && (
         <TrustDetailPanel
-          onClose={() => setIsOpen(false)}
+          onClose={closePanel}
           containerRef={containerRef}
         />
       )}

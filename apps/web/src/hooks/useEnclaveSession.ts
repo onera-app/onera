@@ -15,40 +15,11 @@ import {
   type EnclaveConfig,
 } from '@/lib/ai';
 import { trpc } from '@/lib/trpc';
-import { useAttestationStore } from '@/stores/attestationStore';
+import { useAttestationStore, setEnclaveConfigCache } from '@/stores/attestationStore';
 import {
   fetchAndVerifyAttestation,
   type VerificationOptions,
 } from '@onera/crypto/attestation';
-
-/**
- * Eagerly verify attestation and populate the attestation store.
- * This runs as soon as enclave config is available (before any messages are sent).
- */
-async function verifyAttestationEagerly(config: EnclaveConfig): Promise<void> {
-  try {
-    const options: VerificationOptions = {
-      knownMeasurements: config.expectedMeasurements,
-      allowUnverified: config.allowUnverified ?? false,
-    };
-
-    const result = await fetchAndVerifyAttestation(
-      config.attestationEndpoint,
-      options,
-    );
-
-    if (result.valid && result.quote) {
-      useAttestationStore.getState().setVerified(result.quote);
-    } else if (config.allowUnverified) {
-      useAttestationStore.getState().setUnverified();
-    } else {
-      useAttestationStore.getState().setError();
-    }
-  } catch (err) {
-    console.error('Eager attestation verification failed:', err);
-    useAttestationStore.getState().setError();
-  }
-}
 
 /**
  * Hook that manages the enclave lifecycle at a layout level.
@@ -81,6 +52,9 @@ export function useEnclaveSession(): void {
   const requestInFlightRef = useRef(false);
   const lastFailureRef = useRef<{ modelId: string; at: number } | null>(null);
 
+  // Generation counter to discard stale async attestation results (I1 fix)
+  const attestationGenerationRef = useRef(0);
+
   // Request enclave when a private model is selected
   useEffect(() => {
     const releaseCurrentEnclave = () => {
@@ -91,8 +65,11 @@ export function useEnclaveSession(): void {
       enclaveAssignmentIdRef.current = null;
       activeEnclaveModelIdRef.current = null;
       setEnclaveConfigForTasks(null);
+      setEnclaveConfigCache(null);
       useAttestationStore.getState().clear();
       clearPrivateInferenceCache();
+      // Bump generation to invalidate any in-flight attestation verification
+      attestationGenerationRef.current++;
       if (heartbeatIntervalRef.current) {
         clearInterval(heartbeatIntervalRef.current);
         heartbeatIntervalRef.current = null;
@@ -157,12 +134,12 @@ export function useEnclaveSession(): void {
           lastFailureRef.current = null;
           enclaveAssignmentIdRef.current = data.assignmentId;
           setEnclaveConfigForTasks(config);
+          setEnclaveConfigCache(config);
 
-          // Store config globally so useDirectChat and other consumers can access it
-          useAttestationStore.getState().setEnclaveConfig(config);
-
-          // Eagerly verify attestation — populates trust badge immediately
-          verifyAttestationEagerly(config);
+          // Eagerly verify attestation — populates trust badge immediately.
+          // Capture generation to discard results if enclave was released before verification completes.
+          const generation = ++attestationGenerationRef.current;
+          verifyAttestationEagerly(config, generation, attestationGenerationRef);
 
           if (heartbeatIntervalRef.current) {
             clearInterval(heartbeatIntervalRef.current);
@@ -178,6 +155,7 @@ export function useEnclaveSession(): void {
           lastFailureRef.current = { modelId: selectedModelId, at: Date.now() };
           console.error('Failed to request enclave:', error);
           useAttestationStore.getState().setError();
+          clearPrivateInferenceCache();
         },
         onSettled: () => {
           requestInFlightRef.current = false;
@@ -203,7 +181,48 @@ export function useEnclaveSession(): void {
       if (heartbeatIntervalRef.current) {
         clearInterval(heartbeatIntervalRef.current);
       }
+      setEnclaveConfigCache(null);
       useAttestationStore.getState().clear();
+      attestationGenerationRef.current++;
     };
   }, []);
+}
+
+/**
+ * Eagerly verify attestation and populate the attestation store.
+ * Uses a generation counter to discard results from stale enclave sessions.
+ */
+async function verifyAttestationEagerly(
+  config: EnclaveConfig,
+  generation: number,
+  generationRef: React.RefObject<number>,
+): Promise<void> {
+  try {
+    const options: VerificationOptions = {
+      knownMeasurements: config.expectedMeasurements,
+      allowUnverified: config.allowUnverified ?? false,
+    };
+
+    const result = await fetchAndVerifyAttestation(
+      config.attestationEndpoint,
+      options,
+    );
+
+    // Discard result if a newer generation has started (enclave was released/switched)
+    if (generationRef.current !== generation) return;
+
+    if (result.valid && result.quote) {
+      useAttestationStore.getState().setVerified(result.quote);
+    } else if (config.allowUnverified) {
+      useAttestationStore.getState().setUnverified();
+    } else {
+      useAttestationStore.getState().setError();
+    }
+  } catch (err) {
+    // Discard error if stale
+    if (generationRef.current !== generation) return;
+
+    console.error('Eager attestation verification failed:', err);
+    useAttestationStore.getState().setError();
+  }
 }

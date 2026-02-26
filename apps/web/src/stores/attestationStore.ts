@@ -24,13 +24,11 @@ interface AttestationState {
   enclaveStatus: EnclaveStatus;
   attestation: AttestationDetails | null;
   transparencyLog: TransparencyLogDetails | null;
-  enclaveConfig: EnclaveConfig | null;
 
   setVerified: (quote: AttestationQuote) => void;
   setUnverified: () => void;
   setConnecting: () => void;
   setError: () => void;
-  setEnclaveConfig: (config: EnclaveConfig) => void;
   clear: () => void;
 }
 
@@ -55,7 +53,6 @@ export const useAttestationStore = create<AttestationState>((set) => ({
   enclaveStatus: 'none',
   attestation: null,
   transparencyLog: null,
-  enclaveConfig: null,
 
   setVerified: (quote) =>
     set({
@@ -80,14 +77,25 @@ export const useAttestationStore = create<AttestationState>((set) => ({
       attestation: null,
     }),
 
-  setEnclaveConfig: (config) =>
-    set({ enclaveConfig: config }),
-
   clear: () =>
     set({
       enclaveStatus: 'none',
       attestation: null,
       transparencyLog: null,
-      enclaveConfig: null,
     }),
 }));
+
+/**
+ * Module-level enclave config cache.
+ * Kept outside the Zustand store to avoid exposing security config
+ * (like allowUnverified) in the globally accessible reactive store.
+ */
+let _enclaveConfig: EnclaveConfig | null = null;
+
+export function setEnclaveConfigCache(config: EnclaveConfig | null): void {
+  _enclaveConfig = config;
+}
+
+export function getEnclaveConfigCache(): EnclaveConfig | null {
+  return _enclaveConfig;
+}

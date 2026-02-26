@@ -22,7 +22,7 @@ import { trpc } from '@/lib/trpc';
 import type { NativeSearchSettings } from '@/stores/toolsStore';
 import { useModelParamsStore } from '@/stores/modelParamsStore';
 import { normalizeAppError } from '@/lib/errors/app-error';
-import { useAttestationStore } from '@/stores/attestationStore';
+import { useAttestationStore, getEnclaveConfigCache } from '@/stores/attestationStore';
 
 interface UseDirectChatOptions {
   /**
@@ -130,8 +130,10 @@ export function useDirectChat({
   const { providerSettings } = useModelParamsStore();
   const transportRef = useRef<DirectBrowserTransport | null>(null);
 
-  // Enclave config from layout-level useEnclaveSession (via attestation store)
-  const enclaveConfig = useAttestationStore((s) => s.enclaveConfig);
+  // Enclave config from layout-level useEnclaveSession (module-level cache).
+  // Subscribe to enclaveStatus to reactively update when config changes.
+  const enclaveStatus = useAttestationStore((s) => s.enclaveStatus);
+  const enclaveConfig = getEnclaveConfigCache();
 
   // Pre-flight inference allowance check
   const checkAllowance = trpc.billing.checkInferenceAllowance.useMutation();
@@ -188,7 +190,7 @@ export function useDirectChat({
 
     // For credential models, need credentials
     return credentials.length > 0;
-  }, [isUnlocked, selectedModelId, credentials.length, enclaveConfig]);
+  }, [isUnlocked, selectedModelId, credentials.length, enclaveConfig, enclaveStatus]);
 
   // Create transport on mount (always have one to prevent useChat from using default API)
   useEffect(() => {
@@ -246,7 +248,7 @@ export function useDirectChat({
         preflight: enforceAllowance,
       });
     }
-  }, [selectedModelId, maxTokens, systemPrompt, nativeSearch, providerSettings, enclaveConfig, enforceAllowance]);
+  }, [selectedModelId, maxTokens, systemPrompt, nativeSearch, providerSettings, enclaveConfig, enclaveStatus, enforceAllowance]);
 
   // Create chat options with our transport - ALWAYS provide transport
   // Uses refs for callbacks to avoid recreating on every render
