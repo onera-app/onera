@@ -1,4 +1,6 @@
 import { useState, useCallback, memo, useMemo, useRef, useEffect } from "react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { SecurityCheckIcon, Alert01Icon } from "@hugeicons/core-free-icons";
 import { Streamdown } from "streamdown";
 import { MessageActions } from "./MessageActions";
 import { cn, formatModelName } from "@/lib/utils";
@@ -8,10 +10,16 @@ import { MessageMetadata } from "../MessageMetadata";
 import { MessageReasoning } from "../MessageReasoning";
 import { LLMIcon } from "@/components/ui/llm-icon";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   parseThinkingBlocks,
   hasThinkingContent,
   type ThinkingBlock,
 } from "@/lib/parseThinkingBlocks";
+import { useAttestationStore } from "@/stores/attestationStore";
 import type { BranchInfo } from "./BranchNavigation";
 import type {
   MessagePart,
@@ -252,6 +260,11 @@ export const AssistantMessage = memo(function AssistantMessage({
 
   const name = formatModelName(model);
 
+  const enclaveStatus = useAttestationStore((s) => s.enclaveStatus);
+  const isPrivateModel = model?.startsWith('private:');
+  const isEnclaveVerified = isPrivateModel && enclaveStatus === 'verified';
+  const isEnclaveUnverified = isPrivateModel && enclaveStatus === 'unverified';
+
   // Combine thinking blocks into a single reasoning string for the new component
   const reasoningText = thinkingBlocks.map((b) => b.content).join("\n\n");
   const hasReasoning = reasoningText.trim().length > 0;
@@ -281,10 +294,40 @@ export const AssistantMessage = memo(function AssistantMessage({
         >
           {/* Model name indicator - Subtle text, no card feel */}
           {name && (
-            <div className="flex items-center -mb-1 opacity-60">
+            <div className="flex items-center gap-1 -mb-1 opacity-60">
               <span className="text-[10px] font-bold tracking-tight uppercase text-gray-500 dark:text-gray-400">
                 {name}
               </span>
+              {isEnclaveVerified && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex items-center">
+                      <HugeiconsIcon
+                        icon={SecurityCheckIcon}
+                        className="h-3 w-3 text-status-success"
+                      />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="text-xs">
+                    Response delivered via verified AMD SEV-SNP enclave
+                  </TooltipContent>
+                </Tooltip>
+              )}
+              {isEnclaveUnverified && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex items-center">
+                      <HugeiconsIcon
+                        icon={Alert01Icon}
+                        className="h-3 w-3 text-status-warning"
+                      />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="text-xs">
+                    Enclave attestation could not be verified
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </div>
           )}
 
