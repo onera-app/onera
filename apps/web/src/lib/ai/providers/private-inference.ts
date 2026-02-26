@@ -24,6 +24,7 @@ import {
   type VerificationOptions,
 } from '@onera/crypto/attestation';
 import type { EnclaveEndpoint } from '@onera/types';
+import { useAttestationStore } from '@/stores/attestationStore';
 
 interface PrivateInferenceConfig {
   endpoint: EnclaveEndpoint;
@@ -121,6 +122,7 @@ export function createPrivateInferenceModel(
       );
 
       if (!result.valid) {
+        useAttestationStore.getState().setError();
         throw new Error(`Attestation verification failed: ${result.error}`);
       }
 
@@ -128,6 +130,9 @@ export function createPrivateInferenceModel(
       // The server generates a new keypair on each restart, so we must use the fresh key
       attestedPublicKey = result.quote!.public_key;
       verified = true;
+
+      // Update attestation store for trust UI
+      useAttestationStore.getState().setVerified(result.quote!);
     }
 
     return attestedPublicKey;
