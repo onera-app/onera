@@ -13,6 +13,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 import { useFlowState } from "@/hooks/useFlowState";
+import { useEnclaveSession } from "@/hooks/useEnclaveSession";
 
 export function AppLayout() {
   const navigate = useNavigate();
@@ -25,6 +26,9 @@ export function AppLayout() {
     closeSettingsModal,
   } = useUIStore();
   const setActiveModal = useUINavigationStore((state) => state.setActiveModal);
+
+  // Manage enclave lifecycle at layout level (trust badge, eager attestation)
+  useEnclaveSession();
 
   // Track if user has completed onboarding in this session (to avoid showing modal again)
   const [onboardingCompletedThisSession, setOnboardingCompletedThisSession] =

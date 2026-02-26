@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { AttestationQuote } from '@onera/types';
+import type { EnclaveConfig } from '@/lib/ai';
 
 export type EnclaveStatus = 'none' | 'connecting' | 'verified' | 'unverified' | 'error';
 
@@ -23,11 +24,13 @@ interface AttestationState {
   enclaveStatus: EnclaveStatus;
   attestation: AttestationDetails | null;
   transparencyLog: TransparencyLogDetails | null;
+  enclaveConfig: EnclaveConfig | null;
 
   setVerified: (quote: AttestationQuote) => void;
   setUnverified: () => void;
   setConnecting: () => void;
   setError: () => void;
+  setEnclaveConfig: (config: EnclaveConfig) => void;
   clear: () => void;
 }
 
@@ -52,6 +55,7 @@ export const useAttestationStore = create<AttestationState>((set) => ({
   enclaveStatus: 'none',
   attestation: null,
   transparencyLog: null,
+  enclaveConfig: null,
 
   setVerified: (quote) =>
     set({
@@ -76,10 +80,14 @@ export const useAttestationStore = create<AttestationState>((set) => ({
       attestation: null,
     }),
 
+  setEnclaveConfig: (config) =>
+    set({ enclaveConfig: config }),
+
   clear: () =>
     set({
       enclaveStatus: 'none',
       attestation: null,
       transparencyLog: null,
+      enclaveConfig: null,
     }),
 }));

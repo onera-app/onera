@@ -4,7 +4,7 @@
  */
 
 import { useChat, type UseChatHelpers } from '@ai-sdk/react';
-import { useMemo, useCallback, useEffect, useRef, useState } from 'react';
+import { useMemo, useCallback, useEffect, useRef } from 'react';
 import type { UIMessage, ChatInit } from 'ai';
 import { useE2EE } from '@/providers/E2EEProvider';
 import { useModelStore } from '@/stores/modelStore';
@@ -15,17 +15,13 @@ import {
   setCredentialCache,
   clearCredentialCache,
   clearProviderCache,
-  clearPrivateInferenceCache,
   isPrivateModel,
-  parseModelId,
-  setEnclaveConfigForTasks,
   type PartiallyDecryptedCredential,
-  type EnclaveConfig,
 } from '@/lib/ai';
 import { trpc } from '@/lib/trpc';
 import type { NativeSearchSettings } from '@/stores/toolsStore';
 import { useModelParamsStore } from '@/stores/modelParamsStore';
-import { AppError, normalizeAppError } from '@/lib/errors/app-error';
+import { normalizeAppError } from '@/lib/errors/app-error';
 import { useAttestationStore } from '@/stores/attestationStore';
 
 interface UseDirectChatOptions {
@@ -134,22 +130,8 @@ export function useDirectChat({
   const { providerSettings } = useModelParamsStore();
   const transportRef = useRef<DirectBrowserTransport | null>(null);
 
-  // Enclave state for private inference
-  const [enclaveConfig, setEnclaveConfig] = useState<EnclaveConfig | null>(null);
-  const [enclaveAssignmentId, setEnclaveAssignmentId] = useState<string | null>(null);
-  const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const enclaveAssignmentIdRef = useRef<string | null>(null);
-  const activeEnclaveModelIdRef = useRef<string | null>(null);
-  const requestInFlightRef = useRef(false);
-  const lastFailureRef = useRef<{ modelId: string; at: number } | null>(null);
-
-  // tRPC mutations for enclave lifecycle
-  const requestEnclaveMutation = trpc.enclaves.requestEnclave.useMutation();
-  const releaseEnclaveMutation = trpc.enclaves.releaseEnclave.useMutation();
-  const heartbeatMutation = trpc.enclaves.heartbeat.useMutation();
-  const requestMutationRef = useRef(requestEnclaveMutation);
-  const releaseMutationRef = useRef(releaseEnclaveMutation);
-  const heartbeatMutationRef = useRef(heartbeatMutation);
+  // Enclave config from layout-level useEnclaveSession (via attestation store)
+  const enclaveConfig = useAttestationStore((s) => s.enclaveConfig);
 
   // Pre-flight inference allowance check
   const checkAllowance = trpc.billing.checkInferenceAllowance.useMutation();
@@ -163,15 +145,6 @@ export function useDirectChat({
     onFinishRef.current = onFinish;
     onErrorRef.current = onError;
   });
-  useEffect(() => {
-    requestMutationRef.current = requestEnclaveMutation;
-    releaseMutationRef.current = releaseEnclaveMutation;
-    heartbeatMutationRef.current = heartbeatMutation;
-  });
-  useEffect(() => {
-    enclaveAssignmentIdRef.current = enclaveAssignmentId;
-  }, [enclaveAssignmentId]);
-
   // Fetch credentials from Convex
   const rawCredentials = useCredentials();
   const isLoadingCredentials = rawCredentials === undefined;
@@ -201,139 +174,6 @@ export function useDirectChat({
       setCredentialCache(credentials);
     }
   }, [credentials]);
-
-  // Request enclave when a private model is selected
-  useEffect(() => {
-    const releaseCurrentEnclave = () => {
-      const currentAssignmentId = enclaveAssignmentIdRef.current;
-      if (currentAssignmentId) {
-        releaseMutationRef.current.mutate({ assignmentId: currentAssignmentId });
-      }
-      enclaveAssignmentIdRef.current = null;
-      activeEnclaveModelIdRef.current = null;
-      setEnclaveAssignmentId(null);
-      setEnclaveConfig(null);
-      setEnclaveConfigForTasks(null);
-      useAttestationStore.getState().clear();
-      clearPrivateInferenceCache();
-      if (heartbeatIntervalRef.current) {
-        clearInterval(heartbeatIntervalRef.current);
-        heartbeatIntervalRef.current = null;
-      }
-    };
-
-    if (!selectedModelId || !isUnlocked) {
-      releaseCurrentEnclave();
-      return;
-    }
-
-    const isPrivate = isPrivateModel(selectedModelId);
-
-    if (!isPrivate) {
-      releaseCurrentEnclave();
-      return;
-    }
-
-    // Already connected for this model
-    if (activeEnclaveModelIdRef.current === selectedModelId && enclaveAssignmentIdRef.current) {
-      return;
-    }
-
-    // Switching private models: release old enclave first
-    if (
-      activeEnclaveModelIdRef.current &&
-      activeEnclaveModelIdRef.current !== selectedModelId
-    ) {
-      releaseCurrentEnclave();
-    }
-
-    // Prevent duplicate in-flight requests and tight retry loops on 5xx
-    if (requestInFlightRef.current) {
-      return;
-    }
-    if (
-      lastFailureRef.current &&
-      lastFailureRef.current.modelId === selectedModelId &&
-      Date.now() - lastFailureRef.current.at < 10_000
-    ) {
-      return;
-    }
-
-    const { modelName } = parseModelId(selectedModelId);
-    const sessionId = crypto.randomUUID();
-    requestInFlightRef.current = true;
-
-    useAttestationStore.getState().setConnecting();
-
-    requestMutationRef.current.mutate(
-      { modelId: modelName, tier: 'shared', sessionId },
-      {
-        onSuccess: (data) => {
-          const config = {
-            endpoint: data.endpoint,
-            wsEndpoint: data.wsEndpoint,
-            attestationEndpoint: data.attestationEndpoint,
-            expectedMeasurements: data.expectedMeasurements,
-            allowUnverified: data.allowUnverified,
-          };
-          activeEnclaveModelIdRef.current = selectedModelId;
-          lastFailureRef.current = null;
-          enclaveAssignmentIdRef.current = data.assignmentId;
-          setEnclaveConfig(config);
-          setEnclaveConfigForTasks(config);
-          setEnclaveAssignmentId(data.assignmentId);
-
-          if (heartbeatIntervalRef.current) {
-            clearInterval(heartbeatIntervalRef.current);
-          }
-          heartbeatIntervalRef.current = setInterval(() => {
-            const assignmentId = enclaveAssignmentIdRef.current;
-            if (assignmentId) {
-              heartbeatMutationRef.current.mutate({ assignmentId });
-            }
-          }, 30000);
-        },
-        onError: (error) => {
-          lastFailureRef.current = { modelId: selectedModelId, at: Date.now() };
-          console.error('Failed to request enclave:', error);
-          const wrapped = new AppError({
-            code: 'IntegrationError',
-            message: `Failed to connect to private inference: ${error.message}`,
-            userMessage: 'Could not connect to private inference. Please retry.',
-            retryable: true,
-            blocking: false,
-            cause: error,
-            context: { modelId: selectedModelId },
-          });
-          onErrorRef.current?.(wrapped);
-        },
-        onSettled: () => {
-          requestInFlightRef.current = false;
-        },
-      }
-    );
-
-    // Cleanup on unmount
-    return () => {
-      if (heartbeatIntervalRef.current) {
-        clearInterval(heartbeatIntervalRef.current);
-      }
-    };
-  }, [isUnlocked, selectedModelId]);
-
-  // Cleanup enclave on unmount
-  useEffect(() => {
-    return () => {
-      const assignmentId = enclaveAssignmentIdRef.current;
-      if (assignmentId) {
-        releaseMutationRef.current.mutate({ assignmentId });
-      }
-      if (heartbeatIntervalRef.current) {
-        clearInterval(heartbeatIntervalRef.current);
-      }
-      useAttestationStore.getState().clear();
-    };
-  }, []);
 
   // Check if transport is ready
   const isReady = useMemo(() => {
