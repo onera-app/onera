@@ -33,26 +33,38 @@ const MODEL_LIST_SCHEMA = z.array(
 );
 
 const completionMessageSchema = z.object({
-  role: z.enum(["system", "user", "assistant"]),
+  role: z.string(),
   content: z.union([
     z.string(),
+    z.null(),
     z.array(
       z.object({
         type: z.string(),
         text: z.string().optional(),
+        image_url: z.any().optional(),
       })
     ),
-  ]),
-});
+  ]).optional(),
+  name: z.string().optional(),
+  tool_calls: z.any().optional(),
+  tool_call_id: z.string().optional(),
+}).passthrough();
 
 const chatCompletionSchema = z.object({
   model: z.string().min(1),
   messages: z.array(completionMessageSchema).min(1),
-  stream: z.boolean().optional(),
+  stream: z.union([z.boolean(), z.string()]).optional().transform((v) =>
+    v === true || v === "true"
+  ),
   temperature: z.number().min(0).max(2).optional(),
-  max_tokens: z.number().int().positive().optional(),
-  max_completion_tokens: z.number().int().positive().optional(),
-});
+  max_tokens: z.number().int().positive().optional().nullable(),
+  max_completion_tokens: z.number().int().positive().optional().nullable(),
+  top_p: z.number().optional(),
+  frequency_penalty: z.number().optional(),
+  presence_penalty: z.number().optional(),
+  stop: z.union([z.string(), z.array(z.string())]).optional().nullable(),
+  n: z.number().int().positive().optional(),
+}).passthrough();
 
 interface AttestationResponse {
   public_key: string;
@@ -149,19 +161,24 @@ async function releaseAssignment(assignmentId: string): Promise<void> {
     .where(eq(enclaves.id, assignment.enclaveId));
 }
 
-function normalizeMessages(messages: z.infer<typeof completionMessageSchema>[]): Array<{ role: "system" | "user" | "assistant"; content: string }> {
-  return messages.map((message) => {
-    if (typeof message.content === "string") {
-      return { role: message.role, content: message.content };
-    }
+function normalizeMessages(messages: z.infer<typeof completionMessageSchema>[]): Array<{ role: string; content: string }> {
+  return messages
+    .filter((m) => m.role === "system" || m.role === "user" || m.role === "assistant")
+    .map((message) => {
+      if (typeof message.content === "string") {
+        return { role: message.role, content: message.content };
+      }
+      if (!message.content) {
+        return { role: message.role, content: "" };
+      }
 
-    const content = message.content
-      .filter((part) => part.type === "text" && typeof part.text === "string")
-      .map((part) => part.text)
-      .join("");
+      const content = message.content
+        .filter((part: { type: string; text?: string }) => part.type === "text" && typeof part.text === "string")
+        .map((part: { text?: string }) => part.text)
+        .join("");
 
-    return { role: message.role, content };
-  });
+      return { role: message.role, content };
+    });
 }
 
 async function listPrivateModels() {
@@ -278,6 +295,11 @@ privateInferenceApi.post("/chat/completions", async (c) => {
   }
 
   const input = parsed.data;
+
+  // Strip provider prefix if the client prepends one (e.g. "onera/openai/gpt-oss-120b" → "openai/gpt-oss-120b")
+  if (input.model.startsWith("onera/")) {
+    input.model = input.model.slice("onera/".length);
+  }
 
   const allowance = await checkInferenceAllowance(userId, "private");
   if (!allowance.allowed) {
