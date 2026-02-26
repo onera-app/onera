@@ -1,5 +1,5 @@
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowUp01Icon, SquareIcon } from "@hugeicons/core-free-icons";
+import { ArrowUp01Icon, SecurityCheckIcon, SquareIcon } from "@hugeicons/core-free-icons";
 import {
   useState,
   useRef,
@@ -23,6 +23,7 @@ import { AttachmentButton } from "./AttachmentButton";
 import { AttachmentPreview, type PendingAttachment } from "./AttachmentPreview";
 import { SearchToggle } from "./SearchToggle";
 import { processFile } from "@/lib/fileProcessing";
+import { useE2EEStore } from "@/stores/e2eeStore";
 import { useToolsStore } from "@/stores/toolsStore";
 import { useUIStore } from "@/stores/uiStore";
 import { RichTextMessageInput } from "@/features/rich-text-input";
@@ -102,6 +103,9 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
   >();
   const [isSearching] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [showEncryptPulse, setShowEncryptPulse] = useState(false);
+  const e2eeStatus = useE2EEStore((s) => s.status);
+  const isE2EEUnlocked = e2eeStatus === 'unlocked';
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -274,13 +278,19 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
 
     onSend(trimmed, Object.keys(options).length > 0 ? options : undefined);
 
+    // Trigger encrypt pulse animation
+    if (isE2EEUnlocked) {
+      setShowEncryptPulse(true);
+      setTimeout(() => setShowEncryptPulse(false), 400);
+    }
+
     setValue("");
     setAttachments([]);
 
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
-  }, [value, attachments, disabled, searchEnabled, searchProvider, onSend]);
+  }, [value, attachments, disabled, searchEnabled, searchProvider, onSend, isE2EEUnlocked]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -411,9 +421,14 @@ const SimpleMessageInput = memo(function SimpleMessageInput({
                       canSend
                         ? "bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                         : "text-gray-400 bg-gray-200 dark:text-gray-600 dark:bg-gray-700 cursor-not-allowed",
+                      showEncryptPulse && "encrypt-pulse",
                     )}
                   >
-                    <HugeiconsIcon icon={ArrowUp01Icon} className="h-4 w-4" strokeWidth={2.5} />
+                    {showEncryptPulse ? (
+                      <HugeiconsIcon icon={SecurityCheckIcon} className="h-4 w-4 text-green-400" strokeWidth={2.5} />
+                    ) : (
+                      <HugeiconsIcon icon={ArrowUp01Icon} className="h-4 w-4" strokeWidth={2.5} />
+                    )}
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>Send message</TooltipContent>
