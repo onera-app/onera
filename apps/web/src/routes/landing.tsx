@@ -218,7 +218,7 @@ export function LandingPage() {
         {/* FEATURES SECTION */}
         <section className="py-24 px-8 md:px-16 w-full max-w-6xl mx-auto flex flex-col items-center">
           <h2 className="text-[clamp(2.5rem,6vw,4.5rem)] font-black uppercase leading-[1] tracking-[-0.04em] text-center mb-6">
-            ONERA IS A <span className="bg-landing-foreground text-landing px-2 py-1 inline-block -skew-x-6 mr-1"><span className="skew-x-6 inline-block">PRIVACY FIRST</span></span> AI CHAT APPLICATION
+            ONERA IS A <span className="bg-landing-foreground text-landing px-2 py-1 inline-block -skew-x-6 mr-1"><span className="skew-x-6 inline-block">PRIVACY FIRST</span></span> AI APPLICATION
           </h2>
           <p className="text-xl md:text-2xl font-bold tracking-tight text-center mb-12 text-landing-muted-foreground">
             Private AI without compromise.
