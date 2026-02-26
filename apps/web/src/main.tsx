@@ -13,6 +13,7 @@ import { routeTree } from './routeTree.gen';
 if (import.meta.env.DEV) {
   scan({ enabled: true });
 }
+import { PostHogProvider } from '@posthog/react';
 import { SupabaseAuthProvider } from './providers/SupabaseAuthProvider';
 import { TRPCProvider } from './providers/TRPCProvider';
 import { E2EEProvider } from './providers/E2EEProvider';
@@ -24,6 +25,12 @@ import './styles/globals.css';
 
 // Initialize i18n
 import './i18n';
+
+// PostHog configuration
+const posthogOptions = {
+  api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+  defaults: '2026-01-30',
+} as const;
 
 // Create a new router instance
 const router = createRouter({ routeTree });
@@ -43,21 +50,23 @@ function RealtimeUpdatesInitializer({ children }: { children: React.ReactNode })
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AppErrorBoundary>
-      <SupabaseAuthProvider>
-        <TRPCProvider>
-          <ThemeProvider>
-            <E2EEProvider>
-              <SearchProvider>
-                <RealtimeUpdatesInitializer>
-                  <RouterProvider router={router} />
-                  <Toaster position="top-right" richColors />
-                </RealtimeUpdatesInitializer>
-              </SearchProvider>
-            </E2EEProvider>
-          </ThemeProvider>
-        </TRPCProvider>
-      </SupabaseAuthProvider>
-    </AppErrorBoundary>
+    <PostHogProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY} options={posthogOptions}>
+      <AppErrorBoundary>
+        <SupabaseAuthProvider>
+          <TRPCProvider>
+            <ThemeProvider>
+              <E2EEProvider>
+                <SearchProvider>
+                  <RealtimeUpdatesInitializer>
+                    <RouterProvider router={router} />
+                    <Toaster position="top-right" richColors />
+                  </RealtimeUpdatesInitializer>
+                </SearchProvider>
+              </E2EEProvider>
+            </ThemeProvider>
+          </TRPCProvider>
+        </SupabaseAuthProvider>
+      </AppErrorBoundary>
+    </PostHogProvider>
   </StrictMode>
 );
