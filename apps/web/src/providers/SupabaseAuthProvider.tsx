@@ -29,6 +29,7 @@ import {
 } from "@onera/crypto";
 import { useE2EEStore } from "@/stores/e2eeStore";
 import { trpc } from "@/lib/trpc";
+import { analytics } from "@/lib/analytics";
 
 /**
  * User type for the auth context
@@ -105,7 +106,13 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
       if (newSession) {
-        setUser(mapSessionToUser(newSession));
+        const mapped = mapSessionToUser(newSession);
+        setUser(mapped);
+        // Identify user in PostHog so events are attributed
+        analytics.identify(mapped.id, {
+          email: mapped.email,
+          name: mapped.name,
+        });
       } else {
         setUser(null);
       }
@@ -123,6 +130,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     await clearCryptoSession();
     e2eeStore.reset();
+    analytics.reset();
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);

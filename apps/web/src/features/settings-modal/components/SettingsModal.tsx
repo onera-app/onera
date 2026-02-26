@@ -18,6 +18,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { useState, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { analytics } from "@/lib/analytics";
 import {
   Dialog,
   DialogContent,
@@ -214,6 +215,7 @@ export function SettingsModal({
     : tabs;
 
   const handleTabChange = useCallback((tabId: TabId) => {
+    analytics.settings.tabViewed({ tab: tabId });
     setActiveTab(tabId);
     setSearchQuery("");
     setMobileShowContent(true);

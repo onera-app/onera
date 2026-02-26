@@ -39,6 +39,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { normalizeAppError } from "@/lib/errors/app-error";
+import { analytics } from "@/lib/analytics";
 
 type CallbackView =
   | "processing"
@@ -138,6 +139,7 @@ export function SSOCallbackPage() {
       processingRef.current = true;
       setView("processing");
       setStage("oauth_complete");
+      analytics.auth.ssoCallbackProcessing();
 
       try {
         setStage("keyshare_status_check");
@@ -145,6 +147,7 @@ export function SSOCallbackPage() {
 
         if (!result.isNewUser) {
           // Existing user - redirect to app (E2EE unlock modal will handle the rest)
+          analytics.auth.signInSuccess();
           toast.info("Please unlock your encryption to continue.");
           setStage("done");
           navigate({ to: "/app" });
@@ -152,11 +155,13 @@ export function SSOCallbackPage() {
         }
 
         // New user - show onboarding flow
+        analytics.auth.onboardingStarted();
         setRecoveryInfo(result.recoveryInfo || null);
         setStage("unlock_method_setup");
         setView("onboarding");
         toast.success("Account created! Let's get your secure unlock set up.");
       } catch (error) {
+        analytics.auth.signInError({ error: error instanceof Error ? error.message : "E2EE setup failed" });
         failWith(error, "E2EE setup failed");
       }
     };
@@ -189,6 +194,7 @@ export function SSOCallbackPage() {
         throw new Error("Master key not available");
       }
       await setupPasswordEncryption(password, masterKey);
+      analytics.auth.passwordSetupCompleted();
       toast.success("Encryption password set");
       setStage("recovery_ack");
       setView("recovery");
@@ -207,6 +213,7 @@ export function SSOCallbackPage() {
         throw new Error("Master key not available");
       }
       await registerPasskey(masterKey, getDeviceName());
+      analytics.auth.passkeyRegistered();
       toast.success("Passkey registered");
       setStage("recovery_ack");
       setView("recovery");
@@ -316,6 +323,7 @@ export function SSOCallbackPage() {
               <RecoveryPhraseDisplay
                 recoveryInfo={recoveryInfo}
                 onContinue={() => {
+                  analytics.auth.onboardingCompleted();
                   trpcUtils.keyShares.getOnboardingStatus.invalidate();
                   setStage("done");
                   navigate({ to: "/app" });

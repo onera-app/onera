@@ -9,6 +9,7 @@ import { useMessageSearch } from "@/hooks/useMessageSearch";
 import { useNoteSearch } from "@/hooks/useNoteSearch";
 import { useUIStore } from "@/stores/uiStore";
 import { useSearchContext } from "@/components/providers/SearchProvider";
+import { analytics } from "@/lib/analytics";
 import { decryptChatTitle } from "@onera/crypto";
 import {
   groupByDate,
@@ -277,6 +278,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                         <button
                           key={note.id}
                           onClick={() => {
+                            analytics.search.resultClicked({ type: 'note' });
                             navigate({
                               to: "/app/notes",
                               search: { noteId: note.id },
@@ -315,7 +317,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                         return (
                           <button
                             key={msg.id}
-                            onClick={() => handleOpenChat(msg.chatId, msg.id)}
+                            onClick={() => { analytics.search.resultClicked({ type: 'message' }); handleOpenChat(msg.chatId, msg.id); }}
                             className="w-full flex flex-col gap-1 px-3 py-2 rounded-xl text-left transition-all duration-150 hover:bg-gray-100 dark:hover:bg-gray-850"
                           >
                             <div className="flex items-center justify-between w-full">
@@ -347,7 +349,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                         {groupChats.map((chat) => (
                           <button
                             key={chat.id}
-                            onClick={() => handleOpenChat(chat.id)}
+                            onClick={() => { analytics.search.resultClicked({ type: 'chat' }); handleOpenChat(chat.id); }}
                             className={cn(
                               "w-full flex items-center gap-3 px-3 h-12 rounded-xl text-left transition-all duration-150 border",
                               selectedChatId === chat.id

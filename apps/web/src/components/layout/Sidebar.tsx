@@ -66,6 +66,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { OneraLogo } from "@/components/ui/onera-logo";
 import { Spinner } from "@/components/ui/spinner";
+import { analytics } from "@/lib/analytics";
 
 interface ChatWithTitle {
   id: string;
@@ -255,6 +256,7 @@ export function Sidebar() {
   const handleDeleteChat = useCallback(
     async (chatId: string) => {
       await deleteChatRef.current.mutateAsync(chatId);
+      analytics.chat.deleted();
       if (chatId === currentChatId) {
         navigate({ to: "/app" });
       }
@@ -272,6 +274,7 @@ export function Sidebar() {
   const handleNewFolder = async () => {
     try {
       const folder = await createFolder.mutateAsync({ name: "New Folder" });
+      analytics.sidebar.folderCreated();
       setNewFolderIds((prev) => new Set(prev).add(folder.id));
       setExpandedFolders((prev) => new Set(prev).add(folder.id));
     } catch (error) {
@@ -283,6 +286,7 @@ export function Sidebar() {
   const handleRenameFolder = async (folderId: string, newName: string) => {
     try {
       await updateFolder.mutateAsync({ id: folderId, data: { name: newName } });
+      analytics.sidebar.folderRenamed();
       setNewFolderIds((prev) => {
         const next = new Set(prev);
         next.delete(folderId);
@@ -297,6 +301,7 @@ export function Sidebar() {
   const handleDeleteFolder = async (folderId: string) => {
     try {
       await deleteFolder.mutateAsync(folderId);
+      analytics.sidebar.folderDeleted();
       setExpandedFolders((prev) => {
         const next = new Set(prev);
         next.delete(folderId);
@@ -319,6 +324,7 @@ export function Sidebar() {
         id: chatId,
         data: { folderId },
       });
+      analytics.chat.movedToFolder();
       toast.success("Chat moved to folder");
     } catch (error) {
       console.error("Failed to move chat:", error);
@@ -345,6 +351,7 @@ export function Sidebar() {
           id: chatId,
           data: { pinned },
         });
+        pinned ? analytics.chat.pinned() : analytics.chat.unpinned();
         toast.success(pinned ? "Chat pinned" : "Chat unpinned");
       } catch (error) {
         console.error("Failed to update pin status:", error);
@@ -556,7 +563,7 @@ export function Sidebar() {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={() => signOut()}
+                    onClick={() => { analytics.auth.signOut(); signOut(); }}
                     className="gap-2 text-destructive focus:text-destructive focus:bg-destructive/10"
                   >
                     <HugeiconsIcon icon={Logout01Icon} className="h-4 w-4" />
@@ -661,6 +668,7 @@ export function Sidebar() {
               {/* Search */}
               <button
                 onClick={() => {
+                  analytics.search.opened();
                   setSearchModalOpen(true);
                   handleMobileNav();
                 }}
@@ -993,7 +1001,7 @@ export function Sidebar() {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={() => signOut()}
+                    onClick={() => { analytics.auth.signOut(); signOut(); }}
                     className="gap-2 text-destructive focus:text-destructive focus:bg-destructive/10"
                   >
                     <HugeiconsIcon icon={Logout01Icon} className="h-4 w-4" />

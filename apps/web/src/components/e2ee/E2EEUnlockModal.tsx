@@ -31,6 +31,7 @@ import { PasskeyUnlockButton } from './PasskeyUnlockButton';
 import { useHasPasskeys } from '@/hooks/useWebAuthn';
 import { usePasskeySupport } from '@/hooks/useWebAuthnSupport';
 import { useHasPasswordEncryption, usePasswordUnlock } from '@/hooks/usePasswordUnlock';
+import { analytics } from '@/lib/analytics';
 
 type UnlockView = 'options' | 'password' | 'recovery' | 'reset';
 
@@ -78,6 +79,7 @@ export function E2EEUnlockModal() {
       // Set needs setup to trigger E2EESetupModal
       setNeedsSetup(true);
       toast.success('Encryption reset. Please set up encryption again.');
+      analytics.e2ee.resetConfirmed();
     },
   });
 
@@ -118,6 +120,7 @@ export function E2EEUnlockModal() {
       await updateLastSeenMutation.mutateAsync({ deviceId });
 
       setStatus('unlocked');
+      analytics.e2ee.unlockSuccess({ method: 'password' });
       toast.success('Welcome back!');
     } catch (err) {
       console.error('Password unlock failed:', err);
@@ -125,6 +128,7 @@ export function E2EEUnlockModal() {
       setError(message);
       setUnlockState('error');
       setErrorMessage(message);
+      analytics.e2ee.unlockError({ method: 'password', error: message });
     }
   };
 
@@ -167,6 +171,7 @@ export function E2EEUnlockModal() {
       await updateLastSeenMutation.mutateAsync({ deviceId });
 
       setStatus('unlocked');
+      analytics.e2ee.unlockSuccess({ method: 'recovery' });
       toast.success('Welcome back!');
     } catch (err) {
       console.error('Unlock failed:', err);
@@ -174,6 +179,7 @@ export function E2EEUnlockModal() {
       setError(message);
       setUnlockState('error');
       setErrorMessage(message);
+      analytics.e2ee.unlockError({ method: 'recovery', error: message });
     }
   };
 
@@ -374,7 +380,7 @@ export function E2EEUnlockModal() {
                     <Button
                       variant="outline"
                       className="w-full justify-start"
-                      onClick={() => setCurrentView('password')}
+                      onClick={() => { analytics.e2ee.unlockAttempted({ method: 'password' }); setCurrentView('password'); }}
                     >
                       <HugeiconsIcon icon={Key02Icon} className="h-4 w-4 mr-2" />
                       Unlock with Password
@@ -384,7 +390,7 @@ export function E2EEUnlockModal() {
                   <Button
                     variant="outline"
                     className="w-full justify-start"
-                    onClick={() => setCurrentView('recovery')}
+                    onClick={() => { analytics.e2ee.unlockAttempted({ method: 'recovery' }); setCurrentView('recovery'); }}
                   >
                     <HugeiconsIcon icon={Key01Icon} className="h-4 w-4 mr-2" />
                     Use Recovery Phrase
@@ -500,7 +506,7 @@ export function E2EEUnlockModal() {
 
               <div className="pt-2 border-t">
                 <button
-                  onClick={() => setCurrentView('reset')}
+                  onClick={() => { analytics.e2ee.resetInitiated(); setCurrentView('reset'); }}
                   className="text-xs text-gray-500 dark:text-gray-400 hover:text-destructive hover:underline"
                 >
                   Lost your recovery phrase? Reset encryption

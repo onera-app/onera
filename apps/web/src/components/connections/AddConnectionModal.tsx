@@ -7,6 +7,7 @@ import {
   Tick01Icon,
 } from "@hugeicons/core-free-icons";
 import { useState } from "react";
+import { analytics } from "@/lib/analytics";
 import {
   useCreateCredential,
   useUpdateCredential,
@@ -128,6 +129,7 @@ export function AddConnectionModal({
         await createCredential.mutateAsync(data);
       }
 
+      analytics.connections.saved({ provider_id: providerId });
       onClose();
     } catch (error) {
       console.error("Failed to save credential:", error);

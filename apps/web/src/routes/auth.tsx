@@ -5,6 +5,7 @@ import { useAuth, useSignInWithE2EE } from "@/providers/SupabaseAuthProvider";
 import { Button } from "@/components/ui/button";
 import { OneraLogo } from "@/components/ui/onera-logo";
 import { Spinner } from "@/components/ui/spinner";
+import { analytics } from "@/lib/analytics";
 
 function GoogleIcon({ className }: { className?: string }) {
   return (
@@ -55,8 +56,10 @@ export function AuthPage() {
   const handleGoogleSignIn = async () => {
     try {
       setLoadingProvider("google");
+      analytics.auth.signInStarted({ provider: "google" });
       await signInWithOAuth("oauth_google");
     } catch (err) {
+      analytics.auth.signInError({ error: err instanceof Error ? err.message : "Google sign in failed" });
       toast.error(err instanceof Error ? err.message : "Google sign in failed");
       setLoadingProvider(null);
     }
@@ -65,8 +68,10 @@ export function AuthPage() {
   const handleAppleSignIn = async () => {
     try {
       setLoadingProvider("apple");
+      analytics.auth.signInStarted({ provider: "apple" });
       await signInWithOAuth("oauth_apple");
     } catch (err) {
+      analytics.auth.signInError({ error: err instanceof Error ? err.message : "Apple sign in failed" });
       toast.error(err instanceof Error ? err.message : "Apple sign in failed");
       setLoadingProvider(null);
     }

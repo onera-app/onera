@@ -8,6 +8,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { analytics } from "@/lib/analytics";
 import {
   useCredentials,
   useDeleteCredential,
@@ -94,7 +95,9 @@ export function ConnectionsTab() {
 
   const handleDelete = async () => {
     if (!deleteCredentialId) return;
+    const credential = credentials.find((c) => c.id === deleteCredentialId);
     await deleteCredential.mutateAsync(deleteCredentialId);
+    analytics.connections.deleted({ provider_id: credential?.provider || '' });
     setDeleteCredentialId(null);
   };
 

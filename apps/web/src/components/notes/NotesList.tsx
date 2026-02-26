@@ -12,6 +12,7 @@ import {
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { analytics } from "@/lib/analytics";
 import { useUIStore } from "@/stores/uiStore";
 import {
   useNotes,
@@ -89,6 +90,7 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
         contentNonce: encryptedData.contentNonce,
         folderId: selectedFolderId,
       });
+      analytics.notes.created();
       onSelectNote(noteId);
     } catch (error) {
       console.error("[NotesList] Failed to create note:", error);
@@ -99,6 +101,7 @@ export function NotesList({ selectedNoteId, onSelectNote }: NotesListProps) {
   const handleDeleteNote = async () => {
     if (!deleteNoteId) return;
     await deleteNote.mutateAsync(deleteNoteId);
+    analytics.notes.deleted();
     if (selectedNoteId === deleteNoteId) {
       onSelectNote("");
     }

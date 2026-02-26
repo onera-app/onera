@@ -62,6 +62,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { normalizeAppError } from "@/lib/errors/app-error";
 import { cn } from "@/lib/utils";
+import { analytics } from "@/lib/analytics";
 
 interface DecryptedChat {
   id: string;
@@ -522,6 +523,7 @@ export function ChatPage() {
   // Wrap stop to track internal stop state
   const stop = useCallback(() => {
     isInternalStopRef.current = true;
+    analytics.chat.messageStreamStopped();
     stopRaw();
   }, [stopRaw]);
 
@@ -740,6 +742,9 @@ export function ChatPage() {
         }
         return;
       }
+
+      // Track message sent
+      analytics.chat.messageSent({ model_id: selectedModelId || '' });
 
       // Clear follow-ups and search sources when sending a new message
       setFollowUps([]);
@@ -1170,6 +1175,8 @@ export function ChatPage() {
       // Check if we have encryption keys (means chat is loaded)
       const { encryptedChatKey } = encryptionKeysRef.current;
       if (!encryptedChatKey || !chatId || !selectedModelId || !isReady) return;
+
+      analytics.chat.messageRegenerated({ model_id: selectedModelId || '' });
 
       // Use ref to get current messages without recreating callback during streaming
       const currentDisplayMessages = displayMessagesRef.current;

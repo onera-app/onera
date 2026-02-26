@@ -27,9 +27,12 @@ import './styles/globals.css';
 import './i18n';
 
 // PostHog configuration
+const posthogKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY ?? '';
 const posthogOptions = {
   api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
   defaults: '2026-01-30',
+  // Show PostHog debug logs in dev console
+  debug: !!import.meta.env.DEV,
 } as const;
 
 // Create a new router instance
@@ -50,7 +53,7 @@ function RealtimeUpdatesInitializer({ children }: { children: React.ReactNode })
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <PostHogProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY} options={posthogOptions}>
+    <PostHogProvider apiKey={posthogKey} options={posthogOptions}>
       <AppErrorBoundary>
         <SupabaseAuthProvider>
           <TRPCProvider>

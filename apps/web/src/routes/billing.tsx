@@ -7,6 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
+import { analytics } from "@/lib/analytics";
 
 export function BillingPage() {
   const [billingInterval, setBillingInterval] = useState<"monthly" | "yearly">(
@@ -80,6 +81,8 @@ export function BillingPage() {
 
     const activePlanId = resolvedCurrentPlan?.id ?? "free";
     if (planId === activePlanId) return;
+
+    analytics.billing.checkoutInitiated({ plan_id: planId });
 
     try {
       if (currentSubscription?.dodoSubscriptionId) {
@@ -257,7 +260,10 @@ export function BillingPage() {
             <div className="inline-flex rounded-xl border border-gray-100 dark:border-gray-850 p-1 bg-gray-50 dark:bg-gray-850/50">
               <button
                 type="button"
-                onClick={() => setBillingInterval("monthly")}
+                onClick={() => {
+                  analytics.billing.intervalToggled({ interval: "monthly" });
+                  setBillingInterval("monthly");
+                }}
                 className={cn(
                   "px-3 py-1.5 rounded-lg text-sm transition-colors",
                   billingInterval === "monthly"
@@ -269,7 +275,10 @@ export function BillingPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setBillingInterval("yearly")}
+                onClick={() => {
+                  analytics.billing.intervalToggled({ interval: "yearly" });
+                  setBillingInterval("yearly");
+                }}
                 className={cn(
                   "px-3 py-1.5 rounded-lg text-sm transition-colors",
                   billingInterval === "yearly"

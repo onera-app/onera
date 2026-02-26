@@ -21,6 +21,7 @@ import {
 } from "@/lib/ai";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
+import { analytics } from "@/lib/analytics";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useModelSelection } from "../hooks/useModelSelection";
@@ -211,11 +212,13 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
   // Stable callbacks for ModelItem - prevents re-renders of all items
   const handleModelSelect = useCallback(
     (modelId: string) => {
+      const selected = models.find((m) => m.id === modelId);
+      analytics.model.selected({ model_id: modelId, provider: selected?.provider || '' });
       onChange(modelId);
       setIsOpen(false);
       setSearchQuery("");
     },
-    [onChange],
+    [onChange, models],
   );
 
   const handleTogglePin = useCallback(
@@ -271,7 +274,10 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
       <div className="relative" ref={dropdownRef}>
         {/* Trigger button - Apple style: minimal, no border */}
         <button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            if (!isOpen) analytics.model.selectorOpened();
+            setIsOpen(!isOpen);
+          }}
           disabled={isLoading || models.length === 0}
           className={cn(
             "flex max-w-[220px] sm:max-w-[280px] items-center gap-2 h-9 px-3 rounded-lg text-[15px] transition-all duration-150",
