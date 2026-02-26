@@ -179,7 +179,7 @@ export function LandingPage() {
             <div className="flex items-center justify-center mb-8 md:mb-12">
               <OneraLogo size={48} className="h-[40px] w-[40px] md:h-[48px] md:w-[48px] rounded-xl" />
             </div>
-            <div className="text-[clamp(2rem,5.5vw,2.5rem)] font-bold tracking-tight leading-tight">Private AI Chat</div>
+            <div className="text-[clamp(2rem,5.5vw,2.5rem)] font-bold tracking-tight leading-tight">Making AI</div>
             <RedactedWord />
             <p className="max-w-[540px] md:mx-auto mt-5 md:mt-6 text-[clamp(1.05rem,2.5vw,1.25rem)] font-medium leading-relaxed tracking-tight text-landing-muted-foreground">
               Onera encrypts messages on your device before they are sent. Onera cannot read your conversations.
@@ -218,7 +218,7 @@ export function LandingPage() {
         {/* FEATURES SECTION */}
         <section className="py-24 px-8 md:px-16 w-full max-w-6xl mx-auto flex flex-col items-center">
           <h2 className="text-[clamp(2.5rem,6vw,4.5rem)] font-black uppercase leading-[1] tracking-[-0.04em] text-center mb-6">
-            ONERA IS A <span className="bg-landing-foreground text-landing px-2 py-1 inline-block -skew-x-6 mr-1"><span className="skew-x-6 inline-block">PRIVACY FIRST</span></span> OPEN SOURCE AI CHAT APPLICATION
+            ONERA IS A <span className="bg-landing-foreground text-landing px-2 py-1 inline-block -skew-x-6 mr-1"><span className="skew-x-6 inline-block">PRIVACY FIRST</span></span> AI CHAT APPLICATION
           </h2>
           <p className="text-xl md:text-2xl font-bold tracking-tight text-center mb-12 text-landing-muted-foreground">
             Private AI without compromise.
