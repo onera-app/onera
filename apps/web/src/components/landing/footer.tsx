@@ -39,9 +39,21 @@ export function Footer() {
               >
                 {item.label}
               </a>
-            )
+            ),
           )}
         </nav>
+      </div>
+
+      <div className="mx-auto mt-6 max-w-[980px] border-t border-landing-border/20 pt-5">
+        <div className="flex flex-col items-center gap-1 text-center">
+          <p className="font-landing text-[11px] font-medium text-landing-muted-foreground">
+            Badgerauth Private Limited
+          </p>
+          <p className="font-landing text-[11px] text-landing-muted-foreground/70">
+            Plot No-94, Sector A, Aurangabad N-1 CIDCO, Aurangabad, Aurangabad
+            431003, India
+          </p>
+        </div>
       </div>
     </footer>
   );
