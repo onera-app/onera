@@ -23,6 +23,7 @@ import {
 import type { ToolCallMessagePartProps } from "@assistant-ui/react";
 
 import { cn, formatModelName } from "@/lib/utils";
+import { LLMIcon } from "@/components/ui/llm-icon";
 import MarkdownText from "./markdown-text";
 import { MessageReasoning } from "@/components/chat/MessageReasoning";
 import { ToolInvocation, type ToolInvocationData } from "@/components/chat/ToolInvocation";
@@ -176,19 +177,33 @@ const ModelName: FC = () => {
 };
 
 const AssistantMessage: FC = () => {
+  const message = useMessage();
+  const model = message.metadata?.custom?.model as string | undefined;
+  const isRunning = message.status?.type === "running";
+
   return (
     <MessagePrimitive.Root className="group/message relative py-2 sm:py-3">
       <div className="max-w-5xl mx-auto px-4 sm:px-5 md:px-6">
-        <ModelName />
-        <MessagePrimitive.Parts
-          components={{
-            Text: MarkdownText,
-            Reasoning: ReasoningPart,
-            tools: { Fallback: ToolCallPart },
-          }}
-        />
-        <AssistantMetadata />
-        <AssistantActionBar />
+        <div className="flex w-full items-start gap-3 sm:gap-3.5">
+          <LLMIcon
+            model={model}
+            size="md"
+            isLoading={isRunning}
+            className="flex-shrink-0 mt-0.5"
+          />
+          <div className="flex flex-col w-full min-w-0">
+            <ModelName />
+            <MessagePrimitive.Parts
+              components={{
+                Text: MarkdownText,
+                Reasoning: ReasoningPart,
+                tools: { Fallback: ToolCallPart },
+              }}
+            />
+            <AssistantMetadata />
+            <AssistantActionBar />
+          </div>
+        </div>
       </div>
     </MessagePrimitive.Root>
   );
