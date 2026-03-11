@@ -1,9 +1,8 @@
 import { useRef, useCallback, useMemo } from "react";
 import type { ThreadHistoryAdapter, ExportedMessageRepositoryItem } from "@assistant-ui/react";
-import { ExportedMessageRepository } from "@assistant-ui/react";
 import type { ChatHistory } from "@onera/types";
 import {
-  chatHistoryToThreadMessages,
+  chatHistoryToExportedRepository,
   addThreadMessageToHistory,
 } from "@/lib/ai/message-converter";
 import { createMessagesList } from "@/lib/messageTree";
@@ -203,8 +202,9 @@ export function useThreadPersistence({
 
         historyRef.current = decrypted;
 
-        const threadMessages = chatHistoryToThreadMessages(decrypted);
-        return ExportedMessageRepository.fromArray(threadMessages);
+        // Convert the full tree (all branches) to ExportedMessageRepository
+        // so that assistant-ui can reconstruct the branch structure on load.
+        return chatHistoryToExportedRepository(decrypted);
       },
 
       async append(item: ExportedMessageRepositoryItem) {
