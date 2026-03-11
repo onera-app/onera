@@ -22,7 +22,7 @@ import {
 } from "@assistant-ui/react";
 import type { ToolCallMessagePartProps } from "@assistant-ui/react";
 
-import { cn } from "@/lib/utils";
+import { cn, formatModelName } from "@/lib/utils";
 import MarkdownText from "./markdown-text";
 import { MessageReasoning } from "@/components/chat/MessageReasoning";
 import { ToolInvocation, type ToolInvocationData } from "@/components/chat/ToolInvocation";
@@ -159,10 +159,27 @@ const AssistantActionBar: FC = () => {
 // Main component
 // ---------------------------------------------------------------------------
 
+const ModelName: FC = () => {
+  const message = useMessage();
+  const model = message.metadata?.custom?.model as string | undefined;
+  const name = formatModelName(model);
+
+  if (!name) return null;
+
+  return (
+    <div className="flex items-center gap-1 mb-1 opacity-60">
+      <span className="text-[10px] font-bold tracking-tight uppercase text-gray-500 dark:text-gray-400">
+        {name}
+      </span>
+    </div>
+  );
+};
+
 const AssistantMessage: FC = () => {
   return (
     <MessagePrimitive.Root className="group/message relative py-2 sm:py-3">
       <div className="max-w-5xl mx-auto px-4 sm:px-5 md:px-6">
+        <ModelName />
         <MessagePrimitive.Parts
           components={{
             Text: MarkdownText,
