@@ -25,6 +25,8 @@
     "@ai-sdk/provider": "3.0.6",
     "@ai-sdk/react": "3.0.25",
     "@ai-sdk/xai": "3.0.22",
+    "@assistant-ui/react": "0.12.17",
+    "@assistant-ui/react-markdown": "0.12.5",
     "@hugeicons/core-free-icons": "3.1.1",
     "@hugeicons/react": "1.1.5",
     "@monaco-editor/react": "4.7.0",
