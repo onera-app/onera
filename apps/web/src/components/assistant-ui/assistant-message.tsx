@@ -27,7 +27,6 @@ import MarkdownText from "./markdown-text";
 import { MessageReasoning } from "@/components/chat/MessageReasoning";
 import { ToolInvocation, type ToolInvocationData } from "@/components/chat/ToolInvocation";
 import { Sources, type Source } from "@/components/chat/Sources";
-import { TrustBadge } from "@/components/chat/TrustBadge";
 
 // ---------------------------------------------------------------------------
 // Part renderers
@@ -75,20 +74,11 @@ const ToolCallPart: FC<ToolCallMessagePartProps> = ({
 
 const AssistantMetadata: FC = () => {
   const message = useMessage();
-  const model = message.metadata?.custom?.model as string | undefined;
   const sources = message.metadata?.custom?.sources as Source[] | undefined;
-  const isPrivate = typeof model === "string" && model.startsWith("private:");
 
-  return (
-    <>
-      {isPrivate && (
-        <div className="mt-2">
-          <TrustBadge />
-        </div>
-      )}
-      {sources && sources.length > 0 && <Sources sources={sources} />}
-    </>
-  );
+  if (!sources || sources.length === 0) return null;
+
+  return <Sources sources={sources} />;
 };
 
 // ---------------------------------------------------------------------------
