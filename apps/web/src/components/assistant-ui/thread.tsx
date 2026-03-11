@@ -72,7 +72,7 @@ const ThreadFollowUps: FC = () => {
   if (followUps.length === 0) return null;
 
   return (
-    <div className="mt-3 max-w-3xl mx-auto px-4 sm:px-6">
+    <div className="mt-3 max-w-5xl mx-auto px-4 sm:px-5 md:px-6">
       <FollowUps followUps={followUps} onSelect={handleSelect} />
     </div>
   );
@@ -132,18 +132,20 @@ const AssistantMessageWithFollowUps: FC = () => {
 const Thread: FC = () => {
   return (
     <ThreadPrimitive.Root className="flex flex-col h-full relative">
-      <ThreadPrimitive.Viewport className="flex-1 overflow-y-auto">
+      <ThreadPrimitive.Viewport className="flex-1 overflow-y-auto chat-scrollbar">
         <ThreadPrimitive.Empty>
           <ThreadWelcome />
         </ThreadPrimitive.Empty>
 
-        <ThreadPrimitive.Messages
-          components={{
-            UserMessage,
-            AssistantMessage: AssistantMessageWithFollowUps,
-            EditComposer: UserEditComposer,
-          }}
-        />
+        <div className="pt-20 pb-36 sm:pb-40">
+          <ThreadPrimitive.Messages
+            components={{
+              UserMessage,
+              AssistantMessage: AssistantMessageWithFollowUps,
+              EditComposer: UserEditComposer,
+            }}
+          />
+        </div>
 
         {/* Footer area with composer */}
         <ThreadPrimitive.ViewportFooter className="sticky bottom-0 z-20 w-full">
@@ -156,7 +158,7 @@ const Thread: FC = () => {
               "sm:bg-transparent sm:backdrop-blur-none sm:border-0 sm:px-6 sm:pb-6 sm:pt-0",
             )}
           >
-            <div className="max-w-4xl mx-auto w-full">
+            <div className="max-w-5xl mx-auto w-full">
               <Composer />
             </div>
           </div>

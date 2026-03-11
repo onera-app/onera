@@ -145,24 +145,27 @@ const UserEditComposer: FC = () => {
 
 const UserMessage: FC = () => {
   return (
-    <MessagePrimitive.Root className="group/message relative py-4">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <div
-          className={cn(
-            "inline-block max-w-[85%] ml-auto",
-            "rounded-2xl px-4 py-3",
-            "bg-gray-100 dark:bg-gray-850",
-            "text-gray-900 dark:text-gray-100",
-          )}
-        >
-          <MessagePrimitive.Parts
-            components={{
-              Text: UserTextPart,
-              Image: UserImagePart,
-            }}
-          />
+    <MessagePrimitive.Root className="group/message relative py-2 sm:py-3">
+      <div className="max-w-5xl mx-auto px-4 sm:px-5 md:px-6">
+        <div className="flex justify-end">
+          <div className="flex flex-col items-end max-w-[90%] sm:max-w-[min(fit-content,80%)]">
+            <div
+              className={cn(
+                "rounded-2xl px-4 py-3",
+                "bg-gray-100 dark:bg-gray-850",
+                "text-gray-900 dark:text-gray-100",
+              )}
+            >
+              <MessagePrimitive.Parts
+                components={{
+                  Text: UserTextPart,
+                  Image: UserImagePart,
+                }}
+              />
+            </div>
+            <UserActionBar />
+          </div>
         </div>
-        <UserActionBar />
       </div>
     </MessagePrimitive.Root>
   );

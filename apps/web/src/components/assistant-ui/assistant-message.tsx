@@ -171,8 +171,8 @@ const AssistantActionBar: FC = () => {
 
 const AssistantMessage: FC = () => {
   return (
-    <MessagePrimitive.Root className="group/message relative py-4">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
+    <MessagePrimitive.Root className="group/message relative py-2 sm:py-3">
+      <div className="max-w-5xl mx-auto px-4 sm:px-5 md:px-6">
         <MessagePrimitive.Parts
           components={{
             Text: MarkdownText,
