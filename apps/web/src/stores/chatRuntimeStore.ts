@@ -2,7 +2,6 @@ import { create } from "zustand";
 
 export type ChatRuntimeStatus =
   | "idle"
-  | "queued"
   | "streaming"
   | "persisting"
   | "error";
