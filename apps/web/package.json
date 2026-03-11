@@ -23,7 +23,6 @@
     "@ai-sdk/openai": "3.0.7",
     "@ai-sdk/openai-compatible": "2.0.9",
     "@ai-sdk/provider": "3.0.6",
-    "@ai-sdk/react": "3.0.25",
     "@ai-sdk/xai": "3.0.22",
     "@assistant-ui/react": "0.12.17",
     "@assistant-ui/react-markdown": "0.12.5",

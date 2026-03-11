@@ -52,3 +52,19 @@ export interface ProviderCacheEntry {
   provider: unknown;
   credential: DecryptedCredential;
 }
+
+/**
+ * Enclave configuration for private inference
+ */
+export interface EnclaveConfig {
+  endpoint: import('@onera/types').EnclaveEndpoint;
+  wsEndpoint: string;
+  attestationEndpoint: string;
+  expectedMeasurements?: { launch_digest: string };
+  /**
+   * Allow unverified attestation (development only).
+   * WARNING: Setting this to true bypasses signature verification.
+   * This should NEVER be true in production.
+   */
+  allowUnverified?: boolean;
+}

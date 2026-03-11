@@ -7,7 +7,7 @@ import { generateText } from 'ai';
 import { getModelForCredential, getPrivateInferenceModel } from './providers';
 import { getCredentialById, parseModelId } from './credentials';
 import type { ChatMessage } from '@onera/types';
-import type { EnclaveConfig } from './transport';
+import type { EnclaveConfig } from './types';
 
 // Store enclave config for private model tasks
 let currentEnclaveConfig: EnclaveConfig | null = null;

@@ -1,5 +1,2 @@
-export { MessageActions } from './MessageActions';
-export { UserMessage } from './UserMessage';
-export { AssistantMessage, type RegenerateOptions } from './AssistantMessage';
-export { BranchNavigation, type BranchInfo } from './BranchNavigation';
-export { RegenerateMenu } from './RegenerateMenu';
+// Old message components removed — replaced by assistant-ui components in
+// src/components/assistant-ui/

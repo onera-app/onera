@@ -11,8 +11,8 @@ import { clearProviderCache as _clearProviderCache, clearPrivateInferenceCache a
 export type {
   DecryptedCredential,
   ModelInfo,
-  UseDirectChatOptions,
   ParsedModelId,
+  EnclaveConfig,
 } from './types';
 
 // Credential management
@@ -41,16 +41,6 @@ export {
   clearPrivateInferenceCache,
   getDefaultBaseUrl,
 } from './providers';
-
-// Transport
-export {
-  DirectBrowserTransport,
-  createDirectBrowserTransport,
-  supportsNativeSearch,
-  getProviderFromModelId,
-  type DirectBrowserTransportOptions,
-  type EnclaveConfig,
-} from './transport';
 
 // Tasks (title generation, follow-ups)
 export {
