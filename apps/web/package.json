@@ -84,6 +84,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-i18next": "^15.1.0",
+    "remark-gfm": "4.0.1",
     "socket.io-client": "^4.8.0",
     "sonner": "^1.7.0",
     "streamdown": "1.6.11",
