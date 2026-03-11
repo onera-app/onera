@@ -146,24 +146,22 @@ const Thread: FC = () => {
             }}
           />
         </div>
-
-        {/* Footer area with composer */}
-        <ThreadPrimitive.ViewportFooter className="sticky bottom-0 z-20 w-full">
-          <div
-            className={cn(
-              "transition-all duration-300",
-              // Mobile: glassmorphism fixed bar
-              "bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-800/50 px-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] pt-3",
-              // Desktop: transparent
-              "sm:bg-transparent sm:backdrop-blur-none sm:border-0 sm:px-6 sm:pb-6 sm:pt-0",
-            )}
-          >
-            <div className="max-w-5xl mx-auto w-full">
-              <Composer />
-            </div>
-          </div>
-        </ThreadPrimitive.ViewportFooter>
       </ThreadPrimitive.Viewport>
+
+      {/* Composer pinned to bottom of the flex container, outside the scroll viewport */}
+      <div
+        className={cn(
+          "z-20 w-full",
+          // Mobile: glassmorphism
+          "bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-800/50 px-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] pt-3",
+          // Desktop: transparent
+          "sm:bg-transparent sm:backdrop-blur-none sm:border-0 sm:px-6 sm:pb-6 sm:pt-0",
+        )}
+      >
+        <div className="max-w-5xl mx-auto w-full">
+          <Composer />
+        </div>
+      </div>
 
       <ScrollToBottomButton />
     </ThreadPrimitive.Root>
