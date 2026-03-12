@@ -159,7 +159,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
     navigate({
       to: "/app/c/$chatId",
       params: { chatId },
-      search: { pending: false, messageId },
+      search: { messageId },
     });
     onOpenChange(false);
 

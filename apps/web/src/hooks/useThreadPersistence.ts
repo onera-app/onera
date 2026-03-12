@@ -1,5 +1,5 @@
 import { useRef, useCallback, useMemo } from "react";
-import type { ThreadHistoryAdapter, ExportedMessageRepositoryItem } from "@assistant-ui/react";
+import type { ThreadHistoryAdapter, ExportedMessageRepositoryItem, ChatModelAdapter, ChatModelRunResult } from "@assistant-ui/react";
 import type { ChatHistory } from "@onera/types";
 import {
   chatHistoryToExportedRepository,
@@ -15,6 +15,8 @@ import { generateChatTitle, generateFollowUps } from "@/lib/ai/tasks";
 import { useModelStore } from "@/stores/modelStore";
 
 interface UseThreadPersistenceOptions {
+  /** The ChatModelAdapter so resume() can delegate to it */
+  adapter: ChatModelAdapter;
   chatId: string;
   chat: {
     id: string;
@@ -71,6 +73,7 @@ function threadMessageToConverterShape(message: ExportedMessageRepositoryItem["m
 }
 
 export function useThreadPersistence({
+  adapter,
   chatId,
   chat,
   updateChat,
@@ -204,7 +207,28 @@ export function useThreadPersistence({
 
         // Convert the full tree (all branches) to ExportedMessageRepository
         // so that assistant-ui can reconstruct the branch structure on load.
-        return chatHistoryToExportedRepository(decrypted);
+        const repo = chatHistoryToExportedRepository(decrypted);
+
+        // If the last message on the active branch is a user message,
+        // signal the runtime to auto-resume (trigger AI response).
+        // This handles the new-chat flow: home.tsx creates a chat with
+        // the user's first message, navigates here, and we auto-run.
+        const activeMessages = createMessagesList(decrypted);
+        const lastMsg = activeMessages[activeMessages.length - 1];
+        const shouldResume = lastMsg?.role === "user";
+
+        return { ...repo, unstable_resume: shouldResume };
+      },
+
+      async *resume(options) {
+        // Delegate to the ChatModelAdapter — this runs the AI response
+        // for the pending user message after load.
+        const result = adapter.run(options);
+        if (Symbol.asyncIterator in Object(result)) {
+          yield* result as AsyncGenerator<ChatModelRunResult, void, unknown>;
+        } else {
+          yield (await result) as ChatModelRunResult;
+        }
       },
 
       async append(item: ExportedMessageRepositoryItem) {

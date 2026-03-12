@@ -95,14 +95,12 @@ const homeRoute = createRoute({
 });
 
 // Chat route - /app/c/:chatId
-// Search params: pending=true indicates we should trigger AI response on load
 const chatRoute = createRoute({
   getParentRoute: () => appRoute,
   path: '/c/$chatId',
   component: ChatPage,
   errorComponent: ChatErrorFallback,
-  validateSearch: (search: Record<string, unknown>): { pending?: boolean; messageId?: string } => ({
-    pending: search.pending === 'true' || search.pending === true ? true : undefined,
+  validateSearch: (search: Record<string, unknown>): { messageId?: string } => ({
     messageId: typeof search.messageId === 'string' ? search.messageId : undefined,
   }),
 });

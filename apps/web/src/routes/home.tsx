@@ -132,11 +132,11 @@ export function HomePage() {
           ...encryptedData,
         });
 
-        // Navigate immediately - ChatPage will see 'pending: true' and start the AI stream
+        // Navigate immediately - ChatPage's historyAdapter.load() will detect
+        // the last message is a user message and auto-resume the AI response.
         navigate({
           to: "/app/c/$chatId",
           params: { chatId: newChatId },
-          search: { pending: true },
         });
       } catch (err) {
         toast.error(

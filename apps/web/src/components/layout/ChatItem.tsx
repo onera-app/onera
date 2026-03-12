@@ -162,7 +162,7 @@ export const ChatItem = memo(function ChatItem({
         <Link
           to="/app/c/$chatId"
           params={{ chatId: id }}
-          search={{ pending: false }}
+          search={{}}
           onClick={onClick}
           className={cn(
             "relative flex items-center w-full px-2.5 py-1.5 rounded-xl text-sm transition-colors overflow-hidden",

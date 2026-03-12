@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useCallback, useState } from "react";
-import { useParams, useNavigate, useSearch } from "@tanstack/react-router";
+import { useParams } from "@tanstack/react-router";
 import { useLocalRuntime, AssistantRuntimeProvider, WebSpeechSynthesisAdapter } from "@assistant-ui/react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Alert01Icon } from "@hugeicons/core-free-icons";
@@ -44,8 +44,6 @@ function ChatInner({ chatId }: { chatId: string }) {
 
 export function ChatPage() {
   const { chatId } = useParams({ strict: false });
-  const { pending } = useSearch({ strict: false }) as { pending?: boolean };
-  const navigate = useNavigate();
   const { isUnlocked } = useE2EE();
   const { selectedModelId, setSelectedModel } = useModelStore();
 
@@ -97,6 +95,7 @@ export function ChatPage() {
   );
 
   const { historyAdapter, flushPendingSave } = useThreadPersistence({
+    adapter,
     chatId: chatId || "",
     chat: chat ?? null,
     updateChat: updateChat.mutateAsync,
@@ -127,18 +126,6 @@ export function ChatPage() {
   });
 
   // ── Side-effects ──────────────────────────────────────────────────────
-
-  // Clear ?pending search param after navigation
-  useEffect(() => {
-    if (pending && chatId) {
-      navigate({
-        to: "/app/c/$chatId",
-        params: { chatId },
-        search: {},
-        replace: true,
-      });
-    }
-  }, [pending, chatId, navigate]);
 
   // Flush pending save on unmount
   useEffect(() => {
