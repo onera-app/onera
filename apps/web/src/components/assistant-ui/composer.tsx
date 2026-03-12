@@ -11,10 +11,13 @@ import {
   ArrowUp01Icon,
   SecurityCheckIcon,
   SquareIcon,
+  Attachment01Icon,
+  Cancel01Icon,
 } from "@hugeicons/core-free-icons";
 import {
   ComposerPrimitive,
   ThreadPrimitive,
+  AttachmentPrimitive,
 } from "@assistant-ui/react";
 
 import { cn } from "@/lib/utils";
@@ -135,6 +138,29 @@ const ComposerSearchToggle: FC = () => {
 };
 
 // ---------------------------------------------------------------------------
+// Composer attachment preview
+// ---------------------------------------------------------------------------
+
+const ComposerAttachment: FC = () => {
+  return (
+    <AttachmentPrimitive.Root className="relative inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm">
+      <span className="text-gray-700 dark:text-gray-300 truncate max-w-[200px]">
+        <AttachmentPrimitive.Name />
+      </span>
+      <AttachmentPrimitive.Remove asChild>
+        <button
+          type="button"
+          className="shrink-0 p-0.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          title="Remove"
+        >
+          <HugeiconsIcon icon={Cancel01Icon} className="h-3.5 w-3.5" />
+        </button>
+      </AttachmentPrimitive.Remove>
+    </AttachmentPrimitive.Root>
+  );
+};
+
+// ---------------------------------------------------------------------------
 // Main Composer
 // ---------------------------------------------------------------------------
 
@@ -153,6 +179,18 @@ const Composer: FC = () => {
         "sm:hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] sm:dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.25)]",
       )}
     >
+      {/* Pending attachments */}
+      <div className="flex flex-wrap gap-2 px-3 pt-2 empty:hidden">
+        <ComposerPrimitive.Attachments
+          components={{
+            Image: ComposerAttachment,
+            Document: ComposerAttachment,
+            File: ComposerAttachment,
+            Attachment: ComposerAttachment,
+          }}
+        />
+      </div>
+
       {/* Textarea */}
       <div className="px-2.5 pt-2.5 pb-1">
         <ComposerPrimitive.Input
@@ -170,11 +208,21 @@ const Composer: FC = () => {
 
       {/* Bottom toolbar */}
       <div className="flex justify-between mt-0.5 mb-2.5 mx-0.5 max-w-full">
-        {/* Left side: model selector + search toggle */}
+        {/* Left side: model selector + search toggle + attachment */}
         <div className="ml-1 self-end flex items-center flex-1 max-w-[80%] gap-[0.5px]">
           <ComposerModelSelector />
           <div className="flex self-center w-[1px] h-4 mx-1 bg-gray-200/50 dark:bg-gray-800/50" />
           <ComposerSearchToggle />
+          <div className="flex self-center w-[1px] h-4 mx-1 bg-gray-200/50 dark:bg-gray-800/50" />
+          <ComposerPrimitive.AddAttachment asChild>
+            <button
+              type="button"
+              className="p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors"
+              title="Attach file"
+            >
+              <HugeiconsIcon icon={Attachment01Icon} className="h-4 w-4" />
+            </button>
+          </ComposerPrimitive.AddAttachment>
         </div>
 
         {/* Right side: send / stop */}

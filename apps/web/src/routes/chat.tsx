@@ -11,6 +11,7 @@ import { trpc } from "@/lib/trpc";
 import { decryptChatContent } from "@onera/crypto";
 
 import { createChatModelAdapter } from "@/lib/ai/chat-model-adapter";
+import { OneraAttachmentAdapter } from "@/lib/ai/attachment-adapter";
 import { GoogleSearchToolUI, WebSearchToolUI } from "@/components/assistant-ui/tool-uis";
 import { useThreadPersistence } from "@/hooks/useThreadPersistence";
 import { useSidebarStatusSync } from "@/hooks/useSidebarStatusSync";
@@ -102,7 +103,9 @@ export function ChatPage() {
     hasAutoTitle: false,
   });
 
-  // ── Speech & feedback adapters ───────────────────────────────────────
+  // ── Attachment, speech & feedback adapters ────────────────────────────
+  const attachmentAdapter = useMemo(() => new OneraAttachmentAdapter(), []);
+
   const speechAdapter = useMemo(
     () => new WebSpeechSynthesisAdapter(),
     [],
@@ -120,7 +123,7 @@ export function ChatPage() {
 
   // ── Runtime ───────────────────────────────────────────────────────────
   const runtime = useLocalRuntime(adapter, {
-    adapters: { history: historyAdapter, speech: speechAdapter, feedback: feedbackAdapter },
+    adapters: { history: historyAdapter, attachments: attachmentAdapter, speech: speechAdapter, feedback: feedbackAdapter },
   });
 
   // ── Side-effects ──────────────────────────────────────────────────────
