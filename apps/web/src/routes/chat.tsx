@@ -134,7 +134,7 @@ export function ChatPage() {
       navigate({
         to: "/app/c/$chatId",
         params: { chatId },
-        search: { pending: false },
+        search: {},
         replace: true,
       });
     }
