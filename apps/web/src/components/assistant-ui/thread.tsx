@@ -12,6 +12,7 @@ import {
   ThreadPrimitive,
   useComposerRuntime,
   useMessage,
+  useThreadViewport,
 } from "@assistant-ui/react";
 
 import { cn } from "@/lib/utils";
@@ -93,20 +94,21 @@ const LastMessageFollowUps: FC = () => {
 // ---------------------------------------------------------------------------
 
 const ScrollToBottomButton: FC = () => {
+  const isAtBottom = useThreadViewport((v) => v.isAtBottom);
+
+  if (isAtBottom) return null;
+
   return (
     <ThreadPrimitive.ScrollToBottom asChild>
       <button
         type="button"
         className={cn(
-          "absolute bottom-36 sm:bottom-28 left-1/2 -translate-x-1/2 z-10",
+          "absolute -top-12 left-1/2 -translate-x-1/2 z-30",
           "flex items-center justify-center",
           "h-8 w-8 rounded-full shadow-md",
           "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700",
           "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100",
           "transition-all hover:shadow-lg",
-          // ThreadPrimitive.ScrollToBottom auto-hides when at bottom,
-          // but also hide via CSS when not needed to avoid overlap
-          "data-[visible=false]:hidden",
         )}
       >
         <HugeiconsIcon icon={ArrowDown01Icon} className="h-4 w-4" />
@@ -151,6 +153,11 @@ const Thread: FC = () => {
         </div>
       </ThreadPrimitive.Viewport>
 
+      {/* Scroll-to-bottom floats above the composer, only shown when scrolled up */}
+      <div className="relative">
+        <ScrollToBottomButton />
+      </div>
+
       {/* Composer pinned to bottom of the flex container, outside the scroll viewport */}
       <div
         className={cn(
@@ -165,8 +172,6 @@ const Thread: FC = () => {
           <Composer />
         </div>
       </div>
-
-      <ScrollToBottomButton />
     </ThreadPrimitive.Root>
   );
 };
