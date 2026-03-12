@@ -3,27 +3,16 @@ import { MarkdownTextPrimitive } from "@assistant-ui/react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
-import rehypeShiki from "@shikijs/rehype";
 import "katex/dist/katex.min.css";
 
 const MermaidDiagram = lazy(() => import("./mermaid-diagram"));
+const ShikiCodeBlock = lazy(() => import("./shiki-code-block"));
 
 const MarkdownText: FC = () => {
   return (
     <MarkdownTextPrimitive
       remarkPlugins={[remarkGfm, remarkMath]}
-      rehypePlugins={[
-        rehypeKatex,
-        [
-          rehypeShiki,
-          {
-            themes: {
-              light: "github-light",
-              dark: "github-dark",
-            },
-          },
-        ],
-      ]}
+      rehypePlugins={[rehypeKatex]}
       components={{
         h1: ({ children }) => (
           <h1 className="text-2xl font-bold mt-6 mb-3 text-gray-900 dark:text-gray-100">
@@ -71,14 +60,6 @@ const MarkdownText: FC = () => {
             {children}
           </blockquote>
         ),
-        pre: ({ children }) => {
-          // rehype-shiki wraps highlighted code in <pre>, pass through as-is
-          return (
-            <div className="relative group my-3 overflow-x-auto rounded-lg [&>pre]:p-4 [&>pre]:text-sm [&>pre]:rounded-lg">
-              {children}
-            </div>
-          );
-        },
         code: ({ className, children }) => {
           const isInline = !className;
           if (isInline) {
@@ -89,10 +70,11 @@ const MarkdownText: FC = () => {
             );
           }
 
-          // Check for mermaid diagrams
           const language = className?.replace("language-", "") || "";
+          const codeText = String(children).replace(/\n$/, "");
+
+          // Mermaid diagrams
           if (language === "mermaid") {
-            const code = String(children).replace(/\n$/, "");
             return (
               <Suspense
                 fallback={
@@ -101,38 +83,36 @@ const MarkdownText: FC = () => {
                   </div>
                 }
               >
-                <MermaidDiagram code={code} />
+                <MermaidDiagram code={codeText} />
               </Suspense>
             );
           }
 
-          // For non-shiki code blocks (fallback if rehype-shiki doesn't process)
-          return (
-            <div className="relative group my-3">
-              {language && (
-                <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-800 px-4 py-1.5 rounded-t-lg border-b border-gray-200 dark:border-gray-700">
-                  <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
-                    {language}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      navigator.clipboard.writeText(
-                        String(children).replace(/\n$/, ""),
-                      )
-                    }
-                    className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    Copy
-                  </button>
-                </div>
-              )}
-              <pre
-                className={`bg-gray-50 dark:bg-gray-900 p-4 overflow-x-auto text-sm font-mono text-gray-800 dark:text-gray-200 ${language ? "rounded-b-lg" : "rounded-lg"}`}
+          // Syntax-highlighted code blocks (Shiki, client-side async)
+          if (language) {
+            return (
+              <Suspense
+                fallback={
+                  <div className="relative group my-3">
+                    <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-800 px-4 py-1.5 rounded-t-lg border-b border-gray-200 dark:border-gray-700">
+                      <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">{language}</span>
+                    </div>
+                    <pre className="p-4 rounded-b-lg overflow-x-auto bg-gray-50 dark:bg-gray-900 text-sm font-mono text-gray-800 dark:text-gray-200">
+                      <code>{codeText}</code>
+                    </pre>
+                  </div>
+                }
               >
-                <code>{children}</code>
-              </pre>
-            </div>
+                <ShikiCodeBlock code={codeText} language={language} />
+              </Suspense>
+            );
+          }
+
+          // No language specified — plain code block
+          return (
+            <pre className="my-3 p-4 rounded-lg overflow-x-auto bg-gray-50 dark:bg-gray-900 text-sm font-mono text-gray-800 dark:text-gray-200">
+              <code>{children}</code>
+            </pre>
           );
         },
         table: ({ children }) => (
