@@ -11,6 +11,7 @@ import { trpc } from "@/lib/trpc";
 import { decryptChatContent } from "@onera/crypto";
 
 import { createChatModelAdapter } from "@/lib/ai/chat-model-adapter";
+import { GoogleSearchToolUI, WebSearchToolUI } from "@/components/assistant-ui/tool-uis";
 import { useThreadPersistence } from "@/hooks/useThreadPersistence";
 import { useSidebarStatusSync } from "@/hooks/useSidebarStatusSync";
 import Thread from "@/components/assistant-ui/thread";
@@ -27,7 +28,13 @@ import { Button } from "@/components/ui/button";
 
 function ChatInner({ chatId }: { chatId: string }) {
   useSidebarStatusSync(chatId);
-  return <Thread />;
+  return (
+    <>
+      <GoogleSearchToolUI />
+      <WebSearchToolUI />
+      <Thread />
+    </>
+  );
 }
 
 // ---------------------------------------------------------------------------
