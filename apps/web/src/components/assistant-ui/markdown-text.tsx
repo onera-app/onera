@@ -1,11 +1,29 @@
-import { type FC, memo } from "react";
+import { type FC, memo, lazy, Suspense } from "react";
 import { MarkdownTextPrimitive } from "@assistant-ui/react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import rehypeShiki from "@shikijs/rehype";
+import "katex/dist/katex.min.css";
+
+const MermaidDiagram = lazy(() => import("./mermaid-diagram"));
 
 const MarkdownText: FC = () => {
   return (
     <MarkdownTextPrimitive
-      remarkPlugins={[remarkGfm]}
+      remarkPlugins={[remarkGfm, remarkMath]}
+      rehypePlugins={[
+        rehypeKatex,
+        [
+          rehypeShiki,
+          {
+            themes: {
+              light: "github-light",
+              dark: "github-dark",
+            },
+          },
+        ],
+      ]}
       components={{
         h1: ({ children }) => (
           <h1 className="text-2xl font-bold mt-6 mb-3 text-gray-900 dark:text-gray-100">
@@ -53,6 +71,14 @@ const MarkdownText: FC = () => {
             {children}
           </blockquote>
         ),
+        pre: ({ children }) => {
+          // rehype-shiki wraps highlighted code in <pre>, pass through as-is
+          return (
+            <div className="relative group my-3 overflow-x-auto rounded-lg [&>pre]:p-4 [&>pre]:text-sm [&>pre]:rounded-lg">
+              {children}
+            </div>
+          );
+        },
         code: ({ className, children }) => {
           const isInline = !className;
           if (isInline) {
@@ -62,7 +88,25 @@ const MarkdownText: FC = () => {
               </code>
             );
           }
+
+          // Check for mermaid diagrams
           const language = className?.replace("language-", "") || "";
+          if (language === "mermaid") {
+            const code = String(children).replace(/\n$/, "");
+            return (
+              <Suspense
+                fallback={
+                  <div className="my-3 p-4 rounded-lg bg-gray-50 dark:bg-gray-900 animate-pulse">
+                    <div className="h-32 bg-gray-200 dark:bg-gray-800 rounded" />
+                  </div>
+                }
+              >
+                <MermaidDiagram code={code} />
+              </Suspense>
+            );
+          }
+
+          // For non-shiki code blocks (fallback if rehype-shiki doesn't process)
           return (
             <div className="relative group my-3">
               {language && (
