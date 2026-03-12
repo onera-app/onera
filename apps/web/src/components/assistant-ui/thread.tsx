@@ -98,12 +98,15 @@ const ScrollToBottomButton: FC = () => {
       <button
         type="button"
         className={cn(
-          "absolute bottom-24 left-1/2 -translate-x-1/2 z-10",
+          "absolute bottom-36 sm:bottom-28 left-1/2 -translate-x-1/2 z-10",
           "flex items-center justify-center",
           "h-8 w-8 rounded-full shadow-md",
           "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700",
           "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100",
           "transition-all hover:shadow-lg",
+          // ThreadPrimitive.ScrollToBottom auto-hides when at bottom,
+          // but also hide via CSS when not needed to avoid overlap
+          "data-[visible=false]:hidden",
         )}
       >
         <HugeiconsIcon icon={ArrowDown01Icon} className="h-4 w-4" />
