@@ -21,7 +21,6 @@ import {
 } from "@assistant-ui/react";
 
 import { cn } from "@/lib/utils";
-import { ModelSelector } from "@/components/chat/ModelSelector";
 import { SearchToggle } from "@/components/chat/SearchToggle";
 import { useModelStore } from "@/stores/modelStore";
 import { useToolsStore } from "@/stores/toolsStore";
@@ -97,22 +96,6 @@ const StopButton: FC = () => {
         <HugeiconsIcon icon={SquareIcon} className="h-4 w-4 fill-current" />
       </button>
     </ComposerPrimitive.Cancel>
-  );
-};
-
-// ---------------------------------------------------------------------------
-// Model selector wrapper
-// ---------------------------------------------------------------------------
-
-const ComposerModelSelector: FC = () => {
-  const selectedModelId = useModelStore((s) => s.selectedModelId);
-  const setSelectedModel = useModelStore((s) => s.setSelectedModel);
-
-  return (
-    <ModelSelector
-      value={selectedModelId ?? ""}
-      onChange={setSelectedModel}
-    />
   );
 };
 
@@ -208,10 +191,8 @@ const Composer: FC = () => {
 
       {/* Bottom toolbar */}
       <div className="flex justify-between mt-0.5 mb-2.5 mx-0.5 max-w-full">
-        {/* Left side: model selector + search toggle + attachment */}
+        {/* Left side: search toggle + attachment */}
         <div className="ml-1 self-end flex items-center flex-1 max-w-[80%] gap-[0.5px]">
-          <ComposerModelSelector />
-          <div className="flex self-center w-[1px] h-4 mx-1 bg-gray-200/50 dark:bg-gray-800/50" />
           <ComposerSearchToggle />
           <div className="flex self-center w-[1px] h-4 mx-1 bg-gray-200/50 dark:bg-gray-800/50" />
           <ComposerPrimitive.AddAttachment asChild>
