@@ -12,6 +12,10 @@ import {
   ArrowRight01Icon,
   Copy01Icon,
   RepeatIcon,
+  VolumeHighIcon,
+  VolumeOffIcon,
+  ThumbsUpIcon,
+  ThumbsDownIcon,
 } from "@hugeicons/core-free-icons";
 import {
   MessagePrimitive,
@@ -119,6 +123,12 @@ const AssistantBranchPicker: FC = () => {
 // Action bar
 // ---------------------------------------------------------------------------
 
+const actionBtnClass = cn(
+  "h-7 w-7 flex items-center justify-center rounded-xl",
+  "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100",
+  "hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors",
+);
+
 const AssistantActionBar: FC = () => {
   return (
     <ActionBarPrimitive.Root
@@ -129,29 +139,35 @@ const AssistantActionBar: FC = () => {
     >
       <AssistantBranchPicker />
       <ActionBarPrimitive.Copy asChild>
-        <button
-          type="button"
-          className={cn(
-            "h-7 w-7 flex items-center justify-center rounded-xl",
-            "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100",
-            "hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors",
-          )}
-        >
+        <button type="button" className={actionBtnClass} title="Copy">
           <HugeiconsIcon icon={Copy01Icon} className="h-4 w-4" />
         </button>
       </ActionBarPrimitive.Copy>
       <ActionBarPrimitive.Reload asChild>
-        <button
-          type="button"
-          className={cn(
-            "h-7 w-7 flex items-center justify-center rounded-xl",
-            "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100",
-            "hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors",
-          )}
-        >
+        <button type="button" className={actionBtnClass} title="Regenerate">
           <HugeiconsIcon icon={RepeatIcon} className="h-4 w-4" />
         </button>
       </ActionBarPrimitive.Reload>
+      <ActionBarPrimitive.Speak asChild>
+        <button type="button" className={actionBtnClass} title="Read aloud">
+          <HugeiconsIcon icon={VolumeHighIcon} className="h-4 w-4" />
+        </button>
+      </ActionBarPrimitive.Speak>
+      <ActionBarPrimitive.StopSpeaking asChild>
+        <button type="button" className={actionBtnClass} title="Stop reading">
+          <HugeiconsIcon icon={VolumeOffIcon} className="h-4 w-4" />
+        </button>
+      </ActionBarPrimitive.StopSpeaking>
+      <ActionBarPrimitive.FeedbackPositive asChild>
+        <button type="button" className={actionBtnClass} title="Good response">
+          <HugeiconsIcon icon={ThumbsUpIcon} className="h-4 w-4" />
+        </button>
+      </ActionBarPrimitive.FeedbackPositive>
+      <ActionBarPrimitive.FeedbackNegative asChild>
+        <button type="button" className={actionBtnClass} title="Poor response">
+          <HugeiconsIcon icon={ThumbsDownIcon} className="h-4 w-4" />
+        </button>
+      </ActionBarPrimitive.FeedbackNegative>
     </ActionBarPrimitive.Root>
   );
 };

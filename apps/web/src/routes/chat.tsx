@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useCallback, useState } from "react";
 import { useParams, useNavigate, useSearch } from "@tanstack/react-router";
-import { useLocalRuntime, AssistantRuntimeProvider } from "@assistant-ui/react";
+import { useLocalRuntime, AssistantRuntimeProvider, WebSpeechSynthesisAdapter } from "@assistant-ui/react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Alert01Icon } from "@hugeicons/core-free-icons";
 
@@ -95,9 +95,25 @@ export function ChatPage() {
     hasAutoTitle: false,
   });
 
+  // ── Speech & feedback adapters ───────────────────────────────────────
+  const speechAdapter = useMemo(
+    () => new WebSpeechSynthesisAdapter(),
+    [],
+  );
+
+  const feedbackAdapter = useMemo(
+    () => ({
+      submit: ({ message, type }: { message: unknown; type: "positive" | "negative" }) => {
+        // TODO: persist feedback to server when feedback API is ready
+        console.log("[feedback]", type, message);
+      },
+    }),
+    [],
+  );
+
   // ── Runtime ───────────────────────────────────────────────────────────
   const runtime = useLocalRuntime(adapter, {
-    adapters: { history: historyAdapter },
+    adapters: { history: historyAdapter, speech: speechAdapter, feedback: feedbackAdapter },
   });
 
   // ── Side-effects ──────────────────────────────────────────────────────
