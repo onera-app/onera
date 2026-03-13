@@ -14,6 +14,7 @@ import { useE2EE } from "@/providers/E2EEProvider";
 import { useCredentials } from "@/hooks/queries/useCredentials";
 import {
   decryptCredentialsWithMetadata,
+  setCredentialCache,
   getAvailableModelsFromCredentials,
   PRIVATE_MODEL_PREFIX,
   type ModelOption,
@@ -108,6 +109,7 @@ export const ModelSelectorDropdown = memo(function ModelSelectorDropdown({
             }),
           );
           const decrypted = decryptCredentialsWithMetadata(partial);
+          setCredentialCache(decrypted);
           credentialModels = await getAvailableModelsFromCredentials(decrypted);
         }
 

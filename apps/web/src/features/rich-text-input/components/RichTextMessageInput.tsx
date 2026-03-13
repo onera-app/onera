@@ -40,6 +40,7 @@ import { useE2EE } from "@/providers/E2EEProvider";
 import { useCredentials } from "@/hooks/queries/useCredentials";
 import {
   decryptCredentialsWithMetadata,
+  setCredentialCache,
   getAvailableModelsFromCredentials,
   type ModelOption,
   type PartiallyDecryptedCredential,
@@ -111,6 +112,7 @@ export const RichTextMessageInput = memo(function RichTextMessageInput({
           }),
         );
         const decrypted = decryptCredentialsWithMetadata(partial);
+        setCredentialCache(decrypted);
         const availableModels =
           await getAvailableModelsFromCredentials(decrypted);
         setModels(availableModels);
